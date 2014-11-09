@@ -7,7 +7,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 */
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
-:-use_foreign_library(bddem,install).
+:-use_foreign_library(foreign(bddem),install).
 
 :-dynamic p/2,rule_n/1,setting/2.
 
@@ -58,7 +58,7 @@ gen_cl([H/A|T],[C|T1]):-
 assert_all([],[]).
 
 assert_all([H|T],[HRef|TRef]):-
-  assertz(H,HRef),
+  assertz(slipcover:H,HRef),
   assert_all(T,TRef).
 
 
@@ -260,7 +260,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,user:H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
+(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
   and(BDD,BDDN,BDD2)
   |Rest],Module):-
   given(H),!,
@@ -275,7 +275,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,user:H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
+[(bagof(BDDH,H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
   and(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg_db(H,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
@@ -318,7 +318,7 @@ process_body_def_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Module):-
   process_body_def_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
 process_body_def_db([\+H|T],BDD,BDD1,DB,Vars,Vars1,
-[(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,user:H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
+[(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
   and(BDD,BDDN,BDD2)|Rest],
 Module):-
   given(H),!,
@@ -334,7 +334,7 @@ Module):-
   process_body_def_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
 process_body_def_db([\+H|T],BDD,BDD1,DB,Vars,[BDD,BDDH,L,BDDL,BDDN|Vars1],
-  [(bagof(BDDH,user:H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
+  [(bagof(BDDH,H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
   and(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg_db(H,BDDH,DB,Module,H1),
   process_body_def_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
@@ -376,7 +376,7 @@ process_body_def([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   process_body_def(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body_def([\+H|T],BDD,BDD1,Vars,Vars1,
-[(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,user:H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
+[(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
   and(BDD,BDDN,BDD2)|Rest],
   Module):-
   given(H),!,
@@ -392,7 +392,7 @@ Module):-
   process_body_def(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body_def([\+H|T],BDD,BDD1,Vars,[BDD,BDDH,L,BDDL,BDDN|Vars1],
-  [(bagof(BDDH,user:H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
+  [(bagof(BDDH,H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
   and(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg(H,BDDH,Module,H1),
   process_body_def(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
@@ -463,7 +463,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,user:H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
+(((neg(H1);\+ H1),one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN))),
   and(BDD,BDDN,BDD2)
   |Rest],Module):-
   given(H),!,
@@ -478,7 +478,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,user:H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
+[(bagof(BDDH,H1,L)->or_list(L,BDDL),bdd_not(BDDL,BDDN);one(BDDN)),
   and(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg(H,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).

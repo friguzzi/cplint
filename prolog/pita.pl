@@ -5,9 +5,11 @@ EMBLEM and SLIPCASE
 Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 */
+:- module(pita,[p/1,parse/1,s/2]).
+
 :-use_module(library(lists)).
 
-:-[slipcover].
+:-use_module(library(slipcover/slipcover)).
 
 :-dynamic previous_rules/2.
 

@@ -5,6 +5,8 @@ SLIPCOVER
 Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
+:-module(slipcover,[sl/1,load/3,assert_all/2,retract_all/1,rule_n/1,set/2,
+  init_test/1,get_node/2,ret_prob/2,end_test/0]).
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
