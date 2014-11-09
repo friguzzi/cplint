@@ -1,0 +1,95 @@
+/*
+s([student_rank(jane_doe,h)],P).
+P = 0.465
+
+s([student_rank(jane_doe,l)],P).
+P = 0.535
+
+s([course_rat(C,h)],P).
+C = phil101,
+P = 0.330656
+
+s([course_rat(C,l)],P).
+C = phil101,
+P = 0.669344
+
+*/
+professor(gump).
+%1
+professor_teach_ab(P,h):0.2;professor_teach_ab(P,l):0.8:-
+    professor(P).
+%2
+professor_pop(P,h):0.7;professor_pop(P,l):0.3:- 
+    professor_teach_ab(P,h).
+%3
+professor_pop(P,h):0.2;professor_pop(P,l):0.8:- 
+    professor_teach_ab(P,l).
+
+student(jane_doe).
+%4
+student_int(S,h):0.6;student_int(S,l):0.4:-
+    student(S).
+%5
+student_rank(S,h):0.6;student_rank(S,l):0.4:- 
+    bagof(G,R^(registr_stu(R,S),registr_gr(R,G)),L),
+    average(L,Av),Av>1.5.
+%6
+student_rank(S,h):0.4;student_rank(S,l):0.6:- 
+    bagof(G,R^(registr_stu(R,S),registr_gr(R,G)),L),
+    average(L,Av),Av =< 1.5.
+
+registr(5639).
+
+registr_cou(5639,phil101).
+
+registr_stu(5639,jane_doe).
+
+registr(5640).
+
+registr_cou(5640,phil101).
+
+registr_stu(5640,jane_doe).
+
+%7
+registr_gr(Reg,1):0.5;registr_gr(Reg,2):0.5:- 
+    registr_stu(Reg,S),student_int(S,h),registr_cou(Reg,C),course_dif(C,h).
+%8
+registr_gr(Reg,1):0.2;registr_gr(Reg,2):0.8:- 
+    registr_stu(Reg,S),student_int(S,h),registr_cou(Reg,C),course_dif(C,l).
+%9
+registr_gr(Reg,1):0.8;registr_gr(Reg,2):0.2:- 
+    registr_stu(Reg,S),student_int(S,l),registr_cou(Reg,C),course_dif(C,h).
+%10
+registr_gr(Reg,1):0.5;registr_gr(Reg,2):0.5:- 
+    registr_stu(Reg,S),student_int(S,l),registr_cou(Reg,C),course_dif(C,l).
+%11
+registr_sat(Reg,1):0.2;registr_sat(Reg,2):0.8:- 
+    registr_gr(Reg,2),registr_cou(Reg,C),course_prof(C,P),
+    professor_teach_ab(P,h).
+%12
+registr_sat(Reg,1):0.4;registr_sat(Reg,2):0.6:- 
+    registr_gr(Reg,2),registr_cou(Reg,C),course_prof(C,P),
+    professor_teach_ab(P,l).
+%13
+registr_sat(Reg,1):0.6;registr_sat(Reg,2):0.4:- 
+    registr_gr(Reg,1),registr_cou(Reg,C),course_prof(C,P),
+    professor_teach_ab(P,h).
+%14
+registr_sat(Reg,1):0.8;registr_sat(Reg,2):0.2:- 
+    registr_gr(Reg,1),registr_cou(Reg,C),course_prof(C,P),
+    professor_teach_ab(P,l).
+
+course(phil101).
+
+course_prof(phil101,gump).
+%15
+course_dif(C,h):0.5;course_dif(C,l):0.5:- 
+    course(C).
+%16
+course_rat(C,h):0.8;course_rat(C,l):0.2:- 
+    bagof(Stu,R^(registr_cou(R,C),registr_sat(R,Stu)),L),
+    average(L,Av),Av>1.5.
+%17
+course_rat(C,h):0.2;course_rat(C,l):0.8:- 
+    bagof(Stu,R^(registr_cou(R,C),registr_sat(R,Stu)),L),
+    average(L,Av),Av=< 1.5.

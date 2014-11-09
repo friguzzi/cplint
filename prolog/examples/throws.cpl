@@ -1,0 +1,21 @@
+/*
+no
+   ?- s([throws(mary),throws(john),break],P).
+P = 0.46 ?
+yes
+   ?- s([throws(mary),throws(john),\+break],P).
+P = 0.04 ?
+yes
+   ?- s([\+ throws(mary),throws(john),break],P).
+P = 0.3 ?
+yes
+   ?- s([\+ throws(mary),throws(john),\+ break],P).
+P = 0.2 ?
+yes
+   ?-
+	 */
+
+break : 0.8 :- throws(mary).
+break : 0.6 :- throws(john).
+throws(mary) : 0.5.
+throws(john).

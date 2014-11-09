@@ -1,0 +1,52 @@
+/*
+   ?- s([registration_grade(r0,X)],P).
+
+
+
+
+student_ranking(s0,X).
+s([student_ranking(s0,h)],P).
+P = 0,6646250000000005 ?
+s([student_ranking(s0,l)],P).
+P = 0,33537499999999987 
+ok, checked with s.pl
+*/
+
+
+
+registration_course(Key, CKey) :-
+	registration(Key, CKey, _).
+
+registration_student(Key, SKey) :-
+	registration(Key, _, SKey).
+
+registration_grade(Key, 4): 0.2;
+     registration_grade(Key, 1): 0.8 :-
+    registration(Key, CKey, SKey) ,
+    course_difficulty(CKey, h).
+
+
+registration_grade(Key, 4): 0.85;
+     registration_grade(Key, 1): 0.15 :-
+    registration(Key, CKey, SKey) ,
+    course_difficulty(CKey, l).
+
+
+course_difficulty(Cou, h) :0.5 ;  course_difficulty(Cou, l) : 0.5.
+
+
+student_ranking(Stu, h):0.2; student_ranking(Stu, l):0.8:-
+	bagof(Grade, CKey^(registration_student(CKey,Stu),
+			 registration_grade(CKey, Grade)), Grades),
+	average(Grades, Av),Av<2.
+
+student_ranking(Stu, h):0.8; student_ranking(Stu, l):0.2:-
+	bagof(Grade, CKey^(registration_student(CKey,Stu),
+			 registration_grade(CKey, Grade)), Grades),
+	average(Grades, Av),Av>=2.
+
+
+
+
+registration(r0,c16,s0).
+registration(r1,c10,s0).

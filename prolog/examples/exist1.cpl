@@ -1,0 +1,31 @@
+/*
+semlpad.pl
+ground_body(false)
+   ?- s([a],P).
+P = 0.276 ? 
+
+ground_body(true)
+   ?- s([a],P).
+P = 0.3115 ? 
+
+ 
+yes
+lpad.pl
+ground_body(false)
+   ?- s([a],P).
+P = 0.276 ? 
+
+ground_body(true)
+   ?- s([a],P).
+P = 0.3115 ?
+*/
+
+a:0.5 :- p(X).
+
+p(3):0.3.
+
+p(X):0.2 :- c(X).
+
+c(1).
+
+c(2).

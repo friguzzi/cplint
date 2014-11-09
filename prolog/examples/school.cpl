@@ -1,0 +1,796 @@
+/*
+Yap run on school_32.yap
+   ?- s([professor_ability(p0,X)],P).
+P = 0.5,
+X = h ? ;
+P = 0.1,
+X = l ? ;
+P = 0.4,
+X = m ? ;
+no
+   ?- s([professor_popularity(p0,X)],P).
+P = 0.531,
+X = h ? ;
+P = 0.175,
+X = l ? ;
+P = 0.294,
+X = m ? ;
+no
+ok
+
+sc([professor_ability(p0,X)],[professor_popularity(p0,h)],P).
+P = 0.847457627118644,
+X = h ? ;
+P = 0.00188323917137476,
+X = l ? ;
+P = 0.150659133709981,
+X = m ?
+ok
+
+sc([professor_popularity(p0,X)],[professor_ability(p0,h)],P).
+P = 0.9,
+X = h ? ;
+P = 0.01,
+X = l ? ;
+P = 0.09,
+X = m ? ;
+no
+ok
+   ?- s([registration_grade(r0,X)],P).
+P = 0.06675,
+X = 1 ? ;
+P = 0.16575,
+X = 2 ? ;
+Action (";" for more choices, <return> for exit) ? ;
+P = 0.356,
+X = 3 ? ;
+P = 0.4115,
+X = 4 ?
+no
+ok
+
+sc([registration_grade(r0,X)],[registration_course(r0,C), course_difficulty(C,h)],P).
+C = c16,
+P = 0.15,
+X = 1 ? ;
+C = c16,
+P = 0.285,
+X = 2 ? ;
+C = c16,
+P = 0.424,
+X = 3 ? ;
+C = c16,
+P = 0.141,
+X = 4 ? ;
+no
+ok (a=4, ...,d=1)
+
+sc([registration_grade(r0,X)], [registration_course(r0,C), course_difficulty(C,h), registration_student(r0,S), student_intelligence(S,h)],P).
+C = c16,
+P = 0.05,
+S = s0,
+X = 1 ? ;
+C = c16,
+P = 0.15,
+S = s0,
+X = 2 ? ;
+C = c16,
+P = 0.6,
+S = s0,
+X = 3 ? ;
+C = c16,
+P = 0.2,
+S = s0,
+X = 4 ? ;
+no
+ok
+
+sc([registration_grade(r0,X)],[registration_course(r0,C), course_difficulty(C,l), registration_student(r0,S), student_intelligence(S,h)],P).
+C = c16,
+P = 0.01,
+S = s0,
+X = 1 ? ;
+C = c16,
+P = 0.02,
+S = s0,
+X = 2 ? ;
+C = c16,
+P = 0.12,
+S = s0,
+X = 3 ? ;
+C = c16,
+P = 0.85,
+S = s0,
+X = 4 ? ;
+no
+ok
+
+s([registration_satisfaction(r0,X)],P).
+P = 0.15197525,
+X = 1 ? ;
+P = 0.15331025,
+X = 2 ? ;
+P = 0.6947145,
+X = 3 ? ;
+no
+ok
+sc([registration_satisfaction(r0,X)],[ registration_student(r0,S), student_intelligence(S,h)],P).
+P = 0.0959225,
+S = s0,
+X = 1 ? ;
+P = 0.124515,
+S = s0,
+X = 2 ? ;
+P = 0.7795625,
+S = s0,
+X = 3 ? ;
+no
+ok (h=3, l=1)
+
+sc([registration_satisfaction(r0,X)],[registration_grade(r0,4)],P).
+P = 0.04,
+X = 1 ? ;
+P = 0.06,
+X = 2 ? ;
+P = 0.9,
+X = 3 ? ;
+in Yap:
+   ?- registration_satisfaction(r0,X), registration_grade(r0,a).
+% YAP: no handler for error error(domain_error(bayesian_domain),bind_clpbns(var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D11,_D12]),var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D13,_D12])))
+
+sc([registration_satisfaction(r0,X)],[registration_grade(r0,1)],P).
+P = 0.528,
+X = 1 ? ;
+P = 0.167,
+X = 2 ? ;
+P = 0.305,
+X = 3 ? ;
+no
+   ?- sc([ registration_grade(r0,X)],[registration_satisfaction(r0,3)],P).
+P = 0.0293052037923492,
+X = 1 ? ;
+P = 0.114760451955444,
+X = 2 ? ;
+P = 0.322837654892765,
+X = 3 ? ;
+P = 0.533096689359442,
+X = 4 ? ;
+no
+   ?- registration_satisfaction(r0,X), registration_grade(r0,d).
+% YAP: no handler for error error(domain_error(bayesian_domain),bind_clpbns(var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D11,_D12]),var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D13,_D12])))
+
+sc([ registration_grade(r0,X)],[registration_satisfaction(r0,3)],P).
+   ?- registration_satisfaction(r0,h), registration_grade(r0,X).
+% YAP: no handler for error error(domain_error(bayesian_domain),bind_clpbns(var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D11,_D12]),var(grade(r0),[a,b,c,d],[0.2,0.7,0.85,0.1,0.2,0.5,0.01,0.05,0.1,0.6,0.25,0.12,0.3,0.6,0.35,0.04,0.15,0.4,0.15,0.04,0.02,0.4,0.15,0.12,0.5,0.6,0.4,0.05,0.01,0.01,0.2,0.05,0.03,0.45,0.2,0.1],[_D13,_D12])))
+
+s([course_rating(c0,X)],P).
+P = 0.5392099,
+X = h ? ;
+P = 0.2,
+X = l ? ;
+P = 0.2607901,
+X = m ? ;
+no
+yap does not end, starts thrashing
+sc([course_difficulty(c0,X)],[course_rating(c0,h)],P).
+P = 0.235185778302661,
+X = h ? ;
+P = 0.259096503977393,
+X = l ? ;
+P = 0.505717717719945,
+X = m ? ;
+no
+yap does not end, starts thrashing
+s([course_difficulty(c0,X)],P).
+P = 0.25,
+X = h ? ;
+P = 0.25,
+X = l ? ;
+P = 0.5,
+X = m ? ;
+no
+ok
+student_ranking(s0,X).
+| ?- s([student_ranking(s0,X)],P).
+P = 0.33105221125,
+X = h ? ;
+P = 0.204865630625,
+X = l ? ;
+P = 0.46408215812500003,
+X = m ?
+not checked with s
+yap:
+true ?
+yes
+
+
+sc([student_ranking(s0,X)],[student_intelligence(s0,h)],P).
+P = 0.42922046875000003,
+X = h ? ;
+P = 0.20003319999999997,
+X = l ? ;
+P = 0.3707463312499999,
+X = m ? ;
+no
+not checked with s
+yap:
+true 
+*/
+
+
+
+
+professor_ability(Key,h):0.50;professor_ability(Key,m): 0.40;professor_ability(Key,l):  0.10.
+
+professor_popularity(Key, h):0.9; professor_popularity(Key, m):0.09; professor_popularity(Key, l):0.01 :-
+	professor_ability(Key, h).
+
+professor_popularity(Key, h):0.2; professor_popularity(Key, m):0.6; professor_popularity(Key, l):0.2:-
+	professor_ability(Key, m).
+
+professor_popularity(Key, h):0.01; professor_popularity(Key, m):0.09; professor_popularity(Key, l):0.9 :-
+	professor_ability(Key,l).
+
+
+
+registration_course(Key, CKey) :-
+	registration(Key, CKey, _).
+
+registration_student(Key, SKey) :-
+	registration(Key, _, SKey).
+
+registration_grade(Key, 4): 0.2;registration_grade(Key, 3): 0.6;registration_grade(Key, 2): 0.15 ;
+     registration_grade(Key, 1): 0.05 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, h) ,
+    course_difficulty(CKey, h).
+
+registration_grade(Key, 4): 0.7;registration_grade(Key, 3): 0.25;registration_grade(Key, 2): 0.04 ;
+     registration_grade(Key, 1): 0.01 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, h) ,
+    course_difficulty(CKey, m).
+
+
+registration_grade(Key, 4): 0.85;registration_grade(Key, 3): 0.12;registration_grade(Key, 2): 0.02 ;
+     registration_grade(Key, 1): 0.01 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, h) ,
+    course_difficulty(CKey, l).
+
+
+registration_grade(Key, 4): 0.1;registration_grade(Key, 3): 0.3;registration_grade(Key, 2): 0.4 ;
+     registration_grade(Key, 1): 0.2 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, m) ,
+    course_difficulty(CKey, h).
+
+
+registration_grade(Key, 4): 0.2;registration_grade(Key, 3): 0.6;registration_grade(Key, 2): 0.15 ;
+     registration_grade(Key, 1): 0.05 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, m) ,
+    course_difficulty(CKey, m).
+
+registration_grade(Key, 4): 0.5;registration_grade(Key, 3): 0.35;registration_grade(Key, 2): 0.12;
+     registration_grade(Key, 1): 0.03 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, m) ,
+    course_difficulty(CKey, l).
+
+registration_grade(Key, 4): 0.01;registration_grade(Key, 3): 0.04;registration_grade(Key, 2): 0.5 ;
+     registration_grade(Key, 1): 0.45 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, l) ,
+    course_difficulty(CKey, h).
+
+registration_grade(Key, 4): 0.05;registration_grade(Key, 3): 0.15;registration_grade(Key, 2): 0.6 ;
+     registration_grade(Key, 1): 0.2 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, l) ,
+    course_difficulty(CKey, m).
+
+registration_grade(Key, 4): 0.1;registration_grade(Key, 3): 0.4;registration_grade(Key, 2): 0.4 ;
+     registration_grade(Key, 1): 0.1 :-
+    registration(Key, CKey, SKey) ,
+    student_intelligence(SKey, l) ,
+    course_difficulty(CKey, l).
+
+
+registration_satisfaction(Key, 3): 0.98 ; registration_satisfaction(Key, 2): 0.01 ; 
+    registration_satisfaction(Key, 1): 0.01 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, h),
+    registration_grade(Key, 4).
+
+registration_satisfaction(Key, 3): 0.9 ; registration_satisfaction(Key, 2): 0.09 ; 
+    registration_satisfaction(Key, 1): 0.01 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, h),
+    registration_grade(Key, 3).
+
+registration_satisfaction(Key, 3): 0.8 ; registration_satisfaction(Key, 2): 0.15 ; 
+    registration_satisfaction(Key, 1): 0.05 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, h),
+    registration_grade(Key, 2).
+
+
+
+registration_satisfaction(Key, 3): 0.6 ; registration_satisfaction(Key, 2): 0.3 ; 
+    registration_satisfaction(Key, 1): 0.1 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, h),
+    registration_grade(Key, 1).
+
+registration_satisfaction(Key, 3): 0.9 ; registration_satisfaction(Key, 2): 0.05 ; 
+    registration_satisfaction(Key, 1): 0.05 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, m),
+    registration_grade(Key, 4).
+
+registration_satisfaction(Key, 3): 0.4 ; registration_satisfaction(Key, 2): 0.4 ; 
+    registration_satisfaction(Key, 1): 0.2 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, m),
+    registration_grade(Key, 3).
+
+registration_satisfaction(Key, 3): 0.2 ; registration_satisfaction(Key, 2): 0.3 ; 
+    registration_satisfaction(Key, 1): 0.5 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, m),
+    registration_grade(Key, 2).
+
+registration_satisfaction(Key, 3): 0.01 ; registration_satisfaction(Key, 2): 0.04 ; 
+    registration_satisfaction(Key, 1): 0.95 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, m),
+    registration_grade(Key, 1).
+
+registration_satisfaction(Key, 3): 0.5 ; registration_satisfaction(Key, 2): 0.35 ; 
+    registration_satisfaction(Key, 1): 0.15 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, l),
+    registration_grade(Key, 4).
+
+registration_satisfaction(Key, 3): 0.2 ; registration_satisfaction(Key, 2): 0.3 ; 
+    registration_satisfaction(Key, 1): 0.5 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, l),
+    registration_grade(Key, 3).
+
+registration_satisfaction(Key, 3): 0.01 ; registration_satisfaction(Key, 2): 0.09 ; 
+    registration_satisfaction(Key, 1): 0.9 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, l),
+    registration_grade(Key, 2).
+
+registration_satisfaction(Key, 3): 0.01 ; registration_satisfaction(Key, 2): 0.01 ; 
+    registration_satisfaction(Key, 1): 0.98 :-
+    registration(Key, CKey,_),
+    course(CKey, PKey),
+    professor_ability(PKey, l),
+    registration_grade(Key, 1).
+
+course_rating(CKey, h):0.2; course_rating(CKey, m):0.2;course_rating(CKey, l):0.6:-
+	bagof(Sat, RKey^(registration_course(RKey,CKey), registration_satisfaction(RKey,Sat)), Sats),
+	average(Sats, Av),Av<1.
+
+course_rating(CKey, h):0.2; course_rating(CKey, m):0.6;course_rating(CKey, l):0.2:-
+	bagof(Sat, RKey^(registration_course(RKey,CKey), registration_satisfaction(RKey,Sat)), Sats),
+	average(Sats, Av),Av<2,Av>=1.
+
+course_rating(CKey, h):0.6; course_rating(CKey,m):0.2;course_rating(CKey, l):0.2:-
+	bagof(Sat, RKey^(registration_course(RKey,CKey), registration_satisfaction(RKey,Sat)), Sats),
+	average(Sats, Av),Av>=2.
+
+course_difficulty(Key, h) :0.25 ; course_difficulty(Key, m): 0.5 ; course_difficulty(Key, l) : 0.25.
+
+student_intelligence(Key, h): 0.5; student_intelligence(Key,m):0.4; student_intelligence(Key,l):0.1.
+
+student_ranking(Key, h):0.2; student_ranking(Key, m):0.2;student_ranking(Key, l):0.6:-
+	bagof(Grade, CKey^(registration_student(CKey,Key),
+			 registration_grade(CKey, Grade)), Grades),
+	average(Grades, Av),Av<1.5.
+
+student_ranking(Key, h):0.2; student_ranking(Key, m):0.6;student_ranking(Key, l):0.2:-
+	bagof(Grade, CKey^(registration_student(CKey,Key),
+			 registration_grade(CKey, Grade)), Grades),
+	average(Grades, Av),Av>=1.5,Av<3.5.
+
+student_ranking(Key, h):0.6; student_ranking(Key, m):0.2;student_ranking(Key, l):0.2:-
+	bagof(Grade, CKey^(registration_student(CKey,Key),
+			 registration_grade(CKey, Grade)), Grades),
+	average(Grades, Av),Av>=3.5.
+
+
+professor(p0).
+professor(p1).
+professor(p2).
+professor(p3).
+professor(p4).
+professor(p5).
+professor(p6).
+professor(p7).
+professor(p8).
+professor(p9).
+professor(p10).
+professor(p11).
+professor(p12).
+professor(p13).
+professor(p14).
+professor(p15).
+professor(p16).
+professor(p17).
+professor(p18).
+professor(p19).
+professor(p20).
+professor(p21).
+professor(p22).
+professor(p23).
+professor(p24).
+professor(p25).
+professor(p26).
+professor(p27).
+professor(p28).
+professor(p29).
+professor(p30).
+professor(p31).
+
+
+course(c0,p24).
+course(c1,p7).
+course(c2,p16).
+course(c3,p27).
+course(c4,p25).
+course(c5,p6).
+course(c6,p28).
+course(c7,p1).
+course(c8,p29).
+course(c9,p23).
+course(c10,p17).
+course(c11,p16).
+course(c12,p11).
+course(c13,p28).
+course(c14,p13).
+course(c15,p7).
+course(c16,p21).
+course(c17,p15).
+course(c18,p8).
+course(c19,p30).
+course(c20,p1).
+course(c21,p23).
+course(c22,p11).
+course(c23,p9).
+course(c24,p0).
+course(c25,p30).
+course(c26,p15).
+course(c27,p4).
+course(c28,p26).
+course(c29,p29).
+course(c30,p31).
+course(c31,p19).
+course(c32,p5).
+course(c33,p14).
+course(c34,p14).
+course(c35,p25).
+course(c36,p21).
+course(c37,p10).
+course(c38,p2).
+course(c39,p20).
+course(c40,p3).
+course(c41,p18).
+course(c42,p9).
+course(c43,p20).
+course(c44,p17).
+course(c45,p19).
+course(c46,p6).
+course(c47,p4).
+course(c48,p12).
+course(c49,p10).
+course(c50,p2).
+course(c51,p22).
+course(c52,p31).
+course(c53,p24).
+course(c54,p0).
+course(c55,p5).
+course(c56,p22).
+course(c57,p13).
+course(c58,p18).
+course(c59,p12).
+course(c60,p27).
+course(c61,p3).
+course(c62,p8).
+course(c63,p26).
+
+
+student(s0).
+student(s1).
+student(s2).
+student(s3).
+student(s4).
+student(s5).
+student(s6).
+student(s7).
+student(s8).
+student(s9).
+student(s10).
+student(s11).
+student(s12).
+student(s13).
+student(s14).
+student(s15).
+student(s16).
+student(s17).
+student(s18).
+student(s19).
+student(s20).
+student(s21).
+student(s22).
+student(s23).
+student(s24).
+student(s25).
+student(s26).
+student(s27).
+student(s28).
+student(s29).
+student(s30).
+student(s31).
+student(s32).
+student(s33).
+student(s34).
+student(s35).
+student(s36).
+student(s37).
+student(s38).
+student(s39).
+student(s40).
+student(s41).
+student(s42).
+student(s43).
+student(s44).
+student(s45).
+student(s46).
+student(s47).
+student(s48).
+student(s49).
+student(s50).
+student(s51).
+student(s52).
+student(s53).
+student(s54).
+student(s55).
+student(s56).
+student(s57).
+student(s58).
+student(s59).
+student(s60).
+student(s61).
+student(s62).
+student(s63).
+student(s64).
+student(s65).
+student(s66).
+student(s67).
+student(s68).
+student(s69).
+student(s70).
+student(s71).
+student(s72).
+student(s73).
+student(s74).
+student(s75).
+student(s76).
+student(s77).
+student(s78).
+student(s79).
+student(s80).
+student(s81).
+student(s82).
+student(s83).
+student(s84).
+student(s85).
+student(s86).
+student(s87).
+student(s88).
+student(s89).
+student(s90).
+student(s91).
+student(s92).
+student(s93).
+student(s94).
+student(s95).
+student(s96).
+student(s97).
+student(s98).
+student(s99).
+student(s100).
+student(s101).
+student(s102).
+student(s103).
+student(s104).
+student(s105).
+student(s106).
+student(s107).
+student(s108).
+student(s109).
+student(s110).
+student(s111).
+student(s112).
+student(s113).
+student(s114).
+student(s115).
+student(s116).
+student(s117).
+student(s118).
+student(s119).
+student(s120).
+student(s121).
+student(s122).
+student(s123).
+student(s124).
+student(s125).
+student(s126).
+student(s127).
+student(s128).
+student(s129).
+student(s130).
+student(s131).
+student(s132).
+student(s133).
+student(s134).
+student(s135).
+student(s136).
+student(s137).
+student(s138).
+student(s139).
+student(s140).
+student(s141).
+student(s142).
+student(s143).
+student(s144).
+student(s145).
+student(s146).
+student(s147).
+student(s148).
+student(s149).
+student(s150).
+student(s151).
+student(s152).
+student(s153).
+student(s154).
+student(s155).
+student(s156).
+student(s157).
+student(s158).
+student(s159).
+student(s160).
+student(s161).
+student(s162).
+student(s163).
+student(s164).
+student(s165).
+student(s166).
+student(s167).
+student(s168).
+student(s169).
+student(s170).
+student(s171).
+student(s172).
+student(s173).
+student(s174).
+student(s175).
+student(s176).
+student(s177).
+student(s178).
+student(s179).
+student(s180).
+student(s181).
+student(s182).
+student(s183).
+student(s184).
+student(s185).
+student(s186).
+student(s187).
+student(s188).
+student(s189).
+student(s190).
+student(s191).
+student(s192).
+student(s193).
+student(s194).
+student(s195).
+student(s196).
+student(s197).
+student(s198).
+student(s199).
+student(s200).
+student(s201).
+student(s202).
+student(s203).
+student(s204).
+student(s205).
+student(s206).
+student(s207).
+student(s208).
+student(s209).
+student(s210).
+student(s211).
+student(s212).
+student(s213).
+student(s214).
+student(s215).
+student(s216).
+student(s217).
+student(s218).
+student(s219).
+student(s220).
+student(s221).
+student(s222).
+student(s223).
+student(s224).
+student(s225).
+student(s226).
+student(s227).
+student(s228).
+student(s229).
+student(s230).
+student(s231).
+student(s232).
+student(s233).
+student(s234).
+student(s235).
+student(s236).
+student(s237).
+student(s238).
+student(s239).
+student(s240).
+student(s241).
+student(s242).
+student(s243).
+student(s244).
+student(s245).
+student(s246).
+student(s247).
+student(s248).
+student(s249).
+student(s250).
+student(s251).
+student(s252).
+student(s253).
+student(s254).
+student(s255).
+
+
+registration(r0,c16,s0).
+registration(r1,c10,s0).
+registration(r2,c57,s0).
+registration(r3,c22,s1).
+registration(r4,c55,s1).
+registration(r5,c27,s1).
+registration(r6,c14,s2).
+registration(r7,c52,s2).
+registration(r8,c10,s2).
+registration(r9,c47,s3).
+registration(r10,c16,s3).
+registration(r11,c62,s3).
+registration(r12,c12,s4).
+registration(r13,c11,s4).
+registration(r14,c17,s4).
+registration(r15,c52,s5).
+registration(r16,c1,s5).
+registration(r17,c35,s5).
+registration(r18,c0,s6).
+registration(r19,c7,s6).
+registration(r20,c40,s6).

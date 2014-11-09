@@ -1,0 +1,27 @@
+/*
+   ?- s([hiv(a)],P).
+P = 0.154 ?
+yes
+   ?- s([hiv(b)],P).
+P = 0.154 ?
+yes
+   ?- s([hiv(b),hiv(a)],P).
+P = 0.118 ?
+yes
+   ?- s([\+ hiv(b),\+ hiv(a)],P).
+P = 0.81 ?
+yes
+   ?- s([ hiv(b),\+ hiv(a)],P).
+P = 0.036 ?
+yes
+   ?- s([\+ hiv(b),hiv(a)],P).
+P = 0.036 ?
+yes
+*/
+
+(hiv(a) : 0.1).
+(hiv(b) : 0.1).
+(hiv(a) : 0.6) :- hiv(b).
+(hiv(b) : 0.6) :- hiv(a).
+hiv(a) :- hiv(a).
+hiv(b) :- hiv(b).

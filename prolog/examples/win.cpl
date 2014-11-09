@@ -1,0 +1,14 @@
+/*
+   ?- s([win(white)],P).
+P = 0.5 ?
+yes
+   ?- s([win(black)],P).
+P = 0.5 ?
+yes
+   ?- s([win(black),win(white)],P).
+P = 0 ?
+*/
+
+win(white) :- \+ win(black).
+win(black):- \+ win(white).
+win(white) : 0.5 ; win(black) : 0.5.
