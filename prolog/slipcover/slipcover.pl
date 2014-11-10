@@ -1,3 +1,16 @@
+/** <module> slipcover
+
+This module performs learning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It allows to perform both parameter and structure learning.
+
+See http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html for
+details
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0
+*/
+
 /*
 
 SLIPCOVER
@@ -56,6 +69,14 @@ setting(specialization,bottom).
 setting(seed,rand(10,1231,30322)).  
 setting(score,ll).
 /* allowed values: ll aucpr */
+/** 
+ * sl(+FileStem:atom) is det
+ * The predicate performs structure learning for the problem stored in
+ * the files FileStem.l (language bias), FileStem.kb (dataset), 
+ * FileStem.bg (optional, background theory), FileStem.cpl (optional,
+ * initial theory).
+ * The result is stored in FileStem.rules
+ */
 
 sl(File):-
   setting(seed,Seed),
@@ -245,6 +266,14 @@ cycle_structure([(RH,_Score)|RT],R0,S0,SP0,DB,R,S,M):-
   M1 is M-1,
   cycle_structure(RT,R4,S4,SP1,DB,R,S,M1). 
 
+/** 
+ * em(+FileStem:atom) is det
+ * The predicate performs parameter learning for the problem stored in
+ * the files FileStem.l (language bias), FileStem.kb (dataset), 
+ * FileStem.bg (optional, background theory), FileStem.cpl 
+ * (theory).
+ * The result is stored in FileStem.rules
+ */
 
 em(File):-
   generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL),
