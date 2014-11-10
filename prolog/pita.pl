@@ -34,6 +34,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 previous_rules([],[]).
 /** 
  * p(+File:atom) is det
+ *
  * An alias for parse/1
  */
 /* p(File) parses the file File.cpl. It can be called more than once without 
@@ -43,6 +44,7 @@ p(File):-
 
 /** 
  * parse(+File:atom) is det
+ *
  * The predicate paeses the file with name File.cpl and loads the program
  * in memory.
  */
@@ -63,6 +65,7 @@ parse(File):-
   
 /** 
  * s(+Query:atom,-Probability:float) is det
+ *
  * The predicate computes the probability of the ground query Query
  */
 

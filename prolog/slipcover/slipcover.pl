@@ -71,6 +71,7 @@ setting(score,ll).
 /* allowed values: ll aucpr */
 /** 
  * sl(+FileStem:atom) is det
+ *
  * The predicate performs structure learning for the problem stored in
  * the files FileStem.l (language bias), FileStem.kb (dataset), 
  * FileStem.bg (optional, background theory), FileStem.cpl (optional,
@@ -268,6 +269,7 @@ cycle_structure([(RH,_Score)|RT],R0,S0,SP0,DB,R,S,M):-
 
 /** 
  * em(+FileStem:atom) is det
+ *
  * The predicate performs parameter learning for the problem stored in
  * the files FileStem.l (language bias), FileStem.kb (dataset), 
  * FileStem.bg (optional, background theory), FileStem.cpl 
