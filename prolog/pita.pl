@@ -473,9 +473,6 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_tree(Tail, Var, Var1).
 
 
-user:term_expansion((Head :- Body), (H :- Body)):-
-  Head=db(H),!.
-  
 user:term_expansion((Head :- Body), Clauses):-
   setting(compiling,on),
   setting(depth_bound,true),
