@@ -14,7 +14,7 @@ for the relative license.
 #include <stdio.h>
 #include <string.h>
 #include "cuddInt.h"
-#include "YapInterface.h"
+#include <SWI-Prolog.h>
 #define LOGZERO log(0.01)
 #define CACHE_SLOTS 1 
 #define UNIQUE_SLOTS 1
@@ -60,17 +60,17 @@ int ex,cycle;
 DdNode *** nodesToVisit;
 int * NnodesToVisit;
 double * example_prob;
-static int ret_prob(void);
+static foreign_t ret_prob(term_t,term_t);
 double Prob(DdNode *node,int comp_par);
-static int end_bdd(void);
-static int init_test(void);
-static int add_var(void);
-static int init(void);
-static int end(void);
-static int EM(void);
+static foreign_t end_bdd(void);
+static foreign_t init_test(term_t);
+static foreign_t add_var(term_t,term_t,term_t,term_t);
+static foreign_t init(term_t,term_t);
+static foreign_t end(void);
+static foreign_t EM(term_t,term_t,term_t,term_t,term_t,term_t,term_t,term_t);
 static int Q(void);
 double ProbPath(DdNode *node, int comp_par, int nex);
-static int rec_deref(void);
+//static int rec_deref(void);
 int indexMvar(DdNode *node);
 void Forward(DdNode *node, int nex);
 void GetForward(DdNode *node, double ForwProbPath);
@@ -86,16 +86,15 @@ void add_or_replace_node(tablerow *tab, DdNode *node, double value);
 void add_node(tablerow *tab, DdNode *node, double value);
 void destroy_table(tablerow *tab,int varcnt);
 
-static int init(void)
+static foreign_t init(term_t arg1,term_t arg2)
 {
   int j,i;
-  YAP_Term arg1,arg2,list;
+  term_t list=PL_copy_term_ref(arg2);
+  term_t head=PL_new_term_ref();
 
   ex=0;
   cycle=0;
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  nRules=YAP_IntOfTerm(arg1);
+  PL_get_integer(arg1,&nRules);
 
   vars_ex=NULL;
   nVars_ex=NULL;
@@ -108,11 +107,10 @@ static int init(void)
   boolVars_ex=NULL;
   mgr_ex=NULL;
   nodes_probs_ex=NULL;
-  list=arg2;
   for (j=0;j<nRules;j++)  
   {
-    rules[j]=YAP_IntOfTerm(YAP_HeadOfTerm(list));
-    list=YAP_TailOfTerm(list);
+    PL_get_list(list,head,list);
+    PL_get_integer(head,&rules[j]);
     eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
     eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
     arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
@@ -122,10 +120,10 @@ static int init(void)
       eta_temp[j][i]=(double *) malloc(2*sizeof(double));
     }
   }
-  return 1;
+  PL_succeed;
 }
 
-static int init_bdd(void)  
+static foreign_t init_bdd(void)  
 {
   mgr_ex=(DdManager **) realloc(mgr_ex, (ex+1)* sizeof(DdManager *)); 
   mgr_ex[ex]=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
@@ -149,24 +147,22 @@ static int init_bdd(void)
   boolVars_ex=(int *) realloc(boolVars_ex, (ex+1)* sizeof(int ));
   boolVars_ex[ex]=0;
 
-  return 1;
+  PL_succeed;
 }
 
-static int end_bdd(void)
+static foreign_t end_bdd(void)
 {
 
   ex=ex+1;
-  return 1;
+  PL_succeed;
 }
 
 
 
-static int init_test(void)
+static foreign_t init_test(term_t arg1)
 {
-  YAP_Term arg1;  
 
-  arg1=YAP_ARG1;
-  nRules=YAP_IntOfTerm(arg1);
+  PL_get_integer(arg1,&nRules);
 
   ex=0;
   mgr_ex=(DdManager **) malloc((ex+1)* sizeof(DdManager *));
@@ -193,11 +189,10 @@ static int init_test(void)
 
   rules= (int *) malloc(nRules * sizeof(int));
 
-  return 1;
-
+  PL_succeed;
 }
 
-static int end_test(void)
+static foreign_t end_test(void)
 {
   free(bVar2mVar_ex[ex]);
   free(vars_ex[ex]);
@@ -211,7 +206,7 @@ static int end_test(void)
   free(nVars_ex);
   free(boolVars_ex);
 
-  return 1;
+  PL_succeed;
 }
 
 
@@ -252,7 +247,7 @@ static double Expectation(DdNode **nodes_ex,int lenNodes)
   return CLL;
 }
 
-static int end(void)
+static foreign_t end(void)
 {
   int r,i;
 
@@ -290,34 +285,35 @@ static int end(void)
   free(arrayprob);
   free(rules);
 
-  return 1;
+  PL_succeed;
 }
 
 
-static int ret_prob(void)
+static foreign_t ret_prob(term_t arg1, term_t arg2)
 {
-  YAP_Term arg1,arg2,out;
+  term_t out;
+  long nodeint;
   DdNode * node;
   
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  node=(DdNode *)YAP_IntOfTerm(arg1);
-
+  PL_get_long(arg1,&nodeint);
+  node=(DdNode *)nodeint;
+  out=PL_new_term_ref();
+ 
   if (!Cudd_IsConstant(node))
   {
     table=init_table(boolVars_ex[ex]);
-    out=YAP_MkFloatTerm(Prob(node,0));
+    PL_put_float(out,Prob(node,0));
     destroy_table(table,boolVars_ex[ex]);
   }
   else
   {
     if (node==Cudd_ReadOne(mgr_ex[ex]))
-      out=YAP_MkFloatTerm(1.0);
+      PL_put_float(out,1.0);
     else  
-      out=YAP_MkFloatTerm(0.0);
+      PL_put_float(out,0.0);
   }
 
-  return(YAP_Unify(out,arg2));
+  return(PL_unify(out,arg2));
 }
 
 double Prob(DdNode *node,int comp_par)
@@ -371,60 +367,53 @@ so that it is not recomputed
 
 
 
-static int add_var(void)
+static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4)
 {
-  YAP_Term arg1,arg2,arg3,arg4,out,probTerm,probTerm_temp;
+  term_t out,head,probTerm,probTerm_temp;
   variable * v;
   int i;
   DdNode * node;
   double p,p0;
 
-
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3; 
-  arg4=YAP_ARG4;
+  head=PL_new_term_ref();
+  out=PL_new_term_ref();
   nVars_ex[ex]=nVars_ex[ex]+1;
   vars_ex[ex]=(variable *) realloc(vars_ex[ex],nVars_ex[ex] * sizeof(variable));
 
   v=&vars_ex[ex][nVars_ex[ex]-1];
-  v->nVal=YAP_IntOfTerm(arg1);
-  v->nRule=YAP_IntOfTerm(arg3);
+  PL_get_integer(arg1,&v->nVal);
+  PL_get_integer(arg3,&v->nRule);
   v->firstBoolVar=boolVars_ex[ex];
   probs_ex[ex]=(double *) realloc(probs_ex[ex],(((boolVars_ex[ex]+v->nVal-1)* sizeof(double))));
   bVar2mVar_ex[ex]=(int *) realloc(bVar2mVar_ex[ex],((boolVars_ex[ex]+v->nVal-1)* sizeof(int)));
-  probTerm=arg2; 
+  probTerm=PL_copy_term_ref(arg2); 
   p0=1;
   for (i=0;i<v->nVal-1;i++)
   {
     node=Cudd_bddIthVar(mgr_ex[ex],boolVars_ex[ex]+i);
-    p=YAP_FloatOfTerm(YAP_HeadOfTerm(probTerm));
+    PL_get_list(probTerm,head,probTerm);
+    PL_get_float(head,&p);
     bVar2mVar_ex[ex][boolVars_ex[ex]+i]=nVars_ex[ex]-1;
     probs_ex[ex][boolVars_ex[ex]+i]=p/p0;
-    probTerm_temp=YAP_TailOfTerm(probTerm);
-    probTerm=probTerm_temp;
     p0=p0*(1-p/p0);
   }
   boolVars_ex[ex]=boolVars_ex[ex]+v->nVal-1;
   rules[v->nRule]= v->nVal; 
-  out=YAP_MkIntTerm((YAP_Int) nVars_ex[ex]-1);
-  return YAP_Unify(out,arg4);
+  PL_put_integer(out,nVars_ex[ex]-1);
+  return(PL_unify(out,arg4));
 }
 
-static int equality(void)
+static foreign_t equality(term_t arg1,term_t arg2,term_t arg3)
 {
-  YAP_Term arg1,arg2,arg3,out;
+  term_t out;
   int varIndex;
   int value;
   int i;
   variable v;
   DdNode * node, * tmp,*var;
 
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3;
-  varIndex=YAP_IntOfTerm(arg1);
-  value=YAP_IntOfTerm(arg2);
+  PL_get_integer(arg1,&varIndex);
+  PL_get_integer(arg2,&value);
   v=vars_ex[ex][varIndex];
   i=v.firstBoolVar;
   tmp=Cudd_ReadOne(mgr_ex[ex]);
@@ -445,79 +434,84 @@ static int equality(void)
     Cudd_Ref(node);
     Cudd_RecursiveDeref(mgr_ex[ex],tmp);
   }
-  out=YAP_MkIntTerm((YAP_Int) node);
-  return(YAP_Unify(out,arg3));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) node);
+  return(PL_unify(out,arg3));
 }
 
-static int one(void)
+static foreign_t one(term_t arg1)
 {
-  YAP_Term arg,out;
+  term_t out;
   DdNode * node;
 
-  arg=YAP_ARG1;
   node =  Cudd_ReadOne(mgr_ex[ex]);
   Cudd_Ref(node);
-  out=YAP_MkIntTerm((YAP_Int) node);
-  return(YAP_Unify(out,arg));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) node);
+  return(PL_unify(out,arg1));
 }
 
-static int zero(void)
+static foreign_t zero(term_t arg1)
 {
-  YAP_Term arg,out;
+  term_t out;
   DdNode * node;
 
-  arg=YAP_ARG1;
   node = Cudd_ReadLogicZero(mgr_ex[ex]);
   Cudd_Ref(node);
-  out=YAP_MkIntTerm((YAP_Int) node);
-  return(YAP_Unify(out,arg));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) node);
+  return(PL_unify(out,arg1));
 }
 
-static int bdd_not(void)
+static foreign_t bdd_not(term_t arg1,term_t arg2)
 {
-  YAP_Term arg1,arg2,out;
+  term_t out;
+  long nodeint;
   DdNode * node;
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
 
-  node = (DdNode *)YAP_IntOfTerm(arg1);
+  PL_get_long(arg1,&nodeint);
+  node = (DdNode *)nodeint;
   node=Cudd_Not(node);
-  out=YAP_MkIntTerm((YAP_Int) node);
-  return(YAP_Unify(out,arg2));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) node);
+  return(PL_unify(out,arg2));
 }
 
-static int and(void)
+static foreign_t and(term_t arg1,term_t arg2,term_t arg3)
 {
-  YAP_Term arg1,arg2,arg3,out;
+  term_t out;
   DdNode * node1, *node2,*nodeout;
+  long node1int,node2int;
 
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3;
-  node1=(DdNode *)YAP_IntOfTerm(arg1);
-  node2=(DdNode *)YAP_IntOfTerm(arg2);
+  PL_get_long(arg1,&node1int);
+  node1 = (DdNode *)node1int;
+  PL_get_long(arg2,&node2int);
+  node2 = (DdNode *)node2int;
   nodeout=Cudd_bddAnd(mgr_ex[ex],node1,node2);
   Cudd_Ref(nodeout);
-  out=YAP_MkIntTerm((YAP_Int) nodeout);
-  return(YAP_Unify(out,arg3));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) nodeout);
+  return(PL_unify(out,arg3));
 }
 
-static int or(void)
+static foreign_t or(term_t arg1,term_t arg2,term_t arg3)
 {
-  YAP_Term arg1,arg2,arg3,out;
-  DdNode * node1,*node2,*nodeout;
+  term_t out;
+  DdNode * node1, *node2,*nodeout;
+  long node1int,node2int;
 
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3;
-  node1=(DdNode *)YAP_IntOfTerm(arg1);
-  node2=(DdNode *)YAP_IntOfTerm(arg2);
+  PL_get_long(arg1,&node1int);
+  node1 = (DdNode *)node1int;
+  PL_get_long(arg2,&node2int);
+  node2 = (DdNode *)node2int;
   nodeout=Cudd_bddOr(mgr_ex[ex],node1,node2);
   Cudd_Ref(nodeout);
-  out=YAP_MkIntTerm((YAP_Int) nodeout);
-  return(YAP_Unify(out,arg3));
+  out=PL_new_term_ref();
+  PL_put_integer(out,(long) nodeout);
+  return(PL_unify(out,arg3));
 }
 
+/*
 static int garbage_collect(void)
 {
   YAP_Term arg1,arg2,out;
@@ -606,7 +600,7 @@ static int rec_deref(void)
   return 1;
 }
 
-
+*/
 
 double ProbPath(DdNode *node,int comp_par, int nex)
 {
@@ -898,7 +892,7 @@ void Maximization(void)
   }
 }
 
-static int randomize(void)
+static foreign_t randomize(void)
 {
   int i,j,e,rule;
   double * theta,p0;
@@ -943,35 +937,37 @@ static int randomize(void)
     free(Theta_rules[j]);
   }
   free(Theta_rules);
-  return 1;
+  PL_succeed;
 }
 
-static int EM(void)
+static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,term_t arg6,term_t arg7,term_t arg8)
 {
-  YAP_Term arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,
-    out1,out2,out3,nodesTerm,ruleTerm,tail,pair,compoundTerm;
+  term_t pterm,nil,out1,out2,out3,nodesTerm,ruleTerm,head,tail,pair,compoundTerm;
   DdNode * node1,**nodes_ex;
   int r,lenNodes,i,iter;
+  long node1int;
   long iter1;
   double CLL0= -2.2*pow(10,10); //-inf
   double CLL1= -1.7*pow(10,8);  //+inf   
   double p,p0,**eta_rule,ea,er; 
   double ratio,diff;
 
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3;
-  arg4=YAP_ARG4;
-  arg5=YAP_ARG5;
-  arg6=YAP_ARG6;
-  arg7=YAP_ARG7;
-  arg8=YAP_ARG8;
+  pair=PL_new_term_ref();
+  head=PL_new_term_ref();
+  nodesTerm=PL_copy_term_ref(arg1);
+  out1=PL_new_term_ref();
+  out2=PL_new_term_ref();
+  out3=PL_new_term_ref();
+  ruleTerm=PL_new_term_ref();
+  tail=PL_new_term_ref();
+  pterm=PL_new_term_ref();
+  nil=PL_new_term_ref();
+  compoundTerm=PL_new_term_ref();  
 
-  nodesTerm=arg1; 
-  ea=YAP_FloatOfTerm(arg2);
-  er=YAP_FloatOfTerm(arg3);
-  lenNodes=YAP_IntOfTerm(arg4);  
-  iter=YAP_IntOfTerm(arg5);  
+  PL_get_float(arg2,&ea);
+  PL_get_float(arg3,&er);
+  PL_get_integer(arg4,&lenNodes);  
+  PL_get_integer(arg5,&iter);
 
   nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
   nodes_probs_ex=(double *)malloc(lenNodes*sizeof(double));
@@ -979,12 +975,15 @@ static int EM(void)
 
   for (i=0;i<lenNodes;i++)
   {
-    pair=YAP_HeadOfTerm(nodesTerm);
-    node1=(DdNode *)YAP_IntOfTerm(YAP_HeadOfTerm(pair));
+    PL_get_list(nodesTerm,pair,nodesTerm);
+    PL_get_list(pair,head,pair);
+    //printf("qui\n");
+    PL_get_long(head,&node1int);
+    //printf("qua\n");
+    node1=(DdNode *)node1int;
     nodes_ex[i]=node1;
-    pair=YAP_TailOfTerm(pair);
-    example_prob[i]=YAP_FloatOfTerm(YAP_HeadOfTerm(pair));
-    nodesTerm=YAP_TailOfTerm(nodesTerm);
+    PL_get_list(pair,head,pair);
+    PL_get_float(head,&example_prob[i]);
   }
   diff=CLL1-CLL0;
   ratio=diff/fabs(CLL0);
@@ -1011,40 +1010,45 @@ static int EM(void)
     diff=CLL1-CLL0;
     ratio=diff/fabs(CLL0);
   }
-  out2= YAP_TermNil();
+  PL_put_nil(out2);
   for (r=0; r<nRules; r++)
   {
-    tail=YAP_TermNil();
+    PL_put_nil(tail);
     p0=1;
     for (i=0;i<rules[r]-1;i++)
     {
       p=arrayprob[r][i]*p0;
-      tail=YAP_MkPairTerm(YAP_MkFloatTerm(p),tail);
+      PL_put_float(pterm,p);
+      PL_cons_list(tail,pterm,tail);
       p0=p0*(1-arrayprob[r][i]);
     }
-    tail=YAP_MkPairTerm(YAP_MkFloatTerm(p0),tail);
-    ruleTerm=YAP_MkIntTerm(r);
-    compoundTerm=YAP_MkPairTerm(ruleTerm,YAP_MkPairTerm(tail,YAP_TermNil()));
-    out2=YAP_MkPairTerm(compoundTerm,out2);
+    PL_put_float(pterm,p0);
+    PL_cons_list(tail,pterm,tail);
+    PL_put_integer(ruleTerm,r);
+    PL_put_nil(nil);
+    PL_cons_list(tail,tail,nil);
+    PL_cons_list(compoundTerm,ruleTerm,tail);
+    PL_cons_list(out2,compoundTerm,out2);
   }
-  out3= YAP_TermNil();
+  PL_put_nil(out3);
   for (i=0;i<lenNodes;i++)
   {
-    out3=YAP_MkPairTerm(YAP_MkFloatTerm(nodes_probs_ex[i]),out3);
+    PL_put_float(pterm,nodes_probs_ex[i]);
+    PL_cons_list(out3,pterm,out3);
   }
-  YAP_Unify(out3,arg8);
+  PL_unify(out3,arg8);
 
-  out1=YAP_MkFloatTerm(CLL1);
-  YAP_Unify(out1,arg6);
+  PL_put_float(out1,CLL1);
+  PL_unify(out1,arg6);
   free(nodes_ex);
   free(example_prob);
   free(nodes_probs_ex);
 
-  return (YAP_Unify(out2,arg7));
+  return (PL_unify(out2,arg7));
 }
 
 
-static int Q(void)
+/*static int Q(void)
 {
   YAP_Term arg1,arg2,arg3,arg4,out,out1,
     term,nodesTerm,ruleTerm,tail,pair,compoundTerm;
@@ -1152,36 +1156,35 @@ static int dag_size(void)
   out=YAP_MkIntTerm(size);
   return(YAP_Unify(out,arg2));
 }
-
-void init_my_predicates()
+*/
+install_t install()
 /* function required by YAP for intitializing the predicates defined by a C function*/
 {
   srand(10);
 
-  YAP_UserCPredicate("init",init,2);
-  YAP_UserCPredicate("init_bdd",init_bdd,0);
-  YAP_UserCPredicate("end",end,0);
-  YAP_UserCPredicate("end_bdd",end_bdd,0);
-  YAP_UserCPredicate("add_var",add_var,4);
-  YAP_UserCPredicate("equality",equality,3);
-  YAP_UserCPredicate("and",and,3);
-  YAP_UserCPredicate("one",one,1);
-  YAP_UserCPredicate("zero",zero,1);
-  YAP_UserCPredicate("or",or,3);
-  YAP_UserCPredicate("bdd_not",bdd_not,2);
-  YAP_UserCPredicate("create_dot",create_dot,2);
-  YAP_UserCPredicate("init_test",init_test,1);
-  YAP_UserCPredicate("end_test",end_test,0);
-  YAP_UserCPredicate("ret_prob",ret_prob,2);
-  YAP_UserCPredicate("em",EM,8);
-  YAP_UserCPredicate("q",Q,4);
-  YAP_UserCPredicate("randomize",randomize,0);
-  YAP_UserCPredicate("deref",rec_deref,1);
-  YAP_UserCPredicate("garbage_collect",garbage_collect,2);
-  YAP_UserCPredicate("bdd_to_add",bdd_to_add,2);
-  YAP_UserCPredicate("paths_to_non_zero",paths_to_non_zero,2);
-  YAP_UserCPredicate("paths",paths,2);
-  YAP_UserCPredicate("dag_size",dag_size,2);
+  PL_register_foreign("init",2,init,0);
+  PL_register_foreign("init_bdd",0,init_bdd,0);
+  PL_register_foreign("end",0,end,0);
+  PL_register_foreign("end_bdd",0,end_bdd,0);
+  PL_register_foreign("add_var",4,add_var,0);
+  PL_register_foreign("equality",3,equality,0);
+  PL_register_foreign("and",3,and,0);
+  PL_register_foreign("one",1,one,0);
+  PL_register_foreign("zero",1,zero,0);
+  PL_register_foreign("or",3,or,0);
+  PL_register_foreign("bdd_not",2,bdd_not,0);
+//  PL_register_foreign("create_dot",2,create_dot,0);
+  PL_register_foreign("init_test",1,init_test,0);
+  PL_register_foreign("end_test",0,end_test,0);
+  PL_register_foreign("ret_prob",2,ret_prob,0);
+  PL_register_foreign("em",8,EM,0);
+  PL_register_foreign("randomize",0,randomize,0);
+//  PL_register_foreign("deref",1,rec_deref,0);
+//  PL_register_foreign("garbage_collect",2,garbage_collect,0);
+//  PL_register_foreign("bdd_to_add",2,bdd_to_add,0);
+//  PL_register_foreign("paths_to_non_zero",2,paths_to_non_zero,0);
+//  PL_register_foreign("paths",2,paths,0);
+//  PL_register_foreign("dag_size",2,dag_size,0);
 }
 FILE * open_file(char *filename, const char *mode)
 /* opens a file */
