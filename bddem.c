@@ -42,7 +42,7 @@ typedef struct
 tablerow * table;
 typedef struct 
 {
-  DdManager * mgr;
+  DdManager * mgr; //Cudd manager
   int * bVar2mVar; //array that maps Boolena vars to multi-valued vars
   variable * vars; // multivalued variables
   int nVars;  // number of multivalued variables
@@ -56,17 +56,15 @@ typedef struct
 {
   environment * env; // one evnironment for each example
   int ex;  // number of examples
-  double * sigma; // sigma array 
-  double ***eta;  // eta array
-  double ***eta_temp;
-  double **arrayprob;
+  double * sigma; // sigma array for taking into account deleted paths
+  double ***eta;  // eta array: for each rule, each Bool var stores two doubles
+  double ***eta_temp; // eta arrau storing the contribution of the current example
   int * rules; // array with the number of head atoms for each rule
   int nRules; // number of rules
   double * nodes_probs; 
   tablerow * nodesB; // tables of probabilities for nodes in Backward step
   tablerow * nodesF; // tables of probabilities for nodes in Forward step
   double * example_prob; // probability (frequency) of examples in the data
-  double * probs; // probabilities of Boolean variables
 } example_data;
 
 
@@ -79,22 +77,21 @@ static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
   term_t,term_t,term_t,term_t,term_t);
-static int Q(void);
 double ProbPath(example_data * ex_d,DdNode *node, int comp_par, int nex);
 //static int rec_deref(void);
 void Forward(example_data * ex_d,DdNode *node, int nex);
 void UpdateForward(example_data * ex_d,DdNode * node, int nex,
   DdNode *** nodesToVisit,int * NnodesToVisit);
 double GetOutsideExpe(example_data *ex_d,DdNode *root,double ex_prob, int nex);
-void Maximization(example_data * ex_d);
+void Maximization(example_data * ex_d, double ** arrayprob);
 static double Expectation(example_data *ex_d,DdNode **nodes_ex, int lenNodes);
-void init_my_predicates(void);
 FILE *open_file(char *filename, const char *mode);
 tablerow* init_table(int varcnt);
 double * get_value(tablerow *tab,  DdNode *node);
 void add_or_replace_node(tablerow *tab, DdNode *node, double value);
 void add_node(tablerow *tab, DdNode *node, double value);
 void destroy_table(tablerow *tab,int varcnt);
+install_t install(void);
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -102,7 +99,6 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
   example_data * ex_d; 
   double ***eta;
   double ***eta_temp;
-  double **arrayprob;
   int nRules, *rules;
   term_t ex_d_t=PL_new_term_ref();
   term_t list=PL_copy_term_ref(arg2);
@@ -120,8 +116,6 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
   eta_temp=ex_d->eta_temp;
   ex_d->rules= (int *) malloc(nRules * sizeof(int));
   rules=ex_d->rules;
-  ex_d->arrayprob=(double **) malloc(nRules * sizeof(double *));
-  arrayprob=ex_d->arrayprob;
   ex_d->nodes_probs=NULL;
   for (j=0;j<nRules;j++)  
   {
@@ -129,7 +123,6 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
     PL_get_integer(head,&rules[j]);
     eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
     eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-    arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
     for (i=0;i<rules[j]-1;i++)
     {
       eta[j][i]=(double *) malloc(2*sizeof(double));
@@ -175,7 +168,7 @@ static foreign_t init_bdd(term_t arg1, term_t arg2)
 
   ex_d->env[ex].rules=ex_d->rules;
 
-  PL_put_integer(env_t,(long) ex_d->env+ex);
+  PL_put_integer(env_t,(long) (ex_d->env+ex));
   return(PL_unify(env_t,arg2));
  
 }
@@ -285,10 +278,10 @@ static foreign_t end(term_t arg1)
     Cudd_Quit(ex_d->env[i].mgr);
     free(ex_d->env[i].bVar2mVar);
     free(ex_d->env[i].vars);
+    free(ex_d->env[i].probs);
   }
   
   free(ex_d->env);
-  free(ex_d->probs);
   for (r=0;r<ex_d->nRules;r++)
   {
     for (i=0;i<ex_d->rules[r]-1;i++)
@@ -301,11 +294,6 @@ static foreign_t end(term_t arg1)
   }
   free(ex_d->eta);
   free(ex_d->eta_temp);
-  for (r=0;r<ex_d->nRules;r++)
-  {
-    free(ex_d->arrayprob[r]);
-  }
-  free(ex_d->arrayprob);
   free(ex_d->rules);
   free(ex_d);
   PL_succeed;
@@ -484,6 +472,7 @@ static foreign_t one(term_t arg1, term_t arg2)
   DdNode * node;
   long env_l;
   environment *env;
+  int res;
 
   PL_get_long(arg1,&env_l);
   env=(environment *)env_l;
@@ -492,7 +481,10 @@ static foreign_t one(term_t arg1, term_t arg2)
   Cudd_Ref(node);
   out=PL_new_term_ref();
   PL_put_integer(out,(long) node);
-  return(PL_unify(out,arg2));
+  res=PL_unify(out,arg2);
+  return res;
+
+//  return(PL_unify(out,arg2));
 }
 
 static foreign_t zero(term_t arg1, term_t arg2)
@@ -538,7 +530,7 @@ static foreign_t and(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
   long node1int,node2int;
   long env_l;
   environment *env;
-
+  int res;
   PL_get_long(arg1,&env_l);
   env=(environment *)env_l;
 
@@ -550,7 +542,8 @@ static foreign_t and(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
   Cudd_Ref(nodeout);
   out=PL_new_term_ref();
   PL_put_integer(out,(long) nodeout);
-  return(PL_unify(out,arg4));
+  res=PL_unify(out,arg4);
+  return res;
 }
 
 static foreign_t or(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
@@ -568,6 +561,7 @@ static foreign_t or(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
   node1 = (DdNode *)node1int;
   PL_get_long(arg3,&node2int);
   node2 = (DdNode *)node2int;
+
   nodeout=Cudd_bddOr(env->mgr,node1,node2);
   Cudd_Ref(nodeout);
   out=PL_new_term_ref();
@@ -919,7 +913,7 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
 }
 
 
-void Maximization(example_data * ex_d)
+void Maximization(example_data * ex_d, double ** arrayprob)
 {
   int r,i,j,e;
   double sum=0;
@@ -933,10 +927,10 @@ void Maximization(example_data * ex_d)
       sum=(eta_rule[i][0]+eta_rule[i][1]);
       if (sum==0.0)
       {
-        ex_d->arrayprob[r][i]=0;
+        arrayprob[r][i]=0;
       }
       else 
-        ex_d->arrayprob[r][i]=eta_rule[i][1]/sum;
+        arrayprob[r][i]=eta_rule[i][1]/sum;
     }
   }
 
@@ -945,7 +939,7 @@ void Maximization(example_data * ex_d)
     for (j=0;j<ex_d->env[e].nVars;j++)
     {
       r=ex_d->env[e].vars[j].nRule;
-      probs_rule=ex_d->arrayprob[r];
+      probs_rule=arrayprob[r];
       for(i=0;i<ex_d->rules[r]-1;i++)
       {    
         ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=probs_rule[i];
@@ -1011,7 +1005,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
 {
   term_t pterm,nil,out1,out2,out3,nodesTerm,ruleTerm,head,tail,pair,compoundTerm;
   DdNode * node1,**nodes_ex;
-  int r,lenNodes,i,iter,cycle;
+  int r,lenNodes,i,j,iter,cycle;
   long node1int;
   long iter1;
   long ex_d_l;
@@ -1020,6 +1014,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   double CLL1= -1.7*pow(10,8);  //+inf   
   double p,p0,**eta_rule,ea,er; 
   double ratio,diff;
+  double **arrayprob; //new value of paramters after an iteration. One value ofr each rule and Bool var
 
   PL_get_long(arg1,&ex_d_l);
   ex_d=(example_data *)ex_d_l;
@@ -1039,7 +1034,12 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   PL_get_float(arg4,&er);
   PL_get_integer(arg5,&lenNodes);  
   PL_get_integer(arg6,&iter);
-
+  arrayprob=(double **) malloc(ex_d->nRules * sizeof(double *));
+  for (j=0;j<ex_d->nRules;j++)  
+  {
+    arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
+  }
+ 
   nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
   ex_d->nodes_probs=(double *)malloc(lenNodes*sizeof(double));
   ex_d->example_prob=(double *)malloc(lenNodes*sizeof(double));
@@ -1054,7 +1054,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     node1=(DdNode *)node1int;
     nodes_ex[i]=node1;
     PL_get_list(pair,head,pair);
-    PL_get_float(head,&ex_d->example_prob[i]);
+    PL_get_float(head,&(ex_d->example_prob[i]));
   }
   diff=CLL1-CLL0;
   ratio=diff/fabs(CLL0);
@@ -1077,7 +1077,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     }
     CLL0 = CLL1;
     CLL1 = Expectation(ex_d,nodes_ex,lenNodes);
-    Maximization(ex_d);
+    Maximization(ex_d, arrayprob);
     diff=CLL1-CLL0;
     ratio=diff/fabs(CLL0);
   }
@@ -1088,10 +1088,10 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     p0=1;
     for (i=0;i<ex_d->rules[r]-1;i++)
     {
-      p=ex_d->arrayprob[r][i]*p0;
+      p=arrayprob[r][i]*p0;
       PL_put_float(pterm,p);
       PL_cons_list(tail,pterm,tail);
-      p0=p0*(1-ex_d->arrayprob[r][i]);
+      p0=p0*(1-arrayprob[r][i]);
     }
     PL_put_float(pterm,p0);
     PL_cons_list(tail,pterm,tail);
@@ -1119,72 +1119,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
 }
 
 
-/*static int Q(void)
-{
-  YAP_Term arg1,arg2,arg3,arg4,out,out1,
-    term,nodesTerm,ruleTerm,tail,pair,compoundTerm;
-  DdNode * node1,**nodes_ex;
-  int r,lenNodes,i;
-  double p1,p0,**eta_rule,CLL; 
-
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-  arg3=YAP_ARG3;
-  arg4=YAP_ARG4;
-
-  nodesTerm=arg1; 
-  lenNodes=YAP_IntOfTerm(arg2);  
-
-  nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
-  example_prob=(double *)malloc(lenNodes*sizeof(double));
-
-  for (i=0;i<lenNodes;i++)
-  {
-    pair=YAP_HeadOfTerm(nodesTerm);
-    node1=(DdNode *)YAP_IntOfTerm(YAP_HeadOfTerm(pair));
-    nodes_ex[i]=node1;
-    pair=YAP_TailOfTerm(pair);
-    example_prob[i]=YAP_FloatOfTerm(YAP_HeadOfTerm(pair));
-    nodesTerm=YAP_TailOfTerm(nodesTerm);
-  }
-
-  for (r=0;r<nRules;r++)
-  {
-    for (i=0;i<rules[r]-1;i++)  
-    {
-      eta_rule=eta[r];
-      eta_rule[i][0]=0;
-      eta_rule[i][1]=0;
-    }
-  }
-  CLL=Expectation(nodes_ex,lenNodes);
-  out= YAP_TermNil();
-
-  for (r=0; r<nRules; r++)
-  {
-    tail=YAP_TermNil();
-    eta_rule=eta[r];
-    for (i=0;i<rules[r]-1;i++)
-    {
-      p0=eta_rule[i][0];
-      p1=eta_rule[i][1];
-      term=YAP_MkPairTerm(YAP_MkFloatTerm(p0),
-        YAP_MkPairTerm(YAP_MkFloatTerm(p1),YAP_TermNil()));
-      tail=YAP_MkPairTerm(term,tail);
-    }
-
-    ruleTerm=YAP_MkIntTerm(r);
-    compoundTerm=YAP_MkPairTerm(ruleTerm,YAP_MkPairTerm(tail,YAP_TermNil()));
-    out=YAP_MkPairTerm(compoundTerm,out);
-  }
-
-  free(nodes_ex);
-  free(example_prob);
-
-  out1=YAP_MkFloatTerm(CLL);
-  YAP_Unify(out1,arg4);
-  return (YAP_Unify(out,arg3));
-}
+/*
 
 static int paths_to_non_zero(void)
 {
@@ -1233,10 +1168,10 @@ install_t install()
 {
   srand(10);
 
-  PL_register_foreign("init",2,init,0);
-  PL_register_foreign("init_bdd",0,init_bdd,0);
-  PL_register_foreign("end",0,end,0);
-  PL_register_foreign("end_bdd",0,end_bdd,0);
+  PL_register_foreign("init",3,init,0);
+  PL_register_foreign("init_bdd",2,init_bdd,0);
+  PL_register_foreign("end",1,end,0);
+  PL_register_foreign("end_bdd",1,end_bdd,0);
   PL_register_foreign("add_var",5,add_var,0);
   PL_register_foreign("equality",4,equality,0);
   PL_register_foreign("and",4,and,0);
@@ -1248,8 +1183,8 @@ install_t install()
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
-  PL_register_foreign("em",8,EM,0);
-  PL_register_foreign("randomize",0,randomize,0);
+  PL_register_foreign("em",9,EM,0);
+  PL_register_foreign("randomize",1,randomize,0);
 //  PL_register_foreign("deref",1,rec_deref,0);
 //  PL_register_foreign("garbage_collect",2,garbage_collect,0);
 //  PL_register_foreign("bdd_to_add",2,bdd_to_add,0);
