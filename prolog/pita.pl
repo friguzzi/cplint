@@ -783,17 +783,17 @@ average(L,Av):-
 
 sandbox:safe_primitive(pita:set(_,_)).
 sandbox:safe_primitive(pita:setting(_,_)).
-sandbox:safe_primitive(pita:init_test(_)).
-sandbox:safe_primitive(pita:ret_prob(_,_)).
-sandbox:safe_primitive(pita:end_test).
-sandbox:safe_primitive(pita:one(_)).
-sandbox:safe_primitive(pita:zero(_)).
-sandbox:safe_primitive(pita:and(_,_,_)).
-sandbox:safe_primitive(pita:or(_,_,_)).
-sandbox:safe_primitive(pita:bdd_not(_,_)).
-sandbox:safe_primitive(pita:get_var_n(_,_,_,_)).
-sandbox:safe_primitive(pita:add_var(_,_,_,_)).
-sandbox:safe_primitive(pita:equality(_,_,_)).
+sandbox:safe_primitive(pita:init_test(_,_)).
+sandbox:safe_primitive(pita:ret_prob(_,_,_)).
+sandbox:safe_primitive(pita:end_test(_)).
+sandbox:safe_primitive(pita:one(_,_)).
+sandbox:safe_primitive(pita:zero(_,_)).
+sandbox:safe_primitive(pita:and(_,_,_,_)).
+sandbox:safe_primitive(pita:or(_,_,_,_)).
+sandbox:safe_primitive(pita:bdd_not(_,_,_)).
+sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_)).
+sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
+sandbox:safe_primitive(pita:equality(_,_,_,_)).
 
 sandbox:safe_meta(pita:s(_,_), []).
 
