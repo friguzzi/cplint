@@ -25,7 +25,7 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(system)).
 :- use_module(library(terms)).
 :-use_module(library(rbtrees)).
-:-use_foreign_library(foreign(bddem),install).
+:-use_foreign_library(bddem,install).
 :-set_prolog_flag(unknown,warning).
 
 :-multifile setting/2.
@@ -72,7 +72,7 @@ setting(specialization,bottom).
 %setting(specialization,mode).
 /* allowed values: mode,bottom */
 
-setting(seed,rand(10,1231,30322)).  
+setting(seed,rand(10,1231,3032)).  
 setting(score,ll).
 /* allowed values: ll aucpr */
 /** 
@@ -119,7 +119,7 @@ sl(File):-
   ),
 %  write('Initial theory'),nl,
 %  write_rules(R1,user_output),
-  learn_struct(DB,R1,R2,Score2), 
+  learn_struct(DB,R1,R2,Score2),
   learn_params(DB,R2,R,Score),  
   statistics(walltime,[_,WT]),
   WTS is WT/1000,
@@ -143,29 +143,6 @@ gen_fixed([],[]).
 gen_fixed([(H,B,BL)|T],[rule(R,H,B,BL)|T1]):-
   get_next_rule_number(R), 
   gen_fixed(T,T1).
-
-learn_struct_only(DB,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h],[b]],...], -R:final theory of the same form, -CLL
-  format("Clause search~n~n",[]),
-  setting(max_iter,M),
-  setting(depth_bound,DepthB),
-  set(depth_bound,false),
-  findall((H,B,BL),fixed_rule(H,B,BL),LF),
-  length(LF,LLF),
-  gen_fixed(LF,LFR),
-  format("Scoring fixed clauses: ~d clauses~n~n",[LLF]),
-  score_clause_refinements(LFR,1,LLF,DB,[],NB1,[],CL0,[],CLBG0),
-  append(NB1,R1,Beam),
-  cycle_beam(Beam,DB,CL0,[(HCL,S)|TCL],CLBG0,BG,M),
-  set(depth_bound,DepthB),
-  format("Theory search~n~n",[]),
-  setting(max_iter_structure,MS),
-  cycle_structure(TCL,[HCL],S,-1e20,DB,R2,Score,MS),
-  format("Best target theory~n~n",[]),
-  write_rules(R2,user_output),
-  length(BG,NBG),
-  format("Background search: ~d clauses~n~n",[NBG]),
-  remove_score(BG,BG2),
-  append(R2,BG2,R).
 
 
 learn_struct(DB,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h],[b]],...], -R:final theory of the same form, -CLL
@@ -321,6 +298,8 @@ em(File):-
 
 learn_params(DB,R0,R,Score):-  %Parameter Learning
   generate_clauses(R0,R1,0,[],Th0), 
+  format("Initial theory~n",[]),
+  write_rules(R1,user_output),
   assert_all(Th0,Th0Ref),
   assert_all(R1,R1Ref),!,
   findall(R-HN,(rule(R,HL,_BL,_Lit),length(HL,HN)),L),
@@ -332,10 +311,11 @@ learn_params(DB,R0,R,Score):-  %Parameter Learning
   length(DB,NEx),
   (setting(examples,atoms)->
     setting(group,G),  
-    derive_bdd_nodes_groupatoms(DB,ExData,NEx,G,[],Nodes,0,_CLL0,LE,[]),!   
+    derive_bdd_nodes_groupatoms(DB,ExData,NEx,G,[],Nodes,0,CLL0,LE,[]),!   
   ; 
-   derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,_CLL0),!      
+   derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!      
   ),
+  format("Initial score ~f~n",[CLL0]),
   setting(random_restarts_number,N),
   random_restarts(N,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
   end(ExData),
@@ -352,8 +332,9 @@ update_theory_par([def_rule(H,B,L)|T0],Par,[def_rule(H,B,L)|T]):-!,
 update_theory_par([(H:-B)|T0],Par,[(H:-B)|T]):-!,
   update_theory_par(T0,Par,T).
 
-update_theory_par([rule(N,_H,_B,_L)|T0],Par,T):-
-  member([N,[1.0|_T]],Par),!,  
+update_theory_par([rule(N,H,_B,_L)|T0],Par,T):-
+  member([N,[1.0|_T]],Par),
+  last(H,'':_P),!,  
   update_theory_par(T0,Par,T).
 
 update_theory_par([rule(N,H,B,L)|T0],Par,[rule(N,H1,B,L)|T]):-
@@ -524,7 +505,7 @@ elab_clause_ref(rule(_NR,H,B,_Lits),rule(H1,B1)):-
 
 elab_ref([],[]).
 
-elab_ref([rule(_NR,H,B,_Lits)|T],[rule(H1,B1)|T1]):-
+elab_ref([rule(_NR,H,B,_Lits)|T],[rule(H1,B1)|T1]):-!,
   copy_term((H,B),(H1,B1)),
   numbervars((H1,B1),0,_N),
   elab_ref(T,T1).
@@ -604,7 +585,7 @@ derive_bdd_nodes([H|T],ExData,E,Nodes0,Nodes,CLL0,CLL):-
   derive_bdd_nodes(T,ExData,E,Nodes1,Nodes,CLL1,CLL).
 
 
-get_node_list([],Env,BDD,BDD,_CE).
+get_node_list([],_Env,BDD,BDD,_CE).
 
 
 get_node_list([H|T],Env,BDD0,BDD,CE):-
@@ -615,7 +596,7 @@ get_node_list([H|T],Env,BDD0,BDD,CE):-
 
 derive_bdd_nodes_groupatoms_output_atoms([],_ExData,_O,_E,_G,Nodes,Nodes,CLL,CLL,LE,LE).
 
-derive_bdd_nodes_groupatoms_output_atoms([H|T],ExDataO,E,G,Nodes0,Nodes,CLL0,CLL,LE0,LE):-  
+derive_bdd_nodes_groupatoms_output_atoms([H|T],ExData,O,E,G,Nodes0,Nodes,CLL0,CLL,LE0,LE):-  
   generate_goal(O,H,[],GL),
   length(GL,NA),
   (prob(H,P)->
@@ -691,7 +672,7 @@ random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   setting(epsilon_em_fraction,ER),
   length(Nodes,L),
   setting(iter,Iter),
-  em(ExData,odes,EA,ER,L,Iter,CLL,Par1,ExP),  
+  em(ExData,Nodes,EA,ER,L,Iter,CLL,Par1,ExP),  
   score(LE,ExP,CLL,ScoreR),
   setting(verbosity,Ver),
   (Ver>2->
@@ -884,16 +865,12 @@ update_head([H:_P|T],[PU|TP],N,[H:P|T1]):-
 /* utilities */
 
 generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL):-
-  generate_file_name(File,".kb",FileKB),
-  generate_file_name(File,".cpl",FileIn),
-  generate_file_name(File,".rules",FileOut),
-  generate_file_name(File,".bg",FileBG),
-  generate_file_name(File,".l",FileL).
-        
-generate_file_name(File,Ext,FileExt):-
-  name(File,FileString),
-  append(FileString,Ext,FileStringExt),
-  name(FileExt,FileStringExt).
+  atom_concat(File,'.kb',FileKB),
+  atom_concat(File,'.cpl',FileIn),
+  atom_concat(File,'.rules',FileOut),
+  atom_concat(File,'.bg',FileBG),
+  atom_concat(File,'.l',FileL).
+
    
 load_models(File,ModulesList):-  %carica le interpretazioni, 1 alla volta
   open(File,read,Stream),
@@ -937,38 +914,23 @@ read_all_atoms(Stream,Name):-
 read_all_atoms(_S,_N).
 
 
-write_param(initial,S):-!,
-  format("~nInitial parameters~n",[]),
-  findall(rule(R,H,B,Lit),rule(R,H,B,Lit),LDis),
-  findall(rule(d,[H:1.0],B,Lit),def_rule(H,B,Lit),LDef),
-  append(LDis,LDef,L),
-  write_model(L,S).
-
-write_param(L,S):-
-  reverse(L,L1),
-  write_par(L1,S).
 
 
-write_par([],S):-
-  findall(rule(d,[H:1.0],B,Lit),def_rule(H,B,Lit),L),
-  write_model(L,S).
-
-write_par([[N,P]|T],S):-
-  rule(N,HL0,BL),
-  reverse(P,PR),
-  new_par(PR,HL0,HL),
-  copy_term((HL,BL),(HL1,BL1)),
-  numbervars((HL1,BL1),0,_M),
-  write_disj_clause(S,(HL1:-BL1)),
-  write_par(T,S).
 
 
 write_rules([],_S).
 
-write_rules([rule(_N,HL,BL,Lit)|T],S):-
+write_rules([rule(_N,HL,BL,Lit)|T],S):-!,
   copy_term((HL,BL,Lit),(HL1,BL1,Lit1)),
   numbervars((HL1,BL1,Lit1),0,_M),
   write_disj_clause(S,(HL1:-BL1)),
+%  write(Lit1),nl,
+  write_rules(T,S).
+
+write_rules([def_rule(H,BL,Lit)|T],S):-
+  copy_term((H,BL,Lit),(H1,BL1,Lit1)),
+  numbervars((H1,BL1,Lit1),0,_M),
+  write_disj_clause(S,([H1:1.0]:-BL1)),
 %  write(Lit1),nl,
   write_rules(T,S).
 
@@ -978,14 +940,6 @@ new_par([],[],[]).
 new_par([HP|TP],[Head:_|TO],[Head:HP|TN]):-
   new_par(TP,TO,TN).
 
-
-write_model([],_Stream):-!.
-
-write_model([rule(_N,HL,BL)|Rest],Stream):-
-  copy_term((HL,BL),(HL1,BL1)),
-  numbervars((HL1,BL1),0,_M),
-  write_disj_clause(Stream,(HL1:-BL1)),
-  write_model(Rest,Stream).
 
 
 write_disj_clause(S,(H:-[])):-!,
@@ -1014,7 +968,7 @@ write_head(S,[A:P|Rest]):-
   format(S,"~p:~g ; ",[A,P]),
   write_head(S,Rest).
 
-write_body(S,[]):-
+write_body(S,[]):-!,
   format(S,"\ttrue.~n~n",[]).
 
 write_body(S,[A]):-!,
@@ -2238,32 +2192,32 @@ get_var_n(Env,R,S,Probs,V):-
     assert(v(R,S,V))
   ).
 
-add_bdd_arg(M:A,Env,BDD,M:A1):-
+add_bdd_arg(A,Env,BDD,A1):-
   A=..[P|Args],
-  append(Args,[BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,BDD],Args1),
+  A1=..[P|Args1].
 
 
-add_bdd_arg_db(M:A,Env,BDD,DB,M:A1):-
+add_bdd_arg_db(A,Env,BDD,DB,A1):-
   A=..[P|Args],
-  append(Args,[DB,BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[DB,Env,BDD],Args1),
+  A1=..[P|Args1].
 
 
-add_bdd_arg(A,Env,BDD,_Module,A1):-
+add_bdd_arg(A,Env,BDD,Module,A1):-
   A=..[P|Args],
-  append(Args,[BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,BDD],Args1),
+  A1=..[P,Module|Args1].
 
 
-add_bdd_arg_db(A,Env,BDD,DB,_Module,A1):-
+add_bdd_arg_db(A,Env,BDD,DB,Module,A1):-
   A=..[P|Args],
-  append(Args,[DB,BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[DB,Env,BDD],Args1),
+  A1=..[P,Module|Args1].
 
-add_mod_arg(A,_Module,A1):-
+add_mod_arg(A,Module,A1):-
   A=..[P|Args],
-  A1=..[P|Args].
+  A1=..[P,Module|Args].
 
 
 generate_rules_fact([],_Env,_VC,_R,_Probs,_N,[],_Module).
@@ -2696,10 +2650,6 @@ member_eq(E,[_H|T]):-
   member_eq(E,T).
 
 
-add_mod_arg(A,Module,A1):-
-  A=..[P|Args],
-  A1=..[P,Module|Args].
-
 
 
 process_head(HeadList, GroundHeadList) :- 
@@ -2828,8 +2778,8 @@ gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :-
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DB,Module,Head1),
-  Clauses=[(Head1 :- Body1)].
+  add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
+  Clauses=[(Head1 :- (DBH>=1,DB is DBH-1,Body1))].
 
 gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -2935,8 +2885,8 @@ term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DB,Module,Head1),
-  Clauses=(Head1 :- Body1).
+  add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
+  Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
 
 term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :- 
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -3011,8 +2961,8 @@ term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(Head,Env,BDDAnd,DB,Module,Head1),
-  Clauses=(Head1 :- Body1).
+  add_bdd_arg_db(Head,Env,BDDAnd,DBH,Module,Head1),
+  Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
   
 term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :- 
 % definite clause senza DB
@@ -3152,6 +3102,6 @@ sandbox:safe_primitive(slipcover:equality(_,_,_)).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 
 
-:-style_check(-discontiguous).
+%:-style_check(-discontiguous).
 
 
