@@ -372,7 +372,6 @@ so that it is not recomputed
       BChild1=pt*p;
       mVarIndex=env->bVar2mVar[index];
       v=env->vars[mVarIndex];
-      pos=index-v.firstBoolVar;
       res=BChild0+BChild1;
       add_node(table,nodekey,res);
       return res;
@@ -662,10 +661,10 @@ static int rec_deref(void)
 
 double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
 {
-  int index,mVarIndex,comp,pos,position,boolVarIndex;
+  int index,mVarIndex,comp,pos,position;//,boolVarIndex;
   variable v;
   double res;
-  double value,p,pt,pf,BChild0,BChild1,e0,e1;
+  double p,pt,pf,BChild0,BChild1,e0,e1;
   double * value_p,** eta_rule;
   DdNode *nodekey,*T,*F;
 
@@ -673,7 +672,6 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
   comp=(comp && !comp_par) ||(!comp && comp_par);
   if (Cudd_IsConstant(node))
   {
-    value=Cudd_V(node);
     if (comp)
     {
       return 0.0;
@@ -714,7 +712,7 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
       add_node(ex_d->nodesB,nodekey,res);
       position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
       position=position+1;
-      boolVarIndex=Cudd_ReadInvPerm(ex_d->env[nex].mgr,position);//Returns the index of the variable currently in the i-th position of the order. 
+//      boolVarIndex=Cudd_ReadInvPerm(ex_d->env[nex].mgr,position);//Returns the index of the variable currently in the i-th position of the order. 
       if (position<ex_d->env[nex].boolVars)
       {
         ex_d->sigma[position]=ex_d->sigma[position]+e0+e1;
@@ -785,7 +783,6 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
 {
   int index,position,mVarIndex;
   DdNode *T,*E,*nodereg;
-  variable v;
   double *value_p,*value_p_T,*value_p_F,p;
 
   if (Cudd_IsConstant(node)) 
@@ -796,7 +793,7 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
   {
     index=Cudd_NodeReadIndex(node);
     mVarIndex=ex_d->env[nex].bVar2mVar[index];
-    v=ex_d->env[nex].vars[mVarIndex];
+   // v=ex_d->env[nex].vars[mVarIndex];
     p=ex_d->env[nex].probs[index];
     nodereg=Cudd_Regular(node);
     value_p=get_value(ex_d->nodesF,nodereg);
