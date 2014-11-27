@@ -617,7 +617,7 @@ user:term_expansion((Head :- Body),Clauses) :-
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body), 
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
-  append([Env,one(BDD)],BodyList2,BodyList3),
+  append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
