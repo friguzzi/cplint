@@ -1,0 +1,19 @@
+
+pre_pcfg(L):-
+  pre_pcfg([s],L,[]).
+
+pre_pcfg([A|R],L0,L2):-
+  expand_rule(A,[A|R],RHS),
+  pre_pcfg(RHS,L0,L1),
+  r_pre_pcfg(R,L1,L2).
+
+pre_pcfg([A|R],[A|L1],L2):-
+  r_pre_pcfg(R,L1,L2).
+
+r_pre_pcfg(_,[],[]):-!.
+
+r_pre_pcfg(R,L1,L2):-
+  pre_pcfg(R,L1,L2).
+
+expand_rule(s,_L,[s,s]):0.4;expand_rule(s,_L,[a]):0.3;expand_rule(s,_L,[b]):0.3.
+
