@@ -49,7 +49,7 @@ RANLIB	= ranlib
 #ICFLAGS	=
 # These two are typical settings for optimized code with gcc.
 #ICFLAGS	= -g -O3 -Wall
-ICFLAGS	= -g -O3
+ICFLAGS	= -g -O3 -fPIC
 
 # Use XCFLAGS to specify machine-dependent compilation flags.
 # For some platforms no special flags are needed.
