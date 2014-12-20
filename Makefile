@@ -8,7 +8,6 @@ CFLAGSBDDEM= $(CFLAGS) -shared -fPIC -DBP_FREE -O3 -fomit-frame-pointer -Wall -g
 #
 # You shouldn't need to change what follows.
 #
-INSTALL=/usr/bin/install -c
 LDFLAGS= $(LDSOFLAGS) -Lcudd-2.5.0/cudd -Lcudd-2.5.0/mtr -Lcudd-2.5.0/st -Lcudd-2.5.0/util -Lcudd-2.5.0/epd -lcudd  -lmtr -lst -lepd -lutil -lm 
 
 #
@@ -30,4 +29,4 @@ distclean:
 	cd cudd-2.5.0 && make distclean && cd ..
 check:
 install: all
-	$(INSTALL_PROGRAM) bddem.so $(LIBDIR)
+	cp bddem.so $(LIBDIR)
