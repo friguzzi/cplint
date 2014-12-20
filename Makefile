@@ -16,7 +16,7 @@ LDFLAGS= $(LDSOFLAGS) -Lcudd-2.5.0/cudd -Lcudd-2.5.0/mtr -Lcudd-2.5.0/st -Lcudd-
 all:  bddem.so
 
 bddem.so: bddem.o
-	$(CC) -export-dynamic  $(LDFLAGS) bddem.o -o bddem.so  
+	$(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.so  
 
 #-Wl,-R,$(YAPLIBDIR) -Wl,-R,$(LIBDIR)
 
