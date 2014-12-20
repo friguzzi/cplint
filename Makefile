@@ -27,6 +27,7 @@ bddem.o : bddem.c
 
 distclean: 
 	rm -f *.o bddem.so
+	cd cudd-2.5.0 && make distclean && cd ..
 check:
-install: default
+install: all
 	$(INSTALL_PROGRAM) bddem.so $(LIBDIR)
