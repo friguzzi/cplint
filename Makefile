@@ -25,7 +25,7 @@ bddem.o : bddem.c
 	cd cudd-2.5.0 && make && cd ..
 	$(CC) -c $(CFLAGSBDDEM) bddem.c -o bddem.o
 
-clean: 
+distclean: 
 	rm -f *.o bddem.so
 check:
 install: default
