@@ -4,7 +4,7 @@ This theory is the result of translating a Logical Bayesian Network (LBN) constr
 From
 http://dtai.cs.kuleuven.be/cplve/ilp09/
 Reference:
-Wannes Meert, Jan Struyf, Hendrik Blockeel: CP-Logic Theory Inference with Contextual Variable Elimination and Comparison to BDD Based Inference Methods. Inductive Logic Programming, pages 96-109. Springer, 2010.
+Wannes Meert, Jan Struyf, Hendrik Blockeel: CP-Logic Theory Inference with Contextual Variable Elimination and Comparison to BDD Based Inference Methods. ILP 2009:96-109
 */
 
 course(c1).
