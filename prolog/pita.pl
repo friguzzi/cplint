@@ -23,8 +23,8 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 :- module(pita,[s/2, prob/2, set/2,pita_setting/2,
    one/2,zero/2,and/4,or/4,bdd_not/3,get_var_n/5,add_var/5,equality/4,
-     or_list/3, cplint/0, end_cplint/0, parse/1]).
-:-meta_predicate s(:,-).
+     or_list/3, cplint/0, end_cplint/0, load/1]).
+:-meta_predicate s(:,-), prob(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_foreign_library(foreign(bddem),install).
@@ -51,18 +51,18 @@ pita_setting(depth_bound,false).  %if true, it limits the derivation of the exam
 pita_setting(depth,2).
 pita_setting(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-parse(File):-
+load(File):-
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
-    load(FileLPAD)
+    load_file(FileLPAD)
   ;
     atomic_concat(File,'.cpl',FileCPL),
     (exists_file(FileCPL)->
-      load(FileCPL)
+      load_file(FileCPL)
     )
   ).
 
-load(File):-
+load_file(File):-
   cplint,
   user:consult(File),
   end_cplint.
