@@ -23,7 +23,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 :- module(pita,[s/2, prob/2, set/2,pita_setting/2,
    one/2,zero/2,and/4,or/4,bdd_not/3,get_var_n/5,add_var/5,equality/4,
-     or_list/3, cplint/0, end_cplint/0, load/1]).
+     or_list/3, cplint/0, end_cplint/0, load/1, load_file/1]).
 :-meta_predicate s(:,-), prob(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
