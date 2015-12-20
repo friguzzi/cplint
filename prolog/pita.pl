@@ -836,4 +836,5 @@ sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
 sandbox:safe_primitive(pita:equality(_,_,_,_)).
 
 sandbox:safe_meta(pita:s(_,_), []).
+sandbox:safe_meta(pita:prob(_,_), []).
 
