@@ -1,0 +1,483 @@
+\ifnum\pdfoutput>0 % pdflatex compilation
+\documentclass[a4paper,10pt]{article}
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\RequirePackage[hyperindex]{hyperref}
+\else % htlatex compilation
+\documentclass{article}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.png, .gif, .jpg}
+\newcommand{\href}[2]{\Link[#1]{}{} #2 \EndLink}
+\newcommand{\hypertarget}[2]{\Link[]{}{#1} #2 \EndLink}
+\newcommand{\hyperlink}[2]{\Link[]{#1}{} #2 \EndLink}
+\newcommand{\url}[1]{\Link[#1]{}{} #1 \EndLink}
+\fi
+
+
+
+\begin{document}
+\title{SWI-Prolog \texttt{cplint} Pack Manual}
+
+
+\author{Fabrizio Riguzzi\\
+fabrizio.riguzzi@unife.it}
+
+\maketitle
+
+
+\section{Introduction}
+
+
+\texttt{cplint} is a suite of programs for reasoning with LPADs/CP-logic programs  \cite{VenVer03-TR,VenVer04-ICLP04-IC,VenDenBru-JELIA06,DBLP:journals/tplp/VennekensDB09}. It contains modules for both inference and learning.
+
+\section{Installation}
+\texttt{cplint} is distributed as a pack of SWI-Prolog. To install it, use
+\begin{verbatim}
+?- pack_install(cplint).
+\end{verbatim}
+Moreover, in order to make sure you have a foreign library that matches your architecture, run
+\begin{verbatim}
+?-  pack_rebuild(cplint). 
+\end{verbatim}
+
+
+\section{Syntax}
+
+LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
+Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used.
+For example, the  CP-logic clause
+$$h_1:p_1\vee \ldots \vee h_n:p_n\leftarrow b_1,\dots,b_m ,\neg c_1,\ldots,\neg c_l$$
+is represented by
+\begin{verbatim}
+h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl
+\end{verbatim}
+ No parentheses are necessary. The \texttt{pi} are numeric expressions. It is up to the user to ensure that the numeric expressions are legal, i.e. that they sum up to less than one.
+
+If the clause has an empty body, it can be represented like this
+\begin{verbatim}
+h1:p1 ; ... ; hn:pn.
+\end{verbatim}
+If the clause has a single head with probability 1, the annotation can be omitted and the clause takes the form of a normal prolog clause, i.e. 
+\begin{verbatim}
+h1 :- b1,...,bm,\+ c1,...,\+ cl.
+\end{verbatim}
+stands for 
+\begin{verbatim}
+h1:1 :- b1,...,bm,\+ c1,...,\+ cl.
+\end{verbatim}
+The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \texttt{coin.cpl})
+\begin{verbatim}
+heads(Coin):1/2 ; tails(Coin):1/2 :- 
+  toss(Coin),\+biased(Coin).
+
+heads(Coin):0.6 ; tails(Coin):0.4 :- 
+  toss(Coin),biased(Coin).
+
+fair(Coin):0.9 ; biased(Coin):0.1.
+
+toss(coin).
+\end{verbatim}
+The first clause states that if we toss a coin that is not biased it has equal probability of landing heads and tails. The second states that if the coin is biased it has a slightly higher probability of landing heads. The third states that the coin is fair with probability 0.9 and biased with probability 0.1 and the last clause states that we toss a coin with certainty.
+
+Moreover, the bodies of rules may contain the built-in predicates:
+\begin{verbatim}
+is/2, >/2, </2, >=/2 ,=</2,
+=:=/2, =\=/2, true/0, false/0,
+=/2, ==/2, \=/2 ,\==/2, length/2
+\end{verbatim}
+The bodies may also contain the following
+ library predicates:
+\begin{verbatim}
+member/2, max_list/2, min_list/2
+nth0/3, nth/3, dif/2, select/3
+\end{verbatim}
+plus the predicate
+\begin{verbatim}
+average/2
+\end{verbatim}
+that, given a list of numbers, computes its arithmetic mean.
+
+\section{Inference}
+\texttt{cplint} answers queries using the module \verb|pita|. It performs the program transformation technique of \cite{RigSwi10-ICLP10-IC}. Differently from that work, techniques alternative to tabling and answer subsumption are used.
+
+
+
+
+\subsection{Commands}
+%All six modules accept the same commands for reading in files and answering queries.
+The LPAD or CP-logic program must be stored in a text file with extension \texttt{.lpad} or \texttt{.cpl}. Suppose you have stored the example above in file \texttt{coin.cpl}. 
+In order to answer queries to this program, you have to run SWI-Prolog and
+load \texttt{pita} by issuing  the command
+\begin{verbatim}
+?- use_module(library(pita)).
+\end{verbatim}
+at the command prompt.
+Then you must load the source file \texttt{coin.cpl}  with the \texttt{pita} command
+\begin{verbatim}
+?- load(coin).
+\end{verbatim}
+if \texttt{coin.cpl} is in the current directory, or 
+\begin{verbatim}
+?- load('path_to_coin/coin').
+\end{verbatim}
+if \texttt{coin.cpl} is in a different directory.
+\texttt{load(file)} loads \texttt{file.lpad} if it exists, or \texttt{file.cpl}s if it exists, or fails. \texttt{load\_file(file)} loads \texttt{file} without adding the extension.
+At this point you can pose query to the program by using the \texttt{pita} predicate \texttt{prob/2} that takes as its first argument an atomic goal and returns the computed probability in its second argument. For example, the probability of \texttt{heads(coin)} can be asked with the query
+\begin{verbatim}
+?- prob(heads(coin),P).
+\end{verbatim}
+After having loaded a program, future loadings add clauses. If you want to replace the current clauses with the new ones you have to restart SWI-Prolog.
+
+Instead of preparing a file containing the LPAD/CP-logic program, you can prepare a Prolog file where you first load \texttt{pita} and then enclose the probabilistic 
+clauses in \texttt{:-cplint.} and \texttt{:-end\_cplint.} For example, the coin program above can be stored in \texttt{coin.pl} as follows
+\begin{verbatim}
+:- use_module(library(pita)).
+
+:-cplint.
+
+heads(Coin):1/2 ; tails(Coin):1/2:- 
+toss(Coin),\+biased(Coin).
+
+heads(Coin):0.6 ; tails(Coin):0.4:- 
+toss(Coin),biased(Coin).
+
+fair(Coin):0.9 ; biased(Coin):0.1.
+
+toss(coin).
+
+:-end_cplint.
+\end{verbatim}
+Then you can simply load \texttt{coin.pl} as
+\begin{verbatim}
+?-[coin].
+\end{verbatim}
+and query it with
+\begin{verbatim}
+?- prob(heads(coin),P).
+\end{verbatim}
+Note that supplying \texttt{coin.pl} as an argument to the command \texttt{swipl} currently returns errors due to bad interaction between \texttt{pita.pl} and the top-level.
+The program is loaded correctly anyway but it is recommended to load programs from the top-level to avoid these errors.
+
+
+
+\subsubsection{Parameters}
+The module make use of a number of parameters in order to control its behavior. They that can be set with the command
+\begin{verbatim}
+?- set(parameter,value).
+\end{verbatim}
+from the top-level after having loaded the module.
+The current value can be read with
+\begin{verbatim}
+pita_setting(parameter,Value).
+\end{verbatim}
+from the top-level.
+The available parameters are:
+\begin{itemize}
+\item 
+	 \verb|epsilon_parsing|: if (1 - the sum of the probabilities of all the head atoms) is smaller than 
+    \verb|epsilon_parsing|,
+		then \texttt{pita} adds the null event to the head. Default value \texttt{0.00001}.
+\item \verb|single_var|: determines how non ground clauses are treated: if \texttt{true}, a single random variable is assigned to the whole non ground clause, 
+if \texttt{false}, a different random variable is assigned to every grounding of the clause. Default value \texttt{false}.
+\item \verb|depth_bound|: if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter.  Default value \texttt{false}.
+\item  \texttt{depth}: maximum depth of derivations when  \verb|depth_bound| is set to \texttt{true}. Default value \texttt{2}.
+\end{itemize}
+
+
+
+\subsection{Files}
+The \texttt{packs/cplint/prolog/examples} folder in SWI-Prolog home contains some example programs.
+The \texttt{packs/cplint/doc} folder in SWI-Prolog home contains this manual in latex, html and pdf.
+
+\section{Learning}
+\texttt{cplint} contains the following learning algorithms:
+\begin{itemize}
+\item EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs \cite{BelRig11-IDA,BelRig11-CILC11-NC,BelRig11-TR}
+\item SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separatery \cite{BelRig13-TPLP-IJ}
+\end{itemize}
+
+\subsection{Input}
+To execute the learning algorithms, prepare four files in the same folder: 
+\begin{itemize}
+\item \texttt{<stem>.kb}: contains the example interpretations 
+\item \texttt{<stem>.bg}: contains the background knowledge, i.e., knowledge valid for all interpretations
+\item \texttt{<stem>.l}: contains language bias information
+\item \texttt{<stem>.cpl}: contains the LPAD for you which you want to learn the parameters or the initial LPAD for SLIPCASE and LEMUR. For SLIPCOVER, this file should be absent
+\end{itemize}
+where \texttt{<stem>} is your dataset name. Examples of these files can be found in the dataset pages.
+
+In \texttt{<stem>.kb} the example interpretations have to be given as a list of Prolog facts initiated by 
+\texttt{begin(model(<name>)).} and terminated by \texttt{end(model(<name>)).} as in
+\begin{verbatim}
+begin(model(b1)).
+sameperson(1,2).
+movie(f1,1).
+movie(f1,2).
+workedunder(1,w1).
+workedunder(2,w1).
+gender(1,female).
+gender(2,female).
+actor(1).
+actor(2).
+end(model(b1)).
+\end{verbatim}
+The interpretations may contain a fact of the form
+\begin{verbatim}
+prob(0.3).
+\end{verbatim}
+assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the probability of each interpretation is considered equal to $1/n$ where $n$ is the total number of interpretations. \verb|prob/1| can be used to set different multiplicity for the different interpretations.
+
+\texttt{<stem>.bg} can contain Prolog clauses that can be used to derive additional conclusions from the atoms in 
+the interpretations.
+
+\texttt{<stem>.l} contains the declarations of the input and output predicates, of the unseen predicates and the commands for setting the algorithms' parameters.
+Output predicates are declared as
+\begin{verbatim}
+output(<predicate>/<arity>).
+\end{verbatim}
+and define the predicates whose atoms in the input interpretations are used as the goals for the prediction of which you want to optimize the parameters. Derivations for these goals are built by the systems.
+
+Input predicates are those for the predictions of which you do not want to optimize the parameters. You can declare closed world input predicates with
+\begin{verbatim}
+input_cw(<predicate>/<arity>).
+\end{verbatim}
+For these predicates, the only true atoms are those in the interpretations, the clauses in the input program are not used to derive atoms not present in the interpretations.
+
+Open world input predicates are declared with
+\begin{verbatim}
+input(<predicate>/<arity>).
+\end{verbatim}
+In this case, if a subgoal for such a predicate is encountered when deriving the atoms for the output predicates, 
+both the facts in the interpretations and the clauses of the input program are used.
+
+
+For SLIPCOVER, you have to specify the language bias by means of mode declarations in the style of 
+\href{http://www.doc.ic.ac.uk/\string ~shm/progol.html}{Progol}.
+\begin{verbatim}
+modeh(<recall>,<predicate>(<arg1>,...).
+\end{verbatim}
+specifies the atoms that can appear in the head of clauses, while
+\begin{verbatim}
+modeb(<recall>,<predicate>(<arg1>,...).
+\end{verbatim}
+specifies the atoms that can appear in the body of clauses.
+\texttt{<recall>} can be an integer or \texttt{*} (currently unused).
+
+The arguments are of the form
+\begin{verbatim}
++<type>
+\end{verbatim}
+for specifying an input variable of type \texttt{<type>}, or 
+\begin{verbatim}
+-<type>
+\end{verbatim}
+for specifying an output variable of type \texttt{<type>}. or
+\begin{verbatim}
+<constant>
+\end{verbatim}
+for specifying a constant.
+
+SLIPCOVER also allows the arguments
+\begin{verbatim}
+#<type>
+\end{verbatim}
+for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause but should not be used for replacing input variables of the following literals or 
+\begin{verbatim}
+-#<type>
+\end{verbatim}
+for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause and that should be used for replacing input variables of the following literals. \verb|#| and \verb|-#| differ only in the creation of the bottom clause.
+
+An example of language bias for the UWCSE domain is
+\begin{verbatim}
+output(advisedby/2).
+
+input(student/1).
+input(professor/1).
+....
+
+modeh(*,advisedby(+person,+person)). 
+
+modeb(*,professor(+person)).
+modeb(*,student(+person)).
+modeb(*,sameperson(+person, -person)). 
+modeb(*,sameperson(-person, +person)). 
+modeb(*,samecourse(+course, -course)). 
+modeb(*,samecourse(-course, +course)). 
+....
+\end{verbatim}
+SLIPCOVER also requires facts for the \verb|determination/2| predicate that indicate which predicates can appear in the body of clauses. 
+For example
+\begin{verbatim}
+determination(professor/1,student/1).
+determination(student/1,hasposition/2).
+\end{verbatim}
+state that \verb|student/1| can appear in the body of clauses for \verb|professor/1| and that \verb|hasposition/2| can appear in 
+the body of clauses for \verb|student/1|.
+
+SLIPCOVER also allows mode declarations of the form
+\begin{verbatim}
+modeh(<r>,[<s1>,...,<sn>],[<a1>,...,<an>],[<P1/Ar1>,...,<Pk/Ark>]). 
+\end{verbatim}
+These mode declarations are used to generate clauses with more than two head atoms. In them, \verb|<s1>,...,<sn>| are schemas,  \verb|<a1>,...,<an>| are atoms such that \verb|<ai>| is obtained from $\verb|<si>|$ by replacing placemarkers with variables, 
+\verb|<Pi/Ari>| are the predicates admitted in the body. \verb|<a1>,...,<an>| are used to indicate which variables should be shared by the atoms in the head.
+An example of such a mode declaration is
+\begin{verbatim}
+modeh(*,
+  [advisedby(+person,+person),tempadvisedby(+person,+person)],
+  [advisedby(A,B),tempadvisedby(A,B)],
+  [professor/1,student/1,hasposition/2,inphase/2,
+	  publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).
+\end{verbatim}
+
+
+
+\subsection{Parameters}
+In order to set the algorithms' parameters, you have to insert in \texttt{<stem>.l}  commands of the form
+\begin{verbatim}
+:- set(<parameter>,<value>).
+\end{verbatim}
+The available parameters are:
+\begin{itemize}
+\item \verb|depth| (values: integer or \verb|inf|, default value: 3, , valid for EMBLEM and SLIPCOVER): depth of derivations if  \verb|depth_bound|  is set to \verb|true|
+\item \verb|single_var| (values: \verb|{true,false}|, default value: \verb|false|, valid for EMBLEM and SLIPCOVER): if set to \verb|true|, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
+\item \verb|sample_size| (values: integer, default value: 1000, , valid for EMBLEM and SLIPCOVER): total number of examples when the models in the \verb|.kb| file contain a \verb|prob(P).| fact. In that case, one model corresponds to \verb|sample_size*P| examples
+\item \verb|epsilon_em| (values: real, default value: 0.1, valid for 
+EMBLEM and SLIPCOVER): if the difference in the log likelihood in two successive EM iteration is smaller
+than \verb|epsilon_em|, then EM stops 
+\item \verb|epsilon_em_fraction| (values: real, default value: 0.01, valid for 
+EMBLEM and SLIPCOVER): if the difference in the log likelihood in two successive EM iteration is smaller
+than \verb|epsilon_em_fraction|*(-current log likelihood), then EM stops
+\item \verb|iter| (values: integer, defualt value: 1, valid for EMBLEM and SLIPCOVER): maximum number of iteration of EM parameter learning. If set to -1, no maximum number of iterations is imposed
+\item \verb|iterREF| (values: integer, defualt value: 1, valid for  
+ SLIPCOVER):
+ maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.
+\item \verb|random_restarts_number| (values: integer, default value: 1, valid for EMBLEM and SLIPCOVER): number of random restarts of EM learning
+\item \verb|random_restarts_REFnumber| (values: integer, default value: 1, valid for  SLIPCOVER): number of random restarts of EM learning for refinements
+\item \verb|setrand| (values: rand(integer,integer,integer), valid for EMBLEM and SLIPCOVER): seed for the random functions, see Yap manual for allowed values
+\item \verb|logzero| (values: negative real, default value $\log(0.000001)$, valid for SLIPCOVER): value assigned to $\log 0$
+\item \verb|max_iter| (values: integer, default value: 10, valid for SLIPCASE and SLIPCOVER): number of interations of beam search
+\item \verb|max_var| (values: integer, default value: 1, valid for 
+SLIPCOVER): maximum number of distinct variables in a clause
+\item \verb|verbosity| (values: integer in [1,3], default value: 1): level of verbosity of the algorithms
+\item \verb|beamsize|  (values: integer, default value: 20, valid for SLIPCOVER): size of the beam 
+\item \verb|megaex_bottom| (values: integer, default value: 1, valid for SLIPCOVER): number of mega-examples on which to build the bottom clauses
+\item \verb|initial_clauses_per_megaex| (values: integer, default value: 1, valid for SLIPCOVER): 
+ number of bottom clauses to build for each mega-example
+\item \verb|d| (values: integer, default value: 10000, valid for SLIPCOVER): 
+ number of saturation steps when building the bottom clause
+\item \verb|max_iter_structure| (values: integer, default value: 1, valid for SLIPCOVER): 
+maximum  number of theory search iterations
+\item \verb|background_clauses| (values: integer, default value: 50, valid for SLIPCOVER): 
+ maximum numbers of background clauses
+\item \verb|maxdepth_var| (values: integer, default value: 2, valid for SLIPCOVER): maximum depth of
+variables in clauses (as defined in \cite{DBLP:journals/ai/Cohen95}).
+\item \verb|score| (values: \verb|ll|, \verb|aucpr|, default value \verb|ll|, valid for SLIPCOVER): determines the score function for refinement: if set to \verb|ll|, log likelihood is used, if set to \verb|aucpr|, the area under the 
+Precision-Recall curve is used. 
+\end{itemize}
+\subsection{Commands}
+To execute EMBLEM, load \texttt{slipcover} with
+\begin{verbatim}
+?- use_module(library(slipcover)).
+\end{verbatim}
+and call
+\begin{verbatim}
+?- em(stem).
+\end{verbatim}
+To execute SLIPCOVER, load \texttt{slipcover} with
+\begin{verbatim}
+?- use_module(library(slipcover)).
+\end{verbatim}
+and call
+\begin{verbatim}
+?- sl(stem).
+\end{verbatim}
+
+\subsection{Testing}
+To test the theories learned, load \texttt{test.pl} with 
+\begin{verbatim}
+?- use_module(library(test)).
+\end{verbatim}
+and call
+\begin{verbatim}
+?- main([<stem_fold1>,...,<stem_foldn>],[<testing_set_fold1>,...,
+  <testing_set_foldn>]).
+\end{verbatim}
+For example, if you want to test the theory in \verb|ai_train.rules| on the set \verb|ai.kb|, you can call
+\begin{verbatim}
+?- main([ai_train],[ai]).
+\end{verbatim}
+The testing program has the following parameters:
+\begin{itemize}
+\item \verb|neg_ex| (values:  \verb|given|, \verb|cw|, default value: \verb|cw|): if  set to \verb|given|, the negative examples
+are taken from \verb|<testing_set_foldi>.kb|, i.e., those example \verb|ex| stored as \verb|neg(ex)|; if set to \verb|cw|, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+\end{itemize}
+The testing program produces the following output in the current folder:
+\begin{itemize}
+\item \verb|cll.pl|: for each fold, the list of examples orderd by their probability of being true
+\item \verb|areas.csv|: the areas under the Precision-Recall curve and the Receiver Operating Characteristic curve
+\item \verb|curve_roc.m|: a Matlab file for plotting the Receiver Operating Characteristic curve
+\item \verb|curve_pr.m|: a Matlab file for plotting the Precision-Recall curve
+\end{itemize}
+
+
+\subsection{Learning Examples}
+The \verb|cplint/prolog/examples| folder of SWI-Prolog home
+contain examples of input and output files for the learning algorithms
+\begin{itemize}
+	\item \verb|ai_train_par|: parameter learning example from UWCSE
+	\item \verb|ai_train|: structure learning example from UWCSE
+\end{itemize}
+
+\section{License}
+\label{license}
+
+
+
+\texttt{cplint} follows the Artistic License 2.0 that you can find in \texttt{cplint} root folder. The copyright is by Fabrizio Riguzzi.
+\vspace{3mm}
+
+
+The library \href{http://vlsi.colorado.edu/\string ~fabio/}{CUDD} for manipulating BDDs has the following license:
+
+\vspace{3mm}
+
+Copyright (c) 1995-2004, Regents of the University of Colorado
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+\begin{itemize}
+\item
+Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+\item
+Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+\item
+Neither the name of the University of Colorado nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+\end{itemize}
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS \\ AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAU-SED
+\\ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+
+\bibliographystyle{plain}
+\bibliography{bib}
+
+\end{document}
