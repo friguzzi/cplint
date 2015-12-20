@@ -45,9 +45,7 @@ Moreover, in order to make sure you have a foreign library that matches your arc
 
 LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
 Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used.
-For example, the  CP-logic clause
-$$h_1:p_1\vee \ldots \vee h_n:p_n\leftarrow b_1,\dots,b_m ,\neg c_1,\ldots,\neg c_l$$
-is represented by
+A general CP-logic clause has the form
 \begin{verbatim}
 h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl
 \end{verbatim}

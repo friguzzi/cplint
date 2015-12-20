@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
 <!-- html --> 
 <meta name="src" content="manual.tex"> 
-<meta name="date" content="2015-12-20 18:19:00"> 
+<meta name="date" content="2015-12-20 18:37:00"> 
 <link rel="stylesheet" type="text/css" href="manual.css"> 
 </head><body 
 >
@@ -28,10 +28,10 @@ class="cmr-12">December 20, 2015</span></div>
 <!--l. 31--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>is a suite of programs for reasoning with LPADs/CP-logic programs
 <span class="cite">[<a 
-href="#XVenVer03-TR">10</a>,&#x00A0;<a 
-href="#XVenVer04-ICLP04-IC">11</a>,&#x00A0;<a 
-href="#XVenDenBru-JELIA06">8</a>,&#x00A0;<a 
-href="#XDBLP:journals/tplp/VennekensDB09">9</a>]</span>. It contains modules for both inference and learning.
+href="#XVenVer03-TR">9</a>,&#x00A0;<a 
+href="#XVenVer04-ICLP04-IC">10</a>,&#x00A0;<a 
+href="#XVenDenBru-JELIA06">7</a>,&#x00A0;<a 
+href="#XDBLP:journals/tplp/VennekensDB09">8</a>]</span>. It contains modules for both inference and learning.
 <!--l. 33--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">2   </span> <a 
  id="x1-20002"></a>Installation</h3>
@@ -54,37 +54,33 @@ architecture, run
 <!--l. 46--><p class="noindent" >LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
 Disjunction in the head is represented with a semicolon and atoms in the head are
 separated from probabilities by a colon. For the rest, the usual syntax of Prolog is
-used. For example, the CP-logic clause
-   <center class="math-display" >
-<img 
-src="manual0x.png" alt="h1 : p1 &#x2228;...&#x2228; hn : pn &#x2190; b1,...,bm,¬c1,...,¬cl  " class="math-display" ></center> is
-represented by
+used. A general CP-logic clause has the form
 
    <div class="verbatim" id="verbatim-3">
 h1:p1&#x00A0;;&#x00A0;...&#x00A0;;&#x00A0;hn:pn&#x00A0;:-&#x00A0;b1,...,bm,\+&#x00A0;c1,....,\+&#x00A0;cl
 </div>
-<!--l. 53--><p class="nopar" > No parentheses are necessary. The <span 
+<!--l. 51--><p class="nopar" > No parentheses are necessary. The <span 
 class="cmtt-10">pi </span>are numeric expressions. It is up to the user to
 ensure that the numeric expressions are legal, i.e. that they sum up to less than
 one.
-<!--l. 56--><p class="indent" >   If the clause has an empty body, it can be represented like this
+<!--l. 54--><p class="indent" >   If the clause has an empty body, it can be represented like this
 
    <div class="verbatim" id="verbatim-4">
 h1:p1&#x00A0;;&#x00A0;...&#x00A0;;&#x00A0;hn:pn.
 </div>
-<!--l. 59--><p class="nopar" > If the clause has a single head with probability 1, the annotation can be omitted and
+<!--l. 57--><p class="nopar" > If the clause has a single head with probability 1, the annotation can be omitted and
 the clause takes the form of a normal prolog clause, i.e.
 
    <div class="verbatim" id="verbatim-5">
 h1&#x00A0;:-&#x00A0;b1,...,bm,\+&#x00A0;c1,...,\+&#x00A0;cl.
 </div>
-<!--l. 63--><p class="nopar" > stands for
+<!--l. 61--><p class="nopar" > stands for
 
    <div class="verbatim" id="verbatim-6">
 h1:1&#x00A0;:-&#x00A0;b1,...,bm,\+&#x00A0;c1,...,\+&#x00A0;cl.
 </div>
-<!--l. 67--><p class="nopar" > The coin example of <span class="cite">[<a 
-href="#XVenVer04-ICLP04-IC">11</a>]</span> is represented as (file <span 
+<!--l. 65--><p class="nopar" > The coin example of <span class="cite">[<a 
+href="#XVenVer04-ICLP04-IC">10</a>]</span> is represented as (file <span 
 class="cmtt-10">coin.cpl</span>)
 
    <div class="verbatim" id="verbatim-7">
@@ -98,43 +94,43 @@ heads(Coin):1/2&#x00A0;;&#x00A0;tails(Coin):1/2&#x00A0;:-
 &#x00A0;<br />
 &#x00A0;<br />toss(coin).
 </div>
-<!--l. 79--><p class="nopar" > The first clause states that if we toss a coin that is not biased it has equal
+<!--l. 77--><p class="nopar" > The first clause states that if we toss a coin that is not biased it has equal
 probability of landing heads and tails. The second states that if the coin is biased it
 has a slightly higher probability of landing heads. The third states that the coin is
 fair with probability 0.9 and biased with probability 0.1 and the last clause states
 that we toss a coin with certainty.
-<!--l. 82--><p class="indent" >   Moreover, the bodies of rules may contain the built-in predicates:
+<!--l. 80--><p class="indent" >   Moreover, the bodies of rules may contain the built-in predicates:
 
    <div class="verbatim" id="verbatim-8">
 is/2,&#x00A0;&#x003E;/2,&#x00A0;&#x003C;/2,&#x00A0;&#x003E;=/2&#x00A0;,=&#x003C;/2,
 &#x00A0;<br />=:=/2,&#x00A0;=\=/2,&#x00A0;true/0,&#x00A0;false/0,
 &#x00A0;<br />=/2,&#x00A0;==/2,&#x00A0;\=/2&#x00A0;,\==/2,&#x00A0;length/2
 </div>
-<!--l. 87--><p class="nopar" > The bodies may also contain the following library predicates:
+<!--l. 85--><p class="nopar" > The bodies may also contain the following library predicates:
 
    <div class="verbatim" id="verbatim-9">
 member/2,&#x00A0;max_list/2,&#x00A0;min_list/2
 &#x00A0;<br />nth0/3,&#x00A0;nth/3,&#x00A0;dif/2,&#x00A0;select/3
 </div>
-<!--l. 93--><p class="nopar" > plus the predicate
+<!--l. 91--><p class="nopar" > plus the predicate
 
    <div class="verbatim" id="verbatim-10">
 average/2
 </div>
-<!--l. 97--><p class="nopar" > that, given a list of numbers, computes its arithmetic mean.
-<!--l. 100--><p class="noindent" >
+<!--l. 95--><p class="nopar" > that, given a list of numbers, computes its arithmetic mean.
+<!--l. 98--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">4   </span> <a 
  id="x1-40004"></a>Inference</h3>
-<!--l. 101--><p class="noindent" ><span 
+<!--l. 99--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>answers queries using the module <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">pita</span></span></span>. It performs the program
 transformation technique of <span class="cite">[<a 
-href="#XRigSwi10-ICLP10-IC">7</a>]</span>. Differently from that work, techniques alternative to
+href="#XRigSwi10-ICLP10-IC">6</a>]</span>. Differently from that work, techniques alternative to
 tabling and answer subsumption are used.
-<!--l. 106--><p class="noindent" >
+<!--l. 104--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a 
  id="x1-50004.1"></a>Commands</h4>
-<!--l. 108--><p class="noindent" >The LPAD or CP-logic program must be stored in a text file with extension <span 
+<!--l. 106--><p class="noindent" >The LPAD or CP-logic program must be stored in a text file with extension <span 
 class="cmtt-10">.lpad </span>or
 <span 
 class="cmtt-10">.cpl</span>. Suppose you have stored the example above in file <span 
@@ -146,7 +142,7 @@ issuing the command
    <div class="verbatim" id="verbatim-11">
 ?-&#x00A0;use_module(library(pita)).
 </div>
-<!--l. 113--><p class="nopar" > at the command prompt. Then you must load the source file <span 
+<!--l. 111--><p class="nopar" > at the command prompt. Then you must load the source file <span 
 class="cmtt-10">coin.cpl </span>with the
 <span 
 class="cmtt-10">pita </span>command
@@ -154,13 +150,13 @@ class="cmtt-10">pita </span>command
    <div class="verbatim" id="verbatim-12">
 ?-&#x00A0;load(coin).
 </div>
-<!--l. 118--><p class="nopar" > if <span 
+<!--l. 116--><p class="nopar" > if <span 
 class="cmtt-10">coin.cpl </span>is in the current directory, or
 
    <div class="verbatim" id="verbatim-13">
 ?-&#x00A0;load(&#8217;path_to_coin/coin&#8217;).
 </div>
-<!--l. 122--><p class="nopar" > if <span 
+<!--l. 120--><p class="nopar" > if <span 
 class="cmtt-10">coin.cpl </span>is in a different directory. <span 
 class="cmtt-10">load(file) </span>loads <span 
 class="cmtt-10">file.lpad </span>if it exists, or
@@ -180,9 +176,9 @@ class="cmtt-10">heads(coin) </span>can be asked with the query
    <div class="verbatim" id="verbatim-14">
 ?-&#x00A0;prob(heads(coin),P).
 </div>
-<!--l. 128--><p class="nopar" > After having loaded a program, future loadings add clauses. If you want to replace
+<!--l. 126--><p class="nopar" > After having loaded a program, future loadings add clauses. If you want to replace
 the current clauses with the new ones you have to restart SWI-Prolog.
-<!--l. 131--><p class="indent" >   Instead of preparing a file containing the LPAD/CP-logic program, you can
+<!--l. 129--><p class="indent" >   Instead of preparing a file containing the LPAD/CP-logic program, you can
 prepare a Prolog file where you first load <span 
 class="cmtt-10">pita </span>and then enclose the probabilistic
 clauses in <span 
@@ -209,40 +205,40 @@ class="cmtt-10">coin.pl </span>as follows
 &#x00A0;<br />
 &#x00A0;<br />:-end_cplint.
 </div>
-<!--l. 149--><p class="nopar" > Then you can simply load <span 
+<!--l. 147--><p class="nopar" > Then you can simply load <span 
 class="cmtt-10">coin.pl </span>as
 
    <div class="verbatim" id="verbatim-16">
 ?-[coin].
 </div>
-<!--l. 153--><p class="nopar" > and query it with
+<!--l. 151--><p class="nopar" > and query it with
 
    <div class="verbatim" id="verbatim-17">
 ?-&#x00A0;prob(heads(coin),P).
 </div>
-<!--l. 157--><p class="nopar" > Note that supplying <span 
+<!--l. 155--><p class="nopar" > Note that supplying <span 
 class="cmtt-10">coin.pl </span>as an argument to the command <span 
 class="cmtt-10">swipl </span>currently
 returns errors due to bad interaction between <span 
 class="cmtt-10">pita.pl </span>and the top-level. The
 program is loaded correctly anyway but it is recommended to load programs from the
 top-level to avoid these errors.
-<!--l. 163--><p class="noindent" >
+<!--l. 161--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">4.1.1   </span> <a 
  id="x1-60004.1.1"></a>Parameters</h5>
-<!--l. 164--><p class="noindent" >The module make use of a number of parameters in order to control its behavior.
+<!--l. 162--><p class="noindent" >The module make use of a number of parameters in order to control its behavior.
 They that can be set with the command
 
    <div class="verbatim" id="verbatim-18">
 ?-&#x00A0;set(parameter,value).
 </div>
-<!--l. 167--><p class="nopar" > from the top-level after having loaded the module. The current value can be read
+<!--l. 165--><p class="nopar" > from the top-level after having loaded the module. The current value can be read
 with
 
    <div class="verbatim" id="verbatim-19">
 pita_setting(parameter,Value).
 </div>
-<!--l. 172--><p class="nopar" > from the top-level. The available parameters are:
+<!--l. 170--><p class="nopar" > from the top-level. The available parameters are:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">epsilon_parsing</span></span></span>: if (1 - the sum of the probabilities of all the head atoms)
@@ -274,18 +270,18 @@ class="cmtt-10">depth_bound</span></span></span> is set to <span
 class="cmtt-10">true</span>.
      Default value <span 
 class="cmtt-10">2</span>.</li></ul>
-<!--l. 188--><p class="noindent" >
+<!--l. 186--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a 
  id="x1-70004.2"></a>Files</h4>
-<!--l. 189--><p class="noindent" >The <span 
+<!--l. 187--><p class="noindent" >The <span 
 class="cmtt-10">packs/cplint/prolog/examples </span>folder in SWI-Prolog home contains some
 example programs. The <span 
 class="cmtt-10">packs/cplint/doc </span>folder in SWI-Prolog home contains this
 manual in latex, html and pdf.
-<!--l. 192--><p class="noindent" >
+<!--l. 190--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">5   </span> <a 
  id="x1-80005"></a>Learning</h3>
-<!--l. 193--><p class="noindent" ><span 
+<!--l. 191--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>contains the following learning algorithms:
      <ul class="itemize1">
      <li class="itemize">EMBLEM  (EM  over  Bdds  for  probabilistic  Logic  programs  Efficient
@@ -301,10 +297,10 @@ href="#XBelRig11-TR">2</a>]</span>
      <span class="cite">[<a 
 href="#XBelRig13-TPLP-IJ">4</a>]</span></li></ul>
 
-<!--l. 199--><p class="noindent" >
+<!--l. 197--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.1   </span> <a 
  id="x1-90005.1"></a>Input</h4>
-<!--l. 200--><p class="noindent" >To execute the learning algorithms, prepare four files in the same folder:
+<!--l. 198--><p class="noindent" >To execute the learning algorithms, prepare four files in the same folder:
      <ul class="itemize1">
      <li class="itemize"><span 
 class="cmtt-10">&#x003C;stem&#x003E;.kb</span>: contains the example interpretations
@@ -320,10 +316,10 @@ class="cmtt-10">&#x003C;stem&#x003E;.l</span>: contains language bias informatio
 class="cmtt-10">&#x003C;stem&#x003E;.cpl</span>:  contains  the  LPAD  for  you  which  you  want  to  learn
      the  parameters  or  the  initial  LPAD  for  SLIPCASE  and  LEMUR.  For
      SLIPCOVER, this file should be absent</li></ul>
-<!--l. 207--><p class="noindent" >where <span 
+<!--l. 205--><p class="noindent" >where <span 
 class="cmtt-10">&#x003C;stem&#x003E; </span>is your dataset name. Examples of these files can be found in the dataset
 pages.
-<!--l. 209--><p class="indent" >   In <span 
+<!--l. 207--><p class="indent" >   In <span 
 class="cmtt-10">&#x003C;stem&#x003E;.kb </span>the example interpretations have to be given as a list of Prolog
 facts initiated by <span 
 class="cmtt-10">begin(model(&#x003C;name&#x003E;)). </span>and terminated by <span 
@@ -343,22 +339,22 @@ begin(model(b1)).
 &#x00A0;<br />actor(2).
 &#x00A0;<br />end(model(b1)).
 </div>
-<!--l. 223--><p class="nopar" > The interpretations may contain a fact of the form
+<!--l. 221--><p class="nopar" > The interpretations may contain a fact of the form
 
    <div class="verbatim" id="verbatim-21">
 prob(0.3).
 </div>
-<!--l. 227--><p class="nopar" > assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the
+<!--l. 225--><p class="nopar" > assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the
 probability of each interpretation is considered equal to 1<span 
 class="cmmi-10">&#x2215;n </span>where <span 
 class="cmmi-10">n </span>is the total
 number of interpretations. <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">prob/1</span></span></span> can be used to set different multiplicity for the
 different interpretations.
-<!--l. 230--><p class="indent" >   <span 
+<!--l. 228--><p class="indent" >   <span 
 class="cmtt-10">&#x003C;stem&#x003E;.bg </span>can contain Prolog clauses that can be used to derive additional
 conclusions from the atoms in the interpretations.
-<!--l. 233--><p class="indent" >   <span 
+<!--l. 231--><p class="indent" >   <span 
 class="cmtt-10">&#x003C;stem&#x003E;.l </span>contains the declarations of the input and output predicates, of the
 unseen predicates and the commands for setting the algorithms&#8217; parameters. Output
 predicates are declared as
@@ -366,67 +362,67 @@ predicates are declared as
    <div class="verbatim" id="verbatim-22">
 output(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 237--><p class="nopar" > and define the predicates whose atoms in the input interpretations are used as the
+<!--l. 235--><p class="nopar" > and define the predicates whose atoms in the input interpretations are used as the
 goals for the prediction of which you want to optimize the parameters. Derivations
 for these goals are built by the systems.
-<!--l. 240--><p class="indent" >   Input predicates are those for the predictions of which you do not want to
+<!--l. 238--><p class="indent" >   Input predicates are those for the predictions of which you do not want to
 optimize the parameters. You can declare closed world input predicates
 with
 
    <div class="verbatim" id="verbatim-23">
 input_cw(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 243--><p class="nopar" > For these predicates, the only true atoms are those in the interpretations, the
+<!--l. 241--><p class="nopar" > For these predicates, the only true atoms are those in the interpretations, the
 clauses in the input program are not used to derive atoms not present in the
 interpretations.
-<!--l. 246--><p class="indent" >   Open world input predicates are declared with
+<!--l. 244--><p class="indent" >   Open world input predicates are declared with
 
    <div class="verbatim" id="verbatim-24">
 input(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 249--><p class="nopar" > In this case, if a subgoal for such a predicate is encountered when deriving the atoms
+<!--l. 247--><p class="nopar" > In this case, if a subgoal for such a predicate is encountered when deriving the atoms
 for the output predicates, both the facts in the interpretations and the clauses of the
 input program are used.
-<!--l. 254--><p class="indent" >   For SLIPCOVER, you have to specify the language bias by means of mode
+<!--l. 252--><p class="indent" >   For SLIPCOVER, you have to specify the language bias by means of mode
 declarations in the style of <a 
 href="http://www.doc.ic.ac.uk/~shm/progol.html" > Progol </a>.
 
    <div class="verbatim" id="verbatim-25">
 modeh(&#x003C;recall&#x003E;,&#x003C;predicate&#x003E;(&#x003C;arg1&#x003E;,...).
 </div>
-<!--l. 258--><p class="nopar" > specifies the atoms that can appear in the head of clauses, while
+<!--l. 256--><p class="nopar" > specifies the atoms that can appear in the head of clauses, while
 
    <div class="verbatim" id="verbatim-26">
 modeb(&#x003C;recall&#x003E;,&#x003C;predicate&#x003E;(&#x003C;arg1&#x003E;,...).
 </div>
-<!--l. 262--><p class="nopar" > specifies the atoms that can appear in the body of clauses. <span 
+<!--l. 260--><p class="nopar" > specifies the atoms that can appear in the body of clauses. <span 
 class="cmtt-10">&#x003C;recall&#x003E; </span>can be an
 integer or <span 
 class="cmtt-10">* </span>(currently unused).
-<!--l. 266--><p class="indent" >   The arguments are of the form
+<!--l. 264--><p class="indent" >   The arguments are of the form
 
    <div class="verbatim" id="verbatim-27">
 +&#x003C;type&#x003E;
 </div>
-<!--l. 269--><p class="nopar" > for specifying an input variable of type <span 
+<!--l. 267--><p class="nopar" > for specifying an input variable of type <span 
 class="cmtt-10">&#x003C;type&#x003E;</span>, or
 
    <div class="verbatim" id="verbatim-28">
 -&#x003C;type&#x003E;
 </div>
-<!--l. 273--><p class="nopar" > for specifying an output variable of type <span 
+<!--l. 271--><p class="nopar" > for specifying an output variable of type <span 
 class="cmtt-10">&#x003C;type&#x003E;</span>. or
 
    <div class="verbatim" id="verbatim-29">
 &#x003C;constant&#x003E;
 </div>
-<!--l. 277--><p class="nopar" > for specifying a constant.
-<!--l. 280--><p class="indent" >   SLIPCOVER also allows the arguments
+<!--l. 275--><p class="nopar" > for specifying a constant.
+<!--l. 278--><p class="indent" >   SLIPCOVER also allows the arguments
 
    <div class="verbatim" id="verbatim-30">
 #&#x003C;type&#x003E;
 </div>
-<!--l. 283--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
+<!--l. 281--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
 class="cmtt-10">&#x003C;type&#x003E; </span>in
 the bottom clause but should not be used for replacing input variables of the
 following literals or
@@ -434,14 +430,14 @@ following literals or
    <div class="verbatim" id="verbatim-31">
 -#&#x003C;type&#x003E;
 </div>
-<!--l. 287--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
+<!--l. 285--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
 class="cmtt-10">&#x003C;type&#x003E; </span>in
 the bottom clause and that should be used for replacing input variables of
 the following literals. <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">#</span></span></span> and <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">-#</span></span></span> differ only in the creation of the bottom
 clause.
-<!--l. 290--><p class="indent" >   An example of language bias for the UWCSE domain is
+<!--l. 288--><p class="indent" >   An example of language bias for the UWCSE domain is
 
    <div class="verbatim" id="verbatim-32">
 output(advisedby/2).
@@ -460,7 +456,7 @@ output(advisedby/2).
 &#x00A0;<br />modeb(*,samecourse(-course,&#x00A0;+course)).
 &#x00A0;<br />....
 </div>
-<!--l. 307--><p class="nopar" > SLIPCOVER also requires facts for the <span class="obeylines-h"><span class="verb"><span 
+<!--l. 305--><p class="nopar" > SLIPCOVER also requires facts for the <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">determination/2</span></span></span> predicate that indicate
 which predicates can appear in the body of clauses. For example
 
@@ -468,18 +464,18 @@ which predicates can appear in the body of clauses. For example
 determination(professor/1,student/1).
 &#x00A0;<br />determination(student/1,hasposition/2).
 </div>
-<!--l. 313--><p class="nopar" > state that <span class="obeylines-h"><span class="verb"><span 
+<!--l. 311--><p class="nopar" > state that <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">student/1</span></span></span> can appear in the body of clauses for <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">professor/1</span></span></span> and that
 <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">hasposition/2</span></span></span> can appear in the body of clauses for <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">student/1</span></span></span>.
-<!--l. 317--><p class="indent" >   SLIPCOVER also allows mode declarations of the form
+<!--l. 315--><p class="indent" >   SLIPCOVER also allows mode declarations of the form
 
    <div class="verbatim" id="verbatim-34">
 modeh(&#x003C;r&#x003E;,[&#x003C;s1&#x003E;,...,&#x003C;sn&#x003E;],[&#x003C;a1&#x003E;,...,&#x003C;an&#x003E;],[&#x003C;P1/Ar1&#x003E;,...,&#x003C;Pk/Ark&#x003E;]).
 </div>
-<!--l. 320--><p class="nopar" > These mode declarations are used to generate clauses with more than two head
+<!--l. 318--><p class="nopar" > These mode declarations are used to generate clauses with more than two head
 atoms. In them, <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">&#x003C;s1&#x003E;,...,&#x003C;sn&#x003E;</span></span></span> are schemas, <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">&#x003C;a1&#x003E;,...,&#x003C;an&#x003E;</span></span></span> are atoms such that
@@ -499,18 +495,18 @@ modeh(*,
 &#x00A0;<br />&#x00A0;&#x00A0;[professor/1,student/1,hasposition/2,inphase/2,
 &#x00A0;<br />&#x00A0;&#x00A0;publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).
 </div>
-<!--l. 330--><p class="nopar" >
-<!--l. 334--><p class="noindent" >
+<!--l. 328--><p class="nopar" >
+<!--l. 332--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.2   </span> <a 
  id="x1-100005.2"></a>Parameters</h4>
-<!--l. 335--><p class="noindent" >In order to set the algorithms&#8217; parameters, you have to insert in <span 
+<!--l. 333--><p class="noindent" >In order to set the algorithms&#8217; parameters, you have to insert in <span 
 class="cmtt-10">&#x003C;stem&#x003E;.l </span>commands
 of the form
 
    <div class="verbatim" id="verbatim-36">
 :-&#x00A0;set(&#x003C;parameter&#x003E;,&#x003C;value&#x003E;).
 </div>
-<!--l. 338--><p class="nopar" > The available parameters are:
+<!--l. 336--><p class="nopar" > The available parameters are:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">depth</span></span></span> (values: integer or <span class="obeylines-h"><span class="verb"><span 
@@ -630,48 +626,48 @@ class="cmtt-10">ll</span></span></span>,  valid  for  SLIPCOVER):
 class="cmtt-10">ll</span></span></span>, log likelihood is
      used, if set to <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">aucpr</span></span></span>, the area under the Precision-Recall curve is used.</li></ul>
-<!--l. 377--><p class="noindent" >
+<!--l. 375--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.3   </span> <a 
  id="x1-110005.3"></a>Commands</h4>
-<!--l. 378--><p class="noindent" >To execute EMBLEM, load <span 
+<!--l. 376--><p class="noindent" >To execute EMBLEM, load <span 
 class="cmtt-10">slipcover </span>with
 
    <div class="verbatim" id="verbatim-37">
 ?-&#x00A0;use_module(library(slipcover)).
 </div>
-<!--l. 381--><p class="nopar" > and call
+<!--l. 379--><p class="nopar" > and call
 
    <div class="verbatim" id="verbatim-38">
 ?-&#x00A0;em(stem).
 </div>
-<!--l. 385--><p class="nopar" > To execute SLIPCOVER, load <span 
+<!--l. 383--><p class="nopar" > To execute SLIPCOVER, load <span 
 class="cmtt-10">slipcover </span>with
 
    <div class="verbatim" id="verbatim-39">
 ?-&#x00A0;use_module(library(slipcover)).
 </div>
-<!--l. 389--><p class="nopar" > and call
+<!--l. 387--><p class="nopar" > and call
 
    <div class="verbatim" id="verbatim-40">
 ?-&#x00A0;sl(stem).
 </div>
-<!--l. 393--><p class="nopar" >
-<!--l. 395--><p class="noindent" >
+<!--l. 391--><p class="nopar" >
+<!--l. 393--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.4   </span> <a 
  id="x1-120005.4"></a>Testing</h4>
-<!--l. 396--><p class="noindent" >To test the theories learned, load <span 
+<!--l. 394--><p class="noindent" >To test the theories learned, load <span 
 class="cmtt-10">test.pl </span>with
 
    <div class="verbatim" id="verbatim-41">
 ?-&#x00A0;use_module(library(test)).
 </div>
-<!--l. 399--><p class="nopar" > and call
+<!--l. 397--><p class="nopar" > and call
 
    <div class="verbatim" id="verbatim-42">
 ?-&#x00A0;main([&#x003C;stem_fold1&#x003E;,...,&#x003C;stem_foldn&#x003E;],[&#x003C;testing_set_fold1&#x003E;,...,
 &#x00A0;<br />&#x00A0;&#x00A0;&#x003C;testing_set_foldn&#x003E;]).
 </div>
-<!--l. 404--><p class="nopar" > For example, if you want to test the theory in <span class="obeylines-h"><span class="verb"><span 
+<!--l. 402--><p class="nopar" > For example, if you want to test the theory in <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">ai_train.rules</span></span></span> on the set <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">ai.kb</span></span></span>,
 you can call
@@ -679,7 +675,7 @@ you can call
    <div class="verbatim" id="verbatim-43">
 ?-&#x00A0;main([ai_train],[ai]).
 </div>
-<!--l. 408--><p class="nopar" > The testing program has the following parameters:
+<!--l. 406--><p class="nopar" > The testing program has the following parameters:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">neg_ex</span></span></span> (values: <span class="obeylines-h"><span class="verb"><span 
@@ -697,7 +693,7 @@ class="cmtt-10">cw</span></span></span>, the negative examples are generated
      predicates that are not positive examples. The set of all atoms is obtained
      by collecting the set of constants for each type of the arguments of the
      target predicate.</li></ul>
-<!--l. 414--><p class="noindent" >The testing program produces the following output in the current folder:
+<!--l. 412--><p class="noindent" >The testing program produces the following output in the current folder:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">cll.pl</span></span></span>: for each fold, the list of examples orderd by their probability of
@@ -713,10 +709,10 @@ class="cmtt-10">curve_roc.m</span></span></span>:   a   Matlab   file   for   pl
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">curve_pr.m</span></span></span>: a Matlab file for plotting the Precision-Recall curve</li></ul>
-<!--l. 423--><p class="noindent" >
+<!--l. 421--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.5   </span> <a 
  id="x1-130005.5"></a>Learning Examples</h4>
-<!--l. 424--><p class="noindent" >The <span class="obeylines-h"><span class="verb"><span 
+<!--l. 422--><p class="noindent" >The <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">cplint/prolog/examples</span></span></span> folder of SWI-Prolog home contain examples of input
 and output files for the learning algorithms
      <ul class="itemize1">
@@ -726,18 +722,18 @@ class="cmtt-10">ai_train_par</span></span></span>: parameter learning example fr
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">ai_train</span></span></span>: structure learning example from UWCSE</li></ul>
 
-<!--l. 431--><p class="noindent" >
+<!--l. 429--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">6   </span> <a 
  id="x1-140006"></a>License</h3>
-<!--l. 436--><p class="noindent" ><span 
+<!--l. 434--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>follows the Artistic License 2.0 that you can find in <span 
 class="cmtt-10">cplint </span>root folder. The
 copyright is by Fabrizio Riguzzi.
-<!--l. 440--><p class="indent" >   The library <a 
+<!--l. 438--><p class="indent" >   The library <a 
 href="http://vlsi.colorado.edu/~fabio/" > CUDD </a> for manipulating BDDs has the following license:
-<!--l. 444--><p class="indent" >   Copyright (c) 1995-2004, Regents of the University of Colorado
-<!--l. 446--><p class="indent" >   All rights reserved.
-<!--l. 448--><p class="indent" >   Redistribution and use in source and binary forms, with or without modification,
+<!--l. 442--><p class="indent" >   Copyright (c) 1995-2004, Regents of the University of Colorado
+<!--l. 444--><p class="indent" >   All rights reserved.
+<!--l. 446--><p class="indent" >   Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
      <ul class="itemize1">
      <li class="itemize">Redistributions of source code must retain the above copyright notice, this
@@ -750,7 +746,7 @@ are permitted provided that the following conditions are met:
      <li class="itemize">Neither  the  name  of  the  University  of  Colorado  nor  the  names  of  its
      contributors may be used to endorse or promote products derived from
      this software without specific prior written permission.</li></ul>
-<!--l. 465--><p class="noindent" >THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS <br 
+<!--l. 463--><p class="noindent" >THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS <br 
 class="newline" />AND CONTRIBUTORS &#8221;AS IS&#8221; AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -810,13 +806,6 @@ class="cmti-10">Intell.</span>, 79(1):1&#8211;38, 1995.
     </p>
     <p class="bibitem" ><span class="biblabel">
   [6]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
- id="XDBLP:journals/jmlr/ElidanF05"></a>G.&#x00A0;Elidan and N.&#x00A0;Friedman.  Learning hidden variable networks: The
-    information bottleneck approach.  <span 
-class="cmti-10">Journal of Machine Learning Research</span>,
-    6:81&#8211;127, 2005.
-    </p>
-    <p class="bibitem" ><span class="biblabel">
-  [7]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
  id="XRigSwi10-ICLP10-IC"></a>Fabrizio   Riguzzi   and   Terrance   Swift.       Tabling   and   Answer
     Subsumption   for   Reasoning   on   Logic   Programs   with   Annotated
     Disjunctions. In <span 
@@ -827,31 +816,31 @@ class="cmti-10">Leibniz International Proceedings in</span>
     <span 
 class="cmti-10">Informatics (LIPIcs)</span>, pages 162&#8211;171. Schloss Dagstuhl&#8211;Leibniz-Zentrum
     fuer Informatik, 2010.
-
     </p>
     <p class="bibitem" ><span class="biblabel">
-  [8]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
+  [7]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
  id="XVenDenBru-JELIA06"></a>J.&#x00A0;Vennekens, M.&#x00A0;Denecker, and M.&#x00A0;Bruynooghe. Representing causal
     information  about  a  probabilistic  process.   In  <span 
 class="cmti-10">Proceedings  of  the  10th</span>
     <span 
 class="cmti-10">European Conference on Logics in Artificial Intelligence</span>, LNAI. Springer,
     September 2006.
+
     </p>
     <p class="bibitem" ><span class="biblabel">
-  [9]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
+  [8]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
  id="XDBLP:journals/tplp/VennekensDB09"></a>J.&#x00A0;Vennekens,  Marc  Denecker,  and  Maurice  Bruynooghe.   CP-logic:
     A  language  of  causal  probabilistic  events  and  its  relation  to  logic
     programming. <span 
 class="cmti-10">Theory Pract. Log. Program.</span>, 9(3):245&#8211;308, 2009.
     </p>
     <p class="bibitem" ><span class="biblabel">
- [10]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
+  [9]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
  id="XVenVer03-TR"></a>J.&#x00A0;Vennekens  and  S.&#x00A0;Verbaeten.    Logic  programs  with  annotated
     disjunctions. Technical Report CW386, K. U. Leuven, 2003.
     </p>
     <p class="bibitem" ><span class="biblabel">
- [11]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
+ [10]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 
  id="XVenVer04-ICLP04-IC"></a>J.&#x00A0;Vennekens,  S.&#x00A0;Verbaeten,  and  M.&#x00A0;Bruynooghe.   Logic  programs
     with  annotated  disjunctions.     In  <span 
 class="cmti-10">International  Conference  on  Logic</span>
