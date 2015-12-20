@@ -1,0 +1,1578 @@
+@article{DBLP:journals/ai/Cohen95,
+  author    = {William W. Cohen},
+  title     = {Pac-Learning Non-Recursive Prolog Clauses},
+  journal   = {Artif. Intell.},
+  volume    = {79},
+  number    = {1},
+  year      = {1995},
+  pages     = {1-38},
+  ee        = {http://dx.doi.org/10.1016/0004-3702(94)00034-4},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{BelRig13-TPLP-IJ,
+  author = {Elena Bellodi and Fabrizio Riguzzi},
+  title = {Structure Learning of Probabilistic Logic Programs by Searching the Clause Space},
+  journal = {Theory and Practice of Logic Programming},
+  publisher = {Cambridge University Press},
+  copyright = {Cambridge University Press},
+  year = {2013}
+}
+@article{BelRig11-IDA,
+  author = {Elena Bellodi and Fabrizio Riguzzi},
+    title = { Expectation {Maximization} over Binary Decision Diagrams for Probabilistic Logic Programs},
+      year = {2012},
+      volume={16},
+      number={6},
+      journal={Intel. Data Anal.},
+      }
+
+@article{DBLP:journals/jmlr/ElidanF05,
+  author    = {G. Elidan and
+               N. Friedman},
+  title     = {Learning Hidden Variable Networks: The Information Bottleneck
+               Approach},
+  journal   = {Journal of Machine Learning Research},
+  volume    = {6},
+  year      = {2005},
+  pages     = {81-127},
+  ee        = {http://www.jmlr.org/papers/v6/elidan05a.html},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@inproceedings{BraRig10-ILP10-IC,
+	author = {Stefano Bragaglia and Fabrizio Riguzzi},
+	title	= {Approximate Inference for
+Logic Programs with Annotated Disjunctions},
+  booktitle     = {Inductive Logic Programming
+20th International Conference, ILP 2010, Florence, Italy, June 27-30, 2010. Revised Papers },
+volume={6489},
+pages={30--37},
+  year      = {2011},
+
+   series = {LNCS},
+   editor = {Frasconi, Paolo and Lisi, Francesca},
+   publisher = {Springer},
+   doi = {10.1007/978-3-642-21295-6_7},
+  url={http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/BraRig-ILP10.pdf},
+copyright={Springer},
+}
+@inproceedings{Rig11-CILC11-NC,
+	author = {Fabrizio Riguzzi},
+	title	= {{MCINTYRE}: A {Monte Carlo} Algorithm for Probabilistic Logic Programming},
+  booktitle     = {Proceedings of the 26th Italian Conference on Computational Logic ({CILC2011}),
+Pescara, Italy, 31 August-2 September, 2011},
+
+  year      = {2011},
+  abstract={
+Probabilistic Logic Programming is receiving an increasing attention for its ability to model domains with complex and uncertain relations among entities. 
+In this paper we concentrate on the problem of approximate inference in probabilistic logic programming languages based on the distribution semantics.
+A successful approximate approach is based on Monte Carlo sampling, that consists in verifying the truth of the query in a normal program sampled from the probabilistic program.
+The ProbLog system includes such an algorithm and so does the \texttt{cplint} suite.
+In this paper we propose an approach for Monte Carlo inference that is based on a program transformation that translates a probabilistic program into a normal program to which the query can be posed. In the transformation, auxiliary atoms are added to the body of rules for performing sampling and checking for the consistency of the sample. The current sample is stored in the internal database of the Yap Prolog engine.
+The resulting algorithm, called MCINTYRE for Monte Carlo INference wiTh Yap REcord, is evaluated on various problems: biological networks, artificial datasets and a hidden Markov model.  MCINTYRE is compared with the Monte Carlo algorithms of ProbLog and \texttt{cplint} and with the  exact inference  of the PITA system. The results show  that MCINTYRE is faster than the other Monte Carlo algorithms.
+},
+  url={http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/Rig-CILC11.pdf},
+copyright={by the author},
+}
+@inproceedings{BelRig11-CILC11-NC,
+	author = {Elena Bellodi and Fabrizio Riguzzi},
+	title	= {{EM} over Binary Decision Diagrams for Probabilistic Logic Programs},
+  booktitle     = {Proceedings of the 26th Italian Conference on Computational Logic ({CILC2011}),
+Pescara, Italy, 31 August 31-2 September, 2011},
+
+  year      = {2011},
+  abstract={
+Recently much work in Machine Learning has concentrated on representation languages able to combine aspects of logic and probability, leading to the birth of a whole field called Statistical Relational Learning.
+In this paper we present a technique for parameter learning targeted to a family of formalisms where uncertainty is represented using Logic Programming techniques - the so-called Probabilistic Logic Programs such as ICL, PRISM, ProbLog and LPAD.
+Since their equivalent Bayesian networks contain hidden variables, an EM algorithm is adopted.
+In order to speed the computation, expectations are computed directly on the Binary Decision Diagrams that are built for inference.
+The resulting system, called EMBLEM for ``EM over Bdds for probabilistic Logic programs Efficient Mining'', has been applied to a number of datasets and showed good performances both in terms of speed and memory usage.
+},
+  url={http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/BelRig-CILC11.pdf},
+copyright={by the authors},
+}
+
+@inproceedings{BelRig11-ILP11-IC,
+	author = {Elena Bellodi and Fabrizio Riguzzi},
+	title	= {Learning the Structure of Probabilistic Logic Programs},
+  booktitle     = {Inductive Logic Programming,
+21th International Conference, ILP 2011, London, UK, 31 July-3 August, 2011 },
+  year      = {2011},
+url={http://ilp11.doc.ic.ac.uk/short_papers/ilp2011_submission_52.pdf},
+}
+
+@article{RigDiM11-ML-IJ,
+	author = {Fabrizio Riguzzi and Nicola Di Mauro},
+	title	= {Applying the Information Bottleneck to Statistical Relational Learning},
+  year      = {2011},
+  journal={Machine Learning},
+        pdf={http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/RigDiM11-ML-IJ.pdf},
+        note={To appear},
+   doi = {10.1007/s10994-011-5247-6},
+publisher={Springer},
+copyright={Springer},
+abstract={In this  paper we  propose to apply  the Information  Bottleneck (IB) approach  to the  sub-class of
+Statistical Relational  Learning (SRL) languages that  are reducible to Bayesian  networks. When the
+resulting networks involve hidden variables, learning these languages requires the use of techniques
+for  learning from incomplete  data such  as the  Expectation Maximization  (EM) algorithm.
+Recently, the IB approach was shown to be able to avoid some of the local maxima in which EM can get
+trapped when learning with hidden variables.  Here  we present the algorithm Relational Information Bottleneck
+(RIB)
+that learns the parameters of SRL languages reducible
+to Bayesian Networks.  
+ In particular, we present the specialization  of RIB to a  language belonging to the family of languages based on the distribution semantics, Logic Programs with  Annotated Disjunction (LPADs). This language is prototypical for such a family and its equivalent Bayesian networks contain hidden  variables. RIB is evaluated on the IMDB, Cora and artificial datasets and compared with LeProbLog, EM, Alchemy and PRISM. 
+The  experimental results show that  RIB has good performances especially when some logical atoms are unobserved. 
+Moreover, it is particularly suitable when learning from interpretations that share the same Herbrand base.},
+}
+
+@techreport{BelRig11-TR,
+   author =      {Elena Bellodi and Fabrizio Riguzzi},
+   title =       { {EM} over Binary Decision Diagrams for Probabilistic Logic Programs},
+   year =        {2011},
+   institution = {Dipartimento di Ingegneria, Universit\`a di Ferrara, Italy},
+	number={CS-2011-01},
+   url={http://www.unife.it/dipartimento/ingegneria/informazione/informatica/rapporti-tecnici-1/CS-2011-01.pdf/view}
+}
+
+@inproceedings{Rig-RCRA07-IC,
+author={
+ Fabrizio Riguzzi },
+ title={A Top Down Interpreter for {LPAD} and {CP}\--logic},
+booktitle={Proceedings of the  14th RCRA workshop
+Experimental Evaluation of Algorithms for 
+Solving Problems with Combinatorial Explosion}, 
+year={2007},
+pdf={http://pst.istc.cnr.it/RCRA07/articoli/P19-riguzzi-RCRA07.pdf},
+abstract={Logic Programs with Annotated Disjunctions and CP-logic are two different but related languages for expressing probabilistic information in logic programming.
+The paper presents a top down interpreter for computing the probability of a query from a program in one of these two languages when the program is acyclic. 
+The algorithm is based on the one available for ProbLog.
+The performances of the algorithm are compared with those of a Bayesian reasoner and with those of the ProbLog interpreter. On programs that have a small grounding, the Bayesian reasoner is more scalable, but programs with a large grounding require the top down interpreter. The comparison with ProbLog shows that, even if the added expressiveness effectively requires more computation resources, the top down interpreter can still solve 
+problem of significant size.
+},
+keywords={Probabilistic Logic Programming, Logic Programs with Annotated Disjunction, Probabilistic Reasoning},
+}
+
+@techreport{VenVer03-TR,
+   author =      {J. Vennekens and S. Verbaeten},
+   title =       {Logic Programs With Annotated Disjunctions},
+   year =        {2003},
+   institution = {K. U. Leuven},
+   number =      {CW386},
+   url =        {http://www.cs.kuleuven.ac.be/\string~joost/techrep.ps},
+}
+
+@inProceedings{VenVer04-ICLP04-IC,
+   author =      {J. Vennekens and S. Verbaeten and M. Bruynooghe},
+   title =       {Logic Programs With Annotated Disjunctions},
+  booktitle =  {International Conference on Logic Programming},
+   year =        {2004},
+      series={LNCS},
+   volume={3131},
+   publisher={Springer},
+   pages={195-209}
+
+   
+}
+
+@inproceedings{RigSwi10-ICLP10-IC,
+	author = {Fabrizio Riguzzi and Terrance Swift},
+	title	= {{T}abling and {A}nswer {S}ubsumption for {R}easoning on {L}ogic {P}rograms with {A}nnotated {D}isjunctions},
+booktitle = {Technical Communications of the International
+Conference on Logic Programming},
+volume = {7},
+year = {2010},
+publisher = {Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik},
+series = {Leibniz International Proceedings in
+Informatics (LIPIcs)},
+ISBN = {978-3-939897-17-0},
+ISSN = {1868-8969},
+  pages =	{162--171},
+doi = {10.4230/LIPIcs.ICLP.2010.162}
+	}
+
+@inproceedings{DBLP:conf/iclp/MantadelisJ10,
+  author    = {Theofrastos Mantadelis and
+               Gerda Janssens},
+  title     = {Dedicated Tabling for a Probabilistic Setting},
+  booktitle = {International Conference
+               on Logic Programming},
+  year      = {2010},
+  pages     = {124-133},
+  series    = {LIPIcs},
+  volume    = {7},
+  ee        = {http://dx.doi.org/10.4230/LIPIcs.ICLP.2010.124},
+  publisher = {Schloss Dagstuhl - LZI},
+
+}
+  booktitle = {ICLP (Technical Communications)},
+  editor    = {Manuel V. Hermenegildo and
+               Torsten Schaub},
+
+
+@inproceedings{CCIL08,
+author = "F. Calimeri and  S.  Cozza and G. Ianni and N. Leone",
+title = "Computable Functions in {ASP}: Theory and Implementation",
+booktitle = ICLP,
+  publisher = {Springer},
+  series    = {LNCS},
+  volume    = {5366},
+pages = "407-424",
+year =  2008}
+
+
+@article{BaBC09,
+author = "S. Baselice and  P. Bonatti and  G. Criscuolo",
+title = "On finitely recursive programs",
+journal = TPLP,
+Volume =  9,
+Number = 2,
+pages = "213-238",
+year = 2009}
+
+@article{Swif99a, 
+AUTHOR = "T. Swift", 
+TITLE = "Tabling for Non-Monotonic Programming",
+Journal = {Annals of Mathematics and Artifial Intelligence},
+  publisher     = {Baltzer Science Publishers},
+  volume = {25},
+  number = {3-4},
+  pages = "201-240",
+  year          = {1999}
+}
+
+@article{ SaSW99,
+AUTHOR = "K. Sagonas and T. Swift and D. S. Warren",
+TITLE = "The Limits of Fixed-Order Computation",
+Journal = "Theoretical Computer Science",
+Volume = 254,
+Number = "1-2",
+Pages = "465-499",
+Year = 2000 }
+
+% only used in appendix.
+@inproceedings{Swif99b, 
+AUTHOR = "T. Swift", 
+TITLE = "A New Formulation of Tabled Resolution with Delay", 
+Booktitle = "Portuguese Conference
+               on Artificial Intelligence",
+Pages = "163-177",
+Year = 1999,
+Series = "LNAI",
+volume = 1695,
+Publisher = "Springer",
+ }
+
+@inproceedings{Przy89d,
+AUTHOR = "T. Przymusinski",
+TITLE = "Every Logic Program has a Natural Stratification and an Iterated Least Fixed Point Model",
+BOOKTITLE = "Symposium on Principles of Database Systems",
+PAGES = "11-21",
+YEAR = "1989",
+ publisher = {ACM Press},
+}
+
+@inproceedings{DBLP:conf/cl/KameyaS00,
+  author    = {Yoshitaka Kameya and
+               Taisuke Sato},
+  title     = "Efficient {EM} Learning with Tabulation for Parameterized
+               Logic Programs",
+  booktitle = {First International Conference on Computational Logic},
+  year      = {2000},
+  pages     = {269-284},
+  ee        = {http://link.springer.de/link/service/series/0558/bibs/1861/18610269.htm},
+  publisher = {Springer},
+  series    = {LNCS},
+  volume    = {1861},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+
+
+@inproceedings{DBLP:conf/iclp/KimmigCRDR08,
+  author    = "Angelika Kimmig and
+               V\'{\i}tor {Santos Costa} and
+               Ricardo Rocha and
+               Bart Demoen and
+               Luc {De Raedt}",
+  title     = "On the Efficient Execution of {ProbLog} Programs",
+  booktitle     = {International Conference on Logic Programming},
+  year      = {2008},
+  pages     = {175-189},
+  ee        = {http://dx.doi.org/10.1007/978-3-540-89982-2_22},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  publisher = {Springer},
+  series    = {LNCS},
+  volume    = {5366}
+}
+
+
+@inproceedings{DeR-NIPS08,
+author={De Raedt, L. and Demoen, B. and
+Fierens, D. and 
+Gutmann, B. and	Janssens, G. and
+Kimmig, A. and	Landwehr, N. and
+Mantadelis, T. and
+Meert, W. and
+Rocha, R. and
+Santos Costa, V. and
+Thon, I. and
+Vennekens, J.},
+title={Towards digesting the alphabet-soup of statistical relational learning},	
+booktitle={{NIPS*2008} Workshop on Probabilistic Programming},
+year={2008}
+}
+
+% TLS: took out address for space.
+@inproceedings{KimGutSan-ILP09-IC,
+	author = "A. Kimmig and B. Gutmann and V. {Santos Costa}",
+title= "Trading Memory for Answers: Towards Tabling {ProbLog}", 
+  booktitle     = {International Workshop on Statistical Relational Learning},
+  publisher = {KU Leuven},
+   year      = {2009},
+}
+%  address={Leuven, Belgium}
+                  
+@book{pearl88,
+title = {Probabilistic Reasoning in Intelligent Systems: Networks of Plausible Inference},
+author = {Judea Pearl},
+publisher = {Morgan Kaufmann},
+year = {1988},
+isbn = {1558604790},
+keywords = {imported intelligend probabilistic reasoning systems }
+} 
+
+@article{DBLP:journals/tplp/VennekensDB09,
+  author    = {J. Vennekens and
+               Marc Denecker and
+               Maurice Bruynooghe},
+  title     = {{CP}-logic: A language of causal probabilistic events and
+               its relation to logic programming},
+  journal   = {Theory Pract. Log. Program.},
+  volume    = {9},
+  number    = {3},
+  year      = {2009},
+  pages     = {245-308},
+  ee        = {http://dx.doi.org/10.1017/S1471068409003767},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@article{NgSub-InfComp91,
+ author = {Ng, Raymond and Subrahmanian, V. S.},
+ title = {Probabilistic logic programming},
+ journal = {Inf. Comput.},
+ volume = {101},
+ number = {2},
+ year = {1992},
+ issn = {0890-5401},
+ pages = {150--201},
+ doi = {http://dx.doi.org/10.1016/0890-5401(92)90061-J},
+ publisher = {Academic Press, Inc.},
+ address = {Duluth, MN, USA},
+ }
+
+@article{Emd-JLP86,
+ author = "{van Emden}, M H",
+ title = {Quantitative deduction and its fixpoint theory},
+ journal = {J. Log. Program.},
+ volume = {30},
+ number = {1},
+ year = {1986},
+ issn = {0743-1066},
+ pages = {37--53},
+ publisher = {Elsevier Science Inc.},
+ address = {New York, NY, USA},
+ }
+
+@inproceedings{Sha-IJCAI83,
+ author = {Shapiro, Ehud Y.},
+ title = {Logic programs with uncertainties: a tool for implementing rule-based systems},
+ booktitle = IJCAI,
+ year = {1983},
+ pages = {529--532},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ }
+ location = {Karlsruhe, West Germany},
+ address = {San Francisco, CA, USA},
+% booktitle = {International Joint conference on Artificial intelligence},
+
+@inproceedings{Rig09-RCRA-IW,
+author={F. Riguzzi},
+title={The {SLGAD} Procedure for Inference on {Logic Programs with Annotated 
+Disjunctions}}, 
+booktitle={Proceedings of the 15th {RCRA} workshop on Experimental Evaluation 
+of Algorithms for Solving Problems with Combinatorial Explosion
+Udine, Italy, December 12-13, 2008},
+editor={M. Gavanelli and T. Mancini},
+url={http://ceur-ws.org/Vol-451/paper15riguzzi.pdf},
+series={CEUR Workshop Proceedings},
+publisher={Sun {SITE} Central Europe},
+issn={1613-0073},
+number={451},
+year={2009},
+address={Aachen, Germany},
+}
+
+
+
+
+@ARTICLE{DBLP:journals/jlp/ChenSW95,
+  author = {Weidong Chen and Terrance Swift and David Scott Warren},
+  title = {Efficient Top-Down Computation of Queries under the Well-Founded
+	Semantics},
+  journal = {J. Log. Program.},
+  year = {1995},
+  volume = {24},
+  pages = {161-199},
+  number = {3}
+}
+
+@inproceedings{MeeStrBlo08-ILP09-IC,
+	author = {W. Meert and J. Struyf and H. Blockeel},
+	title	= {{CP-Logic} Theory Inference with Contextual Variable Elimination and Comparison to {BDD} Based Inference Methods},
+  booktitle     = {International Conference on Inductive Logic Programming},
+  year      = {2009},
+  publisher = {KU LEuven},
+}
+  address={Leuven, Belgium},
+
+@article{DBLP:journals/jacm/ChenW96,
+  author    = {Weidong Chen and
+               David Scott Warren},
+  title     = {Tabled Evaluation With Delaying for General Logic Programs},
+  journal   = JACM,
+  volume    = {43},
+  number    = {1},
+  year      = {1996},
+  pages     = {20-74},
+  ee        = {db/journals/jacm/ChenW96.html, http://doi.acm.org/10.1145/227595.227597},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{Rig09-LJIGPL-IJ,
+  author = {Fabrizio Riguzzi},
+  title = {Extended Semantics and  Inference for the {Independent Choice Logic}},
+  journal = {Logic Journal of the IGPL},
+  publisher = {Oxford University Press},
+  volume = {17},
+  number = {6},
+  pages = {589--629},
+  address = {Oxford, \UK},
+  year = {2009},
+  abstract = {The Independent Choice Logic (ICL) is a  language for expressing 
+probabilistic information in logic programming that adopts a distribution 
+semantics: an ICL theory defines a distribution over a set of possible worlds 
+that are normal logic programs. The probability of a query is then given by the 
+sum of the probabilities of worlds where the query is true.
+
+The ICL semantics requires the theories to be acyclic. This is a strong 
+limitation that rules out many interesting programs.
+In this paper we present an extension of the ICL semantics that allows theories 
+to be modularly acyclic.
+
+Inference with ICL can be performed with the Cilog2 system that  computes 
+explanations to queries and then  makes them mutually incompatible by means of 
+an iterative algorithm.
+
+We propose the system PICL (for Probabilistic inference with ICL) that computes 
+the explanations to queries by means of a modification of SLDNF\--resolution 
+and then makes them mutually incompatible by means of Binary Decision Diagrams.
+
+PICL and Cilog2 are compared on problems that involve computing the probability 
+of a connection between two nodes in biological graphs and social networks. 
+PICL turned to be more efficient, handling larger networks/more complex queries 
+in a shorter time than Cilog2. This is true both for marginal and for 
+conditional queries.
+},
+  doi = {10.1093/jigpal/jzp025},
+  url = {http://jigpal.oxfordjournals.org/cgi/reprint/jzp025?ijkey=picqzY6rpyU6emf&keytype=ref },
+  http = {http://jigpal.oxfordjournals.org/cgi/content/abstract/jzp025?ijkey=picqzY6rpyU6emf&keytype=ref },
+  keywords = {Probabilistic Logic Programming, Independent Choice Logic, Modularly acyclic programs, SLDNF-Resolution},
+  copyright = {Fabrizio Riguzzi, exclusively licensed to Oxford University Press}
+}
+
+
+
+@inproceedings{Rig08-ICLP08-IC,
+	author = {F. Riguzzi},
+	title	= {Inference with Logic Programs with Annotated Disjunctions under the Well Founded Semantics},
+  booktitle     = ICLP,
+  publisher = {Springer},
+  series    = {LNCS},
+  year      = {2008},
+    volume={5366},
+    pages={667-771},
+        pdf={http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/Rig-ICLP08.pdf},
+    doi={10.1007/978-3-540-89982-2\string_54},
+}
+    url={http://www.springerlink.com/content/247533616617llm8/}
+
+@article{Rig09-JACIL-IJ,
+author={F. Riguzzi},
+title={{SLGAD} Resolution for Inference on {Logic Programs with Annotated 
+Disjunctions}},
+journal={Journal of Algorithms in Logic, Informatics and Cognition },
+publisher={Elsevier},
+note={,\ in press},
+year=2009,
+abstract={Logic Programs with Annotated Disjunctions (LPADs) allow to express 
+probabilistic information in logic programming. The semantics of an LPAD is 
+given in terms of well\--founded models of the normal logic programs obtained 
+by selecting one disjunct from each ground LPAD clause. 
+
+Inference on LPADs can be performed using either the system Ailog2, that was 
+developed for the Independent Choice Logic, or SLDNFAD, an algorithm based on 
+SLDNF.  However, both of these algorithms run the risk of going into infinite 
+loops and of performing redundant computations.
+
+In order to avoid these problems, we present SLGAD resolution that  computes 
+the (conditional) probability of a ground query from a range\--restricted LPAD 
+and is  based on  SLG resolution for normal logic programs. As SLG, it uses 
+tabling to avoid some infinite loops and to avoid redundant computations.
+
+The performances of SLGAD are evaluated on classical benchmarks for normal logic 
+programs under the well\--founded semantics, namely a 2\--person game and the 
+ancestor relation, and on a game of dice.
+
+SLGAD is compared with  Ailog2 and  SLDNFAD on the problems in which they do 
+not go into infinite loops, namely those that are described by a  modularly 
+acyclic program.
+
+On the 2\--person game and the ancestor relation, SLGAD is more expensive than 
+SLDNFAD on problems where SLDNFAD succeeds but is faster than Ailog2 when the 
+query is true in an exponential number of instances.
+
+If the program requires the repeated computation of similar goals, as for the 
+dice game, then SLGAD outperforms both Ailog2 and SLDNFAD.},
+}
+year={2009},
+year={in press},
+@inproceedings{Rig09-RCRA-IW,
+author={F. Riguzzi},
+title={The {SLGAD} Procedure for Inference on {Logic Programs with Annotated 
+Disjunctions}}, 
+booktitle={{RCRA} workshop on Experimental Evaluation 
+of Algorithms for Solving Problems with Combinatorial Explosion},
+editor={Marco Gavanelli and Toni Mancini},
+url={http://ceur-ws.org/Vol-451/paper15riguzzi.pdf},
+series={CEUR Workshop Proceedings},
+publisher={Sun {SITE} Central Europe},
+issn={1613-0073},
+number={451},
+year={2009},
+}
+@BOOK{Pea00-book,
+  title = {Causality},
+  publisher = {Cambridge University Press},
+  year = {2000},
+  author = {Pearl, J.},
+}
+@article{DBLP:journals/tplp/BaralGR09,
+  author    = {C.Baral and
+               M. Gelfond and
+               N. Rushton},
+  title     = {Probabilistic reasoning with answer sets},
+  journal   = {The. Pra. Log. Program.},
+  volume    = {9},
+  number    = {1},
+  year      = {2009},
+  pages     = {57-144},
+  doi        = {10.1017/S1471068408003645},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@article{DBLP:journals/jlp/Poole00,
+  author    = {David Poole},
+  title     = {Abducing through negation as failure: stable models within
+               the independent choice logic},
+  journal   = {Journal of Logic Programming},
+  volume    = {44},
+  number    = {1-3},
+  year      = {2000},
+  pages     = {5-35},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{DBLP:journals/jlp/AptD94,
+  author    = {Krzysztof R. Apt and
+               Kees Doets},
+  title     = {A New Definition of {SLDNF}-Resolution},
+  journal   = {J. Log. Program.},
+  volume    = {18},
+  number    = {2},
+  year      = {1994},
+  pages     = {177-190},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@book{Kolmogorov,
+title={Foundations of the Theory of Probability},
+author={A. N. Kolmogorov}, 
+publisher={Chelsea Publishing Company},
+address={ New York},
+year={1950},
+}
+
+@article{DBLP:journals/jacm/Ross94,
+  author    = {Kenneth A. Ross},
+  title     = {Modular Stratification and Magic Sets for Datalog Programs
+               with Negation},
+  journal   = {J. ACM},
+  volume    = {41},
+  number    = {6},
+  year      = {1994},
+  pages     = {1216-1266},
+  ee        = {db/journals/jacm/Ross94.html, http://doi.acm.org/10.1145/195613.195646},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@book{DBLP:books/sp/Lloyd87,
+  author    = {John W. Lloyd},
+  title     = {Foundations of Logic Programming, 2nd Edition},
+  publisher = {Springer},
+  year      = {1987},
+  isbn      = {3-540-18199-7},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+
+@inproceedings{ve,
+author={Nevin Lianwen Zhang and David Poole}, 
+title={A simple approach to Bayesian network computations}, 
+booktitle={Proceedings of the 10th Biennial Canadian Artificial Intelligence Conference}, 
+year={1994}, 
+pages={171-178},
+}. 
+@inproceedings{DBLP:conf/ifip/Kowalski74,
+  author    = {Robert A. Kowalski},
+  title     = {Predicate Logic as Programming Language},
+  booktitle = {IFIP Congress},
+  year      = {1974},
+  pages     = {569-574},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{DBLP:journals/jacm/AptE82,
+  author    = {Krzysztof R. Apt and
+               Maarten H. van Emden},
+  title     = {Contributions to the Theory of Logic Programming},
+  journal   = {Journal of the ACM},
+  volume    = {29},
+  number    = {3},
+  year      = {1982},
+  pages     = {841-862},
+  ee        = {db/journals/jacm/AptE82.html, http://doi.acm.org/10.1145/322326.322339},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@inproceedings{DBLP:conf/iclp/GelfondL88,
+  author    = {Michael Gelfond and
+               Vladimir Lifschitz},
+  title     = {The Stable Model Semantics for Logic Programming},
+  booktitle = {International Conference and Symposium on Logic Programming},
+  year      = {1988},
+  pages     = {1070-1080},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@inproceedings{DBLP:conf/lpar/Dantsin91,
+  author    = {Evgeny Dantsin},
+  title     = {Probabilistic Logic Programs and their Semantics},
+  booktitle     = {Russian
+               Conference on Logic Programming},
+  year      = {1991},
+  publisher = {Springer},
+  series    = {LNCS},
+  volume    = {592},
+  pages     = {152-164},
+}
+
+inproceedings{DBLP:conf/lpar/Dantsin91,
+  author    = {Evgeny Dantsin},
+  title     = {Probabilistic Logic Programs and their Semantics},
+  booktitle     = {Proceedings of the 2nd Russian
+               Conference on Logic Programming},
+  year      = {1991},
+  publisher = {Springer},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {592},
+  pages     = {152-164},
+}
+
+
+@article{DBLP:journals/jasis/Fuhr00,
+  author    = {Norbert Fuhr},
+  title     = {Probabilistic datalog: Implementing logical information
+               retrieval for advanced applications},
+  journal   = {J. Am. Soc. Inf. Sci.},
+  volume    = {51},
+  number    = {2},
+  year      = {2000},
+  pages     = {95-110},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+
+@inproceedings{DBLP:conf/ilp/Jaeger08,
+  author    = {Manfred Jaeger},
+  title     = {Model-Theoretic Expressivity Analysis},
+  booktitle     = {Probabilistic Inductive Logic Programming - Theory and Applications},
+  year      = {2008},
+  pages     = {325-339},
+  publisher = {Springer},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {4911},
+  ee        = {http://dx.doi.org/10.1007/978-3-540-78652-8_13},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+
+@book{getoor:srl-book07,
+  title    = "An Introduction to Statistical Relational Learning",
+  year         = "2007",
+  editor       = "L. Getoor and B. Taskar",
+  publisher    = "MIT Press",
+}
+This file was created with JabRef 2.2.
+Encoding: Cp1252
+@article{DBLP:journals/ai/Poole97,
+  author    = {David Poole},
+  title     = {The Independent Choice Logic for Modelling Multiple Agents
+               Under Uncertainty},
+  journal   = {Artificial Intelligence},
+  volume    = {94},
+  number    = {1-2},
+  year      = {1997},
+  pages     = {7-56},
+  ee        = {http://dx.doi.org/10.1016/S0004-3702(97)00027-1},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{DBLP:journals/ai/Poole93,
+  author    = {David Poole},
+  title     = {Probabilistic Horn Abduction and {Bayesian} Networks},
+  journal   = {Artif. Intell.},
+  volume    = {64},
+  number    = {1},
+  year      = {1993},
+  pages     = {81-129},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@article{DBLP:journals/jair/SatoK01,
+  author    = {Taisuke Sato and
+               Yoshitaka Kameya},
+  title     = {Parameter Learning of Logic Programs for Symbolic-Statistical
+               Modeling},
+  journal   = {J. Artif. Intell. Res.},
+  volume    = {15},
+  year      = {2001},
+  pages     = {391-454},
+  ee        = {http://www.cs.washington.edu/research/jair/abstracts/sato01a.html},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+@inproceedings{DBLP:conf/iclp/Sato95,
+  author    = {Taisuke Sato},
+  title     = {A Statistical Learning Method for Logic Programs with Distribution
+               Semantics},
+  booktitle = {International Conference on Logic Programming},
+  year      = {1995},
+  pages     = {715-729},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+publisher={MIT Press},
+}
+@INPROCEEDINGS{DBLP:conf/ilp/Poole08,
+  author = {David Poole},
+  title = {The Independent Choice Logic and Beyond},
+  booktitle = {Probabilistic Inductive Logic Programming},
+  year = {2008},
+  pages = {222-243},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://dx.doi.org/10.1007/978-3-540-78652-8_8}
+}
+
+@ARTICLE{DBLP:journals/ngc/AptB91,
+  author = {K. R. Apt and M. Bezem},
+  title = {Acyclic Programs},
+  journal = {New Gener. Comput.},
+  year = {1991},
+  volume = {9},
+  pages = {335-364},
+  number = {3/4},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@BOOK{BerBrio-72,
+  title = {Nonserial Dynamic Programming},
+  publisher = {Academic Press},
+  year = {1972},
+  author = { U. Bertel\`e and F. Brioschi},
+  volume = {91},
+  series = {Mathematics in Science and Engineering}
+}
+
+@INPROCEEDINGS{Blo04-ILP04WIP-IC,
+  author = {H. Blockeel},
+  title = {Probabilistic logical models for Mendel's experiments: An exercise},
+  booktitle = {Inductive Logic Programming ({ILP} 2004), Work in Progress Track},
+  year = {2004}
+}
+
+@ARTICLE{136043,
+  author = {Randal E. Bryant},
+  title = {Symbolic Boolean manipulation with ordered binary-decision diagrams},
+  journal = {ACM Comput. Surv.},
+  year = {1992},
+  volume = {24},
+  pages = {293--318},
+  number = {3},
+  address = {New York, NY, USA},
+  doi = {http://doi.acm.org/10.1145/136035.136043},
+  issn = {0360-0300},
+  publisher = {ACM}
+}
+
+@ARTICLE{Bry-TC86,
+  author = {R. E. Bryant},
+  title = {Graph-based algorithms for boolean function manipulation},
+  journal = { IEEE Trans. on Comput.},
+  year = {1986},
+  volume = {35},
+  pages = {677-691},
+  number = {8}
+}
+
+@BOOK{carnap,
+  title = {Logical Foundations of Probability},
+  publisher = {University of Chicago Press},
+  year = {1950},
+  author = {R. Carnap},
+  owner = {Fabrizio},
+  timestamp = {2008.05.28}
+}
+
+@INCOLLECTION{Cla78,
+  author = {K. L. Clark},
+  title = {Negation as Failure},
+  booktitle = {Logic and Databases},
+  publisher = {Plenum Press},
+  year = {1978}
+}
+
+@INPROCEEDINGS{DBLP:conf/uai/Cussens00,
+  author = {James Cussens},
+  title = {Stochastic Logic Programs: Sampling, Inference and Applications},
+  booktitle = {Proceedings of the 16th Conference in Uncertainty in Artificial
+	Intelligence},
+  year = {2000},
+  pages = {115-122},
+  publisher = {Morgan Kaufmann}
+}
+
+@INPROCEEDINGS{DeRKerKim-ILP06,
+  author = {De Raedt, L. and K. Kersting and A. Kimmig and K. Revoredo and H.
+	Toivonen},
+  title = {Revising Probabilistic Prolog Programs},
+  booktitle = {Proceedings of the 16th International Conference on Inductive Logic
+	Programming},
+  year = {2007},
+  number = {4455},
+  series = {LNAI},
+  publisher = {Springer}
+}
+
+@INPROCEEDINGS{DBLP:conf/ijcai/RaedtKT07,
+  author = {De Raedt, L. and A. Kimmig and H. Toivonen},
+  title = {{ProbLog}: A Probabilistic {P}rolog and Its Application in Link Discovery.},
+  booktitle = {International Joint Conference on Artificial Intelligence},
+  year = {2007},
+  pages = {2462-2467},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://www.ijcai.org/papers07/Papers/IJCAI07-396.pdf}
+}
+
+@INPROCEEDINGS{DBLP:conf/ismis/DehaspeR96,
+  author = {L. Dehaspe and L. De Raedt},
+  title = {{DLAB}: A Declarative Language Bias Formalism.},
+  booktitle = {International Symposium on Methodologies for Intelligent Systems,
+	({ISMIS} 1996)},
+  year = {1996},
+  editor = {Z. W. Ras and M. Michalewicz},
+  number = {1079},
+  series = {LNCS},
+  pages = {613-622},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  isbn = {3-540-61286-6}
+}
+
+@INPROCEEDINGS{FieBloRamBru-MRDM04,
+  author = {D. Fierens and H. Blockeel and J. Ramon and M. Bruynooghe},
+  title = {Logical Bayesian networks},
+  booktitle = {Multi-Relational Data Mining ({MRDM} 2004)},
+  year = {2004},
+  pages = {19--30}
+}
+
+@ARTICLE{DBLP:journals/jlp/Fitting85a,
+  author = {M. Fitting},
+  title = {A Kripke-Kleene Semantics for Logic Programs.},
+  journal = {J. Log. Program.},
+  year = {1985},
+  volume = {2},
+  pages = {295-312},
+  number = {4},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@ARTICLE{gaifman,
+  author = {H. Gaifman},
+  title = {Concerning measures in first order calculi},
+  journal = {Israel J. Math.},
+  year = {1964.},
+  volume = {2},
+  pages = {1�18},
+  owner = {Fabrizio},
+  timestamp = {2008.05.28}
+}
+
+@INPROCEEDINGS{stable-models,
+  author = {M. Gelfond and V. Lifschitz},
+  title = {The Stable Model Semantics for Logic Programming},
+  booktitle = {Proceedings of the 5th Int. Conf. on Logic Programming},
+  year = {1988},
+  editor = {R. Kowalski and K. A. Bowen},
+  pages = {1070--1080},
+  publisher = {{MIT} Press}
+}
+
+@ARTICLE{Getoor+al:JMLR02,
+  author = {L. Getoor and N. Friedman and D. Koller and B. Taskar},
+  title = {Learning probabilistic models of Relational Structure},
+  journal = {Journal of Machine Learning Research},
+  year = {2002},
+  volume = {3},
+  pages = {679-707},
+  month = {December}
+}
+
+@INPROCEEDINGS{KerstingECML06,
+  author = {B. Gutmann and K. Kersting},
+  title = {{TildeCRF}: Conditional Random Fields for Logical Sequences.},
+  booktitle = {Machine Learning, ({ECML} 2006)},
+  year = {2006},
+  series = {LNCS},
+  publisher = {Springer}
+}
+
+@ARTICLE{DBLP:journals/ai/Halpern90,
+  author = {Joseph Y. Halpern},
+  title = {An Analysis of First-Order Logics of Probability},
+  journal = {Artif. Intell.},
+  year = {1990},
+  volume = {46},
+  pages = {311-350},
+  number = {3},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@INPROCEEDINGS{DBLP:conf/ki/HitzlerW02,
+  author = {P. Hitzler and M. Wendt},
+  title = {The Well-Founded Semantics Is a Stratified Fitting Semantics.},
+  booktitle = {Annual German Conference on AI, ({KI} 2002)},
+  year = {2002},
+  number = {2479},
+  series = {LNCS},
+  pages = {205-221},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://link.springer.de/link/service/series/0558/bibs/2479/24790205.htm}
+}
+
+@INPROCEEDINGS{DBLP:conf/mlg/JaegerLM07,
+  author = {Manfred Jaeger and Petr Lidman and Juan L. Mateo},
+  title = {Mining and Learning with Graphs, MLG 2007, Firence, Italy, August
+	1-3, 2007, Proceedings},
+  booktitle = {Comparative Evaluation of PL languages},
+  year = {2007},
+  editor = {Paolo Frasconi and Kristian Kersting and Koji Tsuda}
+}
+
+@INPROCEEDINGS{DBLP:conf/ecml/KerstingG04,
+  author = {K. Kersting and T. G{\"a}rtner},
+  title = {Fisher Kernels for Logical Sequences.},
+  booktitle = {Machine Learning, ({ECML} 2004)},
+  year = {2004},
+  number = {3201},
+  series = {LNCS},
+  pages = {205-216},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://springerlink.metapress.com/openurl.asp?genre=article{\&}issn=0302-9743{\&}volume=3201{\&}spage=205}
+}
+
+@ARTICLE{KerstingJAIR06,
+  author = {K. Kersting and L. De Raedt and T. Raik},
+  title = {Logical Hidden Markov Models.},
+  journal = {Journal of Artificial Intelligence Research},
+  year = {2006},
+  volume = {25},
+  pages = {425-456}
+}
+
+@INPROCEEDINGS{DBLP:conf/psb/KerstingRKR03,
+  author = {K. Kersting and T. Raiko and S. Kramer and L. De Raedt},
+  title = {Towards Discovering Structural Signatures of Protein Folds Based
+	on Logical Hidden Markov Models.},
+  booktitle = {Pacific Symposium on Biocomputing},
+  year = {2003},
+  pages = {192-203},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://helix-web.stanford.edu/psb03/kersting.pdf}
+}
+
+@INPROCEEDINGS{DBLP:conf/ilp/Koller99,
+  author = {Daphne Koller},
+  title = {Probabilistic Relational Models},
+  booktitle = {Proceedings of the 9th International Workshop on Inductive Logic Programming},
+  year = {1999},
+  volume = {1634},
+  series = {Lecture Notes in Computer Science},
+  pages = {3-13},
+  publisher = {Springer}
+}
+
+@ARTICLE{LauSpi-JRS88,
+  author = {Lauritzen, S. and Spiegelhalter, D. J.},
+  title = {Local Computations with Probabilities on Graphical Structures and
+	Their Application to Expert Systems},
+  journal = {Journal of the Royal Statistical Society},
+  year = {1988},
+  volume = {B, 50},
+  pages = {157-224},
+  number = {2}
+}
+
+@INPROCEEDINGS{DBLP:conf/icml/LuG03,
+  author = {Qing Lu and Lise Getoor},
+  title = {Link-based Classification},
+  booktitle = {International Conference
+on Machine Learning},
+  year = {2003},
+  pages = {496-503},
+  publisher = {AAAI Press}
+}
+
+@ARTICLE{DBLP:journals/datamine/MannilaT97,
+  author = {H. Mannila and H. Toivonen},
+  title = {Levelwise Search and Borders of Theories in Knowledge Discovery.},
+  journal = {Data Min. Knowl. Discov.},
+  year = {1997},
+  volume = {1},
+  pages = {241-258},
+  number = {3},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@INPROCEEDINGS{MilDre-ISML02-IC,
+  author = {Miller, D. M. and Drechsler, R.},
+  title = {On the construction of multiple-valued decision diagrams},
+  booktitle = {IEEE International Symposium on Multiple-Valued
+	Logic},
+  year = {2002},
+  publisher={IEEE Computer Society Press},
+  pages = {245-253}
+}
+
+@ARTICLE{DBLP:journals/etai/Muggleton00,
+  author = {Stephen Muggleton},
+  title = {Learning Stochastic Logic Programs},
+  journal = {Electron. Trans. Artif. Intell.},
+  year = {2000},
+  volume = {4},
+  pages = {141-153},
+  number = {B},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://www.ep.liu.se/ej/etai/2000/015/}
+}
+
+@ARTICLE{DBLP:journals/ngc/Poole93,
+  author = {David Poole},
+  title = {Logic Programming, Abduction and Probability - A Top-Down Anytime
+	Algorithm for Estimating Prior and Posterior Probabilities},
+  journal = {New Gener. Comput.},
+  year = {1993},
+  volume = {11},
+  pages = {377-400},
+  number = {3},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@INCOLLECTION{Prz88-Chapter,
+  author = {T. C. Przymusinski},
+  title = {On the declarative semantics of deductive databases and logic programs},
+  booktitle = {Foundations of deductive databases and logic programming},
+  publisher = {Morgan Kaufmann Publishers Inc.},
+  year = {1988},
+  editor = {J. Minker},
+  pages = {193--216},
+  address = {San Francisco, CA, USA},
+  isbn = {0-934613-40-0}
+}
+
+@ARTICLE{DBLP:journals/ml/RichardsonD06,
+  author = {Matthew Richardson and Pedro Domingos},
+  title = {Markov logic networks},
+  journal = {Machine Learning},
+  year = {2006},
+  volume = {62},
+  pages = {107-136},
+  number = {1-2},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://dx.doi.org/10.1007/s10994-006-5833-1}
+}
+
+@INPROCEEDINGS{Rig-AIIA07-IC,
+  author = { Fabrizio Riguzzi },
+  title = {A Top Down Interpreter for {LPAD} and {CP}\--logic},
+  booktitle = {Congress of the Italian Association for Artificial
+	Intelligence},
+  year = {2007},
+  volume = {4733},
+  series = {LNAI},
+  pages = {109--120},
+  publisher = {Springer},
+  abstract = {Logic Programs with Annotated Disjunctions and CP-logic are two different
+	but related languages for expressing probabilistic information in
+	logic programming. The paper presents a top down interpreter for
+	computing the probability of a query from a program in one of these
+	two languages. The algorithm is based on the one available for ProbLog.
+	The performances of the algorithm are compared with those of a Bayesian
+	reasoner and with those of the ProbLog interpreter. On programs that
+	have a small grounding, the Bayesian reasoner is more scalable, but
+	programs with a large grounding require the top down interpreter.
+	The comparison with ProbLog shows that the added expressiveness effectively
+	requires more computation resources.},
+  keywords = {Probabilistic Logic Programming, Logic Programs with Annotated Disjunction,
+	Probabilistic Reasoning},
+  pdf = {http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/Rig-AIIA07.pdf},
+  doi = {10.1007/978-3-540-74782-6\string_11 },
+  
+}
+url = {http://www.springerlink.com/content/v7m1k21607xhh365/},
+@INPROCEEDINGS{Rig-ILP06,
+  author = {F. Riguzzi},
+  title = {{ALLPAD}: Approximate Learning of Logic Programs with Annotated Disjunctions},
+  booktitle = {Proceedings of the 16th International Conference on Inductive Logic
+	Programming},
+  year = {2007},
+  number = {4455},
+  series = {LNAI},
+  publisher = {Springer}
+}
+
+@TECHREPORT{Rig06-TR,
+  author = {F. Riguzzi},
+  title = {{ALLPAD}: Approximate Learning of Logic Programs With Annotated Disjunctions},
+  institution = {University of Ferrara},
+  year = {2006},
+  number = {CS-2006-01},
+  note = {http://www.ing.unife.it/aree\_ricerca/informazione/cs/technical\_reports/CS-2006-01.pdf}
+}
+
+@INPROCEEDINGS{Rig04-ILP04-IC-short,
+  author = {F. Riguzzi},
+  title = {Learning Logic Programs with Annotated Disjunctions},
+  booktitle = {Inductive Logic Programming, ({ILP} 2004)},
+  year = {2004},
+  number = {3194},
+  series = {LNCS},
+  pages = {270--287},
+  month = {September},
+  publisher = {Springer},
+  doi = {10.1007/b10011},
+  isbn = {3-540-22941-8},
+  issn = {0302-9743},
+  url = {http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/Rig-ILP04.pdf}
+}
+
+@INPROCEEDINGS{Ross-PODS01,
+  author = {Kenneth A. Ross},
+  title = {Modular acyclicity and tail recursion in logic programs},
+  booktitle = {Principles of Database Systems},
+  year = {1991},
+  pages = {92--101},
+  address = {New York, NY, USA},
+  publisher = {ACM},
+  doi = {10.1145/113413.113422},
+  isbn = {0-89791-430-9},
+  location = {Denver, Colorado, United States}
+}
+
+@INPROCEEDINGS{DBLP:conf/ijcai/SatoK97,
+  author = {Taisuke Sato and Yoshitaka Kameya},
+  title = {PRISM: A Language for Symbolic-Statistical Modeling},
+  booktitle = {International Joint Conference on Artificial Intelligence},
+  year = {1997},
+  pages = {1330-1339},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@INCOLLECTION{scottkrauss,
+  author = {D. Scott and P. Krauss},
+  title = {Assigning probabilities to logical formulas},
+  booktitle = {Aspects of Inductive Logic},
+  publisher = {North-Holland},
+  year = {1966},
+  editor = {J. Hintikka and P. Suppes},
+  owner = {Fabrizio},
+  timestamp = {2008.05.28}
+}
+
+@INPROCEEDINGS{DBLP:conf/dils/SevonEHKT06,
+  author = {Petteri Sevon and Lauri Eronen and Petteri Hintsanen and Kimmo Kulovesi
+	and Hannu Toivonen},
+  title = {Link Discovery in Graphs Derived from Biological Databases},
+  booktitle = {International Workshop on Data Integration in the Life Sciences},
+  year = {2006},
+  volume = {4075},
+  series = {LNCS},
+  pages = {35-49},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://dx.doi.org/10.1007/11799511_5}
+}
+
+@MISC{Sri05-web-mlj,
+  author = {A. Srinivasan},
+  title = {Aleph},
+  year = {2004},
+  note = {http://web.comlab.ox.ac.uk/oucl/research/ areas/machlearn/Aleph/aleph\_toc.html}
+}
+
+@INPROCEEDINGS{DBLP:conf/dis/StolleKR05,
+  author = {C. Stolle and A. Karwath and L. De Raedt},
+  title = {CLASSIC'CL: An Integrated ILP System.},
+  booktitle = {Discovery Science, ({DS} 2005)},
+  year = {2005},
+  number = {3735},
+  series = {LNCS},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  ee = {http://dx.doi.org/10.1007/11563983_31}
+}
+
+@ARTICLE{DBLP:journals/siamcomp/TarjanY84,
+  author = {Robert Endre Tarjan and Mihalis Yannakakis},
+  title = {Simple Linear-Time Algorithms to Test Chordality of Graphs, Test
+	Acyclicity of Hypergraphs, and Selectively Reduce Acyclic Hypergraphs},
+  journal = {SIAM J. Comput.},
+  year = {1984},
+  volume = {13},
+  pages = {566-579},
+  number = {3},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+% TLS: took address and publisher out for space.
+@INPROCEEDINGS{ThaDav-MDD-78,
+  author = {A. Thayse and M. Davio and J. -P. Deschamps},
+  title = {Optimization of multivalued decision algorithms},
+  booktitle = {International Symposium on Multiple-Valued
+	Logic},
+  year = {1978},
+  pages = {171--178},
+publisher={IEEE Computer Society Press},
+}
+%  address = {Los Alamitos, CA, USA},
+%  publisher = {IEEE Computer Society Press},
+  location = {Rosemont, Illinois, United States}
+
+@ARTICLE{DBLP:journals/ml/TurcotteMS01,
+  author = {M. Turcotte and S. Muggleton and M. J. E. Sternberg},
+  title = {The Effect of Relational Background Knowledge on Learning of Protein
+	Three-Dimensional Fold Signatures.},
+  journal = {Machine Learning},
+  year = {2001},
+  volume = {43},
+  pages = {81-95},
+  number = {1/2},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@ARTICLE{well-founded,
+  author = {Van Gelder, A. and K. A. Ross and J. S. Schlipf},
+  title = {The Well-founded Semantics for General Logic Programs},
+  journal = JACM,
+  year = {1991},
+  volume = {38},
+  pages = {620--650},
+  number = {3}
+}
+
+@INPROCEEDINGS{VenDenBru-JELIA06,
+  author = {J. Vennekens and M. Denecker and M. Bruynooghe},
+  title = {Representing Causal Information about a Probabilistic Process},
+  booktitle = {Proceedings of the 10th European Conference on Logics in Artificial Intelligence},
+  year = {2006},
+  series = {LNAI},
+  month = {September},
+  publisher = {Springer}
+}
+
+@ARTICLE{DBLP:journals/jair/ZhangP96,
+  author = {Nevin Lianwen Zhang and David Poole},
+  title = {Exploiting Causal Independence in Bayesian Network Inference},
+  journal = {Journal of  Artificial Intelligence Research},
+  year = {1996},
+  volume = {5},
+  pages = {301-328},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@PROCEEDINGS{DBLP:conf/ilp/2008p,
+  title = {Probabilistic Inductive Logic Programming - Theory and Applications},
+  year = {2008},
+  editor = { De Raedt, Luc and Paolo Frasconi and Kristian Kersting and Stephen
+	Muggleton},
+  volume = {4911},
+  series = {LNCS},
+  publisher = {Springer},
+  bibsource = {DBLP, http://dblp.uni-trier.de},
+  booktitle = {Probabilistic Inductive Logic Programming},
+  isbn = {978-3-540-78651-1}
+}
+
+@inproceedings{VG89, 
+AUTHOR = "A. {van Gelder}", 
+TITLE = "The Alternating Fixpoint of Logic Programs with Negation",
+BOOKTITLE = "Symposium
+               on Principles of Database Systems",
+ORGANIZATION = "ACM Press",
+PAGES = "1-10",
+YEAR = 1989 }
+
+@inproceedings{TaSa86,
+AUTHOR = "H. Tamaki and T. Sato",
+TITLE = "{OLDT} Resolution with Tabulation",
+BOOKTITLE = ICLP,
+PAGES = "84-98",
+Publisher = {Springer},
+volume    = {225},
+YEAR = 1986 }
+
+@article{Zhou11,
+Author = "N.F. Zhou",
+Title = "The Language Features and Architecture of {B-Prolog}",
+Journal = TPLP,
+Note = "To Appear",
+Year = 2011}
+@Book{Lloyd,
+  author =       {J. W. Lloyd},
+  title =        {Foundations of Logic Programming},
+  edition =      {2nd extended},
+  isbn =         {3-540-18199-7},
+  publisher =   {Springer-Verlag},
+  year =         {1987},
+}
+
+@MISC{Str05-pc,
+  author =       {J. Struyf},
+  year =         {2005},
+  note =         {Personal communication},
+}
+
+
+
+@MISC{Sri05-web,
+  author =       {A. Srinivasan},
+  title =        {Aleph},
+  year =         {2004},
+  note =         {http://web.comlab.ox.ac.uk/oucl/research/areas/machlearn/Aleph/aleph_toc.html},
+}
+
+
+@article{RaeDeh97-ML,
+    Author       = "De Raedt, L. and Dehaspe, L.",
+    Title        = "Clausal discovery",
+    Journal      = "Machine Learning",
+    Year         = 1997,
+    pages ={99--146},
+    number={2--3},
+    volume ={26}
+}
+
+@BOOK{GreVal85-book,
+  author =       {S. Greco and P. Valabrega},
+  title =        {Lezioni di Matematica: Algebra Lineare},
+    volume =       {1},
+  publisher =    {Levrotto e Bella},
+  year =         {1985},
+  address =      {Torino, Italy},
+}
+@BOOK{NiedeW97-book,
+  author =       {S. Nienhuys-Cheng and R. de Wolf},
+  title =        {Foundations of Inductive Logic Programming},
+  publisher =    {Springer},
+  year =         {1997},
+  number =       {1228},
+  series =       {Lecture Notes in Artificial Intelligence},
+  address =      {Berlin, Germany},
+}
+
+
+@BOOK{LobMinRaj92-book,
+  author =       {J. Lobo and J. Minker and A. Rajasekar},
+  title =        {Foundations of Disjunctive Logic Programming},
+  publisher =    {{MIT} Press},
+  year =         {1992},
+  address =      {Cambridge, Massachusetts},
+}
+
+
+@techreport{Hol03-TR,
+   author =      {C. Holzbaur},
+   title =       {{OFAI} clp(q,r) Manual, Edition 1.3.3 },
+   year =        {1995},
+   institution = {Austrian Research Institute for Artificial Intelligence},
+   number =      {TR-95-09},
+   address={Vienna},
+}
+
+@ARTICLE{NgSub92-InfCom-IJ,
+  author =       {R. T. Ng and V. S. Subrahmanian},
+  title =        {Probabilistic Logic Programming},
+  journal =      {Information and Computation},
+  year =         {1992},
+  volume =       {101},
+  number =       {2},
+  pages =        {150--201},
+}
+@inProceedings{KerDeR01-ILP01-IC,
+   author =      {K. Kersting and L. De Raedt},
+   title =       {Towards Combining Inductive Logic Programming and {Bayesian} Networks},
+   booktitle =  {Inductive Logic Programming },
+   year =        {2001},
+    publisher={Springer},
+    series={{LNAI}},
+    volume={2157}
+}
+
+@inProceedings{KerDeR00-ILP00-IC,
+   author =      {K. Kersting and  De Raedt, L.},
+   title =       {Bayesian Logic Programs},
+   booktitle =  {Inductive Logic Programming ({ILP} 2000), Work in Progress Track},
+   year =        {2000},
+   url={http://SunSITE.Informatik.RWTH-Aachen.DE/Publications/CEUR-WS/Vol-35/},
+}
+@techreport{KerDeR01-TR,
+   author =      {K. Kersting and L. De Raedt},
+   title =       {Bayesian Logic Programs},
+   year =        {2001},
+   institution = {Institute for Computer Science, University of Freiburg},
+   number =      {151},
+   address={Freiburg, Germany},
+   month ={April},
+}
+@incollection{GetFri01-BC,
+  author  =      {L. Getoor and N. Friedman and D. Koller and A. Pfeffer},
+  title =        {Learning Probabilistic Relational Models},
+  booktitle =   {Relational Data Mining},
+  publisher =    {Springer-Verlag},
+  year =         {2001},
+  editor    ={Saso Dzeroski and Nada Lavrac},
+  address =      {Berlin},
+}
+@ARTICLE{NgoHad97-TheoCS-IJ,
+  author =       {L. Ngo and P. Haddaway},
+  title =        {Answering Queries from Context-Sensitive Probabilistic
+                    Knowledge Bases},
+  journal =      {Theoretical Computer Science},
+  year =         {1997},
+  volume =       {171},
+  number =       {1--2},
+  pages =        {147-177},
+}
+@article{mugg:mi17:slplearn,
+    TITLE = "Learning Stochastic Logic Programs",
+    AUTHOR = "S. H. Muggleton",
+    YEAR = 2000,
+    JOURNAL = "Electronic Transactions in Artificial Intelligence",
+    VOLUME = 4,
+    NUMBER = "041",
+        URL = "http://www.ida.liu.se/ext/epa/cis/2000/041/tcover.html" }
+
+@inProceedings{Cus00-UAI00-IC,
+   author =      {J. Cussens},
+   title =       {Stochastic logic programs: Sampling, inference and applications},
+   booktitle =  {Uncertainty in Artificial Intelligence ({UAI} 2000)},
+   year =        {2000},
+    publisher={Morgan Kaufmann},
+    address=    {San Francisco, CA},
+    pages=  {115--122},
+}
+
+@inProceedings{Sat98-MD-IW,
+   author =      {Sato, T.},
+   title =       {Modeling scientific theories as PRISM programs},
+   booktitle =  {{ECAI98} Workshop on Machine Discovery},
+   year =        {1998},
+    pages=  {37--45},
+}
+@inProceedings{Sat95-ICLP-IC,
+   author =      { Sato, T.},
+   title =       {A statistical learning method for logic programs with distribution semantics},
+   booktitle =  {12th International Conference on Logic Programming ({ICLP} 1995)},
+   year =        {1995},
+    pages=  {715-729},
+}
+@inProceedings{SanPagQaz03-UAI-IC,
+   author =      {Santos Costa, V.  and D. Page and M. Qazi and J. Cussens},
+   title =       {{CLP}($\mathcal{BN}$): Constraint Logic Programming for Probabilistic Knowledge},
+   booktitle =  {Uncertainty in Artificial Intelligence},
+  publisher={Morgan Kaufmann},
+   year =        {2003},
+}
+@inProceedings{Blo03-MRDM-IW,
+   author =      {H. Blockeel},
+   title =       {Prolog for First-Order Bayesian Networks: A Meta-intepreter Approach},
+   booktitle =  {Multi-Relational Data Mining ({MRDM} 2003)},
+   year =        {2003},
+}
+@INPROCEEDINGS{Ngo96-UAI-IC,
+    AUTHOR = "Ngo, L. ",
+    TITLE = "Probabilistic Disjunctive Logic Programming",
+    BOOKTITLE = "Uncertainty in Artificial Intelligence ({UAI} 1996)",
+    PUBLISHER = "Morgan Kaufmann Publishers",
+    ADDRESS = "San Francisco, CA",
+    YEAR = "1996",
+    PAGES = "397--404"
+}
+
+
+@ARTICLE{CheW96,
+AUTHOR = {W. Chen and D. S. Warren},
+    TITLE = {Tabled {E}valuation with {D}elaying for
+             {G}eneral {L}ogic {P}rograms},
+  JOURNAL = "Journal of the ACM",
+    PAGES = {20--74},
+   VOLUME = {43},
+   NUMBER = {1},
+     YEAR = {1996},
+    MONTH = {January}
+}
+
+@article{Swif99a, 
+AUTHOR = "T. Swift", 
+TITLE = "Tabling for Non-Monotonic Programming",
+Journal = {Annals of Mathematics and Artificial Intelligence},
+  publisher     = {Baltzer Science Publishers},
+  volume = {25},
+  number = {3-4},
+  pages = "201-240",
+  year          = {1999}
+}
+
+@article{VRS91,
+AUTHOR = "A. {van Gelder} and K.A. Ross and J.S. Schlipf",
+JOURNAL = "Journal of the ACM",
+TITLE = "Unfounded Sets and  well-founded semantics for general logic
+		programs", 
+VOLUME = "38",
+NUMBER = "3",
+PAGES = "620--650",
+YEAR = 1991 }
+
