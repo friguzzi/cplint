@@ -130,7 +130,7 @@ Instead of preparing a file containing the LPAD/CP-logic program, you can prepar
 clauses in \texttt{:-cplint.} and \texttt{:-end\_cplint.} For example, the coin program above can be stored in \texttt{coin.pl} as follows
 \begin{verbatim}
 :- use_module(library(pita)).
-
+:- style_check(-discontiguous).
 :-cplint.
 
 heads(Coin):1/2 ; tails(Coin):1/2:- 
@@ -145,6 +145,9 @@ toss(coin).
 
 :-end_cplint.
 \end{verbatim}
+The command \verb|:- style_check(-discontiguous).| avoids warnings about discontinuous definitions of predicates.
+These warnings are due to the translation process and are not a sign of coding errors, so they can be suppressed.
+
 Then you can simply load \texttt{coin.pl} as
 \begin{verbatim}
 ?-[coin].
@@ -184,8 +187,8 @@ if \texttt{false}, a different random variable is assigned to every grounding of
 
 
 \subsection{Files}
-The \texttt{packs/cplint/prolog/examples} folder in SWI-Prolog home contains some example programs.
-The \texttt{packs/cplint/doc} folder in SWI-Prolog home contains this manual in latex, html and pdf.
+The \texttt{pack/cplint/prolog/examples} folder in SWI-Prolog home contains some example programs.
+The \texttt{pack/cplint/doc} folder in SWI-Prolog home contains this manual in latex, html and pdf.
 
 \section{Learning}
 \texttt{cplint} contains the following learning algorithms:
