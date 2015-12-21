@@ -30,7 +30,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(rbtrees)).
 :-use_foreign_library(foreign(bddem),install).
 
-
+:- style_check(-discontiguous).
 
 :- thread_local v/3,rule_n/1, cplint_module/1.
 
