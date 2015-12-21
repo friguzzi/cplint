@@ -18,7 +18,8 @@ SLIPCOVER
 Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[sl/1,em/1,set/2,setting/2]).
+:-module(slipcover,[sl/1,em/1,set/2,setting/2,induce/1,induce_par/1, 
+  op(500,fx,#),op(500,fx,'-#')]).
 :- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
 :-use_module(library(random)).
@@ -35,8 +36,11 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 :-dynamic setting/2,last_id/1, rule/5.
 :- expects_dialect(yap).
 
-:- op(500,fx,#).
-:- op(500,fx,'-#').
+
+:- thread_local v/3,rule_n/1, cplint_module/1.
+
+
+:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
 
 setting(epsilon_em,0.0001).
@@ -84,6 +88,41 @@ setting(score,ll).
  * initial theory).
  * The result is stored in FileStem.rules
  */
+
+induce(Folds):-
+  set(compiling,on),
+  setting(seed,Seed),
+  setrand(Seed),
+  findall(Exs,(member(F,Folds),fold(F,Exs)),L),
+  append(L,DB),
+  assert(database(DB)),
+  statistics(walltime,[_,_]),
+  findall(C,bg(C),RBG),
+  generate_clauses(RBG,_RBG1,0,[],ThBG), 
+  assert_all(ThBG,_ThBGRef),
+    (setting(specialization,bottom)->
+      setting(megaex_bottom,MB),
+      deduct(MB,DB,[],InitialTheory),   
+      length(InitialTheory,_LI),  
+      remove_duplicates(InitialTheory,R1)
+    ;
+      get_head_atoms(O),
+      generate_top_cl(O,R1)
+    ),
+%  write('Initial theory'),nl,
+%  write_rules(R1,user_output),
+  learn_struct(DB,R1,R2,Score2),
+  learn_params(DB,R2,R,Score),  
+  format("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
+  statistics(walltime,[_,WT]),
+  WTS is WT/1000,
+  nl,
+  nl,
+  format('/* SLIPCOVER Final score ~f~n',[Score]),
+  format('Execution time ~f */~n',[WTS]),
+  write_rules(R,user_output),
+  set(compiling,off).
+
 
 sl(File):-
   setting(seed,Seed),
@@ -259,6 +298,30 @@ cycle_structure([(RH,_Score)|RT],R0,S0,SP0,DB,R,S,M):-
  * (theory).
  * The result is stored in FileStem.rules
  */
+induce_par(Folds):-
+  set(compiling,on),
+  setting(seed,Seed),
+  setrand(Seed),
+  findall(Exs,(member(F,Folds),fold(F,Exs)),L),
+  append(L,DB),
+  assert(database(DB)),
+  statistics(walltime,[_,_]),
+  findall(C,bg(C),RBG),
+  generate_clauses(RBG,_RBG1,0,[],ThBG),
+  assert_all(ThBG,_ThBGRef),
+  findall(C,in(C),R00),
+  process_clauses(R00,[],_,[],R0),
+  set(verbosity,3),
+  statistics(walltime,[_,_]),      
+  learn_params(DB,R0,R,Score),
+  statistics(walltime,[_,CT]),
+  CTS is CT/1000,
+  format('/* EMBLEM Final score ~f~n',[Score]),
+  format('Execution time ~f */~n',[CTS]),
+  write_rules(R,user_output),
+  set(compiling,off).
+  
+
 
 em(File):-
   generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL),
@@ -3087,8 +3150,12 @@ term_expansion_int(Head, ((Head1:-one(Env,One)),[def_rule(Head,[],true)])) :-
 
 sandbox:safe_primitive(slipcover:set(_,_)).
 sandbox:safe_primitive(slipcover:setting(_,_)).
+sandbox:safe_primitive(slipcover:init(_,_,_)).
+sandbox:safe_primitive(slipcover:init_bdd(_,_)).
 sandbox:safe_primitive(slipcover:init_test(_)).
 sandbox:safe_primitive(slipcover:ret_prob(_,_)).
+sandbox:safe_primitive(slipcover:end(_)).
+sandbox:safe_primitive(slipcover:end_bdd(_)).
 sandbox:safe_primitive(slipcover:end_test).
 sandbox:safe_primitive(slipcover:one(_)).
 sandbox:safe_primitive(slipcover:zero(_)).
@@ -3098,6 +3165,8 @@ sandbox:safe_primitive(slipcover:bdd_not(_,_)).
 sandbox:safe_primitive(slipcover:get_var_n(_,_,_,_)).
 sandbox:safe_primitive(slipcover:add_var(_,_,_,_)).
 sandbox:safe_primitive(slipcover:equality(_,_,_)).
+
+:- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 
