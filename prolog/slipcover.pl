@@ -18,7 +18,7 @@ SLIPCOVER
 Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,induce/1,induce/2,induce_par/1, 
+:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,induce/1,induce/7,induce_par/1, 
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
@@ -95,7 +95,7 @@ setting_sc(neg_ex,cw).
 induce(Folds):-
   induce_rules(Folds,_R).
 
-induce(TrainFolds,TestFolds):-
+induce(TrainFolds,TestFolds,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
   write('Testing'),nl,
   input_mod(M),
@@ -105,7 +105,7 @@ induce(TrainFolds,TestFolds):-
   generate_clauses(R,_R,0,[],Th), 
   assert_all(Th,M,_ThRef),
   set_sc(compiling,off),
-  test([TE]).
+  test([TE],CLL,AUCROC,ROC,AUCPR,PR).
  
 
 induce_rules(Folds,R):-
@@ -3260,48 +3260,53 @@ user:term_expansion((:- sc), []) :-
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)).
 
-test(TestSets):-
-  S= user_output,
-  SA= user_output,
-  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
-  test(TestSets,S,[],LG,0,Pos,0,Neg,0,CLL),
+test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
+%  S= user_output,
+%  SA= user_output,
+%  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
+  test(TestSet,[],LG,0,Pos,0,Neg,0,CLL),
   keysort(LG,LG1),
-  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
-  writes(LG1,S),
+%  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
+%  writes(LG1,S),
   reverse(LG1,LGR1),
-  compute_areas(LGR1,Pos,Neg,AUCROC,AUCPR),
-  SA1=user_output,
-  format(SA1,"~a;\t ~f;\t ~f;\t ~f~n",[all,CLL,AUCROC,AUCPR]).
-  
-test([],_S,LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
+  compute_areas(LGR1,Pos,Neg,AUCROC,ROC0,AUCPR,PR0),
+  findall([X,Y],member(X-Y,ROC0),ROC1),
+  ROC = c3{data:_{x:x, rows:[[x,'ROC']|ROC1]}},
+  findall([X,Y],member(X-Y,PR0),PR1),
+  PR = c3{data:_{x:x, rows:[[x,'PR']|PR1]}}.
 
-test([HT|TT],S,LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
-  test_fold(HT,S,LG1,Pos1,Neg1,CLL1),
+/*  SA1=user_output,
+  format(SA1,"~a;\t ~f;\t ~f;\t ~f~n",[all,CLL,AUCROC,AUCPR]).
+*/  
+test([],LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
+
+test([HT|TT],LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
+  test_fold(HT,LG1,Pos1,Neg1,CLL1),
   append(LG0,LG1,LG2),
   Pos2 is Pos0+Pos1,
   Neg2 is Neg0+Neg1,
   CLL2 is CLL0+CLL1,
-  test(TT,S,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
+  test(TT,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
 
-test_fold(F,S,LGOrd,Pos,Neg,CLL1):-
+test_fold(F,LGOrd,Pos,Neg,CLL1):-
   find_ex(F,LG,Pos,Neg),
   compute_CLL_atoms(LG,0,0,CLL1,LG1),
-  keysort(LG1,LGOrd),
-  reverse(LGOrd,LGROrd),
-  compute_areas(LGROrd,Pos,Neg,AUCROC,AUCPR), 
-  format(S,"cll(post,~d,~d,[",[Pos,Neg]),
-  writes(LGOrd,S),
-  SA=user_output,
-  format(SA,"~f;\t ~f;\t ~f~n",[CLL1,AUCROC,AUCPR]).
+  keysort(LG1,LGOrd).
+%  reverse(LGOrd,LGROrd),
+%  compute_areas(LGROrd,Pos,Neg,AUCROC,AUCPR), 
+%  format(S,"cll(post,~d,~d,[",[Pos,Neg]),
+%  writes(LGOrd,S),
+%  SA=user_output,
+%  format(SA,"~f;\t ~f;\t ~f~n",[CLL1,AUCROC,AUCPR]).
 
-compute_areas(LG,Pos,Neg,AUCROC,AUCPR):-
+compute_areas(LG,Pos,Neg,AUCROC,ROC,AUCPR,PR):-
   compute_pointsroc(LG,+1e20,0,0,Pos,Neg,[],ROC),
   hull(ROC,0,0,0,AUCROC),
-  SC=user_output,
-  write_p(ROC,SC),
-  compute_aucpr(LG,Pos,Neg,AUCPR,PR),
-  SPR=user_output,
-  write_ppr(PR,SPR).
+%  SC=user_output,
+%  write_p(ROC,SC),
+  compute_aucpr(LG,Pos,Neg,AUCPR,PR).
+%  SPR=user_output,
+%  write_ppr(PR,SPR).
 
 compute_pointsroc([],_P0,_TP,_FP,_FN,_TN,P0,P1):-!,
   append(P0,[1.0-1.0],P1).
