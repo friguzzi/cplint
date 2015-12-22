@@ -33,12 +33,12 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 :-multifile setting_sc/2.
 %:-use_module(library(sandbox)).
 
-:-dynamic p/2,rule_sc_n/1,modeh/4.
+:-dynamic p/2.
 :-dynamic setting_sc/2,last_id/1, rule/5.
 :- expects_dialect(yap).
 
 
-:- thread_local v/3,rule_sc_n/1, input_mod/1.
+:- thread_local v/3, input_mod/1.
 
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
@@ -99,7 +99,7 @@ induce(Folds):-
   %set_prolog_flag(unknown,warning),
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
   append(L,DB),
-  assert(database(DB)),
+  assert(M:database(DB)),
   statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
   M:bg(RBG),
@@ -122,8 +122,9 @@ induce(Folds):-
   nl,
   nl,
   format('/* SLIPCOVER Final score ~f~n',[Score]),
-  format('Execution time ~f */~n',[WTS]),
+  format('Wall time ~f */~n',[WTS]),
   write_rules(R,user_output),
+%  told,
   set_sc(compiling,off).
 
 
@@ -308,7 +309,7 @@ induce_par(Folds):-
   input_mod(M),
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
   append(L,DB),
-  assert(database(DB)),
+  assert(M:database(DB)),
   statistics(walltime,[_,_]),
   M:bg(RBG),
   generate_clauses(RBG,_RBG1,0,[],ThBG),
@@ -321,7 +322,7 @@ induce_par(Folds):-
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
   format('/* EMBLEM Final score ~f~n',[Score]),
-  format('Execution time ~f */~n',[CTS]),
+  format('Wall time ~f */~n',[CTS]),
   write_rules(R,user_output),
   set_sc(compiling,off).
   
@@ -551,20 +552,24 @@ scan_head([H:_P|T],O0,O):-
 
 store_clause_refinement(Ref,RefP,Score):-
   elab_clause_ref(Ref,Ref1),
-  recorda(ref_clause,r(Ref1,RefP,Score),_).
+  input_mod(M),
+  assert(M:ref_clause(r(Ref1,RefP,Score))).
 
 store_refinement(Ref,RefP,Score):-
   elab_ref(Ref,Ref1),
-  recorda(ref,r(Ref1,RefP,Score),_).
+  input_mod(M),
+  assert(M:ref(r(Ref1,RefP,Score))).
 
 already_scored_clause(R,R1,Score):-
   elab_ref([R],[rule(H,B)]),
-  recorded(ref_clause,r(rule(H,B1),R1,Score),_),
+  input_mod(M),
+  M:ref_clause(r(rule(H,B1),R1,Score)),
   permutation(B,B1).
 
 already_scored(R,R1,Score):-
   elab_ref(R,RR),
-  recorded(ref,r(RR,R1,Score),_).
+  input_mod(M),
+  M:ref(r(RR,R1,Score)).
 
 
 elab_clause_ref(rule(_NR,H,B,_Lits),rule(H1,B1)):-
@@ -1706,15 +1711,6 @@ mysublist([H|T],L):-
   mysublist(T,L).
 
 
-check_ref(H,B):-
-  copy_term((H,B),(H1,B1)),
-  numbervars((H1,B1),0,_N),
-  (ref(H1,B1)->
-    fail
-  ;
-    assert(ref(H1,B1))
-  ).
-
 specialize_rule([Lit|_RLit],Rule,M,SpecRul,SLit):-
   Rule = rule(ID,LH,BL,true),
   remove_prob(LH,LH1),
@@ -2089,7 +2085,6 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 
 
-rule_sc_n(0).
 
 setting_sc(epsilon_parsing, 1e-5).
 setting_sc(tabling, off).
