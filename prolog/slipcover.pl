@@ -18,7 +18,7 @@ SLIPCOVER
 Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,induce/1,induce/7,induce_par/1, 
+:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,induce/2,induce/7,induce_par/2, 
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
@@ -92,12 +92,13 @@ setting_sc(neg_ex,cw).
  * The result is stored in FileStem.rules
  */
 
-induce(Folds):-
-  induce_rules(Folds,_R).
+induce(Folds,Th):-
+  induce_rules(Folds,R0),
+  generate_clauses(R0,_R1,0,[],Th).
 
 induce(TrainFolds,TestFolds,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
-  write('Testing'),nl,
+  write2('Testing\n'),
   input_mod(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
@@ -134,14 +135,14 @@ induce_rules(Folds,R):-
     ),
   learn_struct(DB,M,R1,R2,Score2),
   learn_params(DB,M,R2,R,Score),  
-  format("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
+  format2("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
   statistics(walltime,[_,WT]),
   WTS is WT/1000,
   nl,
   nl,
-  format('/* SLIPCOVER Final score ~f~n',[Score]),
-  format('Wall time ~f */~n',[WTS]),
-  write_rules(R,user_output),
+  format2('/* SLIPCOVER Final score ~f~n',[Score]),
+  format2('Wall time ~f */~n',[WTS]),
+  write_rules2(R,user_output),
 %  told,
   set_sc(compiling,off).
 
@@ -178,15 +179,13 @@ sl(File):-
       generate_top_cl(O,R1)
     )
   ),
-%  write('Initial theory'),nl,
-%  write_rules(R1,user_output),
   learn_struct(DB,R1,R2,Score2),
   learn_params(DB,R2,R,Score),  
   statistics(walltime,[_,WT]),
   WTS is WT/1000,
-  format("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
-  format("Total execution time ~f~n~n",[WTS]),
-  write_rules(R,user_output),
+  format2("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
+  format2("Total execution time ~f~n~n",[WTS]),
+  write_rules2(R,user_output),
   listing(setting_sc/2),
   open(FileOut,write,Stream),
   format(Stream,'/* SLIPCOVER Final score ~f~n',[Score]),
@@ -207,29 +206,29 @@ gen_fixed([(H,B,BL)|T],[rule(R,H,B,BL)|T1]):-
 
 
 learn_struct(DB,Mod,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h],[b]],...], -R:final theory of the same form, -CLL
-  format("Clause search~n~n",[]),
+  format2("Clause search~n~n",[]),
   Mod:local_setting(max_iter,M),
   Mod:local_setting(depth_bound,DepthB),
   set_sc(depth_bound,false),
   findall((H,B,BL),Mod:fixed_rule(H,B,BL),LF),
   length(LF,LLF),
   gen_fixed(LF,LFR),
-  format("Scoring fixed clauses: ~d clauses~n~n",[LLF]),
+  format2("Scoring fixed clauses: ~d clauses~n~n",[LLF]),
   score_clause_refinements(LFR,Mod,1,LLF,DB,[],NB1,[],CL0,[],CLBG0),
   append(NB1,R1,Beam),
   cycle_beam(Beam,Mod,DB,CL0,[(HCL,S)|TCL],CLBG0,BG,M),
   set_sc(depth_bound,DepthB),
-  format("Theory search~n~n",[]),
+  format2("Theory search~n~n",[]),
   Mod:local_setting(max_iter_structure,MS),
   cycle_structure(TCL,Mod,[HCL],S,-1e20,DB,R2,Score,MS),
-  format("Best target theory~n~n",[]),
-  write_rules(R2,user_output),
+  format2("Best target theory~n~n",[]),
+  write_rules2(R2,user_output),
   Mod:local_setting(background_clauses,NBG1),
   length(BG,NBG),
-  format("Background search: ~d of ~d clauses~n~n",[NBG1,NBG]),
+  format2("Background search: ~d of ~d clauses~n~n",[NBG1,NBG]),
   pick_first(NBG1,BG,BG1),
   remove_score(BG,BG2),
-  write_rules(BG2,user_output),nl,
+  write_rules2(BG2,user_output),nl,
   append(R2,BG1,R).
 
 pick_first(0,_,[]):-!.
@@ -251,10 +250,10 @@ cycle_structure(_CL,_Mod,R,S,_SP,_DB,R,S,0):-!.  %0 iterations
 
 cycle_structure([(RH,_CLL)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   already_scored([RH|R0],R3,Score),!,
-  format("Theory iteration ~d",[M]),nl,nl,
-  write('Already scored, updated refinement'),nl,
-  write_rules(R3,user_output), 
-  write('Score '),write(Score),nl,nl,nl,
+  format2("Theory iteration ~d~n~n",[M]),
+  write3('Already scored, updated refinement\n'),
+  write_rules3(R3,user_output), 
+  write3('Score '),write3(Score),write3('\n\n\n'),
   (Score>S0->
     R4=R3,
     S4=Score,
@@ -268,10 +267,10 @@ cycle_structure([(RH,_CLL)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   cycle_structure(RT,Mod,R4,S4,SP1,DB,R,S,M1). 
 
 cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
-  format("Theory iteration ~d",[M]),nl,nl,
+  format2("Theory iteration ~d~n~n",[M]),
   generate_clauses([RH|R0],R2,0,[],Th1),
-  format("Initial theory~n~n",[]),
-  write_rules([RH|R0],user_output),
+  format3("Initial theory~n~n",[]),
+  write_rules3([RH|R0],user_output),
   assert_all(Th1,Mod,Th1Ref),  
   assert_all(R2,Mod,R2Ref),!,
   findall(R-HN,(Mod:rule(R,HL,_BL,_Lit),length(HL,HN)),L),  
@@ -288,20 +287,20 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
     derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),! % 1 BDD per model
   ),
   Mod:local_setting(random_restarts_number,N),
-  format("~nInitial CLL ~f~n~n",[CLL0]),
+  format3("~nInitial CLL ~f~n~n",[CLL0]),
   random_restarts(N,ExData,Nodes,CLL0,Score,initial,Par,LE),   %output:CLL,Par
-  format("Score after EMBLEM = ~f~n",[Score]),
+  format3("Score after EMBLEM = ~f~n",[Score]),
   retract_all(Th1Ref),
   retract_all(R2Ref),!,
   end(ExData),  
   update_theory(R2,Par,R3), 
-  write('updated Theory'),nl,
-  write_rules(R3,user_output),   %definite rules without probabilities in the head are not written
+  write3('Updated Theory\n'),
+  write_rules3(R3,user_output),   %definite rules without probabilities in the head are not written
   (Score>S0->
     R4=R3,
     S4=Score,
     SP1=S0,
-    write('New best score'),nl
+    write3('New best score\n')
   ;
     R4=R0,
     S4=S0,
@@ -320,7 +319,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
  * (theory).
  * The result is stored in FileStem.rules
  */
-induce_par(Folds):-
+induce_par(Folds,R):-
   input_mod(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -334,14 +333,13 @@ induce_par(Folds):-
   assert_all(ThBG,_ThBGRef),
   M:in(R00),
   process_clauses(R00,[],_,[],R0),
-  set_sc(verbosity,3),
   statistics(walltime,[_,_]),      
   learn_params(DB,M,R0,R,Score),
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
-  format('/* EMBLEM Final score ~f~n',[Score]),
-  format('Wall time ~f */~n',[CTS]),
-  write_rules(R,user_output),
+  format2('/* EMBLEM Final score ~f~n',[Score]),
+  format2('Wall time ~f */~n',[CTS]),
+  write_rules2(R,user_output),
   set_sc(compiling,off).
   
 
@@ -362,18 +360,17 @@ em(File):-
   set_sc(compiling,on),
   load(FileIn,_TH,R0),
   set_sc(compiling,off),
-  set_sc(verbosity,3),
   statistics(walltime,[_,_]),      
   learn_params(DB,R0,R,Score),
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
-  format("EM: Final score ~f~n",[Score]),
-  format("Execution time ~f~n~n",[CTS]),
-  write_rules(R,user_output),
+  format2("EM: Final score ~f~n",[Score]),
+  format2("Execution time ~f~n~n",[CTS]),
+  write_rules2(R,user_output),
   listing(setting_sc/2),
   open(FileOut,write,Stream),
-  format(Stream,'/* EMBLEM Final score ~f~n',[Score]),
-  format(Stream,'Execution time ~f~n',[CTS]),
+  format2(Stream,'/* EMBLEM Final score ~f~n',[Score]),
+  format2(Stream,'Execution time ~f~n',[CTS]),
   tell(Stream),
   listing(setting_sc/2),
   format(Stream,'*/~n~n',[]),
@@ -384,8 +381,8 @@ em(File):-
 
 learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   generate_clauses(R0,R1,0,[],Th0), 
-  format("Initial theory~n",[]),
-  write_rules(R1,user_output),
+  format2("Initial theory~n",[]),
+  write_rules2(R1,user_output),
   assert_all(Th0,M,Th0Ref),
   assert_all(R1,M,R1Ref),!,
   findall(R-HN,(M:rule(R,HL,_BL,_Lit),length(HL,HN)),L),
@@ -401,7 +398,7 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   ; 
    derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!      
   ),
-  format("Initial score ~f~n",[CLL0]),
+  format3("Initial score ~f~n",[CLL0]),
   M:local_setting(random_restarts_number,N),
   random_restarts(N,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
   end(ExData),
@@ -456,7 +453,7 @@ cycle_beam([],_Mod,_DB,CL,CL,CLBG,CLBG,_M):-!.
 cycle_beam(_Beam,_Mod,_DB,CL,CL,CLBG,CLBG,0):-!.
 
 cycle_beam(Beam,Mod,DB,CL0,CL,CLBG0,CLBG,M):-
-  format("Clause iteration ~d",[M]),nl,nl,
+  format2("Clause iteration ~d~n~n",[M]),
   cycle_clauses(Beam,Mod,DB,[],NB,CL0,CL1,CLBG0,CLBG1),
   M1 is M-1,%decreases the number of max_iter M
   cycle_beam(NB,Mod,DB,CL1,CL,CLBG1,CLBG,M1).
@@ -466,7 +463,7 @@ cycle_clauses([],_M,_DB,NB,NB,CL,CL,CLBG,CLBG):-!.
 cycle_clauses([(RH,_ScoreH)|T],M,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   findall(RS,specialize_rule(RH,M,RS,_L),LR),!,   %-LR:list of lists, each one correponding to a different revised theory; specialize_rule defined in revise.pl
   length(LR,NR),
-  write('Number of revisions '),write(NR),nl,
+  write3('Number of revisions '),write3(NR),write3('\n'),
   score_clause_refinements(LR,M,1,NR,DB,NB0,NB1,CL0,CL1,CLBG0,CLBG1),
   cycle_clauses(T,M,DB,NB1,NB,CL1,CL,CLBG1,CLBG).
 
@@ -474,18 +471,18 @@ score_clause_refinements([],_M,_N,_NR,_DB,NB,NB,CL,CL,CLBG,CLBG).
 
 score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-  %scans the list of revised theories
   already_scored_clause(R1,R3,Score),!,
-  format('Score ref.  ~d of ~d~n',[Nrev,NRef]),
-  write('Already scored, updated refinement'),nl,
-  write_rules([R3],user_output), 
-  write('Score '),write(Score),nl,nl,nl,
+  format3('Score ref.  ~d of ~d~n',[Nrev,NRef]),
+  write3('Already scored, updated refinement\n'),
+  write_rules3([R3],user_output), 
+  write3('Score '),write3(Score),write3('\n\n\n'),
   M:local_setting(beamsize,BS),
   insert_in_order(NB0,(R3,Score),BS,NB1),
   Nrev1 is Nrev+1,  
   score_clause_refinements(T,M,Nrev1,NRef,DB,NB1,NB,CL0,CL,CLBG0,CLBG).
 
 score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):- 
-  format('Score ref.  ~d of ~d~n',[Nrev,NRef]),
-  write_rules([R1],user_output),   
+  format3('Score ref.  ~d of ~d~n',[Nrev,NRef]),
+  write_rules3([R1],user_output),   
   generate_clauses_cw([R1],[R2],0,[],Th1),
   assert_all(Th1,M,Th1Ref),
   assert_all([R2],M,[R2Ref]),!,
@@ -503,14 +500,14 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   ; 
     derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!
   ),
-  format("Initial CLL ~f~n",[CLL0]),
+  format3("Initial CLL ~f~n",[CLL0]),
   M:local_setting(random_restarts_REFnumber,N),
   random_restarts_ref(N,ExData,Nodes,CLL0,Score,initial,Par,LE),  
   end(ExData),
   update_theory([R2],Par,[R3]),
-  write('Updated refinement'),nl,
-  write_rules([R3],user_output), 
-  write('Score (CLL) '),write(Score),nl,nl,nl,
+  write3('Updated refinement\n'),
+  write_rules3([R3],user_output), 
+  write3('Score (CLL) '),write3(Score),write3('\n\n\n'),
   retract_all(Th1Ref),
   retract_all([R2Ref]),!,
   M:local_setting(beamsize,BS),
@@ -518,16 +515,16 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   (target(R3,M)->
     insert_in_order(CL0,(R3,Score),+1e20,CL1),
     length(CL1,LCL1),
-    format("N. of target clauses ~d~n~n",[LCL1]),
+    format2("N. of target clauses ~d~n~n",[LCL1]),
     CLBG1=CLBG0
   ;
     (range_restricted(R3)->
       insert_in_order(CLBG0,(R3,Score),+1e20,CLBG1),
       length(CLBG1,LCL1),
-      format("N. of background clauses ~d~n~n",[LCL1]),
+      format2("N. of background clauses ~d~n~n",[LCL1]),
       CL1=CL0
     ;
-      format("Not range restricted~n~n",[]),
+      format2("Not range restricted~n~n",[]),
       CL1=CL0,
       CLBG1=CLBG0
     )
@@ -737,7 +734,6 @@ get_bdd_group([],_M,_Env,[],G,G,BDD,BDD,_CE,LE,LE):-!.
 get_bdd_group(T,_M,_Env,T,0,0,BDD,BDD,_CE,LE,LE):- !.
 
 get_bdd_group([H|T],M,Env,T1,Gmax,G1,BDD0,BDD,CE,[H|LE0],LE):-
-%  write(H),flush_output,
   get_node(H,M,Env,BDD1),  		%creates the BDD for atom H
   and(Env,BDD0,BDD1,BDD2),
   G is Gmax-1,
@@ -749,15 +745,9 @@ random_restarts(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
 random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   input_mod(M),
-  M:local_setting(verbosity,Ver),
-  (Ver>2->
-    M:local_setting(random_restarts_number,NMax),
-    Num is NMax-N+1,
-    format("Restart number ~d~n~n",[Num]),
-    flush_output
-  ;
-    true
-  ),
+  M:local_setting(random_restarts_number,NMax),
+  Num is NMax-N+1,
+  format3("Restart number ~d~n~n",[Num]),
   randomize(ExData),
   M:local_setting(epsilon_em,EA),
   M:local_setting(epsilon_em_fraction,ER),
@@ -765,12 +755,7 @@ random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(iter,Iter),
   em(ExData,Nodes,EA,ER,L,Iter,CLL,Par1,ExP),  
   score(LE,ExP,CLL,ScoreR),
-  M:local_setting(verbosity,Ver),
-  (Ver>2->
-    format("Random_restart: Score ~f~n",[ScoreR])
-  ;
-    true
-  ),
+  format3("Random_restart: Score ~f~n",[ScoreR]),
   N1 is N-1,
   (ScoreR>Score0->     
     random_restarts(N1,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
@@ -782,27 +767,16 @@ random_restarts_ref(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
 random_restarts_ref(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   input_mod(M),
-  M:local_setting(verbosity,Ver),
-  (Ver>2->
-    M:local_setting(random_restarts_REFnumber,NMax),
-    Num is NMax-N+1,
-    format("Restart number ~d~n~n",[Num]),
-    flush_output
-  ;
-    true
-  ),
+  M:local_setting(random_restarts_REFnumber,NMax),
+  Num is NMax-N+1,
+  format3("Restart number ~d~n~n",[Num]),
   M:local_setting(epsilon_em,EA),
   M:local_setting(epsilon_em_fraction,ER),
   length(Nodes,L),
   M:local_setting(iterREF,Iter),
   em(ExData,Nodes,EA,ER,L,Iter,CLLR,Par1,ExP),  
   score(LE,ExP,CLLR,ScoreR),
-  M:local_setting(verbosity,Ver),
-  (Ver>2->
-    format("Random_restart: Score ~f~n",[ScoreR])
-  ;
-    true
-  ),
+  format3("Random_restart: Score ~f~n",[ScoreR]),
   N1 is N-1,
   (ScoreR>Score0->  
     random_restarts_ref(N1,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
@@ -1010,21 +984,18 @@ read_all_atoms(_S,_N).
 
 
 
-
 write_rules([],_S).
 
 write_rules([rule(_N,HL,BL,Lit)|T],S):-!,
   copy_term((HL,BL,Lit),(HL1,BL1,Lit1)),
   numbervars((HL1,BL1,Lit1),0,_M),
   write_disj_clause(S,(HL1:-BL1)),
-%  write(Lit1),nl,
   write_rules(T,S).
 
 write_rules([def_rule(H,BL,Lit)|T],S):-
   copy_term((H,BL,Lit),(H1,BL1,Lit1)),
   numbervars((H1,BL1,Lit1),0,_M),
   write_disj_clause(S,([H1:1.0]:-BL1)),
-%  write(Lit1),nl,
   write_rules(T,S).
 
 
@@ -1047,7 +1018,6 @@ write_disj_clause(S,(H:-B)):-
 
 
 write_head(S,[A:1.0|_Rest]):-!,
-%  write(_Rest),nl,
   format(S,"~p:1.0",[A]).
   
 write_head(S,[A:P,'':_P]):-!, 
@@ -1229,8 +1199,8 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
   gen_head(Head,Prob,HP),
   copy_term((HP,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
-  format("Bottom clause: example ~p~nClause~n",[H]),
-  write_disj_clause(user_output,(HeadV:-BodyListV)),
+  format2("Bottom clause: example ~p~nClause~n",[H]),
+  write_disj_clause2(user_output,(HeadV:-BodyListV)),
   generate_body(T,Mod,CL0).
 
 generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0]):-
@@ -1248,8 +1218,8 @@ generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0])
   get_next_rule_number(R),
   copy_term((Head,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
-  format("Bottom clause: example ~p~nClause~n~p:0.5 :-~n",[H,HeadV]),
-  write_body(user_output,BodyListV),
+  format2("Bottom clause: example ~p~nClause~n~p:0.5 :-~n",[H,HeadV]),
+  write_body2(user_output,BodyListV),
   generate_body(T,Mod,CL0).
 
 
@@ -1470,36 +1440,30 @@ apply_operators([],_Theory,[]).
 
 apply_operators([add(Rule)|RestOps],Theory,[NewTheory|RestTheory]) :-
   append(Theory, [Rule], NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 apply_operators([add_body(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-
   delete_matching(Theory,Rule1,Theory1),
   append(Theory1, [Rule2], NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 apply_operators([remove_body(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-
   delete_matching(Theory,Rule1,Theory1),
   append(Theory1, [Rule2], NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 apply_operators([add_head(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-
   delete_matching(Theory,Rule1,Theory1),
   append(Theory1, [Rule2], NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 apply_operators([remove_head(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-
   delete_matching(Theory,Rule1,Theory1),
   append(Theory1, [Rule2], NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 apply_operators([remove(Rule)|RestOps],Theory,[NewTheory|RestTheory]) :-
   delete_matching(Theory,Rule,NewTheory),
-%  nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
 
@@ -1709,12 +1673,6 @@ update_head1([],_N,[]):-!.
 update_head1([H:_P|T],N,[H:P|T1]):-
 	       P is 1/N,
 	       update_head1(T,N,T1).
-
-write_list([A]):-!,
-               format("\t~p.~n~n",[A]).
-write_list([A|T]):-
-            format("\t~p,",[A]),
-	          write_list(T).
 
 
 banned_clause(H,M,B):-
@@ -3619,10 +3577,8 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   input_mod(M),
   M:rule_sc_n(NR),
   init_test(NR,Env),
-%  write(\+ H),
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
-%  write(PG),nl,
   end_test(Env),!,
   PG1 is 1-PG,
   (PG1=:=0.0->
@@ -3637,10 +3593,8 @@ compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
   input_mod(M),
   M:rule_sc_n(NR),
   init_test(NR,Env),
-%  write(H),
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
-%  write(PG),nl,
   end_test(Env),!,
   (PG=:=0.0->
     CLL2 is CLL0-10
@@ -3707,6 +3661,98 @@ plot(rec,prec,'--*k')
 %save area_pr.csv  A -ascii -append
 ~n~n",
   []).
-	
+
+write2(A):-
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    write(A)
+  ;
+    true
+  ).
+
+write3(A):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    write(A)
+  ;
+    true
+  ).
+
+format2(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    format(A,B)
+  ;
+    true
+  ).
+
+format3(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    format(A,B)
+  ;
+    true
+  ).
+
+write_rules2(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    write_rules(A,B)
+  ;
+    true
+  ).
+
+write_rules3(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    write_rules(A,B)
+  ;
+    true
+  ).
+
+
+write_disj_clause2(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    write_disj_clause(A,B)
+  ;
+    true
+  ).
+
+write_disj_clause3(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    write_disj_clause(A,B)
+  ;
+    true
+  ).
+
+write_body2(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    write_body(A,B)
+  ;
+    true
+  ).
+
+write_body3(A,B):-	
+  input_mod(M),
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    write_body(A,B)
+  ;
+    true
+  ).
+
+
 
 
