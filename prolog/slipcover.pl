@@ -3271,10 +3271,16 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  writes(LG1,S),
   reverse(LG1,LGR1),
   compute_areas(LGR1,Pos,Neg,AUCROC,ROC0,AUCPR,PR0),
-  findall([X,Y],member(X-Y,ROC0),ROC1),
-  ROC = c3{data:_{x:x, rows:[[x,'ROC']|ROC1]}},
-  findall([X,Y],member(X-Y,PR0),PR1),
-  PR = c3{data:_{x:x, rows:[[x,'PR']|PR1]}}.
+  ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
+    axis:_{x:_{min:0.0,max:1.0,padding:0.0,
+        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
+           y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
+  PR = c3{data:_{x:x, rows:[x-'PR'|PR0]},
+    axis:_{x:_{min:0.0,max:1.0,padding:0.0,
+        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
+           y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}}.
 
 /*  SA1=user_output,
   format(SA1,"~a;\t ~f;\t ~f;\t ~f~n",[all,CLL,AUCROC,AUCPR]).
