@@ -19,7 +19,7 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
 :-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,
-  induce/2,induce/7,induce_par/2,list2or/2,list2and/2,
+  induce/2,induce/8,induce_par/2,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
@@ -99,8 +99,9 @@ induce(Folds,R):-
   rules2terms(R0,R).
 %  generate_clauses(R0,R,0,[],_Th).
 
-induce(TrainFolds,TestFolds,CLL,AUCROC,ROC,AUCPR,PR):-
+induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
+  rules2terms(R,ROut).
   write2('Testing\n'),
   input_mod(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
@@ -322,7 +323,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
  * (theory).
  * The result is stored in FileStem.rules
  */
-induce_par(Folds,R):-
+induce_par(Folds,ROut):-
   input_mod(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -339,6 +340,7 @@ induce_par(Folds,R):-
   process_clauses(R00,[],_,[],R0),
   statistics(walltime,[_,_]),      
   learn_params(DB,M,R0,R,Score),
+  rules2terms(R,ROut).
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
   format2('/* EMBLEM Final score ~f~n',[Score]),
@@ -3181,7 +3183,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
-sandbox:safe_primitive(slipcover:induce(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(slipcover:induce(_,_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 
 %sandbox:safe_primitive(prolog_load_context(_,_)).
