@@ -101,7 +101,7 @@ induce(Folds,R):-
 
 induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
-  rules2terms(R,ROut).
+  rules2terms(R,ROut),
   write2('Testing\n'),
   input_mod(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
@@ -232,7 +232,8 @@ learn_struct(DB,Mod,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h]
   format2("Background search: ~d of ~d clauses~n~n",[NBG1,NBG]),
   pick_first(NBG1,BG,BG1),
   remove_score(BG,BG2),
-  write_rules2(BG2,user_output),nl,
+  write_rules2(BG2,user_output),
+  write2('\n'),
   append(R2,BG1,R).
 
 pick_first(0,_,[]):-!.
@@ -340,7 +341,7 @@ induce_par(Folds,ROut):-
   process_clauses(R00,[],_,[],R0),
   statistics(walltime,[_,_]),      
   learn_params(DB,M,R0,R,Score),
-  rules2terms(R,ROut).
+  rules2terms(R,ROut),
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
   format2('/* EMBLEM Final score ~f~n',[Score]),
