@@ -18,7 +18,8 @@ SLIPCOVER
 Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,induce/2,induce/7,induce_par/2, 
+:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,
+  induce/2,induce/7,induce_par/2,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
@@ -27,6 +28,7 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
 :-use_module(library(pita)).
+:- use_module(library(apply)).
 %:-use_foreign_library(foreign(bddem),install).
 :-set_prolog_flag(unknown,warning).
 
@@ -92,9 +94,10 @@ setting_sc(neg_ex,cw).
  * The result is stored in FileStem.rules
  */
 
-induce(Folds,Th):-
+induce(Folds,R):-
   induce_rules(Folds,R0),
-  generate_clauses(R0,_R1,0,[],Th).
+  rules2terms(R0,R).
+%  generate_clauses(R0,R,0,[],_Th).
 
 induce(TrainFolds,TestFolds,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
@@ -121,25 +124,25 @@ induce_rules(Folds,R):-
   assert(M:database(DB)),
   statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
-  M:bg(RBG),
+  M:bg(RBG0),
+  process_clauses(RBG0,[],_,[],RBG),
   generate_clauses(RBG,_RBG1,0,[],ThBG), 
   assert_all(ThBG,M,_ThBGRef),
-    (M:local_setting(specialization,bottom)->
-      M:local_setting(megaex_bottom,MB),
-      deduct(MB,M,DB,[],InitialTheory),   
-      length(InitialTheory,_LI),  
-      remove_duplicates(InitialTheory,R1)
-    ;
-      get_head_atoms(O),
-      generate_top_cl(O,R1)
-    ),
+  (M:local_setting(specialization,bottom)->
+    M:local_setting(megaex_bottom,MB),
+    deduct(MB,M,DB,[],InitialTheory),   
+    length(InitialTheory,_LI),  
+    remove_duplicates(InitialTheory,R1)
+  ;
+    get_head_atoms(O),
+    generate_top_cl(O,R1)
+  ),
   learn_struct(DB,M,R1,R2,Score2),
   learn_params(DB,M,R2,R,Score),  
   format2("~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
   statistics(walltime,[_,WT]),
   WTS is WT/1000,
-  nl,
-  nl,
+  write2('\n\n'),
   format2('/* SLIPCOVER Final score ~f~n',[Score]),
   format2('Wall time ~f */~n',[WTS]),
   write_rules2(R,user_output),
@@ -328,7 +331,8 @@ induce_par(Folds,R):-
   append(L,DB),
   assert(M:database(DB)),
   statistics(walltime,[_,_]),
-  M:bg(RBG),
+  M:bg(RBG0),
+  process_clauses(RBG0,[],_,[],RBG),
   generate_clauses(RBG,_RBG1,0,[],ThBG),
   assert_all(ThBG,_ThBGRef),
   M:in(R00),
@@ -981,7 +985,15 @@ read_all_atoms(Stream,Name):-
 read_all_atoms(_S,_N).
 
 
+rules2terms(R,T):-
+  maplist(rule2term,R,T).
 
+rule2term(rule(_N,HL,BL,_Lit),(H:-B)):-
+  list2or(HL,H),
+  list2and(BL,B).
+
+rule2term(def_rule(H,BL,_Lit),([H:1.0]:-B)):-
+  list2and(BL,B).
 
 
 write_rules([],_S).
@@ -1012,7 +1024,7 @@ write_disj_clause(S,(H:-[])):-!,
     
 write_disj_clause(S,(H:-B)):-
   write_head(S,H),
-  write(S,' :-'),
+  format(S,' :-',[]),
   nl(S),
   write_body(S,B).
 
@@ -1031,13 +1043,13 @@ write_head(S,[A:P|Rest]):-
   write_head(S,Rest).
 
 write_body(S,[]):-!,
-  format(S,"\ttrue.~n~n",[]).
+  format(S,"  true.~n~n",[]).
 
 write_body(S,[A]):-!,
-  format(S,"\t~p.~n~n",[A]).
+  format(S,"  ~p.~n~n",[A]).
     
 write_body(S,[A|T]):-
-  format(S,"\t~p,~n",[A]),
+  format(S,"  ~p,~n",[A]),
   write_body(S,T).
 
 
@@ -3167,8 +3179,8 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 %sandbox:safe_primitive(write(_)).
 %sandbox:safe_primitive(random:setrand(_)).
 
-sandbox:safe_primitive(slipcover:induce_par(_)).
-sandbox:safe_primitive(slipcover:induce(_)).
+sandbox:safe_primitive(slipcover:induce_par(_,_)).
+sandbox:safe_primitive(slipcover:induce(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 
