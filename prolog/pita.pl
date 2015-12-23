@@ -89,7 +89,7 @@ s(M:Goal,P):-
 prob(M:Goal,P):-
   s(M:Goal,P).
 
-prob_bar(M:Goal,Char):-
+prob_bar(M:Goal,Chart):-
   s(M:Goal,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
