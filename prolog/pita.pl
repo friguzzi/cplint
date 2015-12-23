@@ -21,13 +21,14 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 */
 
-:- module(pita,[s/2, prob/2, set_pita/2,local_pita_setting/2,
+:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,local_pita_setting/2,
    one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/2,
    end/1,end_bdd/1,end_test/1,ret_prob/3,em/9,randomize/1,
    get_var_n/5,add_var/5,equality/4,
      or_list/3, cplint/0, end_cplint/0, load/1, load_file/1]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
+:-meta_predicate prob_bar(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_foreign_library(foreign(bddem),install).
@@ -87,6 +88,14 @@ s(M:Goal,P):-
 
 prob(M:Goal,P):-
   s(M:Goal,P).
+
+prob_bar(M:Goal,Char):-
+  s(M:Goal,P),
+  PF is 1.0-P,
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
+     	       axis:_{x:_{type:category}, rotated: true},
+	                   size:_{ height: 100}}.
+
 
 get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
@@ -854,4 +863,5 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
+sandbox:safe_meta(pita:prob_bar(_,_), []).
 
