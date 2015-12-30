@@ -3215,25 +3215,6 @@ sandbox:safe_primitive(slipcover:equality(_,_,_)).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 
 */
-%:-style_check(-discontiguous).
-:- dynamic input_mod/1.
-
-/* input_mod(0).
-:-prolog_load_context(module, M),
-  retract(input_mod(_)),
-  write(M),
-  assert(input_mod(M)).
-*/
-
-user:term_expansion((:- sc), []) :-
-  prolog_load_context(module, M),
-%  retractall(input_mod(_)),
-  findall(local_setting(P,V),setting_sc(P,V),L),
-  assert_all(L,M,_),
-  assert(input_mod(M)),
-  retractall(M:rule_sc_n(_)),
-  assert(M:rule_sc_n(0)).
-
 test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  S= user_output,
 %  SA= user_output,
@@ -3767,6 +3748,56 @@ write_body3(A,B):-
   ;
     true
   ).
+
+
+%:-style_check(-discontiguous).
+:- dynamic input_mod/1.
+
+/* input_mod(0).
+:-prolog_load_context(module, M),
+  retract(input_mod(_)),
+  write(M),
+  assert(input_mod(M)).
+*/
+
+user:term_expansion((:- sc), []) :-!,
+  prolog_load_context(module, M),
+%  retractall(input_mod(_)),
+  findall(local_setting(P,V),setting_sc(P,V),L),
+  assert_all(L,M,_),
+  assert(input_mod(M)),
+  retractall(M:rule_sc_n(_)),
+  assert(M:rule_sc_n(0)).
+
+user:term_expansion(begin(model(I)), []) :-!,
+  input_mod(M),
+  retractall(M:model(_)),
+  assert(M:model(I)).
+
+user:term_expansion(end(model(_I)), []) :-!,
+  input_mod(M),
+  retractall(M:model(_)).
+
+user:term_expansion(At, A) :-
+  %write(At),nl,
+  input_mod(M),
+  M:model(Name),
+  At \= (_ :- _),
+  At \= end_of_file,
+  (At=neg(Atom)->    
+    Atom=..[Pred|Args],
+    Atom1=..[Pred,Name|Args],
+    A=neg(Atom1)
+  ;
+    (At=prob(Pr)->
+      A=prob(Name,Pr)
+    ;
+      At=..[Pred|Args],
+      Atom1=..[Pred,Name|Args],
+      A=Atom1
+    )
+  ).
+
 
 
 
