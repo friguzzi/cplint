@@ -1420,15 +1420,19 @@ generate_goal([P/A|T],M,H,G0,G1):-
   append(G0,L,G2),
   append(G2,LN,G3),
   generate_goal(T,M,H,G3,G1).
-  
-remove_duplicates([],[]).
 
-remove_duplicates([H|T],T1):-
-  member_eq(H,T),!,
-  remove_duplicates(T,T1).
+remove_duplicates(L0,L):-
+  remove_duplicates(L0,[],L1),
+  reverse(L1,L).
 
-remove_duplicates([H|T],[H|T1]):-
-  remove_duplicates(T,T1).
+remove_duplicates([],L,L).
+
+remove_duplicates([H|T],L0,L):-
+  member_eq(H,L0),!,
+  remove_duplicates(T,L0,L).
+
+remove_duplicates([H|T],L0,L):-
+  remove_duplicates(T,[H|L0],L).
 
 
 /*
@@ -2831,8 +2835,8 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
   N1 is N+1.
   
 gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
-  input_mod(M),
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
+  input_mod(M),
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module),
   append([pita:one(Env,BDD)],BodyList1,BodyList2),
