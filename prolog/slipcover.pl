@@ -107,10 +107,13 @@ induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
-  generate_clauses(R,_R,0,[],Th), 
-  assert_all(Th,M,_ThRef),
+  generate_clauses(R,RuleFacts,0,[],Th), 
+  assert_all(Th,M,ThRef),
+  assert_all(RuleFacts,M,RFRefs),
   set_sc(compiling,off),
-  test([TE],CLL,AUCROC,ROC,AUCPR,PR).
+  test([TE],CLL,AUCROC,ROC,AUCPR,PR),
+  retract_all(ThRef),
+  retract_all(RFRefs).
  
 
 induce_rules(Folds,R):-
@@ -220,11 +223,12 @@ learn_struct(DB,Mod,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h]
   format2("Scoring fixed clauses: ~d clauses~n~n",[LLF]),
   score_clause_refinements(LFR,Mod,1,LLF,DB,[],NB1,[],CL0,[],CLBG0),
   append(NB1,R1,Beam),
-  cycle_beam(Beam,Mod,DB,CL0,[(HCL,S)|TCL],CLBG0,BG,M),
+  cycle_beam(Beam,Mod,DB,CL0,CL,CLBG0,BG,M),
+  learn_params(DB,Mod,[],REmpty,S),
   set_sc(depth_bound,DepthB),
   format2("Theory search~n~n",[]),
   Mod:local_setting(max_iter_structure,MS),
-  cycle_structure(TCL,Mod,[HCL],S,-1e20,DB,R2,Score,MS),
+  cycle_structure(CL,Mod,REmpty,S,-1e20,DB,R2,Score,MS),
   format2("Best target theory~n~n",[]),
   write_rules2(R2,user_output),
   Mod:local_setting(background_clauses,NBG1),
@@ -3490,7 +3494,11 @@ get_constants([Type|T],M,[(Type,Co)|C]):-
   get_constants(T,M,C).
 
 find_pred_using_type(T,L):-
-  setof((P,Ar,A),pred_type(T,P,Ar,A),L).
+  (setof((P,Ar,A),pred_type(T,P,Ar,A),L)->
+    true
+  ;
+    L=[]
+  ).
 
 pred_type(T,P,Ar,A):-
   input_mod(M),
@@ -3524,7 +3532,11 @@ find_constants([(P,Ar,A)|T],M,C0,C):-
   input_mod(Mod),
   gen_goal(1,Ar,A,Args,ArgsNoV,V),
   G=..[P,M|Args],
-  setof(V,ArgsNoV^Mod:G,LC),
+  (setof(V,ArgsNoV^Mod:G,LC)->
+    true
+  ;
+    LC=[]
+  ),
   append(C0,LC,C1),
   remove_duplicates(C1,C2),
   find_constants(T,M,C2,C).
@@ -3554,7 +3566,7 @@ find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   length(LN,N),
   At1=..[P,H|LN],
   findall(At1,M:At1,LP),
-  (setof(\+ At1,neg_ex(LN,TypesA,At1,C),LNeg);LNeg=[]),
+  (setof(\+ At1,neg_ex(LN,TypesA,At1,C),LNeg)->true;LNeg=[]),
   length(LP,NP),
   length(LNeg,NN),
   append([LG0,LP,LNeg],LG1),
@@ -3575,7 +3587,8 @@ compute_CLL_atoms([],_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   input_mod(M),
-  M:rule_sc_n(NR),
+  findall(R,M:rule(R,_HL,_BL,_Lit),LR),
+  length(LR,NR),
   init_test(NR,Env),
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
@@ -3591,7 +3604,8 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
 
 compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
   input_mod(M),
-  M:rule_sc_n(NR),
+  findall(R,M:rule(R,_HL,_BL,_Lit),LR),
+  length(LR,NR),
   init_test(NR,Env),
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
