@@ -84,6 +84,11 @@ fold(test,[
   d297,d298,d299,d300,d302,d303,d304,d309,d312,d313,d317,d318,d319,d324,d326,
   d327,d328,d334,d335]).
 
+fold(all,F):-
+  fold(train,FTr),
+  fold(test,FTe),
+  append(FTr,FTe,F).
+
 output(active/0).
 
 input(ames/0).
