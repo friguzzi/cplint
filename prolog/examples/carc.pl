@@ -1,5 +1,5 @@
 :-use_module(library(slipcover)).
-
+:-use_module(library(lists)).
 /** <examples>
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([all],P).
@@ -17,18 +17,32 @@
 :- style_check(-discontiguous).
 :-sc.
 
-bg([
-(connected(Ring1,Ring2):-
-        Ring1 \= Ring2,
-        member(A,Ring1),
-        member(A,Ring2), !),
-(symbond(A,B,T):- bond(A,B,T)),
-(symbond(A,B,T):- bond(B,A,T))]).
+bg([]).
 
-in([]).
+in([
+(active:0.5 :-
+        atm(B,n,32,C)),
+
+(active:0.5 :-
+        has_property(cytogen_ca,p)),
+
+(active:0.5 :-
+        ames),
+
+(active:0.5 :-
+        atm(B,c,22,C),
+        symbond(B,D,7)),
+
+(active:0.5 :-
+        has_property(cytogen_sce,p)),
+
+(active:0.5:-
+        atm(B,c,10,C),
+        symbond(B,D,1))
+]).
 
 :-set_sc(single_var,false).
-:-set_sc(megaex_bottom,4).
+:-set_sc(megaex_bottom,16).
 :-set_sc(max_iter,60).
 :-set_sc(beamsize,100).
 :-set_sc(d,2).
@@ -172,9 +186,9 @@ determination(active/0,non_ar_5c_ring/1).
 determination(active/0,non_ar_hetero_5_ring/1).
 determination(active/0,five_ring/1).
 determination(active/0,connected/2).
-determination(active/0,'=<'/1).
-determination(active/0,'>='/1).
-determination(active/0,'='/1).
+determination(active/0,'=<'/2).
+determination(active/0,'>='/2).
+determination(active/0,'='/2).
 
 connected(_M,Ring1,Ring2):-
         Ring1 \= Ring2,
