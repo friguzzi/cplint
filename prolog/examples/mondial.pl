@@ -19,7 +19,10 @@
 
 :- set_sc(initial_clauses_per_megaex,6).
 :- set_sc(neg_ex,given).
-
+:- set_sc(beamsize,1000).
+:- set_sc(d,2).
+:- set_sc(max_var,5).
+:- set_sc(verbosity,3).
 bg([]).
 in([]).
 
@@ -54,6 +57,8 @@ input(organization/6).
 input(isMember/3).
 
 determination(christian_religion/1, = /2).
+determination(christian_religion/1, geq/2).
+determination(christian_religion/1, leq/2).
 determination(christian_religion/1, >= /2).
 determination(christian_religion/1, =< /2).
 determination(christian_religion/1,politics/5).
@@ -82,8 +87,8 @@ modeb(1,politics(+state,-date,-name,-motherstate,-type)).
 %modeb(1,politics(-state,-date,-name,-motherstate,+type)).
 modeb(2,(+type= #type)).
 modeb(1,economy(+state,-gdp,-float,-float,-float,-float)).
-modeb(*,(+gdp >= #gdp)).
-modeb(*,(+gdp =< #gdp)).
+modeb(*,geq(+gdp, #gdp)).
+modeb(*,leq(+gdp, #gdp)).
 modeb(1,language(+state,-language,-perl)).
 modeb(1,language(-state,+language,-perl)).
 /*modeb(*,(+perl >= #perl)). %commentati
@@ -135,6 +140,14 @@ lookahead(language(_,_,_),[borders(_,_,_)]).
 banned([christian_religion(A)],[christian_religion(A)]).
 banned([politics(A,B,C,D,E)],[politics(A,B,C,D,E)]).
 */
+
+geq(_,A,B):-
+  number(A),
+  A>=B. 
+
+leq(_,A,B):-
+  number(A),
+  A=<B. 
 
 
 begin(model(f1)).
