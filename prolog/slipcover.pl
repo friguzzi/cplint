@@ -138,7 +138,7 @@ induce_rules(Folds,R):-
     length(InitialTheory,_LI),  
     remove_duplicates(InitialTheory,R1)
   ;
-    get_head_atoms(O),
+    get_head_atoms(O,M),
     generate_top_cl(O,R1)
   ),
   learn_struct(DB,M,R1,R2,Score2),
@@ -472,6 +472,11 @@ cycle_beam(Beam,Mod,DB,CL0,CL,CLBG0,CLBG,M):-
 cycle_clauses([],_M,_DB,NB,NB,CL,CL,CLBG,CLBG):-!.
 
 cycle_clauses([(RH,_ScoreH)|T],M,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
+%  write3('\n\nRevising clause\n'),
+%  write_rules3([RH],user_output),
+%  RH=rule(_,H,B,Lits),
+%  write3(H),write3(' '),write3(B),
+%  write3('\n'),write3(Lits),write3('\n'),
   findall(RS,specialize_rule(RH,M,RS,_L),LR),!,   %-LR:list of lists, each one correponding to a different revised theory; specialize_rule defined in revise.pl
   length(LR,NR),
   write3('Number of revisions '),write3(NR),write3('\n'),
@@ -1749,7 +1754,8 @@ specialize_rule_la([],_LH1,BL1,BL1).
 
 specialize_rule_la([Lit1|T],LH1,BL1,BL3):-
   copy_term(Lit1,Lit2),
-  modeb(_,Lit2),
+  input_mod(M),
+  M:modeb(_,Lit2),
   append(LH1,BL1,ALL1),
   specialize_rule1(Lit2,ALL1,SLit1),
   append(BL1,[SLit1],BL2),
@@ -1879,13 +1885,16 @@ exctract_type_vars([Lit|RestLit],TypeVars):-
 
 
 take_mode(Lit):-
-  modeh(_,Lit),!.
+  input_mod(M),
+  M:modeh(_,Lit),!.
 
 take_mode(Lit):-
-  modeb(_,Lit),!.
+  input_mod(M),
+  M:modeb(_,Lit),!.
 
 take_mode(Lit):-
-  mode(_,Lit),!.
+  input_mod(M),
+  M:mode(_,Lit),!.
 
 
 type_vars([],[],[]).
@@ -2037,10 +2046,18 @@ get_max([(MD-DsH)|T],MD0,_Ds0,Ds):-
 get_max([_H|T],MD,Ds0,Ds):-
 	get_max(T,MD,Ds0,Ds).
 
+delete_eq([],_E,[]).
+
+delete_eq([H|T],E,T1):-
+  H==E,!,
+  delete_eq(T,E,T1).
+
+delete_eq([H|T],E,[H|T1]):-
+  delete_eq(T,E,T1).
 
 output_vars(OutVars,[],OutVars):-!.
 output_vars(BodyAtomVars,[I|InputVars],OutVars):-	
-  delete(BodyAtomVars, I, Residue),   			
+  delete_eq(BodyAtomVars, I, Residue),   			
   output_vars(Residue,InputVars, OutVars).
 
 % returns D as the maximum depth of the variables in the list (first argument)
