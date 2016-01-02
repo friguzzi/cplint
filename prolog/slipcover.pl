@@ -19,7 +19,7 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 */
 :-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,
-  induce/2,induce/8,induce_par/2,list2or/2,list2and/2,
+  induce/2,induce/8,induce_par/2,induce_par/8,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(lists)).
@@ -81,9 +81,26 @@ setting_sc(specialization,bottom).
 
 setting_sc(seed,rand(10,1231,3032)).  
 setting_sc(score,ll).
+/* allowed values: ll aucpr */
 setting_sc(neg_ex,cw).
 
-/* allowed values: ll aucpr */
+
+setting_sc(epsilon_parsing, 1e-5).
+setting_sc(tabling, off).
+/* on, off */
+
+setting_sc(bagof,false).
+/* values: false, intermediate, all, extra */
+
+setting_sc(compiling,off).
+
+
+setting_sc(depth_bound,true).  %if true, it limits the derivation of the example to the value of 'depth'
+setting_sc(depth,2).
+setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
+
+
+
 /** 
  * sl(+FileStem:atom) is det
  *
@@ -329,6 +346,10 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
  * The result is stored in FileStem.rules
  */
 induce_par(Folds,ROut):-
+  induce_parameters(Folds,R),
+  rules2terms(R,ROut).
+
+induce_parameters(Folds,R):-
   input_mod(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -345,7 +366,6 @@ induce_par(Folds,ROut):-
   process_clauses(R00,[],_,[],R0),
   statistics(walltime,[_,_]),      
   learn_params(DB,M,R0,R,Score),
-  rules2terms(R,ROut),
   statistics(walltime,[_,CT]),
   CTS is CT/1000,
   format2('/* EMBLEM Final score ~f~n',[Score]),
@@ -353,7 +373,22 @@ induce_par(Folds,ROut):-
   write_rules2(R,user_output),
   set_sc(compiling,off).
   
-
+induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
+  induce_parameters(TrainFolds,R),
+  rules2terms(R,ROut),
+  write2('Testing\n'),
+  input_mod(M),
+  findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
+  append(L,TE),
+  set_sc(compiling,on),
+  generate_clauses(R,RuleFacts,0,[],Th), 
+  assert_all(Th,M,ThRef),
+  assert_all(RuleFacts,M,RFRefs),
+  set_sc(compiling,off),
+  test([TE],CLL,AUCROC,ROC,AUCPR,PR),
+  retract_all(ThRef),
+  retract_all(RFRefs).
+ 
 
 em(File):-
   generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL),
@@ -1703,7 +1738,8 @@ update_head1([H:_P|T],N,[H:P|T1]):-
 	       update_head1(T,N,T1).
 
 
-banned_clause(H,M,B):-
+banned_clause(H,B):-
+  input_mod(M),
   numbervars((H,B),0,_N),
   M:banned(H2,B2),
   mysublist(H2,H),
@@ -2103,20 +2139,6 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 
 
-
-setting_sc(epsilon_parsing, 1e-5).
-setting_sc(tabling, off).
-/* on, off */
-
-setting_sc(bagof,false).
-/* values: false, intermediate, all, extra */
-
-setting_sc(compiling,off).
-
-
-setting_sc(depth_bound,true).  %if true, it limits the derivation of the example to the value of 'depth'
-setting_sc(depth,2).
-setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 %:- yap_flag(single_var_warnings, on).
 
@@ -3208,6 +3230,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 %sandbox:safe_primitive(random:setrand(_)).
 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
+sandbox:safe_primitive(slipcover:induce_par(_,_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
@@ -3549,7 +3572,7 @@ find_constants([(P,Ar,A)|T],M,C0,C):-
   input_mod(Mod),
   gen_goal(1,Ar,A,Args,ArgsNoV,V),
   G=..[P,M|Args],
-  (setof(V,ArgsNoV^Mod:G,LC)->
+  (setof(V,ArgsNoV^call_goal(Mod,G),LC)->
     true
   ;
     LC=[]
@@ -3558,6 +3581,8 @@ find_constants([(P,Ar,A)|T],M,C0,C):-
   remove_duplicates(C1,C2),
   find_constants(T,M,C2,C).
 
+call_goal(M,G):-
+  M:G.
 
 gen_goal(Arg,Ar,_A,[],[],_):-
   Arg =:= Ar+1,!.
@@ -3603,6 +3628,7 @@ neg_ex([H|T],[HT|TT],At1,C):-
 compute_CLL_atoms([],_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
+%  write(\+ H),nl,
   input_mod(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
@@ -3620,6 +3646,7 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   compute_CLL_atoms(T,N1,CLL2,CLL1,T1).	
 
 compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
+%  write(H),nl,
   input_mod(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
