@@ -1,10 +1,33 @@
-:-use_module(library(slipcover)).
+/* HIV dataset from
+Beerenwinkel N, RahnenfÂ¨uhrer J, DÂ¨aumer M, Hoffmann D, Kaiser R
+Selbig J, Lengauer T (2005) 
+Learning multiple evolutionary pathways from cross-sectional data. 
+Journal of Computational Biology 12:584-598
+
+Prolog version kindly provided by Wannes Meert from 
+Meert, W., Struyf, J., and Blockeel, H. 2008. 
+Learning ground CP-Logic theories by leveraging Bayesian network learning 
+techniques. Fundamenta Informaticae 89, 131-160
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic 
+programs by searching the clause space. 
+Theory and Practice of Logic Programming, 15(2):169-212, 2015
+
+*/
+
 
 /** <examples>
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([all],P).
+?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce([all],P).
+?- induce_par([all],P).
 */
+:- use_module(library(slipcover)).
+
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).

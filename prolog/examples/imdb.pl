@@ -1,10 +1,26 @@
-:-use_module(library(slipcover)).
+/* IMDB dataset from 
+Mihalkova L, Mooney RJ (2007) Bottom-up learning of markov logic network 
+structure.  In: Proceedings of the 24th International Conference on 
+Machine Learning, ACM, pp 625-632
+
+Here the problem is to learn a definition for the predicate workedunder
+
+Downloaded from 
+http://alchemy.cs.washington.edu/data/imdb/
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+*/
+
 
 /** <examples>
 ?- induce([1,2,3,4],[5],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([1,2,3,4],P).
 ?- induce([1,2,3,4,5],P).
 */
+:- use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).

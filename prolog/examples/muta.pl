@@ -1,10 +1,29 @@
-:-use_module(library(slipcover)).
+/* Mutagenesis dataset from
+Srinivasan A, Muggleton S, Sternberg MJE, King RD (1996) 
+Theories for mutagenicity: A study in first-order and feature-based induction. 
+AI 85(1-2):277-299
+
+Downloaded from
+http://www.doc.ic.ac.uk/~shm/mutagenesis.html
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic 
+programs by searching the clause space. 
+Theory and Practice of Logic Programming, 15(2):169-212, 2015
+
+*/
 
 /** <examples>
 ?- induce([1,2,3,4,5,6,7,8,9],[10],P,LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([all],P).
-?- induce([all],P).
+?- induce_par([1,2,3,4,5,6,7,8,9],[10],P,LL,AUCROC,ROC,AUCPR,PR).
+?- induce([1,2,3,4,5,6,7,8,9,10],P).
+?- induce_par([1,2,3,4,5,6,7,8,9,10],P).
 */
+:- use_module(library(slipcover)).
+
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).

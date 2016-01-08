@@ -1,8 +1,15 @@
-:-use_module(library(slipcover)).
+/* University dataset from
+Schulte, Oliver, and Hassan Khosravi. "Learning graphical models for relational data via lattice search." Machine Learning 88.3 (2012): 331-368.
+
+Downloaded from 
+http://www.cs.sfu.ca/~oschulte/jbn/dataset.html
+*/
 
 /** <examples>
 ?- induce([f1,f2,f3,f4],[f5],P,LL,AUCROC,ROC,AUCPR,PR).
 */
+
+:- use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).

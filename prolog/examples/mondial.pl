@@ -1,10 +1,25 @@
-:-use_module(library(slipcover)).
+/* Mondial dataset from
+May W (1999) Information extraction and integration: 
+The mondial case study. Tech. rep., Universitat Freiburg, 
+Institut fur Informatik
+Schulte O, Khosravi H (2012) Learning graphical models for relational 
+data via lattice search. Machine Learning 88(3):331-368
+
+Downloaded from 
+http://www.cs.sfu.ca/~oschulte/jbn/dataset.html
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+*/
 
 /** <examples>
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([all],P).
 ?- induce([all],P).
 */
+:-use_module(library(slipcover)).
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).

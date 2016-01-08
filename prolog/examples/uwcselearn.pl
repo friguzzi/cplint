@@ -1,9 +1,28 @@
-:-use_module(library(slipcover)).
+/* UWCSE dataset from
+Kok S, Domingos P (2005) Learning the structure of Markov Logic Networks. In:
+Proceedings of the 22nd international conference on Machine learning, ACM, pp
+441-448
+
+Downloaded from
+http://alchemy.cs.washington.edu/data/uw-cse
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic 
+programs by searching the clause space. 
+Theory and Practice of Logic Programming, 15(2):169-212, 2015
+*/
 
 /** <examples>
-?- induce([graphics,language,systems,theory],P).
-?- induce_par([graphics,language,systems,theory],P).
+?- induce([ai,graphics,language,systems],[theory],P,LL,AUCROC,ROC,AUCPR,PR).
+?- induce_par([ai,graphics,language,systems],[theory],P,LL,AUCROC,ROC,AUCPR,PR).
+?- induce([ai,graphics,language,systems,theory],P).
+?- induce_par([ai,graphics,language,systems,theory],P).
 */
+
+:- use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).

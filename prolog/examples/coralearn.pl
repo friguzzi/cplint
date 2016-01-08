@@ -1,8 +1,27 @@
-:-use_module(library(slipcover)).
+/* Cora dataset from
+P. Singla and P. Domingos. Discriminative training of Markov logic networks. 
+In Manuela M. Veloso and Subbarao Kambhampati, editors, 
+Proceedings of the 20th National Conference on Artificial Intelligence and the
+17th Innovative Applications of Artificial Intelligence Conference, 
+pages 868-873. AAAI Press/The MIT Press, 2005
+
+Downloaded from
+http://alchemy.cs.washington.edu/data/cora
+
+Used in
+Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. Intelligent Data Analysis, 17(2):343-363, 2013
+Elena Bellodi and Fabrizio Riguzzi. Experimentation of an expectation 
+maximization algorithm for probabilistic logic programs. 
+Intelligenza Artificiale, 8(1):3-18, 2012
+
+Parameter learning problem
+*/
 
 /** <examples>
-?- induce_par([1,2,3,4],P).
+?- induce_par(1,2,3,4],[5],P,LL,AUCROC,ROC,AUCPR,PR).
 */
+
+:- use_module(library(slipcover)).
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).

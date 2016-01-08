@@ -1,10 +1,28 @@
-:-use_module(library(slipcover)).
-:-use_module(library(lists)).
+/* Carcinogenesis dataset from
+
+Srinivasan A, King RD, Muggleton S, Sternberg MJE (1997) 
+Carcinogenesis predictions using ILP. 
+In: Lavrac N, Dzeroski S (eds) 7th International Workshop on Inductive
+Logic Programming, Springer, LNCS, pp 273-287
+
+Downloaded from
+http://www.cs.ox.ac.uk/activities/machlearn/cancer.html
+
+Used in
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo 
+structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+*/
+
 /** <examples>
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([all],P).
+?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce([all],P).
+?- induce_par([all],P).
 */
+:-use_module(library(slipcover)).
+:-use_module(library(lists)).
+
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).
