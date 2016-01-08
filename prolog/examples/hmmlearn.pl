@@ -1,8 +1,26 @@
-:-use_module(library(slipcover)).
-:-use_module(library(lists)).
+/* Hidden Markov Model dataset: 500 sequences of an HMM with 2 states
+and 2 output symbol.
+Used in 
+Fabrizio Riguzzi and Nicola Di Mauro. Applying the information bottleneck 
+to statistical relational learning. Machine Learning, 86(1):89-114, 2012. 
+
+The program is from
+Sato T, Kameya Y, Zhou NF (2005) Generative modeling with failure in prism. 
+In: Kaelbling LP, Saffiotti A (eds) Proceedings of the 19th International 
+Joint Conference on Artificial Intelligence, Professional Book Center, 
+pp 847-852
+
+Examples generated randomly from the target program. The task is to recover
+the values of the parameters of the target program (indicated in the input 
+program). When learning, the initial parameters are randomly set.
+*/
+
 /** <examples>
 ?- induce_par([train],P).
 */
+:- use_module(library(slipcover)).
+:- use_module(library(lists)).
+
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).

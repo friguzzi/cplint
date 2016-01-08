@@ -1,9 +1,26 @@
-:-use_module(library(slipcover)).
+/* Shop dataset from
+Fabrizio Riguzzi and Nicola Di Mauro. Applying the information bottleneck
+to statistical relational learning. Machine Learning, 86(1):89-114, 2012.
+Meert, W., Struyf, J., and Blockeel, H. 2008.
+Learning ground CP-Logic theories by leveraging Bayesian network learning
+techniques. Fundamenta Informaticae 89, 131-160
 
+The training examples are all possible worlds of the target programi (shop4). 
+The prob fact in each model/interpretation/world indicates its probability 
+(it can be interpreted as frequency in a sampled dataset).
+The task is to recover
+the values of the parameters of the input program. When learning, the initial
+parameters are randomly set. A test set is also provided generated randomly from
+the target program.
+
+*/
 /** <examples>
 ?- induce_par([train],P).
 ?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 */
+
+
+:- use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).

@@ -1,10 +1,21 @@
-:-use_module(library(slipcover)).
+/* Bongard dataset from
+L. De Raedt and W. Van Laer. Inductive constraint logic. 
+In Klaus P. Jantke, Takeshi Shinohara, and Thomas Zeugmann, editors, 
+Proceedings of the Sixth International Workshop on Algorithmic
+Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence, 
+pages 80-94. SpringerVerlag, 1995.
+
+Downloaded from 
+https://dtai.cs.kuleuven.be/static/ACE/doc/
+*/
 
 /** <examples>
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([all],P).
 ?- induce([all],P).
 */
+:-use_module(library(slipcover)).
+
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(lpad).
