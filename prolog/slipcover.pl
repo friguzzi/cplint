@@ -22,13 +22,14 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
   induce/2,induce/8,induce_par/2,induce_par/8,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
+:-use_module(library(auc)).
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
 :-use_module(library(pita)).
-:- use_module(library(apply)).
+:-use_module(library(apply)).
 %:-use_foreign_library(foreign(bddem),install).
 :-set_prolog_flag(unknown,warning).
 
@@ -36,8 +37,8 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 %:-use_module(library(sandbox)).
 
 :-dynamic p/2.
-:-dynamic setting_sc/2,last_id/1, rule/5.
-:- expects_dialect(yap).
+:-dynamic setting_sc/2,last_id/1, rule/5, model/1.
+:-expects_dialect(yap).
 
 
 :- thread_local v/3, input_mod/1.
@@ -136,6 +137,7 @@ induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
 induce_rules(Folds,R):-
 %tell(ciao),
   input_mod(M),
+  make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   setrand(Seed),
@@ -169,6 +171,25 @@ induce_rules(Folds,R):-
   write_rules2(R,user_output),
 %  told,
   set_sc(compiling,off).
+
+make_dynamic(M):-
+  findall(O,M:output(O),LO),
+  findall(I,M:input(I),LI),
+  findall(I,M:input_cw(I),LIC),
+  findall(D,M:determination(D,_DD),LDH),
+  findall(DD,M:determination(_D,DD),LDD),
+  append([LO,LI,LIC,LDH,LDD],L0),
+  remove_duplicates(L0,L),
+  maplist(to_dyn(M),L).
+
+to_dyn(M,P/A):-
+  A1 is A+1,
+  M:(dynamic P/A1),
+  A2 is A1+2,
+  M:(dynamic P/A2),
+  A3 is A2+1,
+  M:(dynamic P/A3).
+
 
 
 sl(File):-
@@ -371,6 +392,7 @@ induce_parameters(Folds,R):-
   format2('/* EMBLEM Final score ~f~n',[Score]),
   format2('Wall time ~f */~n',[CTS]),
   write_rules2(R,user_output),
+  write_rules(R,user_output),
   set_sc(compiling,off).
   
 induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
@@ -1039,7 +1061,7 @@ rule2term(rule(_N,HL,BL,_Lit),(H:-B)):-
   list2or(HL,H),
   list2and(BL,B).
 
-rule2term(def_rule(H,BL,_Lit),([H:1.0]:-B)):-
+rule2term(def_rule(H,BL,_Lit),((H:1.0):-B)):-
   list2and(BL,B).
 
 
@@ -3267,12 +3289,13 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  S= user_output,
 %  SA= user_output,
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
-  test(TestSet,[],LG,0,Pos,0,Neg,0,CLL),
+  test_folds(TestSet,[],LG,0,Pos,0,Neg,0,CLL),
   keysort(LG,LG1),
 %  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
 %  writes(LG1,S),
   reverse(LG1,LGR1),
-  compute_areas(LGR1,Pos,Neg,AUCROC,ROC0,AUCPR,PR0),
+  compute_areas_diagrams(LGR1,Pos,Neg,AUCROC,ROC,AUCPR,PR).
+/*
   ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
     axis:_{x:_{min:0.0,max:1.0,padding:0.0,
         tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
@@ -3283,31 +3306,22 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
         tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
            y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
         tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}}.
+*/
+test_folds([],LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
 
-/*  SA1=user_output,
-  format(SA1,"~a;\t ~f;\t ~f;\t ~f~n",[all,CLL,AUCROC,AUCPR]).
-*/  
-test([],LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
-
-test([HT|TT],LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
-  test_fold(HT,LG1,Pos1,Neg1,CLL1),
+test_folds([HT|TT],LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
+  test_1fold(HT,LG1,Pos1,Neg1,CLL1),
   append(LG0,LG1,LG2),
   Pos2 is Pos0+Pos1,
   Neg2 is Neg0+Neg1,
   CLL2 is CLL0+CLL1,
-  test(TT,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
+  test_folds(TT,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
 
-test_fold(F,LGOrd,Pos,Neg,CLL1):-
+test_1fold(F,LGOrd,Pos,Neg,CLL1):-
   find_ex(F,LG,Pos,Neg),
   compute_CLL_atoms(LG,0,0,CLL1,LG1),
   keysort(LG1,LGOrd).
-%  reverse(LGOrd,LGROrd),
-%  compute_areas(LGROrd,Pos,Neg,AUCROC,AUCPR), 
-%  format(S,"cll(post,~d,~d,[",[Pos,Neg]),
-%  writes(LGOrd,S),
-%  SA=user_output,
-%  format(SA,"~f;\t ~f;\t ~f~n",[CLL1,AUCROC,AUCPR]).
-
+/*
 compute_areas(LG,Pos,Neg,AUCROC,ROC,AUCPR,PR):-
   compute_pointsroc(LG,+1e20,0,0,Pos,Neg,[],ROC),
   hull(ROC,0,0,0,AUCROC),
@@ -3453,7 +3467,7 @@ interpolate(I,N,Pos,R0,P0,TPA,FPA,TPB,FPB,A0,A,PR0,[R-P|PR]):-
   A1 is A0+(R-R0)*(P+P0)/2,
   I1 is I+1,
   interpolate(I1,N,Pos,R,P,TPA,FPA,TPB,FPB,A1,A,PR0,PR).
-
+*/
 
 find_ex(DB,LG,Pos,Neg):-
   input_mod(M),
@@ -3825,11 +3839,17 @@ write_body3(A,B):-
 user:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
 %  retractall(input_mod(_)),
+%  M:dynamic(model/1),
+%  M:set_prolog_flag(unkonw,fail),
   findall(local_setting(P,V),setting_sc(P,V),L),
   assert_all(L,M,_),
   assert(input_mod(M)),
   retractall(M:rule_sc_n(_)),
-  assert(M:rule_sc_n(0)).
+  assert(M:rule_sc_n(0)),
+  M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
+    lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
+    ref_clause/1,ref/1,model/1,neg/1)),
+  style_check(-discontiguous).
 
 user:term_expansion(begin(model(I)), []) :-!,
   input_mod(M),
@@ -3841,7 +3861,7 @@ user:term_expansion(end(model(_I)), []) :-!,
   retractall(M:model(_)).
 
 user:term_expansion(At, A) :-
-  %write(At),nl,
+%  write(At),nl,
   input_mod(M),
   M:model(Name),
   At \= (_ :- _),
