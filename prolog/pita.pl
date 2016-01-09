@@ -771,7 +771,8 @@ user:term_expansion((:- cplint), []) :-
   assert_all(L,M,_),
   assert(cplint_module(M)),
   retractall(M:rule_n(_)),
-  assert(M:rule_n(0)).
+  assert(M:rule_n(0)),
+  style_check(-discontiguous).
 
 user:term_expansion((:- end_cplint), []) :-
   retract(cplint_module(_M)).
