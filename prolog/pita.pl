@@ -21,7 +21,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 */
 
-:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,local_pita_setting/2,
+:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,local_pita_setting/2,
    one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/2,
    end/1,end_bdd/1,end_test/1,ret_prob/3,em/9,randomize/1,
    get_var_n/5,add_var/5,equality/4,
@@ -42,20 +42,19 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
   get_var_n/5,add_var/5,equality/4.
 %  remove/3.
 
-
-setting_pita(epsilon_parsing, 1e-5).
+default_setting_pita(epsilon_parsing, 1e-5).
 /* on, off */
 
-setting_pita(bagof,false).
+default_setting_pita(bagof,false).
 /* values: false, intermediate, all, extra */
 
-setting_pita(compiling,off).
+default_setting_pita(compiling,off).
 
 :-set_prolog_flag(unknown,warning).
 
-setting_pita(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
-setting_pita(depth,2).
-setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
+default_setting_pita(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
+default_setting_pita(depth,2).
+default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 load(File):-
   atomic_concat(File,'.lpad',FileLPAD),
@@ -484,6 +483,10 @@ set_pita(Parameter,Value):-
   retract(M:local_pita_setting(Parameter,_)),
   assert(M:local_pita_setting(Parameter,Value)).
 
+setting_pita(P,V):-
+  cplint_module(M),
+  M:local_pita_setting(P,V).
+
 extract_vars_list(L,[],V):-
   rb_new(T),
   extract_vars_tree(L,T,T1),
@@ -750,6 +753,11 @@ user:term_expansion(Head,Clause) :-
     Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
   ).
 
+user:term_expansion((:- set_pita(P,V)), []) :-!,
+  prolog_load_context(module, M),cplint_module(M),
+  set_pita(P,V).
+
+
 user:term_expansion(Head, (Head1:-one(Env,One))) :- 
   prolog_load_context(module, M),cplint_module(M),
   local_pita_setting(depth_bound,true),
@@ -767,19 +775,20 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 user:term_expansion((:- cplint), []) :-
   prolog_load_context(module, M),
-  findall(local_pita_setting(P,V),setting_pita(P,V),L),
+  findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
   assert_all(L,M,_),
   assert(cplint_module(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
+
 user:term_expansion((:- end_cplint), []) :-
   retract(cplint_module(_M)).
 
 cplint:-
   M=user,
-  findall(local_pita_setting(P,V),setting_pita(P,V),L),
+  findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
   assert_all(L,M,_),
   assert(cplint_module(M)),
   retractall(M:rule_n(_)),
