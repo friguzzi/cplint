@@ -392,7 +392,6 @@ induce_parameters(Folds,R):-
   format2('/* EMBLEM Final score ~f~n',[Score]),
   format2('Wall time ~f */~n',[CTS]),
   write_rules2(R,user_output),
-  write_rules(R,user_output),
   set_sc(compiling,off).
   
 induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
