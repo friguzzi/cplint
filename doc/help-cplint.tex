@@ -1,0 +1,94 @@
+\documentclass[a4paper,10pt]{article}
+\RequirePackage[hyperindex]{hyperref}
+
+\begin{document}
+\title{\texttt{cplint} on SWISH Manual}
+\maketitle
+
+%\section{Table of Contents}
+%
+%\begin{itemize}
+%	\item \hyperref[syn]{Syntax} 
+%	\item Inference \ref{inf}
+%	\item Learning \ref{learning}
+%\end{itemize}
+
+\include{syntax}
+
+\include{inference}
+
+\verb|cplint| on SWISH allows two types of programs: LPAD and Prolog. In the first, you create a new LPAD in the editor, in the latter a Prolog program. 
+
+In LPADs, you write in the editor the program without the library import and the \verb|:- cplint| and \verb|:- end_cplint.| compiler directives.
+
+You ask queries by writing the atom of which you want to compute the probability. In the coin example, the probability of \verb|heads(coin)| can be obtained with the 
+\begin{verbatim}
+?- heads(coin)
+\end{verbatim}
+
+In Prolog programs, you have to enter the program above (\verb|coin.pl|) and ask the probability of an atom using the predicate \verb|prob/2| as in
+\begin{verbatim}
+?- prob(heads(coin),P).
+\end{verbatim}
+
+\include{parameters}
+
+\include{learning}
+
+\subsection{Commands}
+\subsubsection{Parameter Learning}
+To execute EMBLEM, prepare an input file in the editor panel as indicated above 
+(see example \verb|bongard.pl|) 
+and call
+\begin{verbatim}
+?- induce_par([train],P).
+\end{verbatim}
+to obtain in \verb|P| the program in input with the updated parameters.
+
+The results can also be tested on a test set with
+\begin{verbatim}
+?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+This returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
+
+By including
+\begin{verbatim}
+:- use_rendering(c3).
+:- use_rendering(lpad).
+\end{verbatim}
+in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
+
+\include{par_lear_general}
+
+
+\subsubsection{Structure Learning}
+To execute SLIPCOVER,
+prepare an input file in the editor panel as indicated above 
+(for example \verb|bongard.pl|)
+and call
+\begin{verbatim}
+?- induce([train],P).
+\end{verbatim}
+to obtain in \verb|P| the learned program.
+
+The results can also be tested on a test set with
+\begin{verbatim}
+?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
+
+By including
+\begin{verbatim}
+:- use_rendering(c3).
+:- use_rendering(lpad).
+\end{verbatim}
+in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
+
+\include{learning_par}
+
+\section{Bibliography}
+\bibliographystyle{plain}
+\bibliography{bib}
+\end{document}

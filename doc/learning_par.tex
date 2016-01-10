@@ -1,0 +1,42 @@
+\subsection{Parameters}
+Parameters are set with  commands of the form
+\begin{verbatim}
+:- set_sc(<parameter>,<value>).
+\end{verbatim}
+The available parameters are:
+\begin{itemize}
+\item \verb|depth_bound|: (values: \verb|{true,false}|,  default value: \texttt{true}) if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter. 
+\item \verb|depth| (values: integer, default value: 2): depth of derivations if  \verb|depth_bound|  is set to \verb|true|
+\item \verb|single_var| (values: \verb|{true,false}|, default value: \verb|false|): if set to \verb|true|, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
+\item \verb|epsilon_em| (values: real, default value: 0.1): if the difference in the log likelihood in two successive parameter EM iteration is smaller
+than \verb|epsilon_em|, then EM stops 
+\item \verb|epsilon_em_fraction| (values: real, default value: 0.01): if the difference in the log likelihood in two successive parameter EM iteration is smaller
+than \verb|epsilon_em_fraction|*(-current log likelihood), then EM stops
+\item \verb|iter| (values: integer, defualt value: 1): maximum number of iteration of EM parameter learning. If set to -1, no maximum number of iterations is imposed
+\item \verb|iterREF| (values: integer, defualt value: 1, valid for  
+ SLIPCOVER):
+ maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.
+\item \verb|random_restarts_number| (values: integer, default value: 1, valid for EMBLEM and SLIPCOVER): number of random restarts of parameter EM learning
+\item \verb|random_restarts_REFnumber| (values: integer, default value: 1, valid for  SLIPCOVER): number of random restarts of parameter EM learning for refinements
+\item \verb|setrand| (values: rand(integer,integer,integer)): seed for the random functions, see SWI-Prolog manual for the allowed values
+\item \verb|logzero| (values: negative real, default value $\log(0.000001)$): value assigned to $\log 0$
+\item \verb|max_iter| (values: integer, default value: 10, valid for  SLIPCOVER): number of interations of beam search
+\item \verb|max_var| (values: integer, default value: 4, valid for 
+SLIPCOVER): maximum number of distinct variables in a clause
+\item \verb|beamsize|  (values: integer, default value: 100, valid for SLIPCOVER): size of the beam 
+\item \verb|megaex_bottom| (values: integer, default value: 1, valid for SLIPCOVER): number of mega-examples on which to build the bottom clauses
+\item \verb|initial_clauses_per_megaex| (values: integer, default value: 1, valid for SLIPCOVER): 
+ number of bottom clauses to build for each mega-example (or 
+ model or interpretation)
+\item \verb|d| (values: integer, default value: 1, valid for SLIPCOVER): 
+ number of saturation steps when building the bottom clause
+\item \verb|max_iter_structure| (values: integer, default value: 10000, valid for SLIPCOVER): 
+maximum  number of theory search iterations
+\item \verb|background_clauses| (values: integer, default value: 50, valid for SLIPCOVER): 
+ maximum numbers of background clauses
+\item \verb|maxdepth_var| (values: integer, default value: 2, valid for SLIPCOVER): maximum depth of
+variables in clauses (as defined in \cite{DBLP:journals/ai/Cohen95}).
+\item \verb|neg_ex| (values:  \verb|given|, \verb|cw|, default value: \verb|cw|): if  set to \verb|given|, the negative examples in testing
+are taken from the test folds interpretations, i.e., those examples \verb|ex| stored as \verb|neg(ex)|; if set to \verb|cw|, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+\item \verb|verbosity| (values: integer in [1,3], default value: 1): level of verbosity of the algorithms
+\end{itemize}

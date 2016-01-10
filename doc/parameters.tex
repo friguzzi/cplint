@@ -1,0 +1,24 @@
+\subsection{Parameters}
+The module makes use of a number of parameters in order to control its behavior. They can be set with the directive
+\begin{verbatim}
+:- set_pita(<parameter>,<value>).
+\end{verbatim}
+inside the couple \texttt{:-cplint.} and \texttt{:-end\_cplint.} 
+
+The current value can be read with
+\begin{verbatim}
+?- setting_pita(<parameter>,Value).
+\end{verbatim}
+from the top-level.
+The available parameters are:
+\begin{itemize}
+\item 
+	 \verb|epsilon_parsing|: if (1 - the sum of the probabilities of all the head atoms) is larger than 
+    \verb|epsilon_parsing|,
+		then \texttt{pita} adds the null event to the head. Default value \texttt{0.00001}.
+\item \verb|single_var|: determines how non ground clauses are treated: if \texttt{true}, a single random variable is assigned to the whole non ground clause, 
+if \texttt{false}, a different random variable is assigned to every grounding of the clause. Default value \texttt{false}.
+\item \verb|depth_bound|: if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter.  Default value \texttt{false}.
+\item  \texttt{depth}: maximum depth of derivations when  \verb|depth_bound| is set to \texttt{true}. Default value \texttt{2}.
+\end{itemize}
+
