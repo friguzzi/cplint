@@ -92,9 +92,11 @@ prob_bar(M:Goal,Chart):-
   s(M:Goal,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
-     	     axis:_{x:_{type:category}, rotated: true},
-	     size:_{height: 100},
-	     legend:_{show: false}}.
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
 
 
 get_p(M:Goal,Env,P):-
