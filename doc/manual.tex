@@ -101,7 +101,7 @@ that, given a list of numbers, computes its arithmetic mean.
 
 
 
-\subsection{Commands}
+%\subsection{Commands}
 %All six modules accept the same commands for reading in files and answering queries.
 %The LPAD or CP-logic program must be stored in a text file with extension \texttt{.lpad} or \texttt{.cpl}. Suppose you have stored the example above in file \texttt{coin.cpl}. 
 %In order to answer queries to this program, you have to run SWI-Prolog and
@@ -127,7 +127,7 @@ that, given a list of numbers, computes its arithmetic mean.
 %After having loaded a program, future loadings add clauses. If you want to replace the current clauses with the new ones you have to restart SWI-Prolog.
 
 %Instead of preparing a file containing the LPAD/CP-logic program, 
-You have to prepare a Prolog file where you first load \texttt{pita} and then enclose the probabilistic 
+For answering queries, you have to prepare a Prolog file where you first load \texttt{pita} and then enclose the probabilistic 
 clauses in \texttt{:-cplint.} and \texttt{:-end\_cplint.} For example, the coin program above can be stored in \texttt{coin.pl} as follows
 \begin{verbatim}
 :- use_module(library(pita)).
@@ -143,40 +143,39 @@ fair(Coin):0.9 ; biased(Coin):0.1.
 
 toss(coin).
 
-:-end_cplint.
+:- end_cplint.
 \end{verbatim}
 %The command \verb|:- style_check(-discontiguous).| avoids warnings about discontinuous definitions of predicates.
 %These warnings are due to the translation process and are not a sign of coding errors, so they can be suppressed.
-
 Then you can simply load \texttt{coin.pl} as
 \begin{verbatim}
-?-[coin].
+?- [coin].
 \end{verbatim}
 and query it with
 \begin{verbatim}
 ?- prob(heads(coin),P).
 \end{verbatim}
-Note that supplying \texttt{coin.pl} as an argument to the command \texttt{swipl} currently returns errors due to bad interaction between \texttt{pita.pl} and the top-level.
-The program is loaded correctly anyway but it is recommended to load programs from the top-level to avoid these errors.
+Note that supplying \texttt{coin.pl} as an argument to the \texttt{swipl} command currently returns errors due to bad interaction between \texttt{pita.pl} and the top-level.
+The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.
 
 
 
-\subsubsection{Parameters}
-The module make use of a number of parameters in order to control its behavior. They can be set with the directive
+\subsection{Parameters}
+The module makes use of a number of parameters in order to control its behavior. They can be set with the directive
 \begin{verbatim}
-:- set_pita(parameter,value).
+:- set_pita(<parameter>,<value>).
 \end{verbatim}
 inside the couple \texttt{:-cplint.} and \texttt{:-end\_cplint.} 
 
 The current value can be read with
 \begin{verbatim}
-setting_pita(parameter,Value).
+?- setting_pita(<parameter>,Value).
 \end{verbatim}
 from the top-level.
 The available parameters are:
 \begin{itemize}
 \item 
-	 \verb|epsilon_parsing|: if (1 - the sum of the probabilities of all the head atoms) is smaller than 
+	 \verb|epsilon_parsing|: if (1 - the sum of the probabilities of all the head atoms) is larger than 
     \verb|epsilon_parsing|,
 		then \texttt{pita} adds the null event to the head. Default value \texttt{0.00001}.
 \item \verb|single_var|: determines how non ground clauses are treated: if \texttt{true}, a single random variable is assigned to the whole non ground clause, 
@@ -200,14 +199,14 @@ To execute the learning algorithms, prepare a Prolog file divided in five parts
 \begin{itemize}
 \item preamble
 \item  background knowledge, i.e., knowledge valid for all interpretations
-\item  LPAD for you which you want to learn the parameters (optional)
+\item  LPAD/CPL-program for you which you want to learn the parameters (optional)
 \item language bias information
 \item  example interpretations 
 \end{itemize}
 The preamble must come first, the order of the other parts can be changed.
 
 For example, consider the Bongard problems of \cite{RaeLae95-ALT95}. 
-The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example files for learning. 
+The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example learning files. 
 For example, it contains \verb|bongard.pl| and \verb|bongardkeys.pl| that represent a Bongard problem.
 Let us consider \verb|bongard.pl|.
 
@@ -227,7 +226,7 @@ if you want a nice representation of the output (in particular, if you want grap
 
 Now you can initialize SLIPCOVER with
 \begin{verbatim}
-:-sc.
+:- sc.
 \end{verbatim}
 At this point you can start setting parameters for SLIPCOVER such as for example
 \begin{verbatim}
@@ -239,16 +238,16 @@ At this point you can start setting parameters for SLIPCOVER such as for example
 We will see later the list of available parameters.
 This ends the preamble.
 
-\subsubsection{Backgroung and Initial LPAD}
+\subsubsection{Backgroung and Initial LPAD/CPL-program}
 %
 Now you can specify the background knowledge with a 
 fact of the form 
 \begin{verbatim}
-bg([<list of terms representing clauses]).
+bg(<list of terms representing clauses>).
 \end{verbatim}
 and an initial program with a fact of the form 
 \begin{verbatim}
-in([<list of terms representing clauses]).
+in(<list of terms representing clauses>).
 \end{verbatim}
 The initial program is used in parameter learning for providing 
 the structure. The indicated parameters do not matter as they are first randomized.
@@ -266,7 +265,7 @@ in([(pos:0.197575 :-
        triangle(A),
        circle(B))]).
 \end{verbatim}
-Both facts should be present. If there are no background/input clauses then write \verb|bg([]).| or \verb|in([]).|
+Both facts should be present. If there are no background/input clauses then write \verb|bg([]).|/\verb|in([]).|
 
 
 \subsubsection{Language Bias}
@@ -276,19 +275,20 @@ Output predicates are declared as
 \begin{verbatim}
 output(<predicate>/<arity>).
 \end{verbatim}
-and define the predicates whose atoms in the input interpretations are used as the goals for the prediction of which you want to optimize the parameters. Derivations for these goals are built by the systems.
+and indicate the predicate whose atoms you want to predict. Derivations for the atoms for this predicates in the input data
+are built by the systems.
 
-Input predicates are those for the predictions of which you do not want to optimize the parameters. You can declare closed world input predicates with
+Input predicates are those whose atoms you are not interested in predicting. You can declare closed world input predicates with
 \begin{verbatim}
 input_cw(<predicate>/<arity>).
 \end{verbatim}
-For these predicates, the only true atoms are those in the interpretations, the clauses in the input program are not used to derive atoms not present in the interpretations.
+For these predicates, the only true atoms are those in the interpretations, the clauses in the input/hypothesized program are not used to derive atoms not present in the interpretations.
 
 Open world input predicates are declared with
 \begin{verbatim}
 input(<predicate>/<arity>).
 \end{verbatim}
-In this case, if a subgoal for such a predicate is encountered when deriving the atoms for the output predicates, 
+In this case, if a subgoal for such a predicate is encountered when deriving a subgoal for the output predicates, 
 both the facts in the interpretations and the clauses of the input program are used.
 
 Then, you have to specify the language bias by means of mode declarations in the style of 
@@ -305,17 +305,17 @@ specifies the atoms that can appear in the body of clauses.
 \texttt{<recall>} indicates how many atoms for the predicate specification are
 retained in the bottom clause during a saturation step. \texttt{*} stands for all those that are found. Otherwise the indicated number is randomly chosen.
 
-The arguments are of the form
+Arguments of the form
 \begin{verbatim}
 +<type>
 \end{verbatim}
-for specifying that the argument should be an input variable of type \texttt{<type>}, i.e., a variable replacing a \texttt{+<type>} argument in the head or a \texttt{-<type>} argument in a preceding literal in the current hypothesized clause.
+specifies that the argument should be an input variable of type \texttt{<type>}, i.e., a variable replacing a \texttt{+<type>} argument in the head or a \texttt{-<type>} argument in a preceding literal in the current hypothesized clause.
 
 Another argument form is
 \begin{verbatim}
 -<type>
 \end{verbatim}
-for specifying that the argument should be replace by a output variable of type \texttt{<type>}. 
+for specifying that the argument should be a output variable of type \texttt{<type>}. 
 Any variable can replace this argument, either input or output.
 The only constraint on output variables is that those in the head of the current hypothesized 
 clause must appear as output variables in an atom of the body.
@@ -324,11 +324,12 @@ Other forms are
 \begin{verbatim}
 #<type>
 \end{verbatim}
-for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause but should not be used for replacing input variables of the following literals or 
+for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause but should not be used for replacing input variables of the following literals when building the bottom clause or 
 \begin{verbatim}
 -#<type>
 \end{verbatim}
-for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause and that should be used for replacing input variables of the following literals. \verb|#| and \verb|-#| differ only in the creation of the bottom clause.
+for specifying an argument which should be replaced by a constant of type \texttt{<type>} in the bottom clause and that should be used for replacing input variables of the following literals when building the bottom clause. 
+%\verb|#| and \verb|-#| differ only in the creation of the bottom clause.
 \begin{verbatim}
 <constant>
 \end{verbatim}
@@ -352,7 +353,7 @@ modeb(*,in(+obj,-obj)).
 modeb(*,in(-obj,+obj)).
 modeb(*,config(+obj,-#dir)).
 \end{verbatim}
-SLIPCOVER also requires facts for the \verb|determination/2| predicate in Aleph style that indicate which predicates can appear in the body of clauses. 
+SLIPCOVER also requires facts for the \verb|determination/2| predicate  Aleph-style that indicate which predicates can appear in the body of clauses. 
 For example
 \begin{verbatim}
 determination(pos/0,triangle/1).
@@ -422,8 +423,7 @@ triangle(2,o1).
 config(2,o1,up).
 \end{verbatim}
 which is contained in the \verb|bongardkeys.pl|
-This is also how model \verb|1| above is stored in SWI-Prolog database.
-
+This is also how model \verb|2| above is stored in SWI-Prolog database.
 The two modalities, models and keys, can be mixed in the same file.
 
 Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument. For example \verb|carc.pl|
@@ -453,26 +453,24 @@ Parameters are set with  commands of the form
 \end{verbatim}
 The available parameters are:
 \begin{itemize}
-\item \verb|depth| (values: integer or \verb|inf|, default value: 2, , valid for EMBLEM and SLIPCOVER): depth of derivations if  \verb|depth_bound|  is set to \verb|true|
-\item \verb|single_var| (values: \verb|{true,false}|, default value: \verb|false|, valid for EMBLEM and SLIPCOVER): if set to \verb|true|, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
-\item \verb|epsilon_em| (values: real, default value: 0.1, valid for 
-EMBLEM and SLIPCOVER): if the difference in the log likelihood in two successive parameter EM iteration is smaller
+\item \verb|depth_bound|: (values: \verb|{true,false}|,  default value: \texttt{true}) if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter. 
+\item \verb|depth| (values: integer, default value: 2): depth of derivations if  \verb|depth_bound|  is set to \verb|true|
+\item \verb|single_var| (values: \verb|{true,false}|, default value: \verb|false|): if set to \verb|true|, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
+\item \verb|epsilon_em| (values: real, default value: 0.1): if the difference in the log likelihood in two successive parameter EM iteration is smaller
 than \verb|epsilon_em|, then EM stops 
-\item \verb|epsilon_em_fraction| (values: real, default value: 0.01, valid for 
-EMBLEM and SLIPCOVER): if the difference in the log likelihood in two successive parameter EM iteration is smaller
+\item \verb|epsilon_em_fraction| (values: real, default value: 0.01): if the difference in the log likelihood in two successive parameter EM iteration is smaller
 than \verb|epsilon_em_fraction|*(-current log likelihood), then EM stops
-\item \verb|iter| (values: integer, defualt value: 1, valid for EMBLEM and SLIPCOVER): maximum number of iteration of EM parameter learning. If set to -1, no maximum number of iterations is imposed
+\item \verb|iter| (values: integer, defualt value: 1): maximum number of iteration of EM parameter learning. If set to -1, no maximum number of iterations is imposed
 \item \verb|iterREF| (values: integer, defualt value: 1, valid for  
  SLIPCOVER):
  maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.
 \item \verb|random_restarts_number| (values: integer, default value: 1, valid for EMBLEM and SLIPCOVER): number of random restarts of parameter EM learning
 \item \verb|random_restarts_REFnumber| (values: integer, default value: 1, valid for  SLIPCOVER): number of random restarts of parameter EM learning for refinements
-\item \verb|setrand| (values: rand(integer,integer,integer), valid for EMBLEM and SLIPCOVER): seed for the random functions, see Yap manual for allowed values
-\item \verb|logzero| (values: negative real, default value $\log(0.000001)$, valid for SLIPCOVER): value assigned to $\log 0$
+\item \verb|setrand| (values: rand(integer,integer,integer)): seed for the random functions, see SWI-Prolog manual for the allowed values
+\item \verb|logzero| (values: negative real, default value $\log(0.000001)$): value assigned to $\log 0$
 \item \verb|max_iter| (values: integer, default value: 10, valid for  SLIPCOVER): number of interations of beam search
 \item \verb|max_var| (values: integer, default value: 4, valid for 
 SLIPCOVER): maximum number of distinct variables in a clause
-\item \verb|verbosity| (values: integer in [1,3], default value: 1): level of verbosity of the algorithms
 \item \verb|beamsize|  (values: integer, default value: 100, valid for SLIPCOVER): size of the beam 
 \item \verb|megaex_bottom| (values: integer, default value: 1, valid for SLIPCOVER): number of mega-examples on which to build the bottom clauses
 \item \verb|initial_clauses_per_megaex| (values: integer, default value: 1, valid for SLIPCOVER): 
@@ -487,12 +485,13 @@ maximum  number of theory search iterations
 \item \verb|maxdepth_var| (values: integer, default value: 2, valid for SLIPCOVER): maximum depth of
 variables in clauses (as defined in \cite{DBLP:journals/ai/Cohen95}).
 \item \verb|neg_ex| (values:  \verb|given|, \verb|cw|, default value: \verb|cw|): if  set to \verb|given|, the negative examples in testing
-are taken from the test folds interpretations, i.e., those example \verb|ex| stored as \verb|neg(ex)|; if set to \verb|cw|, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+are taken from the test folds interpretations, i.e., those examples \verb|ex| stored as \verb|neg(ex)|; if set to \verb|cw|, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+\item \verb|verbosity| (values: integer in [1,3], default value: 1): level of verbosity of the algorithms
 \end{itemize}
 \subsection{Commands}
 \subsubsection{Parameter Learning}
 To execute EMBLEM, prepare an input file as indicated above 
-(for example \verb|bongard.pl|, load it into SWI-Prolog
+(for example \verb|bongard.pl|), load it into SWI-Prolog
 \begin{verbatim}
 ?- [bongard].
 \end{verbatim}
@@ -506,8 +505,8 @@ The results can also be tested on a test set with
 \begin{verbatim}
 ?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 \end{verbatim}
-returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
-the Area Under the PR curve in \verb|AUCPR|, the list of points of the PR curve in \verb|PR|.
+This returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
 
 The general form of the commands is
 \begin{verbatim}
@@ -521,7 +520,7 @@ The general form of the commands is
 \subsubsection{Structure Learning}
 To execute SLIPCOVER,
 prepare an input file as indicated above 
-(for example \verb|bongard.pl|, load it into SWI-Prolog
+(for example \verb|bongard.pl|), load it into SWI-Prolog
 \begin{verbatim}
 ?- [bongard].
 \end{verbatim}
@@ -535,8 +534,8 @@ The results can also be tested on a test set with
 \begin{verbatim}
 ?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 \end{verbatim}
-returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
-the Area Under the PR curve in \verb|AUCPR|, the list of points of the PR curve in \verb|PR|.
+returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
 
 \subsection{Files}
 The \texttt{pack/cplint/prolog/examples} folder in SWI-Prolog home contains some example programs. The subfolder \texttt{learning} contains some learning examples.

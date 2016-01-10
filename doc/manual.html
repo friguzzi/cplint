@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
 <!-- html --> 
 <meta name="src" content="manual.tex"> 
-<meta name="date" content="2016-01-10 00:06:00"> 
+<meta name="date" content="2016-01-10 01:01:00"> 
 <link rel="stylesheet" type="text/css" href="manual.css"> 
 </head><body 
 >
@@ -127,16 +127,13 @@ class="cmtt-10">pita</span></span></span>. It performs the program
 transformation technique of <span class="cite">[<a 
 href="#XRigSwi10-ICLP10-IC">7</a>]</span>. Differently from that work, techniques alternative to
 tabling and answer subsumption are used.
-<!--l. 104--><p class="noindent" >
-   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a 
- id="x1-50004.1"></a>Commands</h4>
-<!--l. 130--><p class="noindent" >You have to prepare a Prolog file where you first load <span 
-class="cmtt-10">pita </span>and then enclose the
-probabilistic clauses in <span 
+<!--l. 130--><p class="indent" >   For answering queries, you have to prepare a Prolog file where you first load <span 
+class="cmtt-10">pita</span>
+and then enclose the probabilistic clauses in <span 
 class="cmtt-10">:-cplint. </span>and <span 
 class="cmtt-10">:-end</span><span 
-class="cmtt-10">_cplint. </span>For example, the coin
-program above can be stored in <span 
+class="cmtt-10">_cplint. </span>For
+example, the coin program above can be stored in <span 
 class="cmtt-10">coin.pl </span>as follows
 
    <div class="verbatim" id="verbatim-11">
@@ -153,50 +150,49 @@ class="cmtt-10">coin.pl </span>as follows
 &#x00A0;<br />
 &#x00A0;<br />toss(coin).
 &#x00A0;<br />
-&#x00A0;<br />:-end_cplint.
+&#x00A0;<br />:-&#x00A0;end_cplint.
 </div>
-<!--l. 147--><p class="nopar" >
-<!--l. 151--><p class="indent" >   Then you can simply load <span 
+<!--l. 147--><p class="nopar" > Then you can simply load <span 
 class="cmtt-10">coin.pl </span>as
 
    <div class="verbatim" id="verbatim-12">
-?-[coin].
+?-&#x00A0;[coin].
 </div>
-<!--l. 154--><p class="nopar" > and query it with
+<!--l. 153--><p class="nopar" > and query it with
 
    <div class="verbatim" id="verbatim-13">
 ?-&#x00A0;prob(heads(coin),P).
 </div>
-<!--l. 158--><p class="nopar" > Note that supplying <span 
-class="cmtt-10">coin.pl </span>as an argument to the command <span 
-class="cmtt-10">swipl </span>currently
+<!--l. 157--><p class="nopar" > Note that supplying <span 
+class="cmtt-10">coin.pl </span>as an argument to the <span 
+class="cmtt-10">swipl </span>command currently
 returns errors due to bad interaction between <span 
 class="cmtt-10">pita.pl </span>and the top-level. The
-program is loaded correctly anyway but it is recommended to load programs from the
+program is loaded correctly anyway but it is recommended to load it from the
 top-level to avoid these errors.
-<!--l. 164--><p class="noindent" >
-   <h5 class="subsubsectionHead"><span class="titlemark">4.1.1   </span> <a 
- id="x1-60004.1.1"></a>Parameters</h5>
-<!--l. 165--><p class="noindent" >The module make use of a number of parameters in order to control its behavior.
+<!--l. 163--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a 
+ id="x1-50004.1"></a>Parameters</h4>
+<!--l. 164--><p class="noindent" >The module makes use of a number of parameters in order to control its behavior.
 They can be set with the directive
 
    <div class="verbatim" id="verbatim-14">
-:-&#x00A0;set_pita(parameter,value).
+:-&#x00A0;set_pita(&#x003C;parameter&#x003E;,&#x003C;value&#x003E;).
 </div>
-<!--l. 168--><p class="nopar" > inside the couple <span 
+<!--l. 167--><p class="nopar" > inside the couple <span 
 class="cmtt-10">:-cplint. </span>and <span 
 class="cmtt-10">:-end</span><span 
 class="cmtt-10">_cplint.</span>
-<!--l. 171--><p class="indent" >   The current value can be read with
+<!--l. 170--><p class="indent" >   The current value can be read with
 
    <div class="verbatim" id="verbatim-15">
-setting_pita(parameter,Value).
+?-&#x00A0;setting_pita(&#x003C;parameter&#x003E;,Value).
 </div>
-<!--l. 174--><p class="nopar" > from the top-level. The available parameters are:
+<!--l. 173--><p class="nopar" > from the top-level. The available parameters are:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">epsilon_parsing</span></span></span>: if (1 - the sum of the probabilities of all the head atoms)
-     is smaller than <span class="obeylines-h"><span class="verb"><span 
+     is larger than <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">epsilon_parsing</span></span></span>, then <span 
 class="cmtt-10">pita </span>adds the null event to the
      head. Default value <span 
@@ -224,10 +220,10 @@ class="cmtt-10">depth_bound</span></span></span> is set to <span
 class="cmtt-10">true</span>.
      Default value <span 
 class="cmtt-10">2</span>.</li></ul>
-<!--l. 191--><p class="noindent" >
+<!--l. 190--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">5   </span> <a 
- id="x1-70005"></a>Learning</h3>
-<!--l. 192--><p class="noindent" ><span 
+ id="x1-60005"></a>Learning</h3>
+<!--l. 191--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>contains the following learning algorithms:
      <ul class="itemize1">
      <li class="itemize">EMBLEM  (EM  over  Bdds  for  probabilistic  Logic  programs  Efficient
@@ -243,41 +239,42 @@ href="#XBelRig11-TR">2</a>]</span>
      <span class="cite">[<a 
 href="#XBelRig13-TPLP-IJ">4</a>]</span></li></ul>
 
-<!--l. 198--><p class="noindent" >
+<!--l. 197--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.1   </span> <a 
- id="x1-80005.1"></a>Input</h4>
-<!--l. 199--><p class="noindent" >To execute the learning algorithms, prepare a Prolog file divided in five
+ id="x1-70005.1"></a>Input</h4>
+<!--l. 198--><p class="noindent" >To execute the learning algorithms, prepare a Prolog file divided in five
 parts
      <ul class="itemize1">
      <li class="itemize">preamble
      </li>
      <li class="itemize">background knowledge, i.e., knowledge valid for all interpretations
      </li>
-     <li class="itemize">LPAD for you which you want to learn the parameters (optional)
+     <li class="itemize">LPAD/CPL-program for you which you want to learn the parameters
+     (optional)
      </li>
      <li class="itemize">language bias information
      </li>
      <li class="itemize">example interpretations</li></ul>
-<!--l. 207--><p class="noindent" >The preamble must come first, the order of the other parts can be changed.
-<!--l. 209--><p class="indent" >   For example, consider the Bongard problems of <span class="cite">[<a 
+<!--l. 206--><p class="noindent" >The preamble must come first, the order of the other parts can be changed.
+<!--l. 208--><p class="indent" >   For example, consider the Bongard problems of <span class="cite">[<a 
 href="#XRaeLae95-ALT95">6</a>]</span>. The <span 
 class="cmtt-10">pack/cplint/</span>
 <span 
-class="cmtt-10">prolog/examples/learning </span>folder in SWI-Prolog home contains some example files
-for learning. For example, it contains <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">prolog/examples/learning </span>folder in SWI-Prolog home contains some example
+learning files. For example, it contains <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">bongard.pl</span></span></span> and <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">bongardkeys.pl</span></span></span> that
 represent a Bongard problem. Let us consider <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">bongard.pl</span></span></span>.
-<!--l. 214--><p class="noindent" >
+<!--l. 213--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.1.1   </span> <a 
- id="x1-90005.1.1"></a>Preamble</h5>
-<!--l. 215--><p class="noindent" >In the preamble, the SLIPCOVER library is loaded with
+ id="x1-80005.1.1"></a>Preamble</h5>
+<!--l. 214--><p class="noindent" >In the preamble, the SLIPCOVER library is loaded with
 
    <div class="verbatim" id="verbatim-16">
 :-&#x00A0;use_module(library(slipcover)).
 </div>
-<!--l. 218--><p class="nopar" > Then, if you are using your file in cplint on SWISH, you could add
+<!--l. 217--><p class="nopar" > Then, if you are using your file in cplint on SWISH, you could add
 
    <div class="verbatim" id="verbatim-17">
 :-&#x00A0;if(current_predicate(use_rendering/1)).
@@ -285,14 +282,14 @@ class="cmtt-10">bongard.pl</span></span></span>.
 &#x00A0;<br />:-&#x00A0;use_rendering(lpad).
 &#x00A0;<br />:-&#x00A0;endif.
 </div>
-<!--l. 225--><p class="nopar" > if you want a nice representation of the output (in particular, if you want graphs of
+<!--l. 224--><p class="nopar" > if you want a nice representation of the output (in particular, if you want graphs of
 the ROC and PR curves).
-<!--l. 228--><p class="indent" >   Now you can initialize SLIPCOVER with
+<!--l. 227--><p class="indent" >   Now you can initialize SLIPCOVER with
 
    <div class="verbatim" id="verbatim-18">
-:-sc.
+:-&#x00A0;sc.
 </div>
-<!--l. 231--><p class="nopar" > At this point you can start setting parameters for SLIPCOVER such as for
+<!--l. 230--><p class="nopar" > At this point you can start setting parameters for SLIPCOVER such as for
 example
 
    <div class="verbatim" id="verbatim-19">
@@ -301,25 +298,25 @@ example
 &#x00A0;<br />:-&#x00A0;set_sc(max_iter_structure,5).
 &#x00A0;<br />:-&#x00A0;set_sc(verbosity,1).
 </div>
-<!--l. 238--><p class="nopar" > We will see later the list of available parameters. This ends the preamble.
-<!--l. 242--><p class="noindent" >
+<!--l. 237--><p class="nopar" > We will see later the list of available parameters. This ends the preamble.
+<!--l. 241--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.1.2   </span> <a 
- id="x1-100005.1.2"></a>Backgroung and Initial LPAD</h5>
-<!--l. 244--><p class="noindent" >Now you can specify the background knowledge with a fact of the form
+ id="x1-90005.1.2"></a>Backgroung and Initial LPAD/CPL-program</h5>
+<!--l. 243--><p class="noindent" >Now you can specify the background knowledge with a fact of the form
 
    <div class="verbatim" id="verbatim-20">
-bg([&#x003C;list&#x00A0;of&#x00A0;terms&#x00A0;representing&#x00A0;clauses]).
+bg(&#x003C;list&#x00A0;of&#x00A0;terms&#x00A0;representing&#x00A0;clauses&#x003E;).
 </div>
-<!--l. 248--><p class="nopar" > and an initial program with a fact of the form
+<!--l. 247--><p class="nopar" > and an initial program with a fact of the form
 
    <div class="verbatim" id="verbatim-21">
-in([&#x003C;list&#x00A0;of&#x00A0;terms&#x00A0;representing&#x00A0;clauses]).
+in(&#x003C;list&#x00A0;of&#x00A0;terms&#x00A0;representing&#x00A0;clauses&#x003E;).
 </div>
-<!--l. 252--><p class="nopar" > The initial program is used in parameter learning for providing the structure. The
+<!--l. 251--><p class="nopar" > The initial program is used in parameter learning for providing the structure. The
 indicated parameters do not matter as they are first randomized. Remember to
 enclose each clause in parentheses because <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">:-</span></span></span> has the highest precedence.
-<!--l. 257--><p class="indent" >   For example, <span class="obeylines-h"><span class="verb"><span 
+<!--l. 256--><p class="indent" >   For example, <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">bongard.pl</span></span></span> has the initial program
 
    <div class="verbatim" id="verbatim-22">
@@ -333,38 +330,36 @@ in([(pos:0.197575&#x00A0;:-
 &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;triangle(A),
 &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;circle(B))]).
 </div>
-<!--l. 268--><p class="nopar" > Both facts should be present. If there are no background/input clauses then write
+<!--l. 267--><p class="nopar" > Both facts should be present. If there are no background/input clauses then write
 <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">bg([]).</span></span></span> or <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">bg([]).</span></span></span>/<span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">in([]).</span></span></span>
-<!--l. 272--><p class="noindent" >
+<!--l. 271--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.1.3   </span> <a 
- id="x1-110005.1.3"></a>Language Bias</h5>
-<!--l. 274--><p class="noindent" >The language bias part contains the declarations of the input and output predicates.
+ id="x1-100005.1.3"></a>Language Bias</h5>
+<!--l. 273--><p class="noindent" >The language bias part contains the declarations of the input and output predicates.
 Output predicates are declared as
 
    <div class="verbatim" id="verbatim-23">
 output(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 278--><p class="nopar" > and define the predicates whose atoms in the input interpretations are used as the
-goals for the prediction of which you want to optimize the parameters. Derivations
-for these goals are built by the systems.
-<!--l. 281--><p class="indent" >   Input predicates are those for the predictions of which you do not want to
-optimize the parameters. You can declare closed world input predicates
-with
+<!--l. 277--><p class="nopar" > and indicate the predicate whose atoms you want to predict. Derivations for the
+atoms for this predicates in the input data are built by the systems.
+<!--l. 281--><p class="indent" >   Input predicates are those whose atoms you are not interested in predicting. You
+can declare closed world input predicates with
 
    <div class="verbatim" id="verbatim-24">
 input_cw(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 284--><p class="nopar" > For these predicates, the only true atoms are those in the interpretations, the
-clauses in the input program are not used to derive atoms not present in the
+<!--l. 284--><p class="nopar" > For these predicates, the only true atoms are those in the interpretations, the clauses
+in the input/hypothesized program are not used to derive atoms not present in the
 interpretations.
 <!--l. 287--><p class="indent" >   Open world input predicates are declared with
 
    <div class="verbatim" id="verbatim-25">
 input(&#x003C;predicate&#x003E;/&#x003C;arity&#x003E;).
 </div>
-<!--l. 290--><p class="nopar" > In this case, if a subgoal for such a predicate is encountered when deriving the atoms
+<!--l. 290--><p class="nopar" > In this case, if a subgoal for such a predicate is encountered when deriving a subgoal
 for the output predicates, both the facts in the interpretations and the clauses of the
 input program are used.
 <!--l. 294--><p class="indent" >   Then, you have to specify the language bias by means of mode declarations in the
@@ -388,12 +383,12 @@ specification are retained in the bottom clause during a saturation step. <span
 class="cmtt-10">* </span>stands
 for all those that are found. Otherwise the indicated number is randomly
 chosen.
-<!--l. 308--><p class="indent" >   The arguments are of the form
+<!--l. 308--><p class="indent" >   Arguments of the form
 
    <div class="verbatim" id="verbatim-28">
 +&#x003C;type&#x003E;
 </div>
-<!--l. 311--><p class="nopar" > for specifying that the argument should be an input variable of type <span 
+<!--l. 311--><p class="nopar" > specifies that the argument should be an input variable of type <span 
 class="cmtt-10">&#x003C;type&#x003E;</span>, i.e., a
 variable replacing a <span 
 class="cmtt-10">+&#x003C;type&#x003E; </span>argument in the head or a <span 
@@ -404,12 +399,11 @@ preceding literal in the current hypothesized clause.
    <div class="verbatim" id="verbatim-29">
 -&#x003C;type&#x003E;
 </div>
-<!--l. 317--><p class="nopar" > for specifying that the argument should be replace by a output variable of type
-<span 
-class="cmtt-10">&#x003C;type&#x003E;</span>. Any variable can replace this argument, either input or output.
-The only constraint on output variables is that those in the head of the
-current hypothesized clause must appear as output variables in an atom of the
-body.
+<!--l. 317--><p class="nopar" > for specifying that the argument should be a output variable of type <span 
+class="cmtt-10">&#x003C;type&#x003E;</span>. Any
+variable can replace this argument, either input or output. The only constraint on
+output variables is that those in the head of the current hypothesized clause must
+appear as output variables in an atom of the body.
 <!--l. 323--><p class="indent" >   Other forms are
 
    <div class="verbatim" id="verbatim-30">
@@ -418,24 +412,21 @@ body.
 <!--l. 326--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
 class="cmtt-10">&#x003C;type&#x003E; </span>in
 the bottom clause but should not be used for replacing input variables of the
-following literals or
+following literals when building the bottom clause or
 
    <div class="verbatim" id="verbatim-31">
 -#&#x003C;type&#x003E;
 </div>
 <!--l. 330--><p class="nopar" > for specifying an argument which should be replaced by a constant of type <span 
 class="cmtt-10">&#x003C;type&#x003E; </span>in
-the bottom clause and that should be used for replacing input variables of
-the following literals. <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">#</span></span></span> and <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">-#</span></span></span> differ only in the creation of the bottom
-clause.
+the bottom clause and that should be used for replacing input variables of the
+following literals when building the bottom clause.
 
    <div class="verbatim" id="verbatim-32">
 &#x003C;constant&#x003E;
 </div>
-<!--l. 334--><p class="nopar" > for specifying a constant.
-<!--l. 337--><p class="indent" >   An example of language bias for the Bongard domain is
+<!--l. 335--><p class="nopar" > for specifying a constant.
+<!--l. 338--><p class="indent" >   An example of language bias for the Bongard domain is
 
    <div class="verbatim" id="verbatim-33">
 output(pos/0).
@@ -454,10 +445,9 @@ output(pos/0).
 &#x00A0;<br />modeb(*,in(-obj,+obj)).
 &#x00A0;<br />modeb(*,config(+obj,-#dir)).
 </div>
-<!--l. 354--><p class="nopar" > SLIPCOVER also requires facts for the <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">determination/2</span></span></span> predicate in Aleph
-style that indicate which predicates can appear in the body of clauses. For
-example
+<!--l. 355--><p class="nopar" > SLIPCOVER also requires facts for the <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">determination/2</span></span></span> predicate Aleph-style that
+indicate which predicates can appear in the body of clauses. For example
 
    <div class="verbatim" id="verbatim-34">
 determination(pos/0,triangle/1).
@@ -466,15 +456,15 @@ determination(pos/0,triangle/1).
 &#x00A0;<br />determination(pos/0,in/2).
 &#x00A0;<br />determination(pos/0,config/2).
 </div>
-<!--l. 363--><p class="nopar" > state that <span class="obeylines-h"><span class="verb"><span 
+<!--l. 364--><p class="nopar" > state that <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">triangle/1</span></span></span> can appear in the body of clauses for <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">pos/0</span></span></span>.
-<!--l. 366--><p class="indent" >   SLIPCOVER also allows mode declarations of the form
+<!--l. 367--><p class="indent" >   SLIPCOVER also allows mode declarations of the form
 
    <div class="verbatim" id="verbatim-35">
 modeh(&#x003C;r&#x003E;,[&#x003C;s1&#x003E;,...,&#x003C;sn&#x003E;],[&#x003C;a1&#x003E;,...,&#x003C;an&#x003E;],[&#x003C;P1/Ar1&#x003E;,...,&#x003C;Pk/Ark&#x003E;]).
 </div>
-<!--l. 369--><p class="nopar" > These mode declarations are used to generate clauses with more than two head
+<!--l. 370--><p class="nopar" > These mode declarations are used to generate clauses with more than two head
 atoms. In them, <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">&#x003C;s1&#x003E;,...,&#x003C;sn&#x003E;</span></span></span> are schemas, <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">&#x003C;a1&#x003E;,...,&#x003C;an&#x003E;</span></span></span> are atoms such that
@@ -495,11 +485,11 @@ modeh(*,
 &#x00A0;<br />[professor/1,student/1,hasposition/2,inphase/2,
 &#x00A0;<br />publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).
 </div>
-<!--l. 379--><p class="nopar" >
-<!--l. 381--><p class="noindent" >
+<!--l. 380--><p class="nopar" >
+<!--l. 382--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.1.4   </span> <a 
- id="x1-120005.1.4"></a>Example Interpretations</h5>
-<!--l. 382--><p class="noindent" >The last part of the file contains the data. You can specify data with two
+ id="x1-110005.1.4"></a>Example Interpretations</h5>
+<!--l. 383--><p class="noindent" >The last part of the file contains the data. You can specify data with two
 modalities: models and keys. In the models type, you specify an example
 model (or interpretation or megaexample) as a list of Prolog facts initiated
 by <span 
@@ -522,21 +512,21 @@ begin(model(2)).
 &#x00A0;<br />config(o1,up).
 &#x00A0;<br />end(model(2)).
 </div>
-<!--l. 401--><p class="nopar" > The interpretations may contain a fact of the form
+<!--l. 402--><p class="nopar" > The interpretations may contain a fact of the form
 
    <div class="verbatim" id="verbatim-38">
 prob(0.3).
 </div>
-<!--l. 405--><p class="nopar" > assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the
+<!--l. 406--><p class="nopar" > assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the
 probability of each interpretation is considered equal to 1<span 
 class="cmmi-10">&#x2215;n </span>where <span 
 class="cmmi-10">n </span>is the total
 number of interpretations. <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">prob/1</span></span></span> can be used to set a different multiplicity for the
 interpretations.
-<!--l. 408--><p class="indent" >   The facts in the interpretation are loaded in SWI-Prolog database by adding an
+<!--l. 409--><p class="indent" >   The facts in the interpretation are loaded in SWI-Prolog database by adding an
 extra initial argument equal to the name of the model.
-<!--l. 410--><p class="indent" >   Alternatively, with the keys modality, you can directly write the facts and the
+<!--l. 411--><p class="indent" >   Alternatively, with the keys modality, you can directly write the facts and the
 first argument will be interpreted as a model identifier. The above interpretation in
 the keys modality is
 
@@ -553,11 +543,11 @@ pos(2).
 &#x00A0;<br />triangle(2,o1).
 &#x00A0;<br />config(2,o1,up).
 </div>
-<!--l. 423--><p class="nopar" > which is contained in the <span class="obeylines-h"><span class="verb"><span 
+<!--l. 424--><p class="nopar" > which is contained in the <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">bongardkeys.pl</span></span></span> This is also how model <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">1</span></span></span> above is stored
-in SWI-Prolog database.
-<!--l. 427--><p class="indent" >   The two modalities, models and keys, can be mixed in the same file.
+class="cmtt-10">2</span></span></span> above is stored
+in SWI-Prolog database. The two modalities, models and keys, can be mixed in the
+same file.
 <!--l. 429--><p class="indent" >   Note that you can add background knowledge that is not probabilistic directly to
 the file writing the clauses taking into account the model argument. For example
 <span class="obeylines-h"><span class="verb"><span 
@@ -587,7 +577,7 @@ fold(train,[2,3,...]).
 </div>
 <!--l. 448--><p class="nopar" >
    <h4 class="subsectionHead"><span class="titlemark">5.2   </span> <a 
- id="x1-130005.2"></a>Parameters</h4>
+ id="x1-120005.2"></a>Parameters</h4>
 <!--l. 450--><p class="noindent" >Parameters are set with commands of the form
 
    <div class="verbatim" id="verbatim-42">
@@ -596,38 +586,44 @@ fold(train,[2,3,...]).
 <!--l. 453--><p class="nopar" > The available parameters are:
      <ul class="itemize1">
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">depth</span></span></span> (values: integer or <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">inf</span></span></span>, default value: 2, , valid for EMBLEM and
-     SLIPCOVER): depth of derivations if <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">depth_bound</span></span></span>: (values: <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">{true,false}</span></span></span>, default value: <span 
+class="cmtt-10">true</span>) if  <span 
+class="cmtt-10">true</span>, the
+     depth of the derivation of the goal is limited to the value of the <span 
+class="cmtt-10">depth</span>
+     parameter.
+     </li>
+     <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">depth</span></span></span>  (values:  integer,  default  value:  2):  depth  of  derivations  if
+     <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">depth_bound</span></span></span> is set to <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">true</span></span></span>
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">single_var</span></span></span> (values:  <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">{true,false}</span></span></span>,  default  value:  <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">false</span></span></span>,  valid  for
-     EMBLEM and SLIPCOVER): if set to <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">true</span></span></span>, there is a random variable
-     for each clause, instead of a different random variable for each grounding
-     of each clause
+class="cmtt-10">single_var</span></span></span> (values: <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">{true,false}</span></span></span>, default value: <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">false</span></span></span>): if set to <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">true</span></span></span>,
+     there is a random variable for each clause, instead of a different random
+     variable for each grounding of each clause
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">epsilon_em</span></span></span> (values:  real,  default  value:  0.1,  valid  for  EMBLEM  and
-     SLIPCOVER): if the difference in the log likelihood in two successive
-     parameter EM iteration is smaller than <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">epsilon_em</span></span></span> (values:  real,  default  value:  0.1):  if  the  difference  in  the
+     log likelihood in two successive parameter EM iteration is smaller than
+     <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">epsilon_em</span></span></span>, then EM stops
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">epsilon_em_fraction</span></span></span>         (values:              real,              default
-     value: 0.01, valid for EMBLEM and SLIPCOVER): if the difference in the
-     log likelihood in two successive parameter EM iteration is smaller than
-     <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">epsilon_em_fraction</span></span></span> (values: real, default value: 0.01): if the difference
+     in the log likelihood in two successive parameter EM iteration is smaller
+     than <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">epsilon_em_fraction</span></span></span>*(-current log likelihood), then EM stops
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">iter</span></span></span>  (values:   integer,   defualt   value:   1,   valid   for   EMBLEM   and
-     SLIPCOVER): maximum number of iteration of EM parameter learning.
-     If set to -1, no maximum number of iterations is imposed
+class="cmtt-10">iter</span></span></span> (values: integer, defualt value: 1): maximum number of iteration of
+     EM parameter learning. If set to -1, no maximum number of iterations is
+     imposed
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">iterREF</span></span></span> (values:  integer,  defualt  value:  1,  valid  for  SLIPCOVER):
@@ -646,14 +642,13 @@ class="cmtt-10">random_restarts_REFnumber</span></span></span> (values: integer,
 
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">setrand</span></span></span> (values:  rand(integer,integer,integer),  valid  for  EMBLEM  and
-     SLIPCOVER): seed for the random functions, see Yap manual for allowed
-     values
+class="cmtt-10">setrand</span></span></span> (values:  rand(integer,integer,integer)):  seed  for  the  random
+     functions, see SWI-Prolog manual for the allowed values
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">logzero</span></span></span> (values:  negative  real,  default  value  log(0<span 
-class="cmmi-10">.</span>000001),  valid  for
-     SLIPCOVER): value assigned to log 0
+class="cmtt-10">logzero</span></span></span> (values: negative real, default value log(0<span 
+class="cmmi-10">.</span>000001)): value assigned
+     to log 0
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">max_iter</span></span></span> (values:  integer,  default  value:  10,  valid  for  SLIPCOVER):
@@ -662,10 +657,6 @@ class="cmtt-10">max_iter</span></span></span> (values:  integer,  default  value
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">max_var</span></span></span> (values:  integer,  default  value:  4,  valid  for  SLIPCOVER):
      maximum number of distinct variables in a clause
-     </li>
-     <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">verbosity</span></span></span> (values: integer in [1,3], default value: 1): level of verbosity of
-     the algorithms
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">beamsize</span></span></span> (values: integer, default value: 100, valid for SLIPCOVER): size
@@ -696,7 +687,6 @@ class="cmtt-10">background_clauses</span></span></span>  (values:   integer,   d
 class="cmtt-10">maxdepth_var</span></span></span> (values: integer, default value: 2, valid for SLIPCOVER):
      maximum depth of variables in clauses (as defined in <span class="cite">[<a 
 href="#XDBLP:journals/ai/Cohen95">5</a>]</span>).
-
      </li>
      <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">neg_ex</span></span></span> (values: <span class="obeylines-h"><span class="verb"><span 
@@ -705,115 +695,122 @@ class="cmtt-10">cw</span></span></span>, default value: <span class="obeylines-h
 class="cmtt-10">cw</span></span></span>): if set to <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">given</span></span></span>, the negative
      examples in testing are taken from the test folds interpretations, i.e., those
-     example <span class="obeylines-h"><span class="verb"><span 
+     examples <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">ex</span></span></span> stored as <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">neg(ex)</span></span></span>; if set to <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">cw</span></span></span>, the negative examples are
      generated according to the closed world assumption, i.e., all atoms for
+
      target predicates that are not positive examples. The set of all atoms is
      obtained by collecting the set of constants for each type of the arguments
-     of the target predicate.</li></ul>
-<!--l. 492--><p class="noindent" >
+     of the target predicate.
+     </li>
+     <li class="itemize"><span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">verbosity</span></span></span> (values: integer in [1,3], default value: 1): level of verbosity of
+     the algorithms</li></ul>
+<!--l. 491--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.3   </span> <a 
- id="x1-140005.3"></a>Commands</h4>
-<!--l. 493--><p class="noindent" >
+ id="x1-130005.3"></a>Commands</h4>
+<!--l. 492--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.3.1   </span> <a 
- id="x1-150005.3.1"></a>Parameter Learning</h5>
-<!--l. 494--><p class="noindent" >To execute EMBLEM, prepare an input file as indicated above (for example
+ id="x1-140005.3.1"></a>Parameter Learning</h5>
+<!--l. 493--><p class="noindent" >To execute EMBLEM, prepare an input file as indicated above (for example
 <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">bongard.pl</span></span></span>, load it into SWI-Prolog
+class="cmtt-10">bongard.pl</span></span></span>), load it into SWI-Prolog
 
    <div class="verbatim" id="verbatim-43">
 ?-&#x00A0;[bongard].
 </div>
-<!--l. 498--><p class="nopar" > and call
+<!--l. 497--><p class="nopar" > and call
 
    <div class="verbatim" id="verbatim-44">
 ?-&#x00A0;induce_par([train],P).
 </div>
-<!--l. 502--><p class="nopar" > to obtain in <span class="obeylines-h"><span class="verb"><span 
+<!--l. 501--><p class="nopar" > to obtain in <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">P</span></span></span> the program in input with the updated parameters.
-<!--l. 505--><p class="indent" >   The results can also be tested on a test set with
+<!--l. 504--><p class="indent" >   The results can also be tested on a test set with
 
    <div class="verbatim" id="verbatim-45">
 ?-&#x00A0;induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 </div>
-<!--l. 508--><p class="nopar" > returning the log likelihood of the test examples in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">LL</span></span></span>, the Area Under the ROC
+<!--l. 507--><p class="nopar" > This returns the log likelihood of the test examples in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">LL</span></span></span>, the Area Under
+the ROC curve in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">AUCROC</span></span></span>, a dictionary containing the list of points (in the
+form of Prolog pairs <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">x-y</span></span></span>) of the ROC curve in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">ROC</span></span></span>, the Area Under the PR
 curve in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">AUCROC</span></span></span>, the list of points (in the form of Prolog pairs <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">x-y</span></span></span>) of the ROC curve
-in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">ROC</span></span></span>, the Area Under the PR curve in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">AUCPR</span></span></span>, the list of points of the PR curve in
+class="cmtt-10">AUCPR</span></span></span>, a dictionary containing the list of points of the PR curve in
 <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">PR</span></span></span>.
-<!--l. 512--><p class="indent" >   The general form of the commands is
+<!--l. 511--><p class="indent" >   The general form of the commands is
 
    <div class="verbatim" id="verbatim-46">
 ?-&#x00A0;induce_par(&#x003C;list_of_train_folds&#x003E;,P).
 </div>
-<!--l. 515--><p class="nopar" >
+<!--l. 514--><p class="nopar" >
 
    <div class="verbatim" id="verbatim-47">
 ?-&#x00A0;induce_par(&#x003C;list_of_train_folds&#x003E;,&#x003C;list_of_test_folds&#x003E;,
 &#x00A0;<br />&#x00A0;&#x00A0;P,LL,AUCROC,ROC,AUCPR,PR).
 </div>
-<!--l. 519--><p class="nopar" >
-<!--l. 521--><p class="noindent" >
+<!--l. 518--><p class="nopar" >
+<!--l. 520--><p class="noindent" >
    <h5 class="subsubsectionHead"><span class="titlemark">5.3.2   </span> <a 
- id="x1-160005.3.2"></a>Structure Learning</h5>
-<!--l. 522--><p class="noindent" >To execute SLIPCOVER, prepare an input file as indicated above (for example
+ id="x1-150005.3.2"></a>Structure Learning</h5>
+<!--l. 521--><p class="noindent" >To execute SLIPCOVER, prepare an input file as indicated above (for example
 <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">bongard.pl</span></span></span>, load it into SWI-Prolog
+class="cmtt-10">bongard.pl</span></span></span>), load it into SWI-Prolog
 
    <div class="verbatim" id="verbatim-48">
 ?-&#x00A0;[bongard].
 </div>
-<!--l. 527--><p class="nopar" > and call
+<!--l. 526--><p class="nopar" > and call
 
    <div class="verbatim" id="verbatim-49">
 ?-&#x00A0;induce([train],P).
 </div>
-<!--l. 531--><p class="nopar" > to obtain in <span class="obeylines-h"><span class="verb"><span 
+<!--l. 530--><p class="nopar" > to obtain in <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">P</span></span></span> the learned program.
-<!--l. 534--><p class="indent" >   The results can also be tested on a test set with
+<!--l. 533--><p class="indent" >   The results can also be tested on a test set with
 
    <div class="verbatim" id="verbatim-50">
 ?-&#x00A0;induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 </div>
-<!--l. 537--><p class="nopar" > returning the log likelihood of the test examples in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">LL</span></span></span>, the Area Under the ROC
+<!--l. 536--><p class="nopar" > returning the log likelihood of the test examples in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">LL</span></span></span>, the Area Under
+the ROC curve in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">AUCROC</span></span></span>, a dictionary containing the list of points (in the
+form of Prolog pairs <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">x-y</span></span></span>) of the ROC curve in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">ROC</span></span></span>, the Area Under the PR
 curve in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">AUCROC</span></span></span>, the list of points (in the form of Prolog pairs <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">x-y</span></span></span>) of the ROC curve
-in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">ROC</span></span></span>, the Area Under the PR curve in <span class="obeylines-h"><span class="verb"><span 
-class="cmtt-10">AUCPR</span></span></span>, the list of points of the PR curve in
+class="cmtt-10">AUCPR</span></span></span>, a dictionary containing the list of points of the PR curve in
 <span class="obeylines-h"><span class="verb"><span 
 class="cmtt-10">PR</span></span></span>.
-<!--l. 541--><p class="noindent" >
+<!--l. 540--><p class="noindent" >
    <h4 class="subsectionHead"><span class="titlemark">5.4   </span> <a 
- id="x1-170005.4"></a>Files</h4>
-<!--l. 542--><p class="noindent" >The <span 
+ id="x1-160005.4"></a>Files</h4>
+<!--l. 541--><p class="noindent" >The <span 
 class="cmtt-10">pack/cplint/prolog/examples </span>folder in SWI-Prolog home contains some
 example programs. The subfolder <span 
 class="cmtt-10">learning </span>contains some learning examples. The
 <span 
 class="cmtt-10">pack/cplint/doc </span>folder in SWI-Prolog home contains this manual in latex, html and
 pdf.
-<!--l. 546--><p class="noindent" >
+<!--l. 545--><p class="noindent" >
    <h3 class="sectionHead"><span class="titlemark">6   </span> <a 
- id="x1-180006"></a>License</h3>
-<!--l. 551--><p class="noindent" ><span 
+ id="x1-170006"></a>License</h3>
+<!--l. 550--><p class="noindent" ><span 
 class="cmtt-10">cplint </span>follows the Artistic License 2.0 that you can find in <span 
 class="cmtt-10">cplint </span>root folder. The
 copyright is by Fabrizio Riguzzi.
-<!--l. 555--><p class="indent" >   The library <a 
+<!--l. 554--><p class="indent" >   The library <a 
 href="http://vlsi.colorado.edu/~fabio/" > CUDD </a> for manipulating BDDs has the following license:
-<!--l. 559--><p class="indent" >   Copyright (c) 1995-2004, Regents of the University of Colorado
-<!--l. 561--><p class="indent" >   All rights reserved.
-<!--l. 563--><p class="indent" >   Redistribution and use in source and binary forms, with or without modification,
+<!--l. 558--><p class="indent" >   Copyright (c) 1995-2004, Regents of the University of Colorado
+<!--l. 560--><p class="indent" >   All rights reserved.
+<!--l. 562--><p class="indent" >   Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
      <ul class="itemize1">
      <li class="itemize">Redistributions of source code must retain the above copyright notice, this
@@ -827,7 +824,7 @@ are permitted provided that the following conditions are met:
      contributors may be used to endorse or promote products derived from
      this software without specific prior written permission.</li></ul>
 
-<!--l. 580--><p class="noindent" >THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS <br 
+<!--l. 579--><p class="noindent" >THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS <br 
 class="newline" />AND CONTRIBUTORS &#8221;AS IS&#8221; AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -843,7 +840,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <!--l. 1--><p class="noindent" >
    <h3 class="likesectionHead"><a 
- id="x1-190006"></a>References</h3>
+ id="x1-180006"></a>References</h3>
 <!--l. 1--><p class="noindent" >
     <div class="thebibliography">
     <p class="bibitem" ><span class="biblabel">
