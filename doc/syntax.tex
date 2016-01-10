@@ -1,0 +1,54 @@
+\section{Syntax}
+\label{syn}
+
+LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
+Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used.
+A general CP-logic clause has the form
+\begin{verbatim}
+h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl
+\end{verbatim}
+ No parentheses are necessary. The \texttt{pi} are numeric expressions. It is up to the user to ensure that the numeric expressions are legal, i.e. that they sum up to less than one.
+
+If the clause has an empty body, it can be represented like this
+\begin{verbatim}
+h1:p1 ; ... ; hn:pn.
+\end{verbatim}
+If the clause has a single head with probability 1, the annotation can be omitted and the clause takes the form of a normal prolog clause, i.e. 
+\begin{verbatim}
+h1 :- b1,...,bm,\+ c1,...,\+ cl.
+\end{verbatim}
+stands for 
+\begin{verbatim}
+h1:1 :- b1,...,bm,\+ c1,...,\+ cl.
+\end{verbatim}
+The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \texttt{coin.cpl})
+\begin{verbatim}
+heads(Coin):1/2 ; tails(Coin):1/2 :- 
+  toss(Coin),\+biased(Coin).
+
+heads(Coin):0.6 ; tails(Coin):0.4 :- 
+  toss(Coin),biased(Coin).
+
+fair(Coin):0.9 ; biased(Coin):0.1.
+
+toss(coin).
+\end{verbatim}
+The first clause states that if we toss a coin that is not biased it has equal probability of landing heads and tails. The second states that if the coin is biased it has a slightly higher probability of landing heads. The third states that the coin is fair with probability 0.9 and biased with probability 0.1 and the last clause states that we toss a coin with certainty.
+
+Moreover, the bodies of rules may contain the built-in predicates:
+\begin{verbatim}
+is/2, >/2, </2, >=/2 ,=</2,
+=:=/2, =\=/2, true/0, false/0,
+=/2, ==/2, \=/2 ,\==/2, length/2
+\end{verbatim}
+The bodies may also contain the following
+ library predicates:
+\begin{verbatim}
+member/2, max_list/2, min_list/2
+nth0/3, nth/3, dif/2, select/3
+\end{verbatim}
+plus the predicate
+\begin{verbatim}
+average/2
+\end{verbatim}
+that, given a list of numbers, computes its arithmetic mean.
