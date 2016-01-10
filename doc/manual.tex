@@ -43,8 +43,8 @@ Moreover, in order to make sure you have a foreign library that matches your arc
 \end{verbatim}
 
 
-\include{syntax}
-\include{inference}
+\input{syntax}
+\input{inference}
 
 
 Then you can simply load \texttt{coin.pl} as
@@ -83,11 +83,11 @@ if \texttt{false}, a different random variable is assigned to every grounding of
 \end{itemize}
 
 
-\include{parameters}
+\input{parameters}
 
 
 
-\include{learning}
+\input{learning}
 
 \subsection{Commands}
 \subsubsection{Parameter Learning}
@@ -109,7 +109,7 @@ The results can also be tested on a test set with
 This returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
 the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
 
-\include{par_lear_general}
+\input{par_lear_general}
 
 \subsubsection{Structure Learning}
 To execute SLIPCOVER,
@@ -131,7 +131,7 @@ The results can also be tested on a test set with
 returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
 the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
 
-\include{learning_par}
+\input{learning_par}
 
 \subsection{Files}
 The \texttt{pack/cplint/prolog/examples} folder in SWI-Prolog home contains some example programs. The subfolder \texttt{learning} contains some learning examples.
