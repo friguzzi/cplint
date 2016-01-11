@@ -27,14 +27,14 @@ In the preamble, the SLIPCOVER library is loaded with
 \begin{verbatim}
 :- use_module(library(slipcover)).
 \end{verbatim}
-Then, if you are using your file in cplint on SWISH, you could add
-\begin{verbatim}
-:- if(current_predicate(use_rendering/1)).
-:- use_rendering(c3).
-:- use_rendering(lpad).
-:- endif.
-\end{verbatim}
-if you want a nice representation of the output (in particular, if you want graphs of the ROC and PR curves).
+%Then, if you are using your file in cplint on SWISH, you could add
+%\begin{verbatim}
+%:- if(current_predicate(use_rendering/1)).
+%:- use_rendering(c3).
+%:- use_rendering(lpad).
+%:- endif.
+%\end{verbatim}
+%if you want a nice representation of the output (in particular, if you want graphs of the ROC and PR curves).
 
 Now you can initialize SLIPCOVER with
 \begin{verbatim}
