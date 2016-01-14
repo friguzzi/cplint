@@ -2,30 +2,24 @@
 
 This module performs reassoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
-It allows to parse probabilistic program and
-compute the probability of queris.
+It reads probabilistic program andcomputes the probability of queries.
 
-See http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html for
-the syntax of programs.
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+details.
 
 @author Fabrizio Riguzzi
 @license Artistic License 2.0
+@copyright Fabrizio Riguzzi
 */
 
 
-/*
-
-EMBLEM and SLIPCASE
-
-Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
-
-*/
-
-:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,local_pita_setting/2,
-   one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/2,
-   end/1,end_bdd/1,end_test/1,ret_prob/3,em/9,randomize/1,
-   get_var_n/5,add_var/5,equality/4,
-     or_list/3, cplint/0, end_cplint/0, load/1, load_file/1]).
+:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,%local_pita_setting/2,
+  init/3,init_bdd/2,init_test/2,end/1,end_test/1,
+  one/2,zero/2,and/4,or/4,bdd_not/3,
+  ret_prob/3,get_var_n/5,equality/4,or_list/3, 
+  em/9,randomize/1,
+  cplint/0,end_cplint/0,load/1,load_file/1]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -42,6 +36,129 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
   get_var_n/5,add_var/5,equality/4.
 %  remove/3.
 
+
+/** 
+ * init(+NumberOfRules:int,+NumberOfHeads:list,-Context:int) is det
+ *
+ * Initializes a data structure for performing parameter learning.
+ * NumberOfRules is the number of rules of the model, 
+ * NumberOfHeads is a list of integers, one for each rule, indicating the number
+ * of head atoms in each rule.
+ * It returns an integer in Context that is a pointer to a
+ * context data structure for performing the EM algorithm.
+ */
+
+/** 
+ * end(+Context:int) is det
+ *
+ * Terminates the context data structure for performing parameter learning.
+ * Context is a pointer to a context data structure for performing 
+ * the EM algorithm  
+ * Context must have been returned by a call to init/3. 
+ * It frees all the memory occupied by the BDDs of Context.
+ */
+
+/** 
+ *  init_bdd(+Context:int,-Environment:int) is det
+ *
+ * Initializes an enviroment data structure for storing a BDD.
+ * Context is an integer that is a pointer to a context data structure 
+ * created using init/3. 
+ * Returns an integer Environment that is a pointer to a data structure for 
+ * storing a single BDD to be used for the EM algorithm.
+ */
+
+
+/** 
+ * init_test(+NumberOfRules:int,-Environment:int) is det
+ *
+ * Initializes a data structure for storing a single BDD.
+ * NumberOfRules is the number of rules of the model, 
+ * Returns an integer Environment that is a pointer to a data structure for 
+ * storing a single BDD to be used for inference only (no learning).
+ */
+
+/** 
+ * end_test(+Environment:int) is det
+ *
+ * Terminates the environment data structure for storing a single BDD.
+ * Environment is a pointer to a data structure returned by a call to 
+ * init_test/2. 
+ */
+
+/** 
+ * one(+Environment:int,-One:int) is det
+ *
+ * Returns in One a pointer to a BDD belonging to environment Environment 
+ * representing the one Boolean function 
+ */
+
+/** 
+ * zero(+Environment:int,-Zero:int) is det
+ *
+ * Returns in Zero a pointer to a BDD belonging to environment Environment 
+ * representing the zero Boolean function 
+ */
+
+/** 
+ * and(+Environment:int,+A:int,+B:int,-AandB:int) is det
+ *
+ * Returns in AandB a pointer to a BDD belonging to environment Environment 
+ * representing the conjunction of BDDs A and B
+ */
+
+/** 
+ * or(+Environment:int,+A:int,+B:int,-AorB:int) is det
+ *
+ * Returns in AorB a pointer to a BDD belonging to environment Environment 
+ * representing the disjunction of BDDs A and B
+ */
+
+/** 
+ * ret_prob(+Environment:int,+BDD:int,-Probability:float) is det
+ *
+ * Returns the Probability of BDD belonging to environment Environment 
+ */
+
+/** 
+ * bdd_not(+Environment:int,+A:int,-NotA:int) is det
+ *
+ * Returns in NotA a pointer to a BDD belonging to environment Environment 
+ * representing the negation of BDD A 
+ */
+
+/** 
+ * equality(+Environment:int,+Variable:int,+Value:int,-BDD:int) is det
+ *
+ * Returns in BDD the BDD belonging to environment Environment 
+ * that represents the equation Variable=Value.
+ */
+
+/** 
+ * em(+Context:int,+ListOfBDDs:list,+EA:float,+ER:float,+NumberOfBDDs:int,+Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
+ *
+ * Performs EM learning.
+ * Takes as input the Context, a list of BDDs each representing one example,
+ * the minimum absolute difference EA and relative difference ER between the 
+ * log likelihood of examples in two different iterations, the number of BDDs
+ * NumberOfBDDs (=length(ListOfBDDs)), and the maximum number of iterations
+ * Iterations.
+ * Returns the final log likelihood of examples LL, the list of new Parameters
+ * and a list with the final probabilities of each example.
+ */
+
+/** 
+ * randomize(+Context:int) is det
+ *
+ * Randomizes the parameters of random variables associated to Context.
+ */
+
+/** 
+ * add_var(+Environment:int,+NumberOfHeads:int,+ProbabilityDistribution:list, +Rule,-Variable:int) is det
+ * Returns in Variable the index of a new random variable in Environment with 
+ * NumberOHeads values and probability distribution ProbabilityDistribution
+ */
+
 default_setting_pita(epsilon_parsing, 1e-5).
 /* on, off */
 
@@ -56,6 +173,11 @@ default_setting_pita(depth_bound,false).  %if true, it limits the derivation of 
 default_setting_pita(depth,2).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
+/** 
+ * load(+File:atom) is det
+ *
+ * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
+ */
 load(File):-
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
@@ -67,17 +189,23 @@ load(File):-
     )
   ).
 
+/** 
+ * load_file(+FileWithExtension:atom) is det
+ *
+ * Loads FileWithExtension.
+ */
 load_file(File):-
   cplint,
   user:consult(File),
   end_cplint.
 
 /** 
- * s(+Query:atom,-Probability:float) is det
+ * s(+Query:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query
+ * The predicate computes the probability of the ground query Query.
+ * If Query is not ground, it returns in backtracking all instantiations of
+ * Query together with their probabilities
  */
-
 s(M:Goal,P):-
   M:rule_n(NR),
   init_test(NR,Env),
@@ -85,9 +213,26 @@ s(M:Goal,P):-
   end_test(Env),
   member((Goal,P),L).
 
+/** 
+ * prob(+Query:atom,-Probability:float) is nondet
+ *
+ * The predicate computes the probability of the ground query Query
+ * If Query is not ground, it returns in backtracking all instantiations of
+ * Query together with their probabilities
+ */
 prob(M:Goal,P):-
   s(M:Goal,P).
 
+/** 
+ * prob_bar(+Query:atom,-Probability:dict) is nondet
+ *
+ * The predicate computes the probability of the ground query Query
+ * and returns it as a dict for rendering with c3 as a bar chart with 
+ * a bar for the probability of Query true and a bar for the probability of 
+ * Query false.
+ * If Query is not ground, it returns in backtracking all instantiations of
+ * Query together with their probabilities
+ */
 prob_bar(M:Goal,Chart):-
   s(M:Goal,P),
   PF is 1.0-P,
@@ -150,6 +295,12 @@ retract_all([H|T]):-
   erase(H),
   retract_all(T).
 
+/** 
+ * get_var_n(+Environment:int,+Rule:int,+Substitution:term,-Variable:int) is det
+ *
+ * Returns the index Variable of the random variable associated to rule with 
+ * index Rule and grouding substitution Substitution in environment Environment.
+ */
 get_var_n(Env,R,S,Probs,V):-
   (v(R,S,V)->
     true
@@ -465,6 +616,12 @@ get_probs([_H:P|T], [P1|T1]) :-
   get_probs(T, T1).
 
 
+/** 
+ * or_list(+ListOfBDDs:list,+Environment,-BDD:int) is det
+ *
+ * Returns in BDD a pointer to a BDD belonging to environment Environment 
+ * representing the disjunction of all the BDDs in ListOfBDDs
+ */
 or_list([H],_Env,H):-!.
 
 or_list([H|T],Env,B):-
@@ -478,13 +635,27 @@ or_list1([H|T],Env,B0,B1):-
   or_list1(T,Env,B2,B1).
 
 
-
-/* set_pita(Par,Value) can be used to set the value of a parameter */
+/** 
+ * set_pita(+Parameter:atom,+Value:term) is det
+ *
+ * The predicate sets the value of a parameter
+ * For a list of parameters see 
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ */
 set_pita(Parameter,Value):-
   cplint_module(M),
   retract(M:local_pita_setting(Parameter,_)),
   assert(M:local_pita_setting(Parameter,Value)).
 
+/** 
+ * setting_pita(+Parameter:atom,-Value:term) is det
+ *
+ * The predicate returns the value of a parameter
+ * For a list of parameters see 
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ */
 setting_pita(P,V):-
   cplint_module(M),
   M:local_pita_setting(P,V).
@@ -788,6 +959,12 @@ user:term_expansion((:- cplint), []) :-
 user:term_expansion((:- end_cplint), []) :-
   retract(cplint_module(_M)).
 
+
+/** 
+ * cplint is det
+ *
+ * Initializes the cplint inference module.
+ */
 cplint:-
   M=user,
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
@@ -796,6 +973,11 @@ cplint:-
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)).
 
+/** 
+ * end_cplint is det
+ *
+ * Terminates the cplint inference module.
+ */
 end_cplint:-
   retract(cplint_module(_M)).
 
