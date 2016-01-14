@@ -4,10 +4,10 @@ This module performs learning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It allows to perform both parameter and structure learning.
 
-See http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html for
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
 details
 
-@author Fabrizio Riguzzi
+@author Fabrizio Riguzzi, Elena Bellodi
 @license Artistic License 2.0
 */
 
@@ -15,10 +15,10 @@ details
 
 SLIPCOVER
 
-Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
+Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[sl/1,em/1,set_sc/2,setting_sc/2,
+:-module(slipcover,[set_sc/2,setting_sc/2,
   induce/2,induce/8,induce_par/2,induce_par/8,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
@@ -46,7 +46,16 @@ Copyright (c) 2013, Fabrizio Riguzzi and Elena Bellodi
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
-
+/** 
+ * setting_sc(+Parameter:atom,-Value:term) is det
+ *
+ * The predicate returns the default value of a parameter
+ * For a list of parameters see 
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * To obtain the current value of the parameters, use local_setting/2
+ * from the input module
+ */
 setting_sc(epsilon_em,0.0001).
 setting_sc(epsilon_em_fraction,0.00001).
 setting_sc(eps,0.0001).
@@ -102,22 +111,32 @@ setting_sc(single_var,true). %false:1 variable for every grounding of a rule; tr
 
 
 
-/** 
- * sl(+FileStem:atom) is det
- *
- * The predicate performs structure learning for the problem stored in
- * the files FileStem.l (language bias), FileStem.kb (dataset), 
- * FileStem.bg (optional, background theory), FileStem.cpl (optional,
- * initial theory).
- * The result is stored in FileStem.rules
- */
 
+/** 
+ * induce(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
+ *
+ * The predicate performs structure learning using the folds indicated in 
+ * TrainFolds for training. 
+ * It returns in P the learned probabilistic program.
+ */
 induce(Folds,R):-
   induce_rules(Folds,R0),
   rules2terms(R0,R).
 %  generate_clauses(R0,R,0,[],_Th).
 
-induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
+/** 
+ * induce(+TrainFolds:list_of_atoms,+TrainFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ *
+ * The predicate performs structure learning using the folds indicated in 
+ * TrainFolds for training. 
+ * It returns in P the learned probabilistic program.
+ * Moreover, it tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, a dict containing the points
+ * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
+ * and a dict containing the points of the PR curve in PR
+ */
+induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
   rules2terms(R,ROut),
   write2('Testing\n'),
@@ -129,7 +148,7 @@ induce(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   assert_all(Th,M,ThRef),
   assert_all(RuleFacts,M,RFRefs),
   set_sc(compiling,off),
-  test([TE],CLL,AUCROC,ROC,AUCPR,PR),
+  test([TE],LL,AUCROC,ROC,AUCPR,PR),
   retract_all(ThRef),
   retract_all(RFRefs).
  
@@ -191,7 +210,15 @@ to_dyn(M,P/A):-
   M:(dynamic P/A3).
 
 
-
+/** 
+ * sl(+FileStem:atom) is det
+ *
+ * The predicate performs structure learning for the problem stored in
+ * the files FileStem.l (language bias), FileStem.kb (dataset), 
+ * FileStem.bg (optional, background theory), FileStem.cpl (optional,
+ * initial theory).
+ * The result is stored in FileStem.rules
+ */
 sl(File):-
   setting_sc(seed,Seed),
   setrand(Seed),
@@ -358,13 +385,11 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   cycle_structure(RT,Mod,R4,S4,SP1,DB,R,S,M1). 
 
 /** 
- * em(+FileStem:atom) is det
+ * induce_par(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
  *
- * The predicate performs parameter learning for the problem stored in
- * the files FileStem.l (language bias), FileStem.kb (dataset), 
- * FileStem.bg (optional, background theory), FileStem.cpl 
- * (theory).
- * The result is stored in FileStem.rules
+ * The predicate learns the parameters of the program stored in the in/1 fact
+ * of the input file using the folds indicated in TrainFolds for training. 
+ * It returns in P the input program with the updated parameters.
  */
 induce_par(Folds,ROut):-
   induce_parameters(Folds,R),
@@ -393,7 +418,19 @@ induce_parameters(Folds,R):-
   format2('Wall time ~f */~n',[CTS]),
   write_rules2(R,user_output),
   set_sc(compiling,off).
-  
+
+/** 
+ * induce_par(+TrainFolds:list_of_atoms,+TrainFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ *
+ * The predicate learns the parameters of the program stored in the in/1 fact
+ * of the input file using the folds indicated in TrainFolds for training. 
+ * It returns in P the input program with the updated parameters.
+ * Moreover, it tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, a dict containing the points
+ * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
+ * and a dict containing the points of the PR curve in PR
+ */
 induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_parameters(TrainFolds,R),
   rules2terms(R,ROut),
@@ -411,6 +448,15 @@ induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   retract_all(RFRefs).
  
 
+/** 
+ * em(+FileStem:atom) is det
+ *
+ * The predicate performs parameter learning for the problem stored in
+ * the files FileStem.l (language bias), FileStem.kb (dataset), 
+ * FileStem.bg (optional, background theory), FileStem.cpl 
+ * (theory).
+ * The result is stored in FileStem.rules
+ */
 em(File):-
   generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL),
   reconsult(FileL),
@@ -1120,7 +1166,13 @@ write_body(S,[A|T]):-
   format(S,"  ~p,~n",[A]),
   write_body(S,T).
 
-
+/** 
+ * list2or(+List:list,-Or:term) is det
+ * list2or(-List:list,+Or:term) is det
+ *
+ * The predicate succeeds when Or is a disjunction (using the ; operator)
+ * of the terms in List
+ */
 list2or([],true):-!.
 
 list2or([X],X):-
@@ -1130,6 +1182,13 @@ list2or([H|T],(H ; Ta)):-!,
     list2or(T,Ta).
 
 
+/** 
+ * list2and(+List:list,-And:term) is det
+ * list2and(-List:list,+And:term) is det
+ *
+ * The predicate succeeds when And is a conjunction (using the , operator)
+ * of the terms in List
+ */
 list2and([],true):-!.
 
 list2and([X],X):-
@@ -2719,7 +2778,14 @@ or_list1([H|T],Env,B0,B1):-
   or_list1(T,Env,B2,B1).
 */
 
-/* set_sc(Par,Value) can be used to set the value of a parameter */
+/** 
+ * set_sc(+Parameter:atom,+Value:term) is det
+ *
+ * The predicate sets the value of a parameter
+ * For a list of parameters see 
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ */
 set_sc(Parameter,Value):-
   input_mod(M),
   retract(M:local_setting(Parameter,_)),
