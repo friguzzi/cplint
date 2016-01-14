@@ -59,7 +59,7 @@ details.
  */
 
 /** 
- *  init_bdd(+Context:int,-Environment:int) is det
+ * init_bdd(+Context:int,-Environment:int) is det
  *
  * Initializes an enviroment data structure for storing a BDD.
  * Context is an integer that is a pointer to a context data structure 
@@ -82,8 +82,8 @@ details.
  * end_test(+Environment:int) is det
  *
  * Terminates the environment data structure for storing a single BDD.
- * Environment is a pointer to a data structure returned by a call to 
- * init_test/2. 
+ * Environment is a pointer to a data structure returned by a call 
+ * to init_test/2. 
  */
 
 /** 
@@ -296,10 +296,11 @@ retract_all([H|T]):-
   retract_all(T).
 
 /** 
- * get_var_n(+Environment:int,+Rule:int,+Substitution:term,-Variable:int) is det
+ * get_var_n(+Environment:int,+Rule:int,+Substitution:term,+Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with 
- * index Rule and grouding substitution Substitution in environment Environment.
+ * index Rule, grouding substitution Substitution and head distribution 
+ * Probabilities in environment Environment.
  */
 get_var_n(Env,R,S,Probs,V):-
   (v(R,S,V)->
