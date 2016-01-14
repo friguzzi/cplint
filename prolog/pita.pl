@@ -38,7 +38,7 @@ details.
 
 
 /** 
- * init(+NumberOfRules:int,+NumberOfHeads:list,-Context:int) is det
+ * init(++NumberOfRules:int,++NumberOfHeads:list,--Context:int) is det
  *
  * Initializes a data structure for performing parameter learning.
  * NumberOfRules is the number of rules of the model, 
@@ -49,7 +49,7 @@ details.
  */
 
 /** 
- * end(+Context:int) is det
+ * end(++Context:int) is det
  *
  * Terminates the context data structure for performing parameter learning.
  * Context is a pointer to a context data structure for performing 
@@ -59,7 +59,7 @@ details.
  */
 
 /** 
- * init_bdd(+Context:int,-Environment:int) is det
+ * init_bdd(++Context:int,--Environment:int) is det
  *
  * Initializes an enviroment data structure for storing a BDD.
  * Context is an integer that is a pointer to a context data structure 
@@ -69,7 +69,7 @@ details.
  */
 
 /** 
- * end_bdd(+Environment:int) is det
+ * end_bdd(++Environment:int) is det
  *
  * Terminates the evnironment data structure for storing a BDD.
  * Environment is a pointer to a data structure returned by init_bdd/2. 
@@ -78,7 +78,7 @@ details.
 
 
 /** 
- * init_test(+NumberOfRules:int,-Environment:int) is det
+ * init_test(++NumberOfRules:int,--Environment:int) is det
  *
  * Initializes a data structure for storing a single BDD.
  * NumberOfRules is the number of rules of the model, 
@@ -87,7 +87,7 @@ details.
  */
 
 /** 
- * end_test(+Environment:int) is det
+ * end_test(++Environment:int) is det
  *
  * Terminates the environment data structure for storing a single BDD.
  * Environment is a pointer to a data structure returned by a call 
@@ -95,55 +95,55 @@ details.
  */
 
 /** 
- * one(+Environment:int,-One:int) is det
+ * one(++Environment:int,--One:int) is det
  *
  * Returns in One a pointer to a BDD belonging to environment Environment 
  * representing the one Boolean function 
  */
 
 /** 
- * zero(+Environment:int,-Zero:int) is det
+ * zero(++Environment:int,--Zero:int) is det
  *
  * Returns in Zero a pointer to a BDD belonging to environment Environment 
  * representing the zero Boolean function 
  */
 
 /** 
- * and(+Environment:int,+A:int,+B:int,-AandB:int) is det
+ * and(++Environment:int,++A:int,++B:int,--AandB:int) is det
  *
  * Returns in AandB a pointer to a BDD belonging to environment Environment 
  * representing the conjunction of BDDs A and B
  */
 
 /** 
- * or(+Environment:int,+A:int,+B:int,-AorB:int) is det
+ * or(++Environment:int,++A:int,++B:int,--AorB:int) is det
  *
  * Returns in AorB a pointer to a BDD belonging to environment Environment 
  * representing the disjunction of BDDs A and B
  */
 
 /** 
- * ret_prob(+Environment:int,+BDD:int,-Probability:float) is det
+ * ret_prob(++Environment:int,++BDD:int,-Probability:float) is det
  *
  * Returns the Probability of BDD belonging to environment Environment 
  */
 
 /** 
- * bdd_not(+Environment:int,+A:int,-NotA:int) is det
+ * bdd_not(++Environment:int,++A:int,--NotA:int) is det
  *
  * Returns in NotA a pointer to a BDD belonging to environment Environment 
  * representing the negation of BDD A 
  */
 
 /** 
- * equality(+Environment:int,+Variable:int,+Value:int,-BDD:int) is det
+ * equality(++Environment:int,++Variable:int,++Value:int,--BDD:int) is det
  *
  * Returns in BDD the BDD belonging to environment Environment 
  * that represents the equation Variable=Value.
  */
 
 /** 
- * em(+Context:int,+ListOfBDDs:list,+EA:float,+ER:float,+NumberOfBDDs:int,+Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
+ * em(++Context:int,++ListOfBDDs:list,++EA:float,++ER:float,++NumberOfBDDs:int,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
  *
  * Performs EM learning.
  * Takes as input the Context, a list of BDDs each representing one example,
@@ -153,16 +153,19 @@ details.
  * Iterations.
  * Returns the final log likelihood of examples LL, the list of new Parameters
  * and a list with the final probabilities of each example.
+ * Parameters is a list whose elements are of the form [N,P] where N is the rule
+ * number and P is a list of probabilities, one for each head atom of rule N, 
+ * in reverse order.
  */
 
 /** 
- * randomize(+Context:int) is det
+ * randomize(++Context:int) is det
  *
  * Randomizes the parameters of random variables associated to Context.
  */
 
 /** 
- * add_var(+Environment:int,+NumberOfHeads:int,+ProbabilityDistribution:list, +Rule,-Variable:int) is det
+ * add_var(++Environment:int,++NumberOfHeads:int,++ProbabilityDistribution:list, ++Rule,-Variable:int) is det
  * Returns in Variable the index of a new random variable in Environment with 
  * NumberOHeads values and probability distribution ProbabilityDistribution
  */
@@ -182,7 +185,7 @@ default_setting_pita(depth,2).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 /** 
- * load(+File:atom) is det
+ * load(++File:atom) is det
  *
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
  */
@@ -198,7 +201,7 @@ load(File):-
   ).
 
 /** 
- * load_file(+FileWithExtension:atom) is det
+ * load_file(++FileWithExtension:atom) is det
  *
  * Loads FileWithExtension.
  */
@@ -208,7 +211,7 @@ load_file(File):-
   end_cplint.
 
 /** 
- * s(+Query:atom,-Probability:float) is nondet
+ * s(:Query:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query.
  * If Query is not ground, it returns in backtracking all instantiations of
@@ -222,7 +225,7 @@ s(M:Goal,P):-
   member((Goal,P),L).
 
 /** 
- * prob(+Query:atom,-Probability:float) is nondet
+ * prob(:Query:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query
  * If Query is not ground, it returns in backtracking all instantiations of
@@ -232,7 +235,7 @@ prob(M:Goal,P):-
   s(M:Goal,P).
 
 /** 
- * prob_bar(+Query:atom,-Probability:dict) is nondet
+ * prob_bar(:Query:atom,-Probability:dict) is nondet
  *
  * The predicate computes the probability of the ground query Query
  * and returns it as a dict for rendering with c3 as a bar chart with 
@@ -305,7 +308,7 @@ retract_all([H|T]):-
   retract_all(T).
 
 /** 
- * get_var_n(+Environment:int,+Rule:int,+Substitution:term,+Probabilities:list,-Variable:int) is det
+ * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with 
  * index Rule, grouding substitution Substitution and head distribution 
@@ -628,7 +631,7 @@ get_probs([_H:P|T], [P1|T1]) :-
 
 
 /** 
- * or_list(+ListOfBDDs:list,+Environment,-BDD:int) is det
+ * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
  *
  * Returns in BDD a pointer to a BDD belonging to environment Environment 
  * representing the disjunction of all the BDDs in ListOfBDDs
@@ -647,7 +650,7 @@ or_list1([H|T],Env,B0,B1):-
 
 
 /** 
- * set_pita(+Parameter:atom,+Value:term) is det
+ * set_pita(++Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see 
@@ -660,7 +663,7 @@ set_pita(Parameter,Value):-
   assert(M:local_pita_setting(Parameter,Value)).
 
 /** 
- * setting_pita(+Parameter:atom,-Value:term) is det
+ * setting_pita(?Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see 
