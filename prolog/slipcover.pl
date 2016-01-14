@@ -203,7 +203,7 @@ to_dyn(M,P/A):-
 
 
 /** 
- * sl(+FileStem:atom) is det
+ * sl(++FileStem:atom) is det
  *
  * The predicate performs structure learning for the problem stored in
  * the files FileStem.l (language bias), FileStem.kb (dataset), 
