@@ -31,9 +31,9 @@ details.
 
 :- thread_local v/3,rule_n/1,cplint_module/1,local_pita_setting/2.
 
-:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
+/*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
-  get_var_n/5,add_var/5,equality/4.
+  get_var_n/5,add_var/5,equality/4.*/
 %  remove/3.
 
 
