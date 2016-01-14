@@ -43,73 +43,63 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :-expects_dialect(yap).
 
 
-:- thread_local v/3, input_mod/1.
+:- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
 
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
-/** 
- * setting_sc(+Parameter:atom,-Value:term) is det
- *
- * The predicate returns the default value of a parameter
- * For a list of parameters see 
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
- * To obtain the current value of the parameters, use local_setting/2
- * from the input module
- */
-setting_sc(epsilon_em,0.0001).
-setting_sc(epsilon_em_fraction,0.00001).
-setting_sc(eps,0.0001).
-setting_sc(eps_f,0.00001).
+default_setting_sc(epsilon_em,0.0001).
+default_setting_sc(epsilon_em_fraction,0.00001).
+default_setting_sc(eps,0.0001).
+default_setting_sc(eps_f,0.00001).
 
 /* if the difference in log likelihood in two successive em iteration is smaller
 than epsilon_em, then EM stops */
-setting_sc(epsilon_sem,2).
+default_setting_sc(epsilon_sem,2).
 
 /* number of random restarts of em */
-setting_sc(random_restarts_REFnumber,1).
-setting_sc(random_restarts_number,1).
-setting_sc(iterREF,-1).
-setting_sc(iter,-1).
-setting_sc(examples,atoms).
-setting_sc(group,1).
-setting_sc(d,1).  
-setting_sc(verbosity,1).
-setting_sc(logzero,log(0.000001)).
-setting_sc(megaex_bottom,1). 
-setting_sc(initial_clauses_per_megaex,1).  
-setting_sc(max_iter,10).
-setting_sc(max_iter_structure,10000).
-setting_sc(max_var,4).
-setting_sc(max_rules,10).
-setting_sc(maxdepth_var,2).
-setting_sc(beamsize,100).
-setting_sc(background_clauses,50).
+default_setting_sc(random_restarts_REFnumber,1).
+default_setting_sc(random_restarts_number,1).
+default_setting_sc(iterREF,-1).
+default_setting_sc(iter,-1).
+default_setting_sc(examples,atoms).
+default_setting_sc(group,1).
+default_setting_sc(d,1).  
+default_setting_sc(verbosity,1).
+default_setting_sc(logzero,log(0.000001)).
+default_setting_sc(megaex_bottom,1). 
+default_setting_sc(initial_clauses_per_megaex,1).  
+default_setting_sc(max_iter,10).
+default_setting_sc(max_iter_structure,10000).
+default_setting_sc(max_var,4).
+default_setting_sc(max_rules,10).
+default_setting_sc(maxdepth_var,2).
+default_setting_sc(beamsize,100).
+default_setting_sc(background_clauses,50).
 
-setting_sc(specialization,bottom).
+default_setting_sc(specialization,bottom).
 %setting_sc(specialization,mode).
 /* allowed values: mode,bottom */
 
-setting_sc(seed,rand(10,1231,3032)).  
-setting_sc(score,ll).
+default_setting_sc(seed,rand(10,1231,3032)).  
+default_setting_sc(score,ll).
 /* allowed values: ll aucpr */
-setting_sc(neg_ex,cw).
+default_setting_sc(neg_ex,cw).
 
 
-setting_sc(epsilon_parsing, 1e-5).
-setting_sc(tabling, off).
+default_setting_sc(epsilon_parsing, 1e-5).
+default_setting_sc(tabling, off).
 /* on, off */
 
-setting_sc(bagof,false).
+default_setting_sc(bagof,false).
 /* values: false, intermediate, all, extra */
 
-setting_sc(compiling,off).
+default_setting_sc(compiling,off).
 
 
-setting_sc(depth_bound,true).  %if true, it limits the derivation of the example to the value of 'depth'
-setting_sc(depth,2).
-setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
+default_setting_sc(depth_bound,true).  %if true, it limits the derivation of the example to the value of 'depth'
+default_setting_sc(depth,2).
+default_setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 
 
@@ -2793,6 +2783,20 @@ set_sc(Parameter,Value):-
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
+/** 
+ * setting_sc(+Parameter:atom,-Value:term) is det
+ *
+ * The predicate returns the default value of a parameter
+ * For a list of parameters see 
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * To obtain the current value of the parameters, use local_setting/2
+ * from the input module
+ */
+setting_sc(P,V):-
+  input_mod(M),
+  M:local_setting(P,V).
+
 extract_vars_list(L,[],V):-
   rb_new(T),
   extract_vars_tree(L,T,T1),
@@ -3908,7 +3912,7 @@ user:term_expansion((:- sc), []) :-!,
 %  retractall(input_mod(_)),
 %  M:dynamic(model/1),
 %  M:set_prolog_flag(unkonw,fail),
-  findall(local_setting(P,V),setting_sc(P,V),L),
+  findall(local_setting(P,V),default_setting_sc(P,V),L),
   assert_all(L,M,_),
   assert(input_mod(M)),
   retractall(M:rule_sc_n(_)),
