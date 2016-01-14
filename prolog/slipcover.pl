@@ -1158,13 +1158,12 @@ write_body(S,[A|T]):-
   format(S,"  ~p,~n",[A]),
   write_body(S,T).
 
-/** 
- * list2or(+List:list,-Or:term) is det
- * list2or(-List:list,+Or:term) is det
- *
- * The predicate succeeds when Or is a disjunction (using the ; operator)
- * of the terms in List
- */
+%! list2or(+List:list,-Or:term) is det
+%! list2or(-List:list,+Or:term) is det
+%
+% The predicate succeeds when Or is a disjunction (using the ; operator)
+% of the terms in List
+
 list2or([],true):-!.
 
 list2or([X],X):-
