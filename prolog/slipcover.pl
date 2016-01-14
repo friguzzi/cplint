@@ -1174,8 +1174,8 @@ list2or([H|T],(H ; Ta)):-!,
 
 
 /** 
- * list2and(+List:list,-And:term) is det
- * list2and(-List:list,+And:term) is det
+ * list2and(+List:list,-And:term) is det.
+ * list2and(-List:list,+And:term) is det.
  *
  * The predicate succeeds when And is a conjunction (using the , operator)
  * of the terms in List
