@@ -1,6 +1,6 @@
 /** <module> PITA
 
-This module performs reassoning over Logic Programs with Annotated
+This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It reads probabilistic program andcomputes the probability of queries.
 
