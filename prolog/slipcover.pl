@@ -35,7 +35,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 %:-use_foreign_library(foreign(bddem),install).
 :-set_prolog_flag(unknown,warning).
 
-:-multifile setting_sc/2.
+%:-multifile setting_sc/2.
 %:-use_module(library(sandbox)).
 
 :-dynamic p/2.
