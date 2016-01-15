@@ -38,8 +38,6 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 %:-multifile setting_sc/2.
 %:-use_module(library(sandbox)).
 
-:-dynamic p/2.
-:-dynamic setting_sc/2,last_id/1, rule/5, model/1.
 
 
 
@@ -3919,7 +3917,7 @@ user:term_expansion((:- sc), []) :-!,
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
-    ref_clause/1,ref/1,model/1,neg/1)),
+    ref_clause/1,ref/1,model/1,neg/1,rule/4)),
   style_check(-discontiguous).
 
 user:term_expansion(begin(model(I)), []) :-!,
