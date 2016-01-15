@@ -40,7 +40,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 :-dynamic p/2.
 :-dynamic setting_sc/2,last_id/1, rule/5, model/1.
-:-expects_dialect(yap).
+
 
 
 :- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
