@@ -165,7 +165,8 @@ details.
  */
 
 /** 
- * add_var(++Environment:int,++NumberOfHeads:int,++ProbabilityDistribution:list, ++Rule,-Variable:int) is det
+ * add_var(++Environment:int,++NumberOfHeads:int,++ProbabilityDistribution:list, ++Rule:int,-Variable:int) is det.
+ *
  * Returns in Variable the index of a new random variable in Environment with 
  * NumberOHeads values and probability distribution ProbabilityDistribution
  */
