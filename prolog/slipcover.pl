@@ -21,7 +21,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
 :-module(slipcover,[set_sc/2,setting_sc/2,
-  induce/2,induce/8,induce_par/2,induce_par/8,list2or/2,list2and/2,
+  induce/2,induce/8,induce_par/2,induce_par/8,test/6,test/7,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
@@ -129,12 +129,25 @@ induce(Folds,R):-
 induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
   rules2terms(R,ROut),
+  test(R,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
+
+/** 
+ * test(-P:probabilistic_program,+TrainFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, a dict containing the points
+ * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
+ * and a dict containing the points of the PR curve in PR
+ */
+test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   write2('Testing\n'),
   input_mod(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
-  generate_clauses(R,RuleFacts,0,[],Th), 
+  generate_clauses(P,RuleFacts,0,[],Th), 
   assert_all(Th,M,ThRef),
   assert_all(RuleFacts,M,RFRefs),
   set_sc(compiling,off),
@@ -387,6 +400,7 @@ induce_par(Folds,ROut):-
 
 induce_parameters(Folds,R):-
   input_mod(M),
+  make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   setrand(Seed),
