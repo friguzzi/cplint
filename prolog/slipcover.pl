@@ -148,16 +148,20 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   append(L,TE),
   set_sc(compiling,on),
   process_clauses(P,[],_,[],PRules),
-  generate_clauses(PRules,_RuleFacts,0,[],Th), 
+  generate_clauses(PRules,RuleFacts,0,[],Th), 
   assert_all(Th,M,ThRef),
+  assert_all(RuleFacts,M,RFRef),
   M:bg(RBG0),
   process_clauses(RBG0,[],_,[],RBG),
-  generate_clauses(RBG,_RBG1,0,[],ThBG),
+  generate_clauses(RBG,RBGRF,0,[],ThBG),
   assert_all(ThBG,ThBGRef),
+  assert_all(RBGRF,RBGRFRef),
   set_sc(compiling,off),
   test([TE],LL,AUCROC,ROC,AUCPR,PR),
   retract_all(ThBGRef),
-  retract_all(ThRef).
+  retract_all(RBGRFRef),
+  retract_all(ThRef),
+  retract_all(RFRef).
  
 
 induce_rules(Folds,R):-
