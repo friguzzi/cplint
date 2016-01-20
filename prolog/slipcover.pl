@@ -21,7 +21,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
 :-module(slipcover,[set_sc/2,setting_sc/2,
-  induce/2,induce/8,induce_par/2,induce_par/8,test/6,test/7,list2or/2,list2and/2,
+  induce/2,induce_par/2,test/7,list2or/2,list2and/2,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
@@ -129,7 +129,7 @@ induce(Folds,R):-
 induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   induce_rules(TrainFolds,R),
   rules2terms(R,ROut),
-  test(R,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
+  test(ROut,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
 
 /** 
  * test(-P:probabilistic_program,+TrainFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
@@ -147,13 +147,17 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
-  generate_clauses(P,RuleFacts,0,[],Th), 
+  process_clauses(P,[],_,[],PRules),
+  generate_clauses(PRules,_RuleFacts,0,[],Th), 
   assert_all(Th,M,ThRef),
-  assert_all(RuleFacts,M,RFRefs),
+  M:bg(RBG0),
+  process_clauses(RBG0,[],_,[],RBG),
+  generate_clauses(RBG,_RBG1,0,[],ThBG),
+  assert_all(ThBG,ThBGRef),
   set_sc(compiling,off),
   test([TE],LL,AUCROC,ROC,AUCPR,PR),
-  retract_all(ThRef),
-  retract_all(RFRefs).
+  retract_all(ThBGRef),
+  retract_all(ThRef).
  
 
 induce_rules(Folds,R):-
@@ -172,7 +176,7 @@ induce_rules(Folds,R):-
   M:bg(RBG0),
   process_clauses(RBG0,[],_,[],RBG),
   generate_clauses(RBG,_RBG1,0,[],ThBG), 
-  assert_all(ThBG,M,_ThBGRef),
+  assert_all(ThBG,M,ThBGRef),
   (M:local_setting(specialization,bottom)->
     M:local_setting(megaex_bottom,MB),
     deduct(MB,M,DB,[],InitialTheory),   
@@ -192,7 +196,8 @@ induce_rules(Folds,R):-
   format2('Wall time ~f */~n',[WTS]),
   write_rules2(R,user_output),
 %  told,
-  set_sc(compiling,off).
+  set_sc(compiling,off),
+  retract_all(ThBGRef).
 
 make_dynamic(M):-
   findall(O,M:output(O),LO),
@@ -3335,9 +3340,8 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 %sandbox:safe_primitive(random:setrand(_)).
 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
-sandbox:safe_primitive(slipcover:induce_par(_,_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
-sandbox:safe_primitive(slipcover:induce(_,_,_,_,_,_,_,_)).
+sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 
 %sandbox:safe_primitive(prolog_load_context(_,_)).
