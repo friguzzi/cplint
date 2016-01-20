@@ -700,6 +700,17 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
+user:term_expansion((:- cplint), []) :-!,
+  prolog_load_context(module, M),
+  findall(M:local_pita_setting(P,V),default_setting_pita(P,V),L),
+  assert_all(L,M,_),
+  assert(cplint_module(M)),
+  retractall(M:rule_n(_)),
+  assert(M:rule_n(0)),
+  style_check(-discontiguous).
+
+user:term_expansion((:- end_cplint), []) :-!,
+  retractall(cplint_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),cplint_module(M),
@@ -958,21 +969,8 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
   prolog_load_context(module, M),cplint_module(M),
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
-  (Head\= end_of_file),!,
+  (Head\= end_of_file),
   add_bdd_arg(Head,Env,One,_Module,Head1).
-
-user:term_expansion((:- cplint), []) :-
-  prolog_load_context(module, M),
-  findall(M:local_pita_setting(P,V),default_setting_pita(P,V),L),
-  assert_all(L,M,_),
-  assert(cplint_module(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)),
-  style_check(-discontiguous).
-
-
-user:term_expansion((:- end_cplint), []) :-
-  retract(cplint_module(_M)).
 
 
 /** 
@@ -994,7 +992,7 @@ cplint:-
  * Terminates the cplint inference module.
  */
 end_cplint:-
-  retract(cplint_module(_M)).
+  retractall(cplint_module(_M)).
 
 list2or([],true):-!.
 
