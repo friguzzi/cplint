@@ -1,5 +1,7 @@
 
-manual.pdf: manual.tex manual.bbl
+manual.pdf: manual.tex bib.bib inference.tex learning.tex learning_par.tex parameters.tex syntax.tex
+	pdflatex manual
+	bibtex manual
 	pdflatex manual
 	pdflatex manual
 

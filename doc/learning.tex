@@ -59,7 +59,8 @@ fact of the form
 \begin{verbatim}
 bg(<list of terms representing clauses>).
 \end{verbatim}
-and an initial program with a fact of the form 
+where the clauses must currently be deterministic.
+Moreover, you can specify an initial program with a fact of the form 
 \begin{verbatim}
 in(<list of terms representing clauses>).
 \end{verbatim}
@@ -119,6 +120,12 @@ specifies the atoms that can appear in the body of clauses.
 \texttt{<recall>} indicates how many atoms for the predicate specification are
 retained in the bottom clause during a saturation step. \texttt{*} stands for all those that are found. Otherwise the indicated number is randomly chosen.
 
+Two specialization modes are available: \verb|bottom| and \verb|mode|.
+In the first, a bottom clause is built and the literals to be added during 
+refinement are taken from it. In the latter, no bottom clause is built and
+the literals to be added during refinement are generated 
+directly from the mode declarations. 
+
 Arguments of the form
 \begin{verbatim}
 +<type>
@@ -148,6 +155,12 @@ for specifying an argument which should be replaced by a constant of type \textt
 <constant>
 \end{verbatim}
 for specifying a constant.
+
+Note that arguments of the form
+\verb|#<type>| \verb|-#<type>| are not available in 
+specialization mode \verb|mode|, if you want constants to appear in 
+the literals you have to indicate them one by one in the mode declarations.
+
 
 An example of language bias for the Bongard domain is
 \begin{verbatim}
@@ -191,6 +204,51 @@ modeh(*,
 [advisedby(A,B),tempadvisedby(A,B)],
 [professor/1,student/1,hasposition/2,inphase/2,
 publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).
+\end{verbatim}
+%
+Lookahead can also be specified with facts of the form
+\begin{verbatim}
+lookahead(<literal>,<list of literals>).
+\end{verbatim}
+In this case when a literal matching \verb|<literal>| is added to the body of clause during refinement, then also
+the literals matching \verb|<list of literals>| will be added.
+An example of such declaration (from \verb|muta.pl|) is
+\begin{verbatim}
+lookahead(logp(_),[(_=_))]).
+\end{verbatim}
+Note that
+\verb|<list of literals>| is copied with \verb|copy_term/2| before matching, so
+variables in common between \verb|<literal>| and \verb|<list of literals>|
+may not be in common in the refined clause.
+
+It is also possible to specify that a literal can only be added together with 
+other literals with facts of the form 
+\begin{verbatim}
+lookahead_cons(<literal>,<list of literals>).
+\end{verbatim}
+In this case \verb|<literal>| is added to the body of clause during refinement only together with
+literals matching \verb|<list of literals>|.
+An example of such declaration is
+\begin{verbatim}
+lookahead_cons(logp(_),[(_=_))]).
+\end{verbatim}
+Also here 
+\verb|<list of literals>| is copied with \verb|copy_term/2| before matching, so
+variables in common between \verb|<literal>| and \verb|<list of literals>|
+may not be in common in the refined clause.
+
+Moreover, we can specify lookahead with
+\begin{verbatim}
+lookahead_cons_var(<literal>,<list of literals>).
+\end{verbatim}
+In this case \verb|<literal>| is added to the body of clause during refinement only together with
+literals matching \verb|<list of literals>| and \verb|<list of literals>| is not copied before matching, so
+variables in common between \verb|<literal>| and \verb|<list of literals>|
+are in common also in the refined clause. This is allowed only with
+\verb|specialization| set to \verb|bottom|.
+An example of such declaration is
+\begin{verbatim}
+lookahead_cons_var(logp(B),[(B=_))]).
 \end{verbatim}
 
 \subsubsection{Example Interpretations}

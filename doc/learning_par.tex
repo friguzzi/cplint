@@ -5,6 +5,7 @@ Parameters are set with  commands of the form
 \end{verbatim}
 The available parameters are:
 \begin{itemize}
+\item \verb|specialization|: (values: \verb|{bottom,mode}|,  default value: \texttt{bottom}) specialization mode. 
 \item \verb|depth_bound|: (values: \verb|{true,false}|,  default value: \texttt{true}) if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter. 
 \item \verb|depth| (values: integer, default value: 2): depth of derivations if  \verb|depth_bound|  is set to \verb|true|
 \item \verb|single_var| (values: \verb|{true,false}|, default value: \verb|false|): if set to \verb|true|, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
