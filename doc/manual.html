@@ -14,6 +14,23 @@
 <h2 class="author">Fabrizio Riguzzi<br />
 fabrizio.riguzzi@unife.it</h2>
 </div>
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#syn">Syntax</a></li>
+<li><a href="#inf">Inference</a><ul>
+<li><a href="#parameters">Parameters</a></li>
+</ul></li>
+<li><a href="#learning">Learning</a><ul>
+<li><a href="#input">Input</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#parameters-1">Parameters</a></li>
+<li><a href="#files">Files</a></li>
+</ul></li>
+<li><a href="#license">License</a></li>
+</ul>
+</div>
 <h1 id="introduction">Introduction</h1>
 <p><code>cplint</code> is a suite of programs for reasoning with LPADs/CP-logic programs <span class="citation">[8]</span>, <span class="citation">[11]</span>, <span class="citation">[9]</span>, <span class="citation">[10]</span>. It contains modules for both inference and learning.</p>
 <h1 id="installation">Installation</h1>
@@ -21,7 +38,7 @@ fabrizio.riguzzi@unife.it</h2>
 <pre><code>?- pack_install(cplint).</code></pre>
 <p>Moreover, in order to make sure you have a foreign library that matches your architecture, run</p>
 <pre><code>?- pack_rebuild(cplint). </code></pre>
-<h1 id="syntax">Syntax</h1>
+<h1 id="syn">Syntax</h1>
 <p>LPAD and CP-logic programs consist of a set of annotated disjunctive clauses. Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used. A general CP-logic clause has the form</p>
 <pre><code>h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl</code></pre>
 <p>No parentheses are necessary. The <code>pi</code> are numeric expressions. It is up to the user to ensure that the numeric expressions are legal, i.e. that they sum up to less than one.</p>
@@ -52,7 +69,7 @@ nth0/3, nth/3, dif/2, select/3</code></pre>
 <p>plus the predicate</p>
 <pre><code>average/2</code></pre>
 <p>that, given a list of numbers, computes its arithmetic mean.</p>
-<h1 id="inference">Inference</h1>
+<h1 id="inf">Inference</h1>
 <p><code>cplint</code> answers queries using the module <code>pita</code>. It performs the program transformation technique of <span class="citation">[7]</span>. Differently from that work, techniques alternative to tabling and answer subsumption are used.</p>
 <p>For answering queries, you have to prepare a Prolog file where you first load <code>pita</code> and then enclose the probabilistic clauses in <code>:-cplint.</code> and <code>:-end_cplint.</code> For example, the coin program above can be stored in <code>coin.pl</code> as follows</p>
 <pre><code>:- use_module(library(pita)).
@@ -87,19 +104,6 @@ toss(coin).
 <li><p><code>depth_bound</code>: if <code>true</code>, the depth of the derivation of the goal is limited to the value of the <code>depth</code> parameter. Default value <code>false</code>.</p></li>
 <li><p><code>depth</code>: maximum depth of derivations when <code>depth_bound</code> is set to <code>true</code>. Default value <code>2</code>.</p></li>
 </ul>
-<h2 id="parameters-1">Parameters</h2>
-<p>The module makes use of a number of parameters in order to control its behavior. They can be set with the directive</p>
-<pre><code>:- set_pita(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
-<p>inside the couple <code>:-cplint.</code> and <code>:-end_cplint.</code></p>
-<p>The current value can be read with</p>
-<pre><code>?- setting_pita(&lt;parameter&gt;,Value).</code></pre>
-<p>from the top-level. The available parameters are:</p>
-<ul>
-<li><p><code>epsilon_parsing</code>: if (1 - the sum of the probabilities of all the head atoms) is larger than <code>epsilon_parsing</code>, then <code>pita</code> adds the null event to the head. Default value <code>0.00001</code>.</p></li>
-<li><p><code>single_var</code>: determines how non ground clauses are treated: if <code>true</code>, a single random variable is assigned to the whole non ground clause, if <code>false</code>, a different random variable is assigned to every grounding of the clause. Default value <code>false</code>.</p></li>
-<li><p><code>depth_bound</code>: if <code>true</code>, the depth of the derivation of the goal is limited to the value of the <code>depth</code> parameter. Default value <code>false</code>.</p></li>
-<li><p><code>depth</code>: maximum depth of derivations when <code>depth_bound</code> is set to <code>true</code>. Default value <code>2</code>.</p></li>
-</ul>
 <h1 id="learning">Learning</h1>
 <p>The following learning algorithms are available:</p>
 <ul>
@@ -120,12 +124,6 @@ toss(coin).
 <h3 id="preamble">Preamble</h3>
 <p>In the preamble, the SLIPCOVER library is loaded with</p>
 <pre><code>:- use_module(library(slipcover)).</code></pre>
-<p>Then, if you are using your file in cplint on SWISH, you could add</p>
-<pre><code>:- if(current_predicate(use_rendering/1)).
-:- use_rendering(c3).
-:- use_rendering(lpad).
-:- endif.</code></pre>
-<p>if you want a nice representation of the output (in particular, if you want graphs of the ROC and PR curves).</p>
 <p>Now you can initialize SLIPCOVER with</p>
 <pre><code>:- sc.</code></pre>
 <p>At this point you can start setting parameters for SLIPCOVER such as for example</p>
@@ -133,11 +131,11 @@ toss(coin).
 :- set_sc(max_iter,2).
 :- set_sc(max_iter_structure,5).
 :- set_sc(verbosity,1).</code></pre>
-<p>We will see later the list of available parameters. This ends the preamble.</p>
+<p>We will see later the list of available parameters. A particularly important parameter is <code>verbosity</code>: if set to 1, nothing is printed and learning is fastest, if set to 3 much information is printed and learning is slowest, 2 is in between. This ends the preamble.</p>
 <h3 id="backgroung-and-initial-lpadcpl-program">Backgroung and Initial LPAD/CPL-program</h3>
 <p>Now you can specify the background knowledge with a fact of the form</p>
 <pre><code>bg(&lt;list of terms representing clauses&gt;).</code></pre>
-<p>and an initial program with a fact of the form</p>
+<p>where the clauses must currently be deterministic. Moreover, you can specify an initial program with a fact of the form</p>
 <pre><code>in(&lt;list of terms representing clauses&gt;).</code></pre>
 <p>The initial program is used in parameter learning for providing the structure. The indicated parameters do not matter as they are first randomized. Remember to enclose each clause in parentheses because <code>:-</code> has the highest precedence.</p>
 <p>For example, <code>bongard.pl</code> has the initial program</p>
@@ -166,6 +164,7 @@ toss(coin).
 <p>specifies the atoms that can appear in the head of clauses, while</p>
 <pre><code>modeb(&lt;recall&gt;,&lt;predicate&gt;(&lt;arg1&gt;,...).</code></pre>
 <p>specifies the atoms that can appear in the body of clauses. <code>&lt;recall&gt;</code> can be an integer or <code>*</code>. <code>&lt;recall&gt;</code> indicates how many atoms for the predicate specification are retained in the bottom clause during a saturation step. <code>*</code> stands for all those that are found. Otherwise the indicated number is randomly chosen.</p>
+<p>Two specialization modes are available: <code>bottom</code> and <code>mode</code>. In the first, a bottom clause is built and the literals to be added during refinement are taken from it. In the latter, no bottom clause is built and the literals to be added during refinement are generated directly from the mode declarations.</p>
 <p>Arguments of the form</p>
 <pre><code>+&lt;type&gt;</code></pre>
 <p>specifies that the argument should be an input variable of type <code>&lt;type&gt;</code>, i.e., a variable replacing a <code>+&lt;type&gt;</code> argument in the head or a <code>-&lt;type&gt;</code> argument in a preceding literal in the current hypothesized clause.</p>
@@ -179,6 +178,7 @@ toss(coin).
 <p>for specifying an argument which should be replaced by a constant of type <code>&lt;type&gt;</code> in the bottom clause and that should be used for replacing input variables of the following literals when building the bottom clause.</p>
 <pre><code>&lt;constant&gt;</code></pre>
 <p>for specifying a constant.</p>
+<p>Note that arguments of the form <code>#&lt;type&gt;</code> <code>-#&lt;type&gt;</code> are not available in specialization mode <code>mode</code>, if you want constants to appear in the literals you have to indicate them one by one in the mode declarations.</p>
 <p>An example of language bias for the Bongard domain is</p>
 <pre><code>output(pos/0).
 
@@ -210,6 +210,19 @@ determination(pos/0,config/2).</code></pre>
 [advisedby(A,B),tempadvisedby(A,B)],
 [professor/1,student/1,hasposition/2,inphase/2,
 publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).</code></pre>
+<p>Lookahead can also be specified with facts of the form</p>
+<pre><code>lookahead(&lt;literal&gt;,&lt;list of literals&gt;).</code></pre>
+<p>In this case when a literal matching <code>&lt;literal&gt;</code> is added to the body of clause during refinement, then also the literals matching <code>&lt;list of literals&gt;</code> will be added. An example of such declaration (from <code>muta.pl</code>) is</p>
+<pre><code>lookahead(logp(_),[(_=_))]).</code></pre>
+<p>Note that <code>&lt;list of literals&gt;</code> is copied with <code>copy_term/2</code> before matching, so variables in common between <code>&lt;literal&gt;</code> and <code>&lt;list of literals&gt;</code> may not be in common in the refined clause.</p>
+<p>It is also possible to specify that a literal can only be added together with other literals with facts of the form</p>
+<pre><code>lookahead_cons(&lt;literal&gt;,&lt;list of literals&gt;).</code></pre>
+<p>In this case <code>&lt;literal&gt;</code> is added to the body of clause during refinement only together with literals matching <code>&lt;list of literals&gt;</code>. An example of such declaration is</p>
+<pre><code>lookahead_cons(logp(_),[(_=_))]).</code></pre>
+<p>Also here <code>&lt;list of literals&gt;</code> is copied with <code>copy_term/2</code> before matching, so variables in common between <code>&lt;literal&gt;</code> and <code>&lt;list of literals&gt;</code> may not be in common in the refined clause.</p>
+<p>Moreover, we can specify lookahead with</p>
+<pre><code>lookahead_cons_var(&lt;literal&gt;,&lt;list of literals&gt;).</code></pre>
+<p>In this case <code>&lt;literal&gt;</code> is added to the body of clause during refinement only together with literals matching <code>&lt;list of literals&gt;</code> and <code>&lt;list of literals&gt;</code> is not copied before matching, so variables in common between <code>&lt;literal&gt;</code> and <code>&lt;list of literals&gt;</code> are in common also in the refined clause. This is allowed only with <code>specialization</code> set to <code>bottom</code>.</p>
 <h3 id="example-interpretations">Example Interpretations</h3>
 <p>The last part of the file contains the data. You can specify data with two modalities: models and keys. In the models type, you specify an example model (or interpretation or megaexample) as a list of Prolog facts initiated by <code>begin(model(&lt;name&gt;)).</code> and terminated by <code>end(model(&lt;name&gt;)).</code> as in</p>
 <pre><code>begin(model(2)).
@@ -254,11 +267,39 @@ symbond(Mod,A,B,T):- bond(Mod,B,A,T).</code></pre>
 <p>Then you must indicate how the examples are divided in folds with facts of the form: <code>fold(&lt;fold_name&gt;,&lt;list of model identifiers&gt;)</code>, as for example</p>
 <pre><code>fold(train,[2,3,...]).
 fold(test,[490,491,...]).</code></pre>
-<h2 id="parameters-2">Parameters</h2>
+<h2 id="commands">Commands</h2>
+<h3 id="parameter-learning">Parameter Learning</h3>
+<p>To execute EMBLEM, prepare an input file as indicated above, load it into SWI-Prolog and execute</p>
+<pre><code>?- induce_par(&lt;list of folds&gt;,P).</code></pre>
+<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
+<p>For example <code>bongard.pl</code>, you can load it into SWI-Prolog with</p>
+<pre><code>?- [bongard].</code></pre>
+<p>and perform parameter learning on the <code>train</code> fold with</p>
+<pre><code>?- induce_par([train],P).</code></pre>
+<p>A program can also be tested on a test set with</p>
+<pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds. This returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
+<p>For example, to test on fold <code>test</code> the program learned on fold <code>train</code> you can run the query</p>
+<pre><code>?- induce_par([train],P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<p>Or you can test the input program on the fold <code>test</code> with</p>
+<pre><code>?- in(P),
+test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<h3 id="structure-learning">Structure Learning</h3>
+<p>To execute SLIPCOVER, prepare an input file as indicated above, load it into SWI-Prolog and call</p>
+<pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
+<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
+<p>For example <code>bongard.pl</code>, you can load it into SWI-Prolog with</p>
+<pre><code>?- [bongard].</code></pre>
+<p>and perform structure learning on the <code>train</code> fold with</p>
+<pre><code>?- induce([train],P).</code></pre>
+<p>A program can also be tested on a test set with <code>test/7</code> as described above.</p>
+<h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
 <p>The available parameters are:</p>
 <ul>
+<li><p><code>specialization</code>: (values: <code>{bottom,mode}</code>, default value: <code>bottom</code>) specialization mode.</p></li>
 <li><p><code>depth_bound</code>: (values: <code>{true,false}</code>, default value: <code>true</code>) if <code>true</code>, the depth of the derivation of the goal is limited to the value of the <code>depth</code> parameter.</p></li>
 <li><p><code>depth</code> (values: integer, default value: 2): depth of derivations if <code>depth_bound</code> is set to <code>true</code></p></li>
 <li><p><code>single_var</code> (values: <code>{true,false}</code>, default value: <code>false</code>): if set to <code>true</code>, there is a random variable for each clause, instead of a different random variable for each grounding of each clause</p></li>
@@ -282,29 +323,6 @@ fold(test,[490,491,...]).</code></pre>
 <li><p><code>neg_ex</code> (values: <code>given</code>, <code>cw</code>, default value: <code>cw</code>): if set to <code>given</code>, the negative examples in testing are taken from the test folds interpretations, i.e., those examples <code>ex</code> stored as <code>neg(ex)</code>; if set to <code>cw</code>, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.</p></li>
 <li><p><code>verbosity</code> (values: integer in [1,3], default value: 1): level of verbosity of the algorithms</p></li>
 </ul>
-<h2 id="commands">Commands</h2>
-<h3 id="parameter-learning">Parameter Learning</h3>
-<p>To execute EMBLEM, prepare an input file as indicated above (for example <code>bongard.pl</code>), load it into SWI-Prolog</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and call</p>
-<pre><code>?- induce_par([train],P).</code></pre>
-<p>to obtain in <code>P</code> the program in input with the updated parameters.</p>
-<p>The results can also be tested on a test set with</p>
-<pre><code>?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<p>This returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
-<p>The general form of the commands is</p>
-<pre><code>?- induce_par(&lt;list_of_train_folds&gt;,P).</code></pre>
-<pre><code>?- induce_par(&lt;list_of_train_folds&gt;,&lt;list_of_test_folds&gt;,
-P,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<h3 id="structure-learning">Structure Learning</h3>
-<p>To execute SLIPCOVER, prepare an input file as indicated above (for example <code>bongard.pl</code>), load it into SWI-Prolog</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and call</p>
-<pre><code>?- induce([train],P).</code></pre>
-<p>to obtain in <code>P</code> the learned program.</p>
-<p>The results can also be tested on a test set with</p>
-<pre><code>?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<p>returning the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
 <h2 id="files">Files</h2>
 <p>The <code>pack/cplint/prolog/examples</code> folder in SWI-Prolog home contains some example programs. The subfolder <code>learning</code> contains some learning examples. The <code>pack/cplint/doc</code> folder in SWI-Prolog home contains this manual in latex, html and pdf.</p>
 <h1 id="license">License</h1>
@@ -318,8 +336,7 @@ P,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <li><p>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p></li>
 <li><p>Neither the name of the University of Colorado nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.</p></li>
 </ul>
-<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS<br />
-AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAU-SED<br />
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAU-SED<br />
 AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 <div id="refs" class="references">
 <div id="ref-BelRig11-CILC11-NC">
