@@ -2807,12 +2807,10 @@ set_sc(Parameter,Value):-
 /** 
  * setting_sc(+Parameter:atom,-Value:term) is det
  *
- * The predicate returns the default value of a parameter
+ * The predicate returns the value of a parameter
  * For a list of parameters see 
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
- * To obtain the current value of the parameters, use local_setting/2
- * from the input module
  */
 setting_sc(P,V):-
   input_mod(M),
