@@ -1040,6 +1040,7 @@ builtin(_ @> _).
 builtin(memberchk(_,_)).
 builtin(select(_,_,_)).
 builtin(dif(_,_)).
+builtin(prob(_,_)).
 
 average(L,Av):-
         sum_list(L,Sum),
