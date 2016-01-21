@@ -4,20 +4,15 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <meta name="author" content="Fabrizio Riguzzi fabrizio.riguzzi@unife.it" />
-  <title>SWI-Prolog cplint Pack Manual</title>
+  <title>cplint on SWISH Manual</title>
   <style type="text/css">code{white-space: pre;}</style>
 </head>
 <body>
 <div id="header">
-<h1 class="title">SWI-Prolog <code>cplint</code> Pack Manual</h1>
-<h2 class="author">Fabrizio Riguzzi<br />
-fabrizio.riguzzi@unife.it</h2>
+<h1 class="title"><code>cplint</code> on SWISH Manual</h1>
 </div>
 <div id="TOC">
 <ul>
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#installation">Installation</a></li>
 <li><a href="#syn">Syntax</a></li>
 <li><a href="#inf">Inference</a><ul>
 <li><a href="#parameters">Parameters</a></li>
@@ -26,18 +21,10 @@ fabrizio.riguzzi@unife.it</h2>
 <li><a href="#input">Input</a></li>
 <li><a href="#commands">Commands</a></li>
 <li><a href="#parameters-1">Parameters</a></li>
-<li><a href="#files">Files</a></li>
 </ul></li>
-<li><a href="#license">License</a></li>
+<li><a href="#bibliography">Bibliography</a></li>
 </ul>
 </div>
-<h1 id="introduction">Introduction</h1>
-<p><code>cplint</code> is a suite of programs for reasoning with LPADs/CP-logic programs <span class="citation">[8]</span>, <span class="citation">[11]</span>, <span class="citation">[9]</span>, <span class="citation">[10]</span>. It contains modules for both inference and learning.</p>
-<h1 id="installation">Installation</h1>
-<p><code>cplint</code> is distributed as a pack of SWI-Prolog. To install it, use</p>
-<pre><code>?- pack_install(cplint).</code></pre>
-<p>Moreover, in order to make sure you have a foreign library that matches your architecture, run</p>
-<pre><code>?- pack_rebuild(cplint). </code></pre>
 <h1 id="syn">Syntax</h1>
 <p>LPAD and CP-logic programs consist of a set of annotated disjunctive clauses. Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used. A general CP-logic clause has the form</p>
 <pre><code>h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl</code></pre>
@@ -48,7 +35,7 @@ fabrizio.riguzzi@unife.it</h2>
 <pre><code>h1 :- b1,...,bm,\+ c1,...,\+ cl.</code></pre>
 <p>stands for</p>
 <pre><code>h1:1 :- b1,...,bm,\+ c1,...,\+ cl.</code></pre>
-<p>The coin example of <span class="citation">[11]</span> is represented as (file <code>coin.cpl</code>)</p>
+<p>The coin example of <span class="citation">[8]</span> is represented as (file <code>coin.cpl</code>)</p>
 <pre><code>heads(Coin):1/2 ; tails(Coin):1/2 :- 
   toss(Coin),\+biased(Coin).
 
@@ -86,11 +73,17 @@ fair(Coin):0.9 ; biased(Coin):0.1.
 toss(coin).
 
 :- end_cplint.</code></pre>
-<p>Then you can simply load <code>coin.pl</code> as</p>
-<pre><code>?- [coin].</code></pre>
-<p>and query it with</p>
+<p><code>cplint</code> on SWISH allows two types of programs: LPAD and Prolog. In the first, you create a new LPAD in the editor, in the latter a Prolog program.</p>
+<p>In LPADs, you write in the editor the program without the library import and the <code>:- cplint</code> and <code>:- end_cplint.</code> compiler directives.</p>
+<p>You ask queries by writing the atom of which you want to compute the probability. In the coin example, the probability of <code>heads(coin)</code> can be obtained with the</p>
+<pre><code>?- heads(coin).</code></pre>
+<p>In Prolog programs, you have to enter the program above (<code>coin.pl</code>) and ask the probability of an atom using the predicate <code>prob/2</code> as in</p>
 <pre><code>?- prob(heads(coin),P).</code></pre>
-<p>Note that supplying <code>coin.pl</code> as an argument to the <code>swipl</code> command currently returns errors due to bad interaction between <code>pita.pl</code> and the top-level. The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.</p>
+<p>You can also see the probability of the query being true and being false as a bar chart with</p>
+<pre><code>?- prob_bar(heads(coin),P).</code></pre>
+<p>if you include</p>
+<pre><code>:- use_rendering(c3).</code></pre>
+<p>before <code>:- cplint.</code></p>
 <h2 id="parameters">Parameters</h2>
 <p>The module makes use of a number of parameters in order to control its behavior. They can be set with the directive</p>
 <pre><code>:- set_pita(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
@@ -270,12 +263,10 @@ symbond(Mod,A,B,T):- bond(Mod,B,A,T).</code></pre>
 fold(test,[490,491,...]).</code></pre>
 <h2 id="commands">Commands</h2>
 <h3 id="parameter-learning">Parameter Learning</h3>
-<p>To execute EMBLEM, prepare an input file as indicated above, load it into SWI-Prolog and execute</p>
+<p>To execute EMBLEM, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce_par(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
-<p>For example <code>bongard.pl</code>, you can load it into SWI-Prolog with</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and perform parameter learning on the <code>train</code> fold with</p>
+<p>For example <code>bongard.pl</code>, you can perform parameter learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_par([train],P).</code></pre>
 <p>A program can also be tested on a test set with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
@@ -285,14 +276,16 @@ fold(test,[490,491,...]).</code></pre>
    test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>Or you can test the input program on the fold <code>test</code> with</p>
 <pre><code>?- in(P),
-test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<p>By including</p>
+<pre><code>:- use_rendering(c3).
+:- use_rendering(lpad).</code></pre>
+<p>in the code before <code>:- sc.</code> the curves will be shown as graphs and the output program will be pretty printed.</p>
 <h3 id="structure-learning">Structure Learning</h3>
-<p>To execute SLIPCOVER, prepare an input file as indicated above, load it into SWI-Prolog and call</p>
+<p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
-<p>For example <code>bongard.pl</code>, you can load it into SWI-Prolog with</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and perform structure learning on the <code>train</code> fold with</p>
+<p>For example <code>bongard.pl</code>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> as described above.</p>
 <h2 id="parameters-1">Parameters</h2>
@@ -324,21 +317,7 @@ test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <li><p><code>neg_ex</code> (values: <code>given</code>, <code>cw</code>, default value: <code>cw</code>): if set to <code>given</code>, the negative examples in testing are taken from the test folds interpretations, i.e., those examples <code>ex</code> stored as <code>neg(ex)</code>; if set to <code>cw</code>, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.</p></li>
 <li><p><code>verbosity</code> (values: integer in [1,3], default value: 1): level of verbosity of the algorithms</p></li>
 </ul>
-<h2 id="files">Files</h2>
-<p>The <code>pack/cplint/prolog/examples</code> folder in SWI-Prolog home contains some example programs. The subfolder <code>learning</code> contains some learning examples. The <code>pack/cplint/doc</code> folder in SWI-Prolog home contains this manual in latex, html and pdf.</p>
-<h1 id="license">License</h1>
-<p><code>cplint</code> follows the Artistic License 2.0 that you can find in <code>cplint</code> root folder. The copyright is by Fabrizio Riguzzi.</p>
-<p>The library <a href="http://vlsi.colorado.edu/\string ~fabio/">CUDD</a> for manipulating BDDs has the following license:</p>
-<p>Copyright (c) 1995-2004, Regents of the University of Colorado</p>
-<p>All rights reserved.</p>
-<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
-<ul>
-<li><p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</p></li>
-<li><p>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p></li>
-<li><p>Neither the name of the University of Colorado nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.</p></li>
-</ul>
-<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAU-SED<br />
-AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<h1 id="bibliography" class="unnumbered">Bibliography</h1>
 <div id="refs" class="references">
 <div id="ref-BelRig11-CILC11-NC">
 <p>1. Elena Bellodi and Fabrizio Riguzzi. 2011. EM over binary decision diagrams for probabilistic logic programs. <em>Proceedings of the 26th italian conference on computational logic (CILC2011), pescara, italy, 31 august 31-2 september, 2011</em>. Retrieved from <a href="http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/BelRig-CILC11.pdf" class="uri">http://www.ing.unife.it/docenti/FabrizioRiguzzi/Papers/BelRig-CILC11.pdf</a></p>
@@ -361,17 +340,8 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (
 <div id="ref-RigSwi10-ICLP10-IC">
 <p>7. Fabrizio Riguzzi and Terrance Swift. 2010. Tabling and Answer Subsumption for Reasoning on Logic Programs with Annotated Disjunctions. <em>Technical communications of the international conference on logic programming</em>, Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik, 162–171. <a href="http://doi.org/10.4230/LIPIcs.ICLP.2010.162" class="uri">http://doi.org/10.4230/LIPIcs.ICLP.2010.162</a></p>
 </div>
-<div id="ref-VenVer03-TR">
-<p>8. J. Vennekens and S. Verbaeten. 2003. <em>Logic programs with annotated disjunctions</em>. K. U. Leuven. Retrieved from <a href="http://www.cs.kuleuven.ac.be/\string~joost/techrep.ps" class="uri">http://www.cs.kuleuven.ac.be/\string~joost/techrep.ps</a></p>
-</div>
-<div id="ref-VenDenBru-JELIA06">
-<p>9. J. Vennekens, M. Denecker, and M. Bruynooghe. 2006. Representing causal information about a probabilistic process. <em>Proceedings of the 10th european conference on logics in artificial intelligence</em>, Springer.</p>
-</div>
-<div id="ref-DBLP:journals/tplp/VennekensDB09">
-<p>10. J. Vennekens, Marc Denecker, and Maurice Bruynooghe. 2009. CP-logic: A language of causal probabilistic events and its relation to logic programming. <em>Theory Pract. Log. Program.</em> 9, 3: 245–308.</p>
-</div>
 <div id="ref-VenVer04-ICLP04-IC">
-<p>11. J. Vennekens, S. Verbaeten, and M. Bruynooghe. 2004. Logic programs with annotated disjunctions. <em>International conference on logic programming</em>, Springer, 195–209.</p>
+<p>8. J. Vennekens, S. Verbaeten, and M. Bruynooghe. 2004. Logic programs with annotated disjunctions. <em>International conference on logic programming</em>, Springer, 195–209.</p>
 </div>
 </div>
 </body>
