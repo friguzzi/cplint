@@ -3379,10 +3379,8 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  SA= user_output,
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
   test_folds(TestSet,[],LG,0,_Pos,0,_Neg,0,CLL),
-  keysort(LG,LG1),
 %  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
 %  writes(LG1,S),
-  reverse(LG1,LGR1),
   compute_areas_diagrams(LGR1,AUCROC,ROC,AUCPR,PR).
 /*
   ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
