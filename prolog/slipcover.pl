@@ -3381,7 +3381,7 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
   test_folds(TestSet,[],LG,0,_Pos,0,_Neg,0,CLL),
 %  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
 %  writes(LG1,S),
-  compute_areas_diagrams(LGR1,AUCROC,ROC,AUCPR,PR).
+  compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
 /*
   ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
     axis:_{x:_{min:0.0,max:1.0,padding:0.0,
