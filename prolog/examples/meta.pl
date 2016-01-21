@@ -14,3 +14,9 @@ c.
 
 :- end_cplint.
 
+/** <examples>
+
+?- prob(a,Prob).
+?- prob_bar(a,Prob).
+
+*/
