@@ -47,20 +47,37 @@ before \verb|:- cplint.|
 \subsection{Commands}
 \subsubsection{Parameter Learning}
 To execute EMBLEM, prepare an input file in the editor panel as indicated above 
-(see example \verb|bongard.pl|) 
 and call
+\begin{verbatim}
+?- induce_par(<list of folds>,P).
+\end{verbatim}
+where \verb|<list of folds>| is a list of the folds for training and
+\verb|P| will contain the input program with updated parameters.
+
+For example \verb|bongard.pl|, you can 
+perform parameter learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce_par([train],P).
 \end{verbatim}
-to obtain in \verb|P| the program in input with the updated parameters.
-
-The results can also be tested on a test set with
+A program can also be tested on a test set with
 \begin{verbatim}
-?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
+?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
 \end{verbatim}
+where \verb|<program>| is a list of terms representing clauses and
+\verb|<list of folds>| is a list of folds.
 This returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
 the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
 
+For example, to test on fold \verb|test| the program learned on fold \verb|train| you can run the query
+\begin{verbatim}
+?- induce_par([train],P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+Or you can test the input program on the fold \verb|test| with
+\begin{verbatim}
+?- in(P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
 By including
 \begin{verbatim}
 :- use_rendering(c3).
@@ -68,32 +85,24 @@ By including
 \end{verbatim}
 in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
 
-\input{par_lear_general}
 
 
 \subsubsection{Structure Learning}
 To execute SLIPCOVER,
 prepare an input file in the editor panel as indicated above 
-(for example \verb|bongard.pl|)
 and call
+\begin{verbatim}
+?- induce(<list of folds>,P).
+\end{verbatim}
+where \verb|<list of folds>| is a list of the folds for training and
+\verb|P| will contain the learned program.
+
+For example \verb|bongard.pl|, you can perform structure learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce([train],P).
 \end{verbatim}
-to obtain in \verb|P| the learned program.
-
-The results can also be tested on a test set with
-\begin{verbatim}
-?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
-\end{verbatim}
-returning the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
-the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
-
-By including
-\begin{verbatim}
-:- use_rendering(c3).
-:- use_rendering(lpad).
-\end{verbatim}
-in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
+A program can also be tested on a test set with \verb|test/7| as
+described above.
 
 \input{learning_par}
 
