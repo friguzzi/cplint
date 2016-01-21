@@ -1,4 +1,4 @@
-/** <module> PITA
+/** <module> pita
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
