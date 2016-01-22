@@ -52,3 +52,13 @@ plus the predicate
 average/2
 \end{verbatim}
 that, given a list of numbers, computes its arithmetic mean.
+
+The body of rules may also contain the predicate \verb|prob/2| that computes the
+probability of an atom, thus allowing nested probability computations.
+For example
+\begin{verbatim}
+a:0.2:-
+  prob(b,P),
+  P>0.2.
+\end{verbatim}
+is a valid rule.
