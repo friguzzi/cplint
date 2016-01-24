@@ -180,7 +180,9 @@ induce_rules(Folds,R):-
   M:bg(RBG0),
   process_clauses(RBG0,[],_,[],RBG),
   generate_clauses(RBG,_RBG1,0,[],ThBG), 
+  generate_clauses_bg(RBG,ClBG), 
   assert_all(ThBG,M,ThBGRef),
+  assert_all(ClBG,M,ClBGRef),
   (M:local_setting(specialization,bottom)->
     M:local_setting(megaex_bottom,MB),
     deduct(MB,M,DB,[],InitialTheory),   
@@ -201,7 +203,8 @@ induce_rules(Folds,R):-
   write_rules2(R,user_output),
 %  told,
   set_sc(compiling,off),
-  retract_all(ThBGRef).
+  retract_all(ThBGRef),
+  retract_all(ClBGRef).
 
 make_dynamic(M):-
   findall(O,M:output(O),LO),
@@ -2485,6 +2488,24 @@ generate_rules_db([Head:_P|T],Env,Body,VC,R,Probs,DB,BDDAnd,N,[Clause|Clauses],M
   N1 is N+1,
   generate_rules_db(T,Env,Body,VC,R,Probs,DB,BDDAnd,N1,Clauses,Module).
 
+process_body_bg([],[],_Module).
+
+process_body_bg([\+ H|T],[\+ H|Rest],Module):-
+  builtin(H),!,
+  process_body_bg(T,Rest,Module).
+  
+process_body_bg([\+ H|T],[\+ H1|Rest],Env,Module):-!,
+  add_mod_arg(H,Module,H1),
+  process_body_bg(T,Rest,Module).
+
+process_body_bg([H|T],[H|Rest],Module):-
+  builtin(H),!,
+  process_body_bg(T,Rest,Module).
+
+process_body_bg([H|T],[H1|Rest],Env,Module):-!,
+  add_mod_arg(H,Module,H1),
+  process_body_bg(T,Rest,Module).
+
 
 
 process_body([],BDD,BDD,Vars,Vars,[],_Env,_Module).
@@ -3023,6 +3044,22 @@ gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=[(Head1 :- Body1)].
+
+
+generate_clauses_bg([],[]):-!.
+
+generate_clauses_bg([H|T],[CL|T1]):-
+  gen_clause_bg(H,CL),  %agg.cut
+  generate_clauses_bg(T,T1).
+
+gen_clause_bg(def_rule(H,BodyList,_Lit),Clauses) :- 
+% disjunctive clause with a single head atom e depth_bound
+  process_body_bg(BodyList,BodyList2,Module),
+  list2and(BodyList2,Body1),
+  add_mod_arg(H,Module,Head1),
+  Clauses=[(Head1 :- Body1)].
+
+
 
 builtin(_A is _B).
 builtin(_A > _B).
