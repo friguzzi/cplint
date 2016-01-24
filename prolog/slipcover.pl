@@ -3057,7 +3057,7 @@ gen_clause_bg(def_rule(H,BodyList,_Lit),Clauses) :-
   process_body_bg(BodyList,BodyList2,Module),
   list2and(BodyList2,Body1),
   add_mod_arg(H,Module,Head1),
-  Clauses=[(Head1 :- Body1)].
+  Clauses=(Head1 :- Body1).
 
 
 
