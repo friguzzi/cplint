@@ -10,10 +10,11 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([all],P).
+?- induce_par([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+?- in(P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
 ?- induce([all],P).
+?- induce([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 */
 :-use_module(library(slipcover)).
 
@@ -27,20 +28,23 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
 :- set_sc(megaex_bottom,10).
-%:- set_sc(max_iter,10).
+:- set_sc(max_iter,10).
 :- set_sc(max_iter_structure,50).
 :- set_sc(verbosity,3).
 
-/*bg([
-replaceable(gear),
-replaceable(wheel),
-replaceable(chain),
-not_replaceable(engine),
-not_replaceable(control_unit)
-]).*/
 
-in([
-]).  
+:- in.
+class(sendback):0.5 :-
+  worn(A),
+  not_replaceable(A).
+
+class(fix):0.6 :-
+  worn(A),
+  replaceable(A).
+
+class(ok):0.5 :-
+  \+ worn(_A).
+:- end_in.  
 
 :- bg.
 replaceable(gear).
@@ -67,19 +71,19 @@ input(replaceable/1).
 input(not_replaceable/1).
 input(worn/1).
 
-%determination(class/1,replaceable/1).
-%determination(class/1,not_replaceable/1).
-%determination(class/1,worn/1).
+determination(class/1,replaceable/1).
+determination(class/1,not_replaceable/1).
+determination(class/1,worn/1).
 
-%modeh(*,class(fix)).
-%modeh(*,class(ok)).
-%modeh(*,class(sendback)).
+modeh(*,class(fix)).
+modeh(*,class(ok)).
+modeh(*,class(sendback)).
 
 
-modeh(*,[class(fix),class(ok),class(sendback)],
+/*modeh(*,[class(fix),class(ok),class(sendback)],
   [class(fix),class(ok),class(sendback)],
   [replaceable/1,not_replaceable/1,worn/1]).
-
+*/
 
 modeb(*,not_replaceable(-comp)).
 modeb(*,replaceable(-comp)).
