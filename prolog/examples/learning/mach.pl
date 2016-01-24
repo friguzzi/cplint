@@ -27,26 +27,29 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
 :- set_sc(megaex_bottom,10).
-%:- set_sc(max_iter,2).
-%:- set_sc(max_iter_structure,5).
+%:- set_sc(max_iter,10).
+:- set_sc(max_iter_structure,50).
 :- set_sc(verbosity,3).
 
-bg([
+/*bg([
 replaceable(gear),
 replaceable(wheel),
 replaceable(chain),
 not_replaceable(engine),
 not_replaceable(control_unit)
-]).
+]).*/
 
 in([
 ]).  
 
-replaceable(_,gear).
-replaceable(_,wheel).
-replaceable(_,chain).
-not_replaceable(_,engine).
-not_replaceable(_,control_unit).
+:- bg.
+replaceable(gear).
+replaceable(wheel).
+replaceable(chain).
+not_replaceable(engine).
+not_replaceable(control_unit).
+
+:- end_bg.
 
 fold(train,[1,2,3,4,5,6,7,8,9,10]).
 
@@ -64,13 +67,19 @@ input(replaceable/1).
 input(not_replaceable/1).
 input(worn/1).
 
-determination(class/1,replaceable/1).
-determination(class/1,not_replaceable/1).
-determination(class/1,worn/1).
+%determination(class/1,replaceable/1).
+%determination(class/1,not_replaceable/1).
+%determination(class/1,worn/1).
 
-modeh(*,class(fix)).
-modeh(*,class(ok)).
-modeh(*,class(sendback)).
+%modeh(*,class(fix)).
+%modeh(*,class(ok)).
+%modeh(*,class(sendback)).
+
+
+modeh(*,[class(fix),class(ok),class(sendback)],
+  [class(fix),class(ok),class(sendback)],
+  [replaceable/1,not_replaceable/1,worn/1]).
+
 
 modeb(*,not_replaceable(-comp)).
 modeb(*,replaceable(-comp)).
