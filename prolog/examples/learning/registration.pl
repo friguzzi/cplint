@@ -1,19 +1,16 @@
-/* Machines dataset from
-L. De Raedt and W. Van Laer. Inductive constraint logic. 
-In Klaus P. Jantke, Takeshi Shinohara, and Thomas Zeugmann, editors, 
-Proceedings of the Sixth International Workshop on Algorithmic
-Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence, 
-pages 80-94. SpringerVerlag, 1995.
+/* Registration dataset from The ACE Data Mining System User's Manual
+https://dtai.cs.kuleuven.be/ACE/doc/ACEuser-1.2.16.pdf
 
 Downloaded from 
 https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce([all]],P).
-?- induce([all],P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([all],P).
+?- induce_par([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
+?- in(P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
+?- induce([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
 */
+
 :-use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
@@ -25,7 +22,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
-:- set_sc(megaex_bottom,3).
+:- set_sc(megaex_bottom,7).
 %:- set_sc(max_iter,2).
 %:- set_sc(max_iter_structure,5).
 :- set_sc(verbosity,3).
@@ -51,6 +48,12 @@ company_type(T):-
 	company(C),
 	company(C, T).
 
+not_company_type(commercial):-
+  \+ company_type(commercial).
+
+not_company_type(university):-
+  \+ company_type(university).
+
 course_len(C, L):-
 	course(C, L, _).
 	
@@ -72,9 +75,16 @@ party(no):0.5:-
 fold(all,F):-
   findall(I,int(I),F).
 
+:- fold(all,F),
+   sample(4,F,FTr,FTe),
+   assert(fold(rand_train,FTr)),
+   assert(fold(rand_test,FTe)).
+
+
 output(party/1).
 
 input(job/1).
+input(not_company_type/1).
 input(company_type/1).
 input(subscription/1).
 input(course_len/2).
@@ -85,6 +95,7 @@ input(participant/4).
 input(course/3)/
 
 determination(party/1,job/1).
+determination(party/1,not_company_type/1).
 determination(party/1,company_type/1).
 determination(party/1,subscription/1).
 determination(party/1,course_len/2).
@@ -100,6 +111,7 @@ modeh(*,party(no)).
 
 modeb(*,job(-#job)).
 modeb(*,company_type(-#ctype)).
+modeb(*,not_company_type(-#ctype)).
 modeb(*,subscription(-sub)).
 modeb(*,course_len(+sub,-#cl)).
 modeb(*,course_type(+sub,-#ct)).
