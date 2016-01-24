@@ -2549,7 +2549,9 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+  pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
   given(H),!,
@@ -2611,7 +2613,9 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
+  (((neg(H1);\+ H1),pita:one(Env,BDDN));
+    (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+      pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
   given(H),!,
@@ -2642,7 +2646,9 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+    pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
   given(H),!,
@@ -2758,7 +2764,8 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);one(BDDN))),
+(((neg(H1);\+ H1),pita:one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);
+  pita:one(BDDN))),
   pita:and(BDD,BDDN,BDD2)
   |Rest],Module):-
   given(H),!,
