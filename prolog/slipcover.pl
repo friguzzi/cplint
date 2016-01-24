@@ -1326,6 +1326,8 @@ keep_const([H|T],[H|T1]):-
  *
  * Samples N elements from List and returns them in Sampled.
  * The rest of List is returned in Rest
+ * If List contains less than N elements, Sampled is List and Rest
+ * is [].
 */
 sample(0,List,[],List):-!.
 
