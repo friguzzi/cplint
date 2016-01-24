@@ -22,6 +22,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 */
 :-module(slipcover,[set_sc/2,setting_sc/2,
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
+  sample/4,
   op(500,fx,#),op(500,fx,'-#')]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
@@ -1248,12 +1249,16 @@ deduct(0,_Mod,_DB,Th,Th):-!.
 
 deduct(NM,Mod,DB,InTheory0,InTheory):-
   get_head_atoms(O,Mod),
-  sample(1,DB,[M],DB1),
-  generate_head(O,M,Mod,[],HL),
-  generate_body(HL,Mod,InTheory1),
-  append(InTheory0,InTheory1,InTheory2),
-  NM1 is NM-1,
-  deduct(NM1,Mod,DB1,InTheory2,InTheory).
+  sample(1,DB,Sampled,DB1),
+  (Sampled=[M]->
+    generate_head(O,M,Mod,[],HL),
+    generate_body(HL,Mod,InTheory1),
+    append(InTheory0,InTheory1,InTheory2),
+    NM1 is NM-1,
+    deduct(NM1,Mod,DB1,InTheory2,InTheory)
+  ;
+    InTheory=InTheory0
+  ).
 
 
 get_head_atoms(O,M):-
@@ -1316,7 +1321,12 @@ keep_const([H|T],[H|T1]):-
   keep_const(T,T1).
 
 
-
+/**
+ * sample(+N,List:list,-Sampled:list,-Rest:list) is det
+ *
+ * Samples N elements from List and returns them in Sampled.
+ * The rest of List is returned in Rest
+*/
 sample(0,List,[],List):-!.
 
 sample(N,List,List,[]):-
@@ -2550,7 +2560,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
-  (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+  (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
   pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
@@ -2566,7 +2576,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+[(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
   pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -2614,7 +2624,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   (((neg(H1);\+ H1),pita:one(Env,BDDN));
-    (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+    (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
       pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
@@ -2630,7 +2640,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+[(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
   pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -2647,7 +2657,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
-  (bagof(BDDH,H2,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+  (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
     pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module):-
@@ -2663,7 +2673,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+[(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
   pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -2764,7 +2774,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(BDDN));(bagof(BDDH,H2,L)->or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);
+(((neg(H1);\+ H1),pita:one(BDDN));(bagof(BDDH,H2,L)->pita:or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);
   pita:one(BDDN))),
   pita:and(BDD,BDDN,BDD2)
   |Rest],Module):-
@@ -2780,7 +2790,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);pita:one(BDDN)),
+[(bagof(BDDH,H1,L)->pita:or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);pita:one(BDDN)),
   pita:and(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg(H,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
