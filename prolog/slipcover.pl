@@ -151,15 +151,22 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   generate_clauses(PRules,RuleFacts,0,[],Th), 
   assert_all(Th,M,ThRef),
   assert_all(RuleFacts,M,RFRef),
-  M:bg(RBG0),
-  process_clauses(RBG0,[],_,[],RBG),
-  generate_clauses(RBG,RBGRF,0,[],ThBG),
-  assert_all(ThBG,ThBGRef),
-  assert_all(RBGRF,RBGRFRef),
+  (M:bg(RBG0)->
+    process_clauses(RBG0,[],_,[],RBG),
+    generate_clauses(RBG,RBGRF,0,[],ThBG),
+    assert_all(ThBG,ThBGRef),
+    assert_all(RBGRF,RBGRFRef)
+  ;
+    true
+  ),
   set_sc(compiling,off),
   test([TE],LL,AUCROC,ROC,AUCPR,PR),
-  retract_all(ThBGRef),
-  retract_all(RBGRFRef),
+  (M:bg(RBG0)->
+    retract_all(ThBGRef),
+    retract_all(RBGRFRef)
+  ;
+    true
+  ),
   retract_all(ThRef),
   retract_all(RFRef).
  
@@ -177,12 +184,15 @@ induce_rules(Folds,R):-
   assert(M:database(DB)),
   statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
-  M:bg(RBG0),
-  process_clauses(RBG0,[],_,[],RBG),
-  generate_clauses(RBG,_RBG1,0,[],ThBG), 
-  generate_clauses_bg(RBG,ClBG), 
-  assert_all(ThBG,M,ThBGRef),
-  assert_all(ClBG,M,ClBGRef),
+  (M:bg(RBG0)->
+    process_clauses(RBG0,[],_,[],RBG),
+    generate_clauses(RBG,_RBG1,0,[],ThBG), 
+    generate_clauses_bg(RBG,ClBG), 
+    assert_all(ThBG,M,ThBGRef),
+    assert_all(ClBG,M,ClBGRef)
+  ;
+    true
+  ),
   (M:local_setting(specialization,bottom)->
     M:local_setting(megaex_bottom,MB),
     deduct(MB,M,DB,[],InitialTheory),   
@@ -203,8 +213,12 @@ induce_rules(Folds,R):-
   write_rules2(R,user_output),
 %  told,
   set_sc(compiling,off),
-  retract_all(ThBGRef),
-  retract_all(ClBGRef).
+  (M:bg(RBG0)->
+    retract_all(ThBGRef),
+    retract_all(ClBGRef)
+  ;
+    true
+  ).
 
 make_dynamic(M):-
   findall(O,M:output(O),LO),
@@ -212,7 +226,8 @@ make_dynamic(M):-
   findall(I,M:input_cw(I),LIC),
   findall(D,M:determination(D,_DD),LDH),
   findall(DD,M:determination(_D,DD),LDD),
-  append([LO,LI,LIC,LDH,LDD],L0),
+  findall(DH,(M:modeh(_,_,_,LD),member(DH,LD)),LDDH),
+  append([LO,LI,LIC,LDH,LDD,LDDH],L0),
   remove_duplicates(L0,L),
   maplist(to_dyn(M),L).
 
@@ -420,10 +435,13 @@ induce_parameters(Folds,R):-
   append(L,DB),
   assert(M:database(DB)),
   statistics(walltime,[_,_]),
-  M:bg(RBG0),
-  process_clauses(RBG0,[],_,[],RBG),
-  generate_clauses(RBG,_RBG1,0,[],ThBG),
-  assert_all(ThBG,_ThBGRef),
+  (M:bg(RBG0)->
+    process_clauses(RBG0,[],_,[],RBG),
+    generate_clauses(RBG,_RBG1,0,[],ThBG),
+    assert_all(ThBG,ThBGRef)
+  ;
+    true
+  ),
   M:in(R00),
   process_clauses(R00,[],_,[],R0),
   statistics(walltime,[_,_]),      
@@ -433,7 +451,12 @@ induce_parameters(Folds,R):-
   format2('/* EMBLEM Final score ~f~n',[Score]),
   format2('Wall time ~f */~n',[CTS]),
   write_rules2(R,user_output),
-  set_sc(compiling,off).
+  set_sc(compiling,off),
+  (M:bg(RBG0)->
+    retract_all(ThBGRef)
+  ;
+    true
+  ).
 
 /** 
  * induce_par(+TrainFolds:list_of_atoms,+TrainFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
@@ -3973,7 +3996,7 @@ user:term_expansion((:- sc), []) :-!,
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
-    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1)),
+    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1)),
   style_check(-discontiguous).
 
 user:term_expansion((:- bg), []) :-!,
@@ -4025,7 +4048,8 @@ user:term_expansion((:- end_in), []) :-!,
 user:term_expansion(begin(model(I)), []) :-!,
   input_mod(M),
   retractall(M:model(_)),
-  assert(M:model(I)).
+  assert(M:model(I)),
+  assert(M:int(I)).
 
 user:term_expansion(end(model(_I)), []) :-!,
   input_mod(M),
