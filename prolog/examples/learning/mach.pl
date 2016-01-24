@@ -1,20 +1,16 @@
-/* Machines dataset from
-L. De Raedt and W. Van Laer. Inductive constraint logic. 
-In Klaus P. Jantke, Takeshi Shinohara, and Thomas Zeugmann, editors, 
-Proceedings of the Sixth International Workshop on Algorithmic
-Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence, 
-pages 80-94. SpringerVerlag, 1995.
+/* Machines dataset from The ACE Data Mining System User's Manual
+https://dtai.cs.kuleuven.be/ACE/doc/ACEuser-1.2.16.pdf
 
 Downloaded from 
 https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_par([all],P).
 ?- induce_par([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+?- induce_par([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
 ?- in(P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
-?- induce([all],P).
 ?- induce([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+?- induce([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
 */
 :-use_module(library(slipcover)).
 
@@ -27,7 +23,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
-:- set_sc(megaex_bottom,10).
+:- set_sc(megaex_bottom,15).
 :- set_sc(max_iter,10).
 :- set_sc(max_iter_structure,50).
 :- set_sc(verbosity,3).
@@ -43,7 +39,7 @@ class(fix):0.6 :-
   replaceable(A).
 
 class(ok):0.5 :-
-  \+ worn(_A).
+  not_worn(_A).
 :- end_in.  
 
 :- bg.
@@ -52,7 +48,12 @@ replaceable(wheel).
 replaceable(chain).
 not_replaceable(engine).
 not_replaceable(control_unit).
-
+not_worn(C):-
+  \+ worn(C).
+one_worn:-
+  worn(_).
+none_worn:-
+  \+ one_worn.
 :- end_bg.
 
 fold(train,[1,2,3,4,5,6,7,8,9,10]).
@@ -64,16 +65,25 @@ fold(all,F):-
   fold(test,FTe),
   append(FTr,FTe,F).
 
+:- fold(all,F),
+   sample(10,F,FTr,FTe),
+   assert(fold(rand_train,FTr)),
+   assert(fold(rand_test,FTe)).
 
 output(class/1).
 
 input(replaceable/1).
 input(not_replaceable/1).
 input(worn/1).
+input(not_worn/1).
+input(none_worn/0).
+%input(one_worn/0).
 
 determination(class/1,replaceable/1).
 determination(class/1,not_replaceable/1).
 determination(class/1,worn/1).
+determination(class/1,not_worn/1).
+determination(class/1,none_worn/0).
 
 modeh(*,class(fix)).
 modeh(*,class(ok)).
@@ -88,6 +98,8 @@ modeh(*,class(sendback)).
 modeb(*,not_replaceable(-comp)).
 modeb(*,replaceable(-comp)).
 modeb(*,worn(-comp)).
+modeb(*,not_worn(-comp)).
+modeb(*,none_worn).
 
 begin(model(1)).
 testnr(1).
