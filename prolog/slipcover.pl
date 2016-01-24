@@ -144,6 +144,7 @@ induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
 test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   write2('Testing\n'),
   input_mod(M),
+  make_dynamic(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
@@ -154,6 +155,8 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
     generate_clauses(RBG,RBGRF,0,[],ThBG),
+    generate_clauses_bg(RBG,ClBG), 
+    assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef),
     assert_all(RBGRF,RBGRFRef)
   ;
@@ -163,7 +166,8 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   test([TE],LL,AUCROC,ROC,AUCPR,PR),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
-    retract_all(RBGRFRef)
+    retract_all(RBGRFRef),
+    retract_all(ClBGRef)
   ;
     true
   ),
@@ -438,6 +442,8 @@ induce_parameters(Folds,R):-
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
     generate_clauses(RBG,_RBG1,0,[],ThBG),
+    generate_clauses_bg(RBG,ClBG),
+    assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef)
   ;
     true
@@ -453,7 +459,8 @@ induce_parameters(Folds,R):-
   write_rules2(R,user_output),
   set_sc(compiling,off),
   (M:bg(RBG0)->
-    retract_all(ThBGRef)
+    retract_all(ThBGRef),
+    retract_all(ClBGRef)
   ;
     true
   ).
