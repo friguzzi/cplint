@@ -3972,9 +3972,54 @@ user:term_expansion((:- sc), []) :-!,
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
-    ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2)),
+    ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,bg/1,
+    bgc/1,in/1,inc/1)),
   style_check(-discontiguous).
 
+user:term_expansion((:- bg), []) :-!,
+  prolog_load_context(module, M),
+  assert(M:bg).
+
+user:term_expansion(C, bgc(C)) :-
+  prolog_load_context(module, M),
+  M:bg,!.
+
+user:term_expansion((:- end_bg), []) :-!,
+  prolog_load_context(module, M),
+  retractall(M:bg),
+  findall(C,M:bgc(C),L),
+  retract_all(M:bgc(_)),
+  (M:bg(BG0)->
+    retract(M:bg(BG0)),
+    append(BG0,L,BG),
+    assert(M:bg(BG))
+  ;
+    assert(M:bg(L))
+  ).
+
+user:term_expansion((:- in), []) :-!,
+  prolog_load_context(module, M),
+  assert(M:in).
+
+user:term_expansion(C, inc(C)) :-
+  prolog_load_context(module, M),
+  M:in,!.
+
+user:term_expansion((:- end_in), []) :-!,
+  prolog_load_context(module, M),
+  retractall(M:in),
+  findall(C,M:inc(C),L),
+  retract_all(M:inc(_)),
+  (M:in(IN0)->
+    retract(M:in(IN0)),
+    append(IN0,L,IN),
+    assert(M:in(IN))
+  ;
+    assert(M:in(L))
+  ).
+
+
+%
 user:term_expansion(begin(model(I)), []) :-!,
   input_mod(M),
   retractall(M:model(_)),
