@@ -10,10 +10,9 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([train],[test],P,LL,AUCROC,ROC,AUCPR,PR).
+?- induce([all]],P).
+?- induce([all],P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_par([all],P).
-?- induce([all],P).
 */
 :-use_module(library(slipcover)).
 
@@ -60,12 +59,15 @@ course_type(C, T):-
 
 :- end_bg.
 
-party(M,P):-
-        participant(M,_, _, P, _).
-neg(party(M,yes)):- party(M,no).
-neg(party(M,no)):- party(M,yes).
-in([
-]).  
+:- in.
+party(yes):0.5:-
+  company_type(commercial).
+
+party(no):0.5:-
+  subscription(A),
+  course_len(A,4),
+  \+ company_type(commercial).
+:- end_in.
 
 fold(all,F):-
   findall(I,int(I),F).
@@ -88,24 +90,27 @@ determination(party/1,subscription/1).
 determination(party/1,course_len/2).
 determination(party/1,course_type/2).
 
-modeh(*,[party(yes),party(no)],
-  [party(yes),party(no)],
-  [job/1,company_type/1,subscription/1,course_len/2,course_type/2]).
+%modeh(*,[party(yes),party(no)],
+%  [party(yes),party(no)],
+%  [job/1,company_type/1,subscription/1,course_len/2,course_type/2]).
 
 
-%modeh(*,party(yes)).
-%modeh(*,party(no)).
+modeh(*,party(yes)).
+modeh(*,party(no)).
 
 modeb(*,job(-#job)).
 modeb(*,company_type(-#ctype)).
 modeb(*,subscription(-sub)).
 modeb(*,course_len(+sub,-#cl)).
 modeb(*,course_type(+sub,-#ct)).
-/*modeb(*,participant(+job,+comp,+party,+age)).
-modeb(*,company(+comp)).
-modeb(*,company(+comp,+ct)).
-modeb(*,course(+course,+cl,+ct)).
-*/
+
+neg(party(M,yes)):- party(M,no).
+neg(party(M,no)):- party(M,yes).
+
+party(M,P):-
+        participant(M,_, _, P, _).
+
+
 begin(model(adams)).
 participant(researcher,scuf,no,23).
 subscription(erm).
