@@ -2494,7 +2494,7 @@ process_body_bg([\+ H|T],[\+ H|Rest],Module):-
   builtin(H),!,
   process_body_bg(T,Rest,Module).
   
-process_body_bg([\+ H|T],[\+ H1|Rest],Env,Module):-!,
+process_body_bg([\+ H|T],[\+ H1|Rest],Module):-!,
   add_mod_arg(H,Module,H1),
   process_body_bg(T,Rest,Module).
 
@@ -2502,7 +2502,7 @@ process_body_bg([H|T],[H|Rest],Module):-
   builtin(H),!,
   process_body_bg(T,Rest,Module).
 
-process_body_bg([H|T],[H1|Rest],Env,Module):-!,
+process_body_bg([H|T],[H1|Rest],Module):-!,
   add_mod_arg(H,Module,H1),
   process_body_bg(T,Rest,Module).
 
