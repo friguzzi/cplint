@@ -28,6 +28,7 @@ path(X,Y):-
 
 edge(a,b):0.2.
 % there is an edge between a and b with probability 0.2
+edge(b,e):0.5.
 edge(a,c):0.3.
 edge(c,d):0.4.
 edge(d,e):0.4.
@@ -44,7 +45,9 @@ graph(digraph(G)):-
 /** <examples>
 
 ?- prob(path(a,e),Prob). % what is the probability that a and e are connected?
+% expected result 0.22888
 ?- prob_bar(path(a,e),Prob). % what is the probability that a and e are connected?
-?- graph(G). % show the probabilistic graph
+% expected result 0.22888
+?- graph(G). % shows the probabilistic graph
 
 */
