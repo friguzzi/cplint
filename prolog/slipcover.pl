@@ -155,10 +155,10 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   assert_all(RuleFacts,M,RFRef),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-%    generate_clauses(RBG,RBGRF,0,[],ThBG),
+    generate_clauses(RBG,RBGRF,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG), 
-    assert_all(ClBG,M,ClBGRef)
-%    assert_all(ThBG,ThBGRef),
+    assert_all(ClBG,M,ClBGRef),
+    assert_all(ThBG,ThBGRef)
 %    assert_all(RBGRF,RBGRFRef)
   ;
     true
@@ -166,7 +166,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   set_sc(compiling,off),
   test([TE],LL,AUCROC,ROC,AUCPR,PR),
   (M:bg(RBG0)->
-%    retract_all(ThBGRef),
+    retract_all(ThBGRef),
 %    retract_all(RBGRFRef),
     retract_all(ClBGRef)
   ;
@@ -191,9 +191,9 @@ induce_rules(Folds,R):-
 %  findall(C,M:bg(C),RBG),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-%    generate_clauses(RBG,_RBG1,0,[],ThBG), 
+    generate_clauses(RBG,_RBG1,0,[],ThBG), 
     generate_clauses_bg(RBG,ClBG), 
-    %assert_all(ThBG,M,ThBGRef),
+    assert_all(ThBG,M,ThBGRef),
     assert_all(ClBG,M,ClBGRef)
   ;
     true
@@ -219,7 +219,7 @@ induce_rules(Folds,R):-
 %  told,
   set_sc(compiling,off),
   (M:bg(RBG0)->
-%    retract_all(ThBGRef),
+    retract_all(ThBGRef),
     retract_all(ClBGRef)
   ;
     true
@@ -442,10 +442,10 @@ induce_parameters(Folds,R):-
   statistics(walltime,[_,_]),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-%    generate_clauses(RBG,_RBG1,0,[],ThBG),
+    generate_clauses(RBG,_RBG1,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
-    assert_all(ClBG,M,ClBGRef)
-%    assert_all(ThBG,ThBGRef)
+    assert_all(ClBG,M,ClBGRef),
+    assert_all(ThBG,ThBGRef)
   ;
     true
   ),
@@ -460,7 +460,7 @@ induce_parameters(Folds,R):-
   write_rules2(R,user_output),
   set_sc(compiling,off),
   (M:bg(RBG0)->
-%    retract_all(ThBGRef),
+    retract_all(ThBGRef),
     retract_all(ClBGRef)
   ;
     true
