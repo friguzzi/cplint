@@ -34,12 +34,17 @@ female(cathy).
 /** <examples>
 
 ?- prob(male,Prob).  % what is the probability of sampling a male from the 
-  % population?
+% population?
+% expected result 0.4
 ?- prob(female,Prob).% what is the probability of sampling a female from the 
-  % population?
+% population?
+% expected result 0.6
 ?- prob_bar(male,Prob).  % what is the probability of sampling a male from the 
-  % population?
+% population?
+% expected result 0.4
 ?- prob_bar(female,Prob). % what is the probability of sampling a female from the 
-  % population?
+% population?
+% expected result 0.6
 */
+
  
