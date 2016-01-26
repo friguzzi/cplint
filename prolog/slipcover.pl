@@ -155,7 +155,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   assert_all(RuleFacts,M,RFRef),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-    generate_clauses(RBG,RBGRF,0,[],ThBG),
+    generate_clauses(RBG,_RBGRF,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG), 
     assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef)
