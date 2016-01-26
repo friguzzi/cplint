@@ -15,4 +15,4 @@ help-cplint.pdf: help-cplint.tex inference.tex learning.tex learning_par.tex par
 	pdflatex help-cplint
 	bibtex help-cplint
 	pdflatex help-cplint
-	pdflatex manual
+	pdflatex help-cplint
