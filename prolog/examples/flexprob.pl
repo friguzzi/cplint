@@ -20,4 +20,5 @@ draw_red(R, G):-
 :- end_cplint.
 /**
 ?- prob(draw_red(3,1),P).
+% expected result 0.75
 */
