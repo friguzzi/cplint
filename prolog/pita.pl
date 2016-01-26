@@ -25,6 +25,7 @@ details.
 :-meta_predicate prob_bar(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
+:-use_module(library(apply)).
 :-use_foreign_library(foreign(bddem),install).
 
 :- style_check(-discontiguous).
@@ -315,13 +316,18 @@ retract_all([H|T]):-
  * index Rule, grouding substitution Substitution and head distribution 
  * Probabilities in environment Environment.
  */
-get_var_n(Env,R,S,Probs,V):-
-  (v(R,S,V)->
-    true
+get_var_n(Env,R,S,Probs0,V):-
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    (v(R,S,V)->
+      true
+    ;
+      length(Probs,L),
+      add_var(Env,L,Probs,R,V),    
+      assert(v(R,S,V))
+    )
   ;
-    length(Probs,L),
-    add_var(Env,L,Probs,R,V),    
-    assert(v(R,S,V))
+    trhow(error('Non ground probailities not instantiated by the body'))
   ).
 
 add_bdd_arg(M:A,Env,BDD,M:A1):-
@@ -592,9 +598,14 @@ process_head(HeadList, GroundHeadList) :-
   ground_prob(HeadList), !,
   process_head_ground(HeadList, 0, GroundHeadList).
    
-process_head(HeadList, HeadList).
+process_head(HeadList0, HeadList):-
+  get_probs(HeadList0,PL),
+  foldl(minus,PL,1,PNull),
+  append(HeadList0,['':PNull],HeadList).
 
+minus(A,B,A-B).
 
+prob_ann(_:P,P).
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
@@ -624,12 +635,15 @@ ground_prob([_Head:ProbHead|Tail]) :-
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
-get_probs([], []).
+get_probs(Head, PL):-
+  maplist(prob_ann,Head,PL).
+
+/*get_probs([], []).
 
 get_probs([_H:P|T], [P1|T1]) :- 
   P1 is P, 
   get_probs(T, T1).
-
+*/
 
 /** 
  * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
@@ -757,7 +771,9 @@ user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
   prolog_load_context(module, M),cplint_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (_H:P),P=:=0.0, !. 
+  Head = (_H:P),
+  ground(P),
+  P=:=0.0, !. 
 
 user:term_expansion((Head :- Body), Clauses) :- 
 % disjunctive clause with a single head atom e depth_bound
@@ -896,14 +912,18 @@ user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),cplint_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (_H:P),P=:=0.0, !.
+  Head = (_H:P),
+  ground(P),
+  P=:=0.0, !.
   
 user:term_expansion(Head,Clause) :- 
   prolog_load_context(module, M),cplint_module(M),
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),P=:=1.0, !,
+  Head = (H:P),
+  ground(P),
+  P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   Clause=(Head1 :- Body1).
@@ -912,7 +932,9 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),cplint_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),P=:=1.0, !,
+  Head = (H:P),
+  ground(P),
+  P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
@@ -1041,6 +1063,7 @@ builtin(memberchk(_,_)).
 builtin(select(_,_,_)).
 builtin(dif(_,_)).
 builtin(prob(_,_)).
+builtin(findall(_,_,_)).
 
 average(L,Av):-
         sum_list(L,Sum),
