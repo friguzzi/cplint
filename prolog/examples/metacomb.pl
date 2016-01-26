@@ -39,3 +39,10 @@ d :-
 e :- 
   b, c.
 :- end_cplint.
+
+/** <examples>
+
+?-  prob(max_true(d,e),P).
+% expected result 0.15000000000000002
+
+*/
