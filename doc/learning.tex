@@ -18,9 +18,9 @@ To execute the learning algorithms, prepare a Prolog file divided in five parts
 The preamble must come first, the order of the other parts can be changed.
 
 For example, consider the Bongard problems of \cite{RaeLae95-ALT95}. 
-The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example learning files. 
-For example, it contains \verb|bongard.pl| and \verb|bongardkeys.pl| that represent a Bongard problem.
-Let us consider \verb|bongard.pl|.
+%The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example learning files. 
+\href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.lamping.unife.it/example/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem.
+Let us consider \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}.
 
 \subsubsection{Preamble}
 In the preamble, the SLIPCOVER library is loaded with
@@ -35,7 +35,6 @@ In the preamble, the SLIPCOVER library is loaded with
 %:- endif.
 %\end{verbatim}
 %if you want a nice representation of the output (in particular, if you want graphs of the ROC and PR curves).
-
 Now you can initialize SLIPCOVER with
 \begin{verbatim}
 :- sc.
@@ -60,6 +59,26 @@ fact of the form
 bg(<list of terms representing clauses>).
 \end{verbatim}
 where the clauses must currently be deterministic.
+Alternatively, you can specify a set of clauses by including them in 
+a section between
+\verb|:- bg.| and \verb|:- end_bg.| For example
+\begin{verbatim}
+:- bg.
+replaceable(gear).
+replaceable(wheel).
+replaceable(chain).
+not_replaceable(engine).
+not_replaceable(control_unit).
+component(C):-
+  replaceable(C).
+component(C):-
+  not_replaceable(C).
+:- end_bg.
+\end{verbatim}
+from the \href{http://cplint.lamping.unife.it/example/mach.pl}{\texttt{mach.pl}} example.
+If you specify both a \verb|bg/1| fact and a section, the clauses of the two will be combined.
+
+
 Moreover, you can specify an initial program with a fact of the form 
 \begin{verbatim}
 in(<list of terms representing clauses>).
@@ -68,7 +87,7 @@ The initial program is used in parameter learning for providing
 the structure. The indicated parameters do not matter as they are first randomized.
 Remember to enclose each clause in parentheses because \verb|:-| has the highest precedence.
 
-For example, \verb|bongard.pl| has the initial program 
+For example, \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}} has the initial program 
 \begin{verbatim}
 in([(pos:0.197575 :-
        circle(A),
@@ -80,7 +99,23 @@ in([(pos:0.197575 :-
        triangle(A),
        circle(B))]).
 \end{verbatim}
-Both facts should be present. If there are no background/input clauses then write \verb|bg([]).|/\verb|in([]).|
+%Both facts should be present. If there are no background/input clauses then write \verb|bg([]).|/\verb|in([]).|
+Alternatively, you can specify an input program in a section between \verb|:- in.| and \verb|:- end_in.|, as for example
+\begin{verbatim}
+:- in.
+pos:0.197575 :-
+  circle(A),
+  in(B,A).
+pos:0.000303421 :-
+  circle(A),
+  triangle(B).
+pos:0.000448807 :-
+  triangle(A),
+  circle(B).
+:- end_in.
+\end{verbatim}
+If you specify both a \verb|in/1| fact and a section, the clauses of the two will be combined.
+
 
 
 \subsubsection{Language Bias}
@@ -91,20 +126,20 @@ Output predicates are declared as
 output(<predicate>/<arity>).
 \end{verbatim}
 and indicate the predicate whose atoms you want to predict. Derivations for the atoms for this predicates in the input data
-are built by the systems.
+are built by the system. These are the predicates for which new clauses are generated.
 
 Input predicates are those whose atoms you are not interested in predicting. You can declare closed world input predicates with
 \begin{verbatim}
 input_cw(<predicate>/<arity>).
 \end{verbatim}
-For these predicates, the only true atoms are those in the interpretations, the clauses in the input/hypothesized program are not used to derive atoms not present in the interpretations.
+For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input/hypothesized program are not used to derive atoms for these predicates. Moreover,   clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.
 
 Open world input predicates are declared with
 \begin{verbatim}
 input(<predicate>/<arity>).
 \end{verbatim}
 In this case, if a subgoal for such a predicate is encountered when deriving a subgoal for the output predicates, 
-both the facts in the interpretations and the clauses of the input program are used.
+both the facts in the interpretations, those derivable from them and the background knowledge, the background clauses and the clauses of the input program are used.
 
 Then, you have to specify the language bias by means of mode declarations in the style of 
 \href{http://www.doc.ic.ac.uk/\string ~shm/progol.html}{Progol}.
@@ -197,7 +232,7 @@ modeh(<r>,[<s1>,...,<sn>],[<a1>,...,<an>],[<P1/Ar1>,...,<Pk/Ark>]).
 \end{verbatim}
 These mode declarations are used to generate clauses with more than two head atoms. In them, \verb|<s1>,...,<sn>| are schemas,  \verb|<a1>,...,<an>| are atoms such that \verb|<ai>| is obtained from $\verb|<si>|$ by replacing placemarkers with variables, 
 \verb|<Pi/Ari>| are the predicates admitted in the body. \verb|<a1>,...,<an>| are used to indicate which variables should be shared by the atoms in the head.
-An example of such a mode declaration (from \verb|uwcselearn.pl|) is
+An example of such a mode declaration (from \href{http://cplint.lamping.unife.it/example/uwcselearn.pl}{\texttt{uwcselearn.pl}}) is
 \begin{verbatim}
 modeh(*,
 [advisedby(+person,+person),tempadvisedby(+person,+person)],
@@ -206,13 +241,37 @@ modeh(*,
 publication/2,taughtby/3,ta/3,courselevel/2,yearsinprogram/2]).
 \end{verbatim}
 %
+If you want to specify negative literals for addition in the body of clauses,
+you should define a new predicate in the background as in
+\begin{verbatim}
+not_worn(C):-
+  component(C),
+  \+ worn(C).
+one_worn:-
+  worn(_).
+none_worn:-
+  \+ one_worn.
+\end{verbatim}
+from \href{http://cplint.lamping.unife.it/example/mach.pl}{\texttt{mach.pl}} and add the new predicate in a \verb|modeb/2| fact
+\begin{verbatim}
+modeb(*,not_worn(-comp)).
+modeb(*,none_worn).
+\end{verbatim}
+Note that successful negative literals do not instantiate the variables, so if you want
+a variable appearing in a negative literal to be an output variable you must instantiate 
+before calling the negative literals.
+The new predicates must also be declared as input
+\begin{verbatim}
+input_cw(not_worn/1).
+input_cw(none_worn/0).
+\end{verbatim}
 Lookahead can also be specified with facts of the form
 \begin{verbatim}
 lookahead(<literal>,<list of literals>).
 \end{verbatim}
 In this case when a literal matching \verb|<literal>| is added to the body of clause during refinement, then also
 the literals matching \verb|<list of literals>| will be added.
-An example of such declaration (from \verb|muta.pl|) is
+An example of such declaration (from \href{http://cplint.lamping.unife.it/example/muta.pl}{\texttt{muta.pl}}) is
 \begin{verbatim}
 lookahead(logp(_),[(_=_))]).
 \end{verbatim}
@@ -279,6 +338,8 @@ prob(0.3).
 assigning a probability (0.3 in this case) to the interpretations. If this is omitted, the probability of each interpretation is considered equal to $1/n$ where $n$ is the total number of interpretations. \verb|prob/1| can be used to set a different multiplicity for the interpretations.
 
 The facts in the interpretation are loaded in SWI-Prolog database by adding an extra initial argument equal to the name of the model.
+After each interpretation is loaded, a fact of the form \verb|int(<id>)| is asserted, where \verb|id| is the name of the interpretation. This can be used in
+order to retrieve the list of interpretations.
 
 Alternatively, with the keys modality, you can directly write the facts and the first argument will be interpreted as a model identifier. The above interpretation in the keys modality is
 \begin{verbatim}
@@ -294,13 +355,12 @@ in(2,o2,o3).
 triangle(2,o1).
 config(2,o1,up).
 \end{verbatim}
-which is contained in the \verb|bongardkeys.pl|
+which is contained in the \href{http://cplint.lamping.unife.it/example/bongardkeys.pl}{\texttt{bongardkeys.pl}}
 This is also how model \verb|2| above is stored in SWI-Prolog database.
 The two modalities, models and keys, can be mixed in the same file.
 
-Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument. For example \verb|carc.pl|
+Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument. For example \href{http://cplint.lamping.unife.it/example/carc.pl}{\texttt{carc.pl}}
 contains
-
 \begin{verbatim}
 connected(_M,Ring1,Ring2):-
   Ring1 \= Ring2,
@@ -312,9 +372,35 @@ symbond(Mod,A,B,T):- bond(Mod,B,A,T).
 \end{verbatim}
 where the first argument of all the atoms is the model.
 
+Example \href{http://cplint.lamping.unife.it/example/registration.pl}{\texttt{registration.pl}} contains for example
+\begin{verbatim}
+party(M,P):-
+  participant(M,_, _, P, _).
+\end{verbatim}
+that defines intensionally the target predicate \verb|party/1|. Here \verb|M| is the model and \verb|participant/4| is defined in the interpretations.
+You can also define intensionally the negative examples with
+\begin{verbatim}
+neg(party(M,yes)):- party(M,no).
+neg(party(M,no)):- party(M,yes).
+\end{verbatim}
 Then you must indicate how the examples are divided in folds with facts of the form:
 \verb|fold(<fold_name>,<list of model identifiers>)|, as for example
 \begin{verbatim}
 fold(train,[2,3,...]).
 fold(test,[490,491,...]).
 \end{verbatim}
+As the input file is a Prolog program, you can define intensionally the folds as in
+\begin{verbatim}
+fold(all,F):-
+  findall(I,int(I),F).
+\end{verbatim}
+\verb|fold/2| is dynamic so you can also write (\href{http://cplint.lamping.unife.it/example/registration.pl}{\texttt{registration.pl}})
+\begin{verbatim}
+:- fold(all,F),
+   sample(4,F,FTr,FTe),
+   assert(fold(rand_train,FTr)),
+   assert(fold(rand_test,FTe)).
+\end{verbatim}
+which however must be inserted after the input interpretations otherwise the facts for \verb|int/1| will not be available and
+the fold \verb|all| would be empty. This command uses  \verb|sample(N,List,Sampled,Rest)| exported from \verb|slipcover| that samples \verb|N| elements from \verb|List| and returns the sampled elements in \verb|Sampled| and the rest in \verb|Rest|. If \verb|Lilst| has \verb|N| elements or less, \verb|Sampled| is equal to \verb|List| 
+and \verb|Rest| is empty.

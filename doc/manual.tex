@@ -33,7 +33,7 @@ fabrizio.riguzzi@unife.it}
 \cite{DBLP:journals/tplp/VennekensDB09}. It contains modules for both inference and learning.
 
 \section{Installation}
-\texttt{cplint} is distributed as a pack of SWI-Prolog. To install it, use
+\texttt{cplint} is distributed as a \href{http://www.swi-prolog.org/pack/list?p=cplint}{pack} of \href{http://www.swi-prolog.org/}{SWI-Prolog}. To install it, use
 \begin{verbatim}
 ?- pack_install(cplint).
 \end{verbatim}
@@ -47,7 +47,7 @@ Moreover, in order to make sure you have a foreign library that matches your arc
 \input{inference}
 
 
-Then you can simply load \texttt{coin.pl} as
+Then you can simply load \href{http://cplint.lamping.unife.it/example/coin.pl}{\texttt{coin.pl}} as
 \begin{verbatim}
 ?- [coin].
 \end{verbatim}
@@ -55,7 +55,7 @@ and query it with
 \begin{verbatim}
 ?- prob(heads(coin),P).
 \end{verbatim}
-Note that supplying \texttt{coin.pl} as an argument to the \texttt{swipl} command currently returns errors due to bad interaction between \texttt{pita.pl} and the top-level.
+Note that supplying \href{http://cplint.lamping.unife.it/example/coin.pl}{\texttt{coin.pl}} as an argument to the \texttt{swipl} command currently returns errors due to bad interaction between \texttt{pita.pl} and the top-level.
 The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.
 
 
@@ -75,7 +75,7 @@ To execute EMBLEM, prepare an input file as indicated above,
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the input program with updated parameters.
 
-For example \verb|bongard.pl|, you can load it into SWI-Prolog
+For example \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can load it into SWI-Prolog
 with
 \begin{verbatim}
 ?- [bongard].
@@ -114,7 +114,7 @@ and call
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
-For example \verb|bongard.pl|, you can load it into SWI-Prolog
+For example \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can load it into SWI-Prolog
 with
 \begin{verbatim}
 ?- [bongard].
