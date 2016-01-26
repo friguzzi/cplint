@@ -26,7 +26,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- set_sc(megaex_bottom,15).
 :- set_sc(max_iter,10).
 :- set_sc(max_iter_structure,50).
-:- set_sc(verbosity,3).
+:- set_sc(verbosity,1).
 
 
 :- in.
@@ -43,12 +43,17 @@ class(ok):0.5 :-
 :- end_in.  
 
 :- bg.
+component(C):-
+  replaceable(C).
+component(C):-
+  not_replaceable(C).
 replaceable(gear).
 replaceable(wheel).
 replaceable(chain).
 not_replaceable(engine).
 not_replaceable(control_unit).
 not_worn(C):-
+  component(C),
   \+ worn(C).
 one_worn:-
   worn(_).
