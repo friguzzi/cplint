@@ -28,13 +28,17 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- set_sc(verbosity,3).
 
 :- bg.
-company(jvt,commercial).
-company(scuf,university).
-company(ucro,university).
+company_info(jvt,commercial).
+company_info(scuf,university).
+company_info(ucro,university).
 course(cso,2,introductory).
 course(erm,3,introductory).
 course(so2,4,introductory).
 course(srw,3,advanced).
+
+party(P):-
+        participant(_, _, P, _).
+
 
 job(J):-
 	participant(J, _, _, _).
@@ -46,7 +50,7 @@ party_no :- party(no).
 
 company_type(T):-
 	company(C),
-	company(C, T).
+	company_info(C, T).
 
 not_company_type(commercial):-
   \+ company_type(commercial).
@@ -75,11 +79,8 @@ party(no):0.5:-
 fold(all,F):-
   findall(I,int(I),F).
 
-:- fold(all,F),
-   sample(4,F,FTr,FTe),
-   assert(fold(rand_train,FTr)),
-   assert(fold(rand_test,FTe)).
-
+fold(test,[adams,scott]).
+fold(train,[blake, king, miller, turner]).
 
 output(party/1).
 
@@ -90,7 +91,7 @@ input(subscription/1).
 input(course_len/2).
 input(course_type/2).
 input(company/1).
-input(company/2).
+input(company_info/2).
 input(participant/4).
 input(course/3)/
 
@@ -119,8 +120,8 @@ modeb(*,course_type(+sub,-#ct)).
 neg(party(M,yes)):- party(M,no).
 neg(party(M,no)):- party(M,yes).
 
-party(M,P):-
-        participant(M,_, _, P, _).
+%party(M,P):-
+%        participant(M,_, _, P, _).
 
 
 begin(model(adams)).
@@ -160,3 +161,10 @@ participant(researcher,ucro,no,81).
 subscription(so2).
 subscription(srw).
 end(model(turner)).
+
+:- fold(all,F),
+   sample(4,F,FTr,FTe),
+   assert(fold(rand_train,FTr)),
+   assert(fold(rand_test,FTe)).
+
+
