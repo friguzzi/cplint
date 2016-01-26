@@ -326,26 +326,26 @@ get_var_n(Env,R,S,Probs,V):-
 
 add_bdd_arg(M:A,Env,BDD,M:A1):-
   A=..[P|Args],
-  append(Args,[BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,BDD],Args1),
+  A1=..[P|Args1].
 
 
 add_bdd_arg_db(M:A,Env,BDD,DB,M:A1):-
   A=..[P|Args],
-  append(Args,[DB,BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,DB,BDD],Args1),
+  A1=..[P|Args1].
 
 
 add_bdd_arg(A,Env,BDD,_Module,A1):-
   A=..[P|Args],
-  append(Args,[BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,BDD],Args1),
+  A1=..[P|Args1].
 
 
 add_bdd_arg_db(A,Env,BDD,DB,_Module,A1):-
   A=..[P|Args],
-  append(Args,[DB,BDD],Args1),
-  A1=..[P,Env|Args1].
+  append(Args,[Env,DB,BDD],Args1),
+  A1=..[P|Args1].
 
 add_mod_arg(A,_Module,A1):-
   A=..[P|Args],
