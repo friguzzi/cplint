@@ -39,8 +39,8 @@ pre_pcfg([A|R],D0,D,[A|L1],L2):-
 
 pre_pcfg([],D,D,L,L).      % termination
 
-rule('S',L,['S','S']):0.4; rule('S',L,[a]):0.3; 
-rule('S',L,[b]):0.3.
+rule('S',D,['S','S']):0.4; rule('S',D,[a]):0.3; 
+  rule('S',D,[b]):0.3.
 
 
 
