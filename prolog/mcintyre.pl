@@ -22,7 +22,6 @@ details.
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
-:-use_foreign_library(foreign(bddem),install).
 
 :- style_check(-discontiguous).
 
@@ -992,7 +991,7 @@ sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 
 :- multifile sandbox:safe_meta/2.
 
-sandbox:safe_meta(pita:s(_,_), []).
-sandbox:safe_meta(pita:prob(_,_), []).
-sandbox:safe_meta(pita:prob_bar(_,_), []).
+sandbox:safe_meta(mcintyre:s(_,_), []).
+sandbox:safe_meta(mcintyre:prob(_,_), []).
+sandbox:safe_meta(mcintyre:prob_bar(_,_), []).
 
