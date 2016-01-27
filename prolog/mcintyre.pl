@@ -99,8 +99,9 @@ load_file(File):-
  * Query together with their probabilities
  */
 s(M:Goal,P):-
+  write(M),nl,
   input_mod(Mo),
-  write(Mo),
+  write(Mo),nl,
   Mo:local_mc_setting(min_error, MinError),
   Mo:local_mc_setting(k, K),
 % Resetting the clocks...
@@ -658,18 +659,19 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
-user:term_expansion((:- cplint), []) :-!,
+user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
   write(M),write(ciao),nl,
-  findall(M:local_mc_setting(P,V),default_setting_mc(P,V),L),
+  findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
   assert(cplint_module(M)),
   assert(input_mod(M)),
+  write( assert(input_mod(M))),nl,
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- end_cplint), []) :-!,
+user:term_expansion((:- end_mc), []) :-!,
   retractall(cplint_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
