@@ -14,11 +14,12 @@ details.
 */
 
 
-:- module(mcintyre,[prob/2, prob_bar/2, set_mc/2,setting_mc/2,
-  cplint/0,end_cplint/0,load/1,load_file/1,sample_head/4]).
+:- module(mcintyre,[mcprob/2, mcprob_bar/2, set_mc/2,setting_mc/2,
+%  mccplint/0,mcend_cplint/0,load/1,load_file/1,
+sample_head/4]).
 :-meta_predicate s(:,-).
-:-meta_predicate prob(:,-).
-:-meta_predicate prob_bar(:,-).
+:-meta_predicate mcprob(:,-).
+:-meta_predicate mcprob_bar(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -98,8 +99,10 @@ load_file(File):-
  * Query together with their probabilities
  */
 s(M:Goal,P):-
-  M:local_mc_setting(min_error, MinError),
-  M:local_mc_setting(k, K),
+  input_mod(Mo),
+  write(Mo),
+  Mo:local_mc_setting(min_error, MinError),
+  Mo:local_mc_setting(k, K),
 % Resetting the clocks...
 % Performing resolution...
   montecarlo_cycle(0, 0, M:Goal, K, MinError, _Samples, _Lower, P, _Upper),
@@ -118,7 +121,8 @@ montecarlo_cycle(N0, S0, M:Goals, K, MinError, Samples, Lower, Prob, Upper):-!,
   D is N - S,
   Semi is 1.95996 * sqrt(P * (1 - P) / N),
   Int is 2 * Semi,
-  M:local_mc_setting(max_samples,MaxSamples),
+  input_mod(Mo),
+  Mo:local_mc_setting(max_samples,MaxSamples),
   /*   N * P > 5;   N * S / N > 5;   S > 5
   *   N (1 - P) > 5;   N (1 - S / N) > 5;   N (N - S) / N > 5;   N - S > 5
   */
@@ -159,7 +163,7 @@ montecarlo(K1,Count, Success, M:Goals,N1,S1):-
  * If Query is not ground, it returns in backtracking all instantiations of
  * Query together with their probabilities
  */
-prob(M:Goal,P):-
+mcprob(M:Goal,P):-
   s(M:Goal,P).
 
 /** 
@@ -172,7 +176,7 @@ prob(M:Goal,P):-
  * If Query is not ground, it returns in backtracking all instantiations of
  * Query together with their probabilities
  */
-prob_bar(M:Goal,Chart):-
+mcprob_bar(M:Goal,Chart):-
   s(M:Goal,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
@@ -191,7 +195,7 @@ load(FileIn,C1,R):-
   process_clauses(C,[],C1,[],R).
 
 get_node(Goal,Env,B):-
-  cplint_module(M),
+  input_mod(M),
   M:local_mc_setting(depth_bound,true),!,
   M:local_mc_setting(depth,DB),
   retractall(v(_,_,_)),
@@ -213,7 +217,7 @@ get_node(Goal,Env,B):- %with DB=false
 
 
 get_next_rule_number(R):-
-  cplint_module(PName),
+  input_mod(PName),
   retract(PName:rule_n(R)),
   R1 is R+1,
   assert(PName:rule_n(R1)).
@@ -553,7 +557,7 @@ prob_ann(_:P,P).
 process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
-  cplint_module(M),
+  input_mod(M),
   M:local_mc_setting(epsilon_parsing, Eps), 
   EpsNeg is - Eps, 
   ProbLast > EpsNeg, 
@@ -613,7 +617,7 @@ or_list1([H|T],Env,B0,B1):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_mc(Parameter,Value):-
-  cplint_module(M),
+  input_mod(M),
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
@@ -626,7 +630,7 @@ set_mc(Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_mc(P,V):-
-  cplint_module(M),
+  input_mod(M),
   M:local_mc_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -656,9 +660,11 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
 
 user:term_expansion((:- cplint), []) :-!,
   prolog_load_context(module, M),
+  write(M),write(ciao),nl,
   findall(M:local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
   assert(cplint_module(M)),
+  assert(input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
