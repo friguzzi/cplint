@@ -14,19 +14,21 @@ details.
 */
 
 
-:- module(mcintyre,[mcprob/2, mcprob_bar/2, set_mc/2,setting_mc/2,
-%  mccplint/0,mcend_cplint/0,load/1,load_file/1,
-sample_head/4]).
+:- module(mcintyre,[mc_prob/2, mc_prob_bar/2, set_mc/2,setting_mc/2,
+  mc/0,end_mc/0,mc_load/1,mc_load_file/1,
+  sample_head/4]).
 :-meta_predicate s(:,-).
-:-meta_predicate mcprob(:,-).
-:-meta_predicate mcprob_bar(:,-).
+:-meta_predicate mc_prob(:,-).
+:-meta_predicate mc_prob_bar(:,-).
+:-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
+:-meta_predicate montecarlo(-,-,-,:,-,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 
 :- style_check(-discontiguous).
 
-:- thread_local v/3,rule_n/1,cplint_module/1,local_mc_setting/2.
+:- thread_local v/3,rule_n/1,mc_module/1,mc_input_mod/1,local_mc_setting/2.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -66,11 +68,11 @@ default_setting_mc(depth,2).
 default_setting_mc(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 /** 
- * load(++File:atom) is det
+ * mc_load(++File:atom) is det
  *
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
  */
-load(File):-
+mc_load(File):-
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
     load_file(FileLPAD)
@@ -82,14 +84,14 @@ load(File):-
   ).
 
 /** 
- * load_file(++FileWithExtension:atom) is det
+ * mc_load_file(++FileWithExtension:atom) is det
  *
  * Loads FileWithExtension.
  */
-load_file(File):-
-  cplint,
+mc_load_file(File):-
+  mc,
   user:consult(File),
-  end_cplint.
+  end_mc.
 
 /** 
  * s(:Query:atom,-Probability:float) is nondet
@@ -99,14 +101,13 @@ load_file(File):-
  * Query together with their probabilities
  */
 s(M:Goal,P):-
-  write(M),nl,
-  input_mod(Mo),
-  write(Mo),nl,
+  mc_input_mod(Mo),
   Mo:local_mc_setting(min_error, MinError),
   Mo:local_mc_setting(k, K),
 % Resetting the clocks...
 % Performing resolution...
   montecarlo_cycle(0, 0, M:Goal, K, MinError, _Samples, _Lower, P, _Upper),
+  !,
   erase_samples.
 
 erase_samples:-
@@ -122,7 +123,7 @@ montecarlo_cycle(N0, S0, M:Goals, K, MinError, Samples, Lower, Prob, Upper):-!,
   D is N - S,
   Semi is 1.95996 * sqrt(P * (1 - P) / N),
   Int is 2 * Semi,
-  input_mod(Mo),
+  mc_input_mod(Mo),
   Mo:local_mc_setting(max_samples,MaxSamples),
   /*   N * P > 5;   N * S / N > 5;   S > 5
   *   N (1 - P) > 5;   N (1 - S / N) > 5;   N (N - S) / N > 5;   N - S > 5
@@ -164,7 +165,7 @@ montecarlo(K1,Count, Success, M:Goals,N1,S1):-
  * If Query is not ground, it returns in backtracking all instantiations of
  * Query together with their probabilities
  */
-mcprob(M:Goal,P):-
+mc_prob(M:Goal,P):-
   s(M:Goal,P).
 
 /** 
@@ -177,7 +178,7 @@ mcprob(M:Goal,P):-
  * If Query is not ground, it returns in backtracking all instantiations of
  * Query together with their probabilities
  */
-mcprob_bar(M:Goal,Chart):-
+mc_prob_bar(M:Goal,Chart):-
   s(M:Goal,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
@@ -196,7 +197,7 @@ load(FileIn,C1,R):-
   process_clauses(C,[],C1,[],R).
 
 get_node(Goal,Env,B):-
-  input_mod(M),
+  mc_input_mod(M),
   M:local_mc_setting(depth_bound,true),!,
   M:local_mc_setting(depth,DB),
   retractall(v(_,_,_)),
@@ -218,7 +219,7 @@ get_node(Goal,Env,B):- %with DB=false
 
 
 get_next_rule_number(R):-
-  input_mod(PName),
+  mc_input_mod(PName),
   retract(PName:rule_n(R)),
   R1 is R+1,
   assert(PName:rule_n(R1)).
@@ -329,8 +330,7 @@ generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
 
 
 generate_clause(Head,Body,HeadList,VC,R,N,Clause):-
-  Clause=(Head:-(Body,sample_head(R,VC,HeadList,NH),NH=N)),
-  write(dd),write(Clause),nl.
+  Clause=(Head:-(Body,sample_head(R,VC,HeadList,NH),NH=N)).
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
@@ -341,8 +341,7 @@ generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
 generate_rules([],_Body,_HeadList,_VC,_R,_N,[]).
 
 generate_rules([Head:_P1,'':_P2],Body,HeadList,VC,R,N,[Clause]):-!,
-  generate_clause(Head,Body,HeadList,VC,R,N,Clause),
-  write(qui),write(Clause),nl.
+  generate_clause(Head,Body,HeadList,VC,R,N,Clause).
 
 generate_rules([Head:_P|T],Body,HeadList,VC,R,N,[Clause|Clauses]):-
   generate_clause(Head,Body,HeadList,VC,R,N,Clause),
@@ -558,7 +557,7 @@ prob_ann(_:P,P).
 process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
-  input_mod(M),
+  mc_input_mod(M),
   M:local_mc_setting(epsilon_parsing, Eps), 
   EpsNeg is - Eps, 
   ProbLast > EpsNeg, 
@@ -618,7 +617,7 @@ or_list1([H|T],Env,B0,B1):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_mc(Parameter,Value):-
-  input_mod(M),
+  mc_input_mod(M),
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
@@ -631,7 +630,7 @@ set_mc(Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_mc(P,V):-
-  input_mod(M),
+  mc_input_mod(M),
   M:local_mc_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -661,21 +660,19 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
 
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
-  write(M),write(ciao),nl,
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
-  assert(cplint_module(M)),
-  assert(input_mod(M)),
-  write( assert(input_mod(M))),nl,
+  assert(mc_module(M)),
+  assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
 user:term_expansion((:- end_mc), []) :-!,
-  retractall(cplint_module(_M)).
+  retractall(mc_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
   Head = (_;_), !, 
@@ -696,26 +693,22 @@ user:term_expansion((Head :- Body), Clauses):-
    ).
   
 user:term_expansion((Head :- Body), Clauses):-
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
-  write((Head :- Body)),nl,
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
-  write(ss),nl,
   extract_vars_list((Head :- Body),[],VC),
-  write(aa),nl,
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
     generate_rules(HeadList,Body,HeadList,[],R,0,Clauses)
   ;
     generate_rules(HeadList,Body,HeadList,VC,R,0,Clauses)
-  ),
-  write(Clauses),nl.
+  ).
 
 user:term_expansion((Head :- Body), []) :- 
-% disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
-  prolog_load_context(module, M),cplint_module(M),
+% disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
+  prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (_H:P),
   ground(P),
@@ -723,7 +716,7 @@ user:term_expansion((Head :- Body), []) :-
 
 user:term_expansion((Head :- Body), Clauses) :- 
 % disjunctive clause with a single head atom e depth_bound
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
@@ -738,7 +731,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :- 
 % disjunctive clause with a single head atom senza depth_bound con prob =1
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -752,7 +745,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :- 
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !, 
@@ -774,7 +767,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :- 
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !, 
   list2or(HeadListOr, Head), 
@@ -789,14 +782,14 @@ user:term_expansion((Head :- Body), Clauses) :-
   
 user:term_expansion((Head :- Body),Clauses) :- 
 % definite clause for db facts
-  prolog_load_context(module, M),cplint_module(M),  
+  prolog_load_context(module, M),mc_module(M),  
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
   Clauses=(Head1 :- Body).
 
 user:term_expansion((Head :- Body),Clauses) :- 
 % definite clause with depth_bound
-  prolog_load_context(module, M),cplint_module(M),  
+  prolog_load_context(module, M),mc_module(M),  
   M:local_mc_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body), 
@@ -807,7 +800,7 @@ user:term_expansion((Head :- Body),Clauses) :-
   Clauses=(Head1 :- Body1).
   
 user:term_expansion(Head,Clauses) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
   Head=(_;_), !, 
@@ -823,7 +816,7 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 user:term_expansion(Head,Clauses) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !, 
   list2or(HeadListOr, Head), 
@@ -837,7 +830,7 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 user:term_expansion(Head,[]) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_H:P),
@@ -845,7 +838,7 @@ user:term_expansion(Head,[]) :-
   P=:=0.0, !.
   
 user:term_expansion(Head,Clause) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -857,7 +850,7 @@ user:term_expansion(Head,Clause) :-
   Clause=(Head1 :- Body1).
 
 user:term_expansion(Head,Clause) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (H:P),
@@ -868,7 +861,7 @@ user:term_expansion(Head,Clause) :-
   Clause=(Head1 :- Body1).
 
 user:term_expansion(Head,Clause) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -886,7 +879,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:_), !, 
@@ -903,12 +896,12 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion((:- set_pita(P,V)), []) :-!,
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   set_pita(P,V).
 
 
 user:term_expansion(Head, (Head1:-one(Env,One))) :- 
-  prolog_load_context(module, M),cplint_module(M),
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % definite fact with db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
@@ -918,15 +911,16 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 
 /** 
- * cplint is det
+ * mc is det
  *
- * Initializes the cplint inference module.
+ * Initializes the mcintyre inference module.
  */
-cplint:-
+mc:-
   M=user,
   findall(M:local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
-  assert(cplint_module(M)),
+  assert(mc_module(M)),
+  assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)).
 
@@ -935,8 +929,8 @@ cplint:-
  *
  * Terminates the cplint inference module.
  */
-end_cplint:-
-  retractall(cplint_module(_M)).
+end_mc:-
+  retractall(mc_module(_M)).
 
 list2or([],true):-!.
 
@@ -984,7 +978,7 @@ builtin(_ @> _).
 builtin(memberchk(_,_)).
 builtin(select(_,_,_)).
 builtin(dif(_,_)).
-builtin(prob(_,_)).
+builtin(mc_prob(_,_)).
 builtin(findall(_,_,_)).
 
 average(L,Av):-
@@ -1000,6 +994,6 @@ sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
-sandbox:safe_meta(mcintyre:prob(_,_), []).
-sandbox:safe_meta(mcintyre:prob_bar(_,_), []).
+sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
+sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 
