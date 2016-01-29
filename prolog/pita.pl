@@ -1006,7 +1006,7 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 /** 
  * begin_lpad_pred is det
  *
- * Initializes the cplint inference module.
+ * Initializes LPAD loading.
  */
 begin_lpad_pred:-
   M=user,
