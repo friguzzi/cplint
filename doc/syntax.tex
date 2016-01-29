@@ -21,7 +21,7 @@ stands for
 \begin{verbatim}
 h1:1 :- b1,...,bm,\+ c1,...,\+ cl.
 \end{verbatim}
-The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \href{http://cplint.lamping.unife.it/example/coin.cpl}{\texttt{coin.cpl}})
+The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \href{http://cplint.lamping.unife.it/example/inference/coin.cpl}{\texttt{coin.cpl}})
 \begin{verbatim}
 heads(Coin):1/2 ; tails(Coin):1/2 :- 
   toss(Coin),\+biased(Coin).
@@ -55,10 +55,22 @@ that, given a list of numbers, computes its arithmetic mean.
 
 The body of rules may also contain the predicate \verb|prob/2| that computes the
 probability of an atom, thus allowing nested probability computations.
-For example
+For example (\href{http://cplint.lamping.unife.it/example/inference/meta.pl}{\texttt{meta.pl}})
 \begin{verbatim}
 a:0.2:-
   prob(b,P),
   P>0.2.
 \end{verbatim}
 is a valid rule.
+
+Moreover, the probabilistic annotations can be variables, as in 
+(\href{http://cplint.lamping.unife.it/example/inference/flexprob.pl}{\texttt{flexprob.pl}}))
+\begin{verbatim}
+red(Prob):Prob.
+
+draw_red(R, G):-
+  Prob is R/(R + G),
+  red(Prob).
+\end{verbatim}
+Variables in probabilistic annotations must be ground when resolution reaches the end of the body, 
+otherwise an exception is raised.
