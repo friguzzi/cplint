@@ -861,12 +861,8 @@ user:term_expansion((Head :- Body),Clauses) :-
 user:term_expansion((Head :- Body),Clauses) :- 
 % definite clause with depth_bound
   prolog_load_context(module, M),pita_module(M),  
-  write(ciao),nl,
-  M:local_pita_setting(depth_bound,T),
-  write(T),nl,
   M:local_pita_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  write(cio),nl,
   list2and(BodyList, Body), 
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
