@@ -19,14 +19,14 @@
 
 \verb|cplint| on SWISH allows two types of programs: LPAD and Prolog. In the first, you create a new LPAD in the editor, in the latter a Prolog program. 
 
-In LPADs, you write in the editor the program without the library import and the \verb|:- cplint| and \verb|:- end_cplint.| compiler directives.
+In LPADs, you write in the editor the program without the library import and the \verb|:- cplint| and \verb|:- end_cplint.| compiler directives. \verb|pita| is used for inference.
 
 You ask queries by writing the atom of which you want to compute the probability. In the coin example, the probability of \verb|heads(coin)| can be obtained with the 
 \begin{verbatim}
 ?- heads(coin).
 \end{verbatim}
 
-In Prolog programs, you have to enter the program above (\verb|coin.pl|) and ask the probability of an atom using the predicate \verb|prob/2| as in
+In Prolog programs, you have to enter the program above (\verb|coin.pl|) and ask the probability of an atom using \verb|pita| using the predicate \verb|prob/2| as in
 \begin{verbatim}
 ?- prob(heads(coin),P).
 \end{verbatim}
@@ -39,7 +39,15 @@ if you include
 \begin{verbatim}
 :- use_rendering(c3).
 \end{verbatim}
-before \verb|:- cplint.|
+before \verb|:- pita.|
+
+When using \verb|mcintyre|, the predicates for querying are \verb|mc_prob/2| and \verb|mc_prob_bar/2| as in
+\begin{verbatim}
+?- mc_prob(heads(coin),P).
+?- mc_prob_bar(heads(coin),P).
+\end{verbatim}
+
+
 \input{parameters}
 
 \input{learning}
