@@ -667,11 +667,12 @@ user:term_expansion((:- mc), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- begin_lpad), []) :-!,
-  mc_input_mod(M),
+user:term_expansion((:- begin_lpad), []) :-
+  mc_input_mod(M),!,
   assert(mc_module(M)).
 
-user:term_expansion((:- end_lpad), []) :-!,
+user:term_expansion((:- end_lpad), []) :-
+  mc_input_mod(_M0),!,
   retractall(mc_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
