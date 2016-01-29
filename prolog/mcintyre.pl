@@ -860,9 +860,7 @@ user:term_expansion(Head,Clause) :-
   Head = (H:P),
   ground(P),
   P=:=1.0, !,
-  list2and([one(Env,BDD)],Body1),
-  add_bdd_arg(H,Env,BDD,_Module,Head1),
-  Clause=(Head1 :- Body1).
+  Clause=H.
 
 user:term_expansion(Head,Clause) :- 
   prolog_load_context(module, M),mc_module(M),
@@ -874,12 +872,10 @@ user:term_expansion(Head,Clause) :-
   process_head(HeadListOr, HeadList), 
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
-  get_probs(HeadList,Probs),
-  add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   (M:local_mc_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(Env,R,[],Probs,V),equality(Env,V,0,BDD)))
+    generate_clause(H,true,HeadList,[],R,0,Clause)
   ;
-    Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
+    generate_clause(H,true,HeadList,VC,R,0,Clause)
   ).
 
 user:term_expansion(Head,Clause) :- 
@@ -891,12 +887,10 @@ user:term_expansion(Head,Clause) :-
   process_head(HeadListOr, HeadList), 
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
-  get_probs(HeadList,Probs),
-  add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
   (M:local_mc_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(Env,R,[],Probs,V),equality(Env,V,0,BDD)))
+    generate_clause(H,true,HeadList,[],R,0,Clause)
   ;
-    Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
+    generate_clause(H,true,HeadList,VC,R,0,Clause)
   ).
 
 user:term_expansion((:- set_pita(P,V)), []) :-!,
@@ -980,6 +974,7 @@ builtin(select(_,_,_)).
 builtin(dif(_,_)).
 builtin(mc_prob(_,_)).
 builtin(findall(_,_,_)).
+builtin(between(_,_,_)).
 
 average(L,Av):-
         sum_list(L,Sum),
