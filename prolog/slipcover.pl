@@ -4025,8 +4025,8 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1)),
   style_check(-discontiguous).
 
-user:term_expansion((:- bg), []) :-!,
-  input_mod(M),
+user:term_expansion((:- begin_bg), []) :-
+  input_mod(M),!,
   assert(M:bg_on).
 
 user:term_expansion(C, M:bgc(C)) :-
@@ -4034,8 +4034,8 @@ user:term_expansion(C, M:bgc(C)) :-
   input_mod(M),
   M:bg_on,!.
 
-user:term_expansion((:- end_bg), []) :-!,
-  input_mod(M),
+user:term_expansion((:- end_bg), []) :-
+  input_mod(M),!,
   retractall(M:bg_on),
   findall(C,M:bgc(C),L),
   retractall(M:bgc(_)),
@@ -4047,8 +4047,8 @@ user:term_expansion((:- end_bg), []) :-!,
     assert(M:bg(L))
   ).
 
-user:term_expansion((:- in), []) :-!,
-  input_mod(M),
+user:term_expansion((:- begin_in), []) :-
+  input_mod(M),!,
   assert(M:in_on).
 
 user:term_expansion(C, M:inc(C)) :-
@@ -4056,8 +4056,8 @@ user:term_expansion(C, M:inc(C)) :-
   input_mod(M),
   M:in_on,!.
 
-user:term_expansion((:- end_in), []) :-!,
-  input_mod(M),
+user:term_expansion((:- end_in), []) :-
+  input_mod(M),!,
   retractall(M:in_on),
   findall(C,M:inc(C),L),
   retractall(M:inc(_)),
