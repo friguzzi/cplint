@@ -19,7 +19,7 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
-  begin_lpad/0,end_lpad/0,load/1,load_file/1]).
+  load/1,load_file/1]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -208,9 +208,9 @@ load(File):-
  * Loads FileWithExtension.
  */
 load_file(File):-
-  begin_lpad,
+  begin_lpad_pred,
   user:consult(File),
-  end_lpad.
+  end_lpad_pred.
 
 /** 
  * s(:Query:atom,-Probability:float) is nondet
@@ -1004,21 +1004,21 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 
 /** 
- * begin_lpad is det
+ * begin_lpad_pred is det
  *
  * Initializes the cplint inference module.
  */
-begin_lpad:-
+begin_lpad_pred:-
   M=user,
   pita_input_mod(M),
   assert(pita_module(M)).
 
 /** 
- * end_lpad is det
+ * end_lpad_pred is det
  *
  * Terminates the cplint inference module.
  */
-end_lpad:-
+end_lpad_pred:-
   retractall(pita_module(_M)).
 
 list2or([],true):-!.
