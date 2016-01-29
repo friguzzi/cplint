@@ -723,11 +723,12 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- begin_lpad), []) :-!,
-  pita_input_mod(M),
+user:term_expansion((:- begin_lpad), []) :-
+  pita_input_mod(M),!,
   assert(pita_module(M)).
 
-user:term_expansion((:- end_lpad), []) :-!,
+user:term_expansion((:- end_lpad), []) :-
+  pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
