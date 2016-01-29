@@ -1,13 +1,15 @@
 \section{Inference}
 \label{inf}
-\texttt{cplint} answers queries using the module \verb|pita|. It performs the program transformation technique of \cite{RigSwi10-ICLP10-IC}. Differently from that work, techniques alternative to tabling and answer subsumption are used.
+\texttt{cplint} answers queries using the module \verb|pita| or \verb|mcintyre|. The first performs the program transformation technique of \cite{RigSwi10-ICLP10-IC}. Differently from that work, techniques alternative to tabling and answer subsumption are used. The latter performs approximate inference by sampling
+using a different program transformation technique and is described in \cite{Rig13-FI-IJ}.
 
-For answering queries, you have to prepare a Prolog file where you first load \texttt{pita} and then enclose the probabilistic 
-clauses in \texttt{:-cplint.} and \texttt{:-end\_cplint.} For example, the coin program above can be stored in \href{http://cplint.lamping.unife.it/example/coin.pl}{\texttt{coin.pl}} as follows
+For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \verb|pita|), initialize it with a directive (for example \verb|:- pita|) and then enclose the LPAD
+clauses in \verb|:-begin_lpad.| and \verb|:-end_lpad.| For example, the coin program above can be stored in \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference
+with \verb|pita| as follows
 \begin{verbatim}
 :- use_module(library(pita)).
-:- cplint.
-
+:- pita.
+:- begin_lpad.
 heads(Coin):1/2 ; tails(Coin):1/2:- 
 toss(Coin),\+biased(Coin).
 
@@ -17,6 +19,59 @@ toss(Coin),biased(Coin).
 fair(Coin):0.9 ; biased(Coin):0.1.
 
 toss(coin).
-
-:- end_cplint.
+:- end_lpad.
 \end{verbatim}
+The same program for \verb|mcintyre| is
+\begin{verbatim}
+:- use_module(library(mcintyre)).
+:- mc.
+:- begin_lpad.
+heads(Coin):1/2 ; tails(Coin):1/2:- 
+toss(Coin),\+biased(Coin).
+
+heads(Coin):0.6 ; tails(Coin):0.4:- 
+toss(Coin),biased(Coin).
+
+fair(Coin):0.9 ; biased(Coin):0.1.
+
+toss(coin).
+:- end_lpad.
+\end{verbatim}
+You can have also (non-probabilistic) clauses outside \verb|:-begin/end_lpad.| These are considered as database clauses.
+In \verb|pita| subgoals in the body of probabilistic clauses can query them by enclosing the query in \verb|db/1|.
+For example (\href{http://cplint.lamping.unife.it/example/inference/testdb.pl}{\texttt{testdb.pl}})
+\begin{verbatim}
+:- use_module(library(pita)).
+:- pita.
+:- begin_lpad.
+sampled_male(X):0.5:-
+  db(male(X)).
+:- end_lpad.
+male(john).
+male(david).
+\end{verbatim}
+You can also use \verb|findall/3| on subgoals defined by database clauses
+(\href{http://cplint.lamping.unife.it/example/inference/persons.pl}{\texttt{persons.pl}})
+\begin{verbatim}
+:- use_module(library(pita)).
+:- pita.
+:- begin_lpad.
+male:M/P; female:F/P:-
+  findall(Male,male(Male),LM),
+  findall(Female,female(Female),LF),
+  length(LM,M),
+  length(LF,F),
+  P is F+M.
+:- end_lpad.
+male(john).
+male(david).
+female(anna).
+female(elen).
+female(cathy).
+\end{verbatim}
+Aggregate predicates on probabilistic subgoals are not implemented due to their high
+computational cost (if the aggregation is over $n$ atoms, the possible values of the
+aggregation are potentially $2^n$).
+
+In \verb|mcintyre| you can query database clauses in the body of probabilistic clauses without any special syntax. You can also 
+use \verb|findall/3|.
