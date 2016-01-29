@@ -785,13 +785,6 @@ user:term_expansion((Head :- Body), Clauses) :-
   ).
   
 user:term_expansion((Head :- Body),Clauses) :- 
-% definite clause for db facts
-  prolog_load_context(module, M),mc_module(M),  
-  ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
-  Head=db(Head1),!,
-  Clauses=(Head1 :- Body).
-
-user:term_expansion((Head :- Body),Clauses) :- 
 % definite clause with depth_bound
   prolog_load_context(module, M),mc_module(M),  
   M:local_mc_setting(depth_bound,true),
@@ -841,26 +834,22 @@ user:term_expansion(Head,[]) :-
   ground(P),
   P=:=0.0, !.
   
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,H) :- 
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (H:P),
   ground(P),
-  P=:=1.0, !,
-  list2and([one(Env,BDD)],Body1),
-  add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
-  Clause=(Head1 :- Body1).
+  P=:=1.0, !.
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,H) :- 
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (H:P),
   ground(P),
-  P=:=1.0, !,
-  Clause=H.
+  P=:=1.0, !.
 
 user:term_expansion(Head,Clause) :- 
   prolog_load_context(module, M),mc_module(M),
@@ -896,16 +885,6 @@ user:term_expansion(Head,Clause) :-
 user:term_expansion((:- set_pita(P,V)), []) :-!,
   prolog_load_context(module, M),mc_module(M),
   set_pita(P,V).
-
-
-user:term_expansion(Head, (Head1:-one(Env,One))) :- 
-  prolog_load_context(module, M),mc_module(M),
-  M:local_mc_setting(depth_bound,true),
-% definite fact with db
-  (Head \= ((user:term_expansion(_,_) ):- _ )),
-  (Head\= end_of_file),!,
-  add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
-
 
 
 /** 
