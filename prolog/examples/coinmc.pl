@@ -4,15 +4,13 @@ J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
 disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
-:- use_module(library(pita)).
+:- use_module('../mcintyre').
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- endif.
 
-:- pita.
-
-:- begin_lpad.
+:- cplint.
 
 heads(Coin): 1/2; tails(Coin) : 1/2:-toss(Coin),\+biased(Coin).
 % if we toss a Coin that is not biased then it lands heads with probability 1/2
@@ -25,7 +23,7 @@ fair(Coin):0.9 ; biased(Coin):0.1.
 toss(coin).
 % coin is certainly tossed
 
-:- end_lpad.
+:- end_cplint.
 
 /** <examples>
 
