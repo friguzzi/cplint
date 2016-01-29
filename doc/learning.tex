@@ -402,5 +402,5 @@ fold(all,F):-
    assert(fold(rand_test,FTe)).
 \end{verbatim}
 which however must be inserted after the input interpretations otherwise the facts for \verb|int/1| will not be available and
-the fold \verb|all| would be empty. This command uses  \verb|sample(N,List,Sampled,Rest)| exported from \verb|slipcover| that samples \verb|N| elements from \verb|List| and returns the sampled elements in \verb|Sampled| and the rest in \verb|Rest|. If \verb|Lilst| has \verb|N| elements or less, \verb|Sampled| is equal to \verb|List| 
+the fold \verb|all| would be empty. This command uses  \verb|sample(N,List,Sampled,Rest)| exported from \verb|slipcover| that samples \verb|N| elements from \verb|List| and returns the sampled elements in \verb|Sampled| and the rest in \verb|Rest|. If \verb|List| has \verb|N| elements or less, \verb|Sampled| is equal to \verb|List| 
 and \verb|Rest| is empty.
