@@ -662,11 +662,17 @@ user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
-  assert(mc_module(M)),
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
+
+user:term_expansion((:- begin_lpad), []) :-!,
+  mc_input_mod(M),
+  assert(mc_module(M)).
+
+user:term_expansion((:- end_lpad), []) :-!,
+  retractall(mc_module(_M)).
 
 user:term_expansion((:- end_mc), []) :-!,
   retractall(mc_module(_M)).
