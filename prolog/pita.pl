@@ -183,7 +183,7 @@ default_setting_pita(compiling,off).
 :-set_prolog_flag(unknown,warning).
 
 default_setting_pita(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
-default_setting_pita(depth,2).
+default_setting_pita(depth,5).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 /** 
@@ -724,7 +724,6 @@ user:term_expansion((:- pita), []) :-!,
   style_check(-discontiguous).
 
 user:term_expansion((:- begin_lpad), []) :-!,
-  prolog_load_context(module, M),
   pita_input_mod(M),
   assert(pita_module(M)).
 
