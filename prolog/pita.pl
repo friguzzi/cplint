@@ -423,8 +423,8 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
   
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  db(H),!,
+process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
+  !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
@@ -437,8 +437,8 @@ process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
-  db(H),!,
+process_body([db(H)|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
+  !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
@@ -452,8 +452,8 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
   
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  db(H),!,
+process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
+  !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
@@ -474,8 +474,8 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
-  db(H),!,
+process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
+  !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
