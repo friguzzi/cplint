@@ -19,7 +19,7 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
-  cplint/0,end_cplint/0,load/1,load_file/1]).
+  load/1,load_file/1]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -183,7 +183,7 @@ default_setting_pita(compiling,off).
 :-set_prolog_flag(unknown,warning).
 
 default_setting_pita(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
-default_setting_pita(depth,2).
+default_setting_pita(depth,5).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
 /** 
@@ -208,9 +208,9 @@ load(File):-
  * Loads FileWithExtension.
  */
 load_file(File):-
-  cplint,
+  begin_lpad_pred,
   user:consult(File),
-  end_cplint.
+  end_lpad_pred.
 
 /** 
  * s(:Query:atom,-Probability:float) is nondet
@@ -714,7 +714,7 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
-user:term_expansion((:- pita_init), []) :-!,
+user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
   assert_all(L,M,_),
@@ -723,11 +723,12 @@ user:term_expansion((:- pita_init), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- cplint), []) :-!,
-  prolog_load_context(module, M),
+user:term_expansion((:- begin_lpad), []) :-
+  pita_input_mod(M),!,
   assert(pita_module(M)).
 
-user:term_expansion((:- end_cplint), []) :-!,
+user:term_expansion((:- end_lpad), []) :-
+  pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -861,12 +862,8 @@ user:term_expansion((Head :- Body),Clauses) :-
 user:term_expansion((Head :- Body),Clauses) :- 
 % definite clause with depth_bound
   prolog_load_context(module, M),pita_module(M),  
-  write(ciao),nl,
-  M:local_pita_setting(depth_bound,T),
-  write(T),nl,
   M:local_pita_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  write(cio),nl,
   list2and(BodyList, Body), 
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
@@ -1004,24 +1001,21 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 
 /** 
- * cplint is det
+ * begin_lpad_pred is det
  *
- * Initializes the cplint inference module.
+ * Initializes LPAD loading.
  */
-cplint:-
+begin_lpad_pred:-
   M=user,
-  findall(M:local_pita_setting(P,V),default_setting_pita(P,V),L),
-  assert_all(L,M,_),
-  assert(pita_module(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)).
+  pita_input_mod(M),
+  assert(pita_module(M)).
 
 /** 
- * end_cplint is det
+ * end_lpad_pred is det
  *
  * Terminates the cplint inference module.
  */
-end_cplint:-
+end_lpad_pred:-
   retractall(pita_module(_M)).
 
 list2or([],true):-!.
@@ -1082,7 +1076,7 @@ average(L,Av):-
 
 sandbox:safe_primitive(pita:set_pita(_,_)).
 sandbox:safe_primitive(pita:setting_pita(_,_)).
-sandbox:safe_primitive(pita:init(_,_,_)).
+/*sandbox:safe_primitive(pita:init(_,_,_)).
 sandbox:safe_primitive(pita:init_bdd(_,_)).
 sandbox:safe_primitive(pita:init_test(_,_)).
 sandbox:safe_primitive(pita:ret_prob(_,_,_)).
@@ -1097,7 +1091,7 @@ sandbox:safe_primitive(pita:bdd_not(_,_,_)).
 sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_)).
 sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
 sandbox:safe_primitive(pita:equality(_,_,_,_)).
-
+*/
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(pita:s(_,_), []).

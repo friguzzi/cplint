@@ -15,7 +15,7 @@ details.
 
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, set_mc/2,setting_mc/2,
-  mc/0,end_mc/0,mc_load/1,mc_load_file/1,
+  mc_load/1,mc_load_file/1,
   sample_head/4]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -89,9 +89,9 @@ mc_load(File):-
  * Loads FileWithExtension.
  */
 mc_load_file(File):-
-  mc,
+  begin_lpad_pred,
   user:consult(File),
-  end_mc.
+  end_lpad_pred.
 
 /** 
  * s(:Query:atom,-Probability:float) is nondet
@@ -662,13 +662,17 @@ user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
-  assert(mc_module(M)),
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- end_mc), []) :-!,
+user:term_expansion((:- begin_lpad), []) :-
+  mc_input_mod(M),!,
+  assert(mc_module(M)).
+
+user:term_expansion((:- end_lpad), []) :-
+  mc_input_mod(_M0),!,
   retractall(mc_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -911,25 +915,21 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 
 /** 
- * mc is det
+ * begin_lpad_pred is det
  *
- * Initializes the mcintyre inference module.
+ * Initializes LPAD loading.
  */
-mc:-
+begin_lpad_pred:-
   M=user,
-  findall(M:local_mc_setting(P,V),default_setting_mc(P,V),L),
-  assert_all(L,M,_),
-  assert(mc_module(M)),
-  assert(mc_input_mod(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)).
+  mc_input_mod(M),
+  assert(mc_module(M)).
 
 /** 
- * end_cplint is det
+ * end_lpad_pred is det
  *
  * Terminates the cplint inference module.
  */
-end_mc:-
+end_lpad_pred:-
   retractall(mc_module(_M)).
 
 list2or([],true):-!.
