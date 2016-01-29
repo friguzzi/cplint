@@ -19,7 +19,7 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
-  cplint/0,end_cplint/0,load/1,load_file/1]).
+  begin_lpad/0,end_lpad/0,load/1,load_file/1]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -208,9 +208,9 @@ load(File):-
  * Loads FileWithExtension.
  */
 load_file(File):-
-  cplint,
+  begin_lpad,
   user:consult(File),
-  end_cplint.
+  end_lpad.
 
 /** 
  * s(:Query:atom,-Probability:float) is nondet
@@ -714,7 +714,7 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
-user:term_expansion((:- pita_init), []) :-!,
+user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
   assert_all(L,M,_),
@@ -723,11 +723,12 @@ user:term_expansion((:- pita_init), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
-user:term_expansion((:- cplint), []) :-!,
+user:term_expansion((:- begin_lpad), []) :-!,
   prolog_load_context(module, M),
+  pita_input_mod(M),
   assert(pita_module(M)).
 
-user:term_expansion((:- end_cplint), []) :-!,
+user:term_expansion((:- end_lpad), []) :-!,
   retractall(pita_module(_M)).
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -1004,24 +1005,21 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 
 
 /** 
- * cplint is det
+ * begin_lpad is det
  *
  * Initializes the cplint inference module.
  */
-cplint:-
+begin_lpad:-
   M=user,
-  findall(M:local_pita_setting(P,V),default_setting_pita(P,V),L),
-  assert_all(L,M,_),
-  assert(pita_module(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)).
+  pita_input_mod(M),
+  assert(pita_module(M)).
 
 /** 
- * end_cplint is det
+ * end_lpad is det
  *
  * Terminates the cplint inference module.
  */
-end_cplint:-
+end_lpad:-
   retractall(pita_module(_M)).
 
 list2or([],true):-!.
