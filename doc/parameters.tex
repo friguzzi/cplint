@@ -54,4 +54,5 @@ This would lead to non-termination in cases where the probability is 0 or 1.
 The example \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
 shows that \verb|mcintyre| can perform inference in presence of an infinite number of explanations for 
 the goal. Differently from \verb|pita|, no depth bound is necessary, as the probability of selecting
-the infinite computation branch is 0.
+the infinite computation branch is 0. However, also \verb|mcintyre| may not terminate if loops not
+involving probabilistic predicates are present.
