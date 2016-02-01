@@ -324,7 +324,14 @@ add_bdd_arg_db(A,Env,BDD,DB,_Module,A1):-
 add_mod_arg(A,_Module,A1):-
   A=..[P|Args],
   A1=..[P|Args].
-
+/** 
+ * sample_head(+R:int,+Variables:list,+HeadList:list,-HeadNumber:int) is det
+ *
+ * samples a head from rule R instantiated as indicated by Variables (list of
+ * constants, one per variable. HeadList contains the head as a list.
+ * HeadNumber is the number of the sample head.
+ * Internal predicates used by the transformed input program
+ */
 sample_head(R,VC,_HeadList,NH):-
   recorded(R,sampled(VC,NH)),!.
 
