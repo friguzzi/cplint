@@ -14,12 +14,16 @@ details.
 */
 
 
-:- module(mcintyre,[mc_prob/2, mc_prob_bar/2, set_mc/2,setting_mc/2,
+:- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
+  mc_sample/5,mc_sample_bar/3,
+  set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob_bar(:,-).
+:-meta_predicate mc_sample(:,+,-,-,-).
+:-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-use_module(library(lists)).
@@ -110,6 +114,7 @@ s(M:Goal,P):-
   !,
   erase_samples.
 
+
 erase_samples:-
   recorded(_Key,_Val,Ref),
   erase(Ref),
@@ -145,7 +150,8 @@ montecarlo(0,N,S , _Goals,N,S):-!.
 
 montecarlo(K1,Count, Success, M:Goals,N1,S1):-
   erase_samples,
-  (M:Goals->
+  copy_term(Goals,Goals1),
+  (M:Goals1->
     Valid=1
   ;
     Valid=0
@@ -159,24 +165,26 @@ montecarlo(K1,Count, Success, M:Goals,N1,S1):-
 
 
 /** 
- * prob(:Query:atom,-Probability:float) is nondet
+ * mc_prob(:Query:atom,-Probability:float) is det
  *
- * The predicate computes the probability of the ground query Query
- * If Query is not ground, it returns in backtracking all instantiations of
- * Query together with their probabilities
+ * The predicate computes the probability of the query Query
+ * If Query is not ground, it considers it as an existential query
+ * and returns the probability that there is a satisfying assignment to
+ * the query.
  */
 mc_prob(M:Goal,P):-
   s(M:Goal,P).
 
 /** 
- * prob_bar(:Query:atom,-Probability:dict) is nondet
+ * mc_prob_bar(:Query:atom,-Probability:dict) is det
  *
  * The predicate computes the probability of the ground query Query
  * and returns it as a dict for rendering with c3 as a bar chart with 
  * a bar for the probability of Query true and a bar for the probability of 
  * Query false.
- * If Query is not ground, it returns in backtracking all instantiations of
- * Query together with their probabilities
+ * If Query is not ground, it considers it as an existential query
+ * and returns the probability that there is a satisfying assignment to
+ * the query.
  */
 mc_prob_bar(M:Goal,Chart):-
   s(M:Goal,P),
@@ -188,6 +196,37 @@ mc_prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
+/** 
+ * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ *
+ * The predicate samples Query Samples times and returns
+ * the number of Successes, of Failures and the 
+ * Probability (Successes/Samples)
+ * If Query is not ground, it considers it as an existential query
+ */
+mc_sample(M:Goal,S,T,F,P):-
+  montecarlo(S,0, 0, M:Goal, N, T),
+  P is T / N,
+  F is N - T,
+  erase_samples.
+
+
+/** 
+ * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
+ *
+ * The predicate samples Query Samples times and returns
+ * a dict for rendering with c3 as a bar chart with 
+ * a bar for the number of successes and a bar for the number
+ * of failures.
+ * If Query is not ground, it considers it as an existential query
+ */
+mc_sample_bar(M:Goal,S,Chart):-
+  mc_sample(M:Goal,S,T,F,_P),
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-T,'F' -F], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
 
 
 load(FileIn,C1,R):-
@@ -996,4 +1035,6 @@ sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 sandbox:safe_meta(mcintyre:s(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 
