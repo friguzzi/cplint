@@ -226,6 +226,7 @@ induce_rules(Folds,R):-
   ).
 
 make_dynamic(M):-
+  M:(dynamic int/1),
   findall(O,M:output(O),LO),
   findall(I,M:input(I),LI),
   findall(I,M:input_cw(I),LIC),
