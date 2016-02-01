@@ -41,12 +41,29 @@ if you include
 \end{verbatim}
 before \verb|:- pita.|
 
+If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
+
 When using \verb|mcintyre|, the predicates for querying are \verb|mc_prob/2| and \verb|mc_prob_bar/2| as in
 \begin{verbatim}
 ?- mc_prob(heads(coin),P).
 ?- mc_prob_bar(heads(coin),P).
 \end{verbatim}
+With \verb|mcintyre|, you can also take a given number of sample with a call such as
+\begin{verbatim}
+?- mc_sample(heads(coin),1000,T,F,P).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns in \verb|T| the number of successes, in \verb|F| the number of failures and in \verb|P| the
+estimated probability (\verb|T/1000|).
 
+You can obtain a bar chart of the samples with
+\begin{verbatim}
+?- mc_sample_bar(heads(coin),1000,Chart).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns in \verb|Char| a diagram with one bar for the number of successes and 
+one bar for the number of failures.
+
+If the query is non-ground, \verb|mc_prob/2|, \verb|mc_prob_bar/2|, \verb|mc_sample/5| and \verb|mc_sample_bar/3|  consider the query as existential
+so they estimate the probability that there is a successful ground instantiation.
 
 \input{parameters}
 
