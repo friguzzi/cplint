@@ -17,6 +17,8 @@ details.
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
   mc_sample/5,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
+  mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
+  mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4]).
@@ -27,6 +29,10 @@ details.
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
 :-meta_predicate mc_sample_arg_bar(:,+,+,-).
+:-meta_predicate mc_sample_arg_first(:,+,+,-).
+:-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
+:-meta_predicate mc_sample_arg_one(:,+,+,-).
+:-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-use_module(library(lists)).
@@ -235,11 +241,11 @@ mc_sample_bar(M:Goal,S,Chart):-
 /** 
  * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * The predicate samples Query Samples times. Arg should be a variable
- * in Query.
- * The predicate returns in Values a list of couples ListOfValues-N where 
- * ListOfValues is the list of values of Arg obtained with 
- * findall(Arg,Query,ListOfValues) and N is the number of samples
+ * The predicate samples Query a number of Samples times. 
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where 
+ * L is the list of values of Arg for which Query succeeds in 
+ * a world sampled at random and N is the number of samples
  * returning that list of values.
  */
 mc_sample_arg(M:Goal,S,Arg,ValList):-
@@ -255,9 +261,9 @@ mc_sample_arg(M:Goal,S,Arg,ValList):-
  * The predicate samples Query Samples times. Arg should be a variable
  * in Query.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of 
- * ListOfValues, the list of values of Arg obtained with 
- * findall(Arg,Query,ListOfValues).
+ * with a bar for each possible value of L,
+ * the list of values of Arg for which Query succeeds in 
+ * a world sampled at random. 
  * The size of the bar is the number of samples
  * returning that list of values.
  */
@@ -290,6 +296,126 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   K2 is K1-1,
   sample_arg(K2,M:Goals,Arg,V1,V).
 
+/** 
+ * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query a number of Samples times. 
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples V-N where 
+ * V is the value of Arg returned as the first answer by Query in 
+ * a world sampled at random and N is the number of samples.
+ * V is failure if the query fails.
+ */
+mc_sample_arg_first(M:Goal,S,Arg,ValList):-
+  empty_assoc(Values0),
+  sample_arg_first(S,M:Goal,Arg, Values0,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+/** 
+ * mc_sample_arg_first_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate samples Query Samples times. Arg should be a variable
+ * in Query.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each value of Arg returned as a first answer by Query in 
+ * a world sampled at random. 
+ * The size of the bar is the number of samples that returned that value.
+ * The value is failure if the query fails.
+ */
+mc_sample_arg_first_bar(M:Goal,S,Arg,Chart):-
+  mc_sample_arg_first(M:Goal,S,Arg,ValList0),
+  maplist(to_atom,ValList0,ValList),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	         %  size:_{height: 100},
+	          legend:_{show: false}}.
+
+
+sample_arg_first(0,_Goals,_Arg,V,V):-!.
+
+sample_arg_first(K1, M:Goals,Arg,V0,V):-
+  erase_samples,
+  copy_term((Goals,Arg),(Goals1,Arg1)),
+  (M:Goals1->
+    numbervars(Arg1),
+    Val=Arg1
+  ;
+    Val=failure
+  ),
+  (get_assoc(Val, V0, N)->
+    N1 is N+1,
+    put_assoc(Val,V0,N1,V1)
+  ;
+    put_assoc(Val,V0,1,V1)
+  ),
+  K2 is K1-1,
+  sample_arg_first(K2,M:Goals,Arg,V1,V).
+
+/** 
+ * mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query a number of Samples times. 
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples V-N where 
+ * V is a value of Arg sampled with uniform probability from those returned 
+ * Query in a world sampled at random and N is the number of samples.
+ * V is failure if the query fails.
+ */
+mc_sample_arg_one(M:Goal,S,Arg,ValList):-
+  empty_assoc(Values0),
+  sample_arg_one(S,M:Goal,Arg, Values0,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+/** 
+ * mc_sample_arg_one_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate samples Query Samples times. Arg should be a variable
+ * in Query.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each value of Arg returned by sampling with uniform 
+ * probabability one answer from those returned by Query in a world sampled 
+ * at random. 
+ * The size of the bar is the number of samples.
+ * The value is failure if the query fails.
+ */
+mc_sample_arg_one_bar(M:Goal,S,Arg,Chart):-
+  mc_sample_arg_one(M:Goal,S,Arg,ValList0),
+  maplist(to_atom,ValList0,ValList),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	         %  size:_{height: 100},
+	          legend:_{show: false}}.
+
+
+sample_arg_one(0,_Goals,_Arg,V,V):-!.
+
+sample_arg_one(K1, M:Goals,Arg,V0,V):-
+  erase_samples,
+  copy_term((Goals,Arg),(Goals1,Arg1)),
+  findall(Arg1,M:Goals1,L),
+  numbervars(L),
+  sample_one(L,Val),
+  (get_assoc(Val, V0, N)->
+    N1 is N+1,
+    put_assoc(Val,V0,N1,V1)
+  ;
+    put_assoc(Val,V0,1,V1)
+  ),
+  K2 is K1-1,
+  sample_arg_one(K2,M:Goals,Arg,V1,V).
+
+sample_one([],failure):-!.
+
+sample_one(List,El):-
+  length(List,L),
+  random(0,L,Pos),
+  nth0(Pos,List,El).
 
 load(FileIn,C1,R):-
   open(FileIn,read,SI),
@@ -1082,4 +1208,8 @@ sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_bar(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
 
