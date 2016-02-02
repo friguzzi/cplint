@@ -32,10 +32,14 @@ The predicate samples \verb|Query| a number of \verb|Samples| times.
 \verb|Arg| should be a variable in \verb|Query|.
 The predicate returns in \verb|Values| a list of couples \verb|L-N| where
 \verb|L| is the list of values of \verb|Arg| for which \verb|Query|
-succeeds in world sampled at random and \verb|N|
+succeeds in a world sampled at random and \verb|N|
 is the number of samples.
 If \verb|L| is the empty list, it means that for that
-sample the query failed. If, in all couples \verb|L-N|, \verb|L| 
+sample the query failed. 
+If \verb|L| is a list with a 
+single element, it means that for that sample the query is 
+determinate. 
+If, in all couples \verb|L-N|, \verb|L| 
 is a list with a 
 single element, it means that the clauses in the program 
 are mutually exclusive, i.e., that in every sample, only
