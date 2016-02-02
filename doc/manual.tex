@@ -52,25 +52,11 @@ Then you can simply load \href{http://cplint.lamping.unife.it/example/inference/
 \begin{verbatim}
 ?- [coin].
 \end{verbatim}
-and query it with \verb|pita| using
-\begin{verbatim}
-?- prob(heads(coin),P).
-\end{verbatim}
 Note that supplying \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} as an argument to the \verb|swipl| command currently returns errors due to bad interaction between \verb|pita| and the top-level.
 The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.
 
-If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
+\input{inf_goals}
 
-When using \verb|mcintyre|, the predicate for querying is \verb|mc_prob/2| as in
-\begin{verbatim}
-?- mc_prob(heads(coin),P).
-\end{verbatim}
-With \verb|mcintyre|, you can also take a given number of sample with a call such as
-\begin{verbatim}
-?- mc_sample(heads(coin),1000,T,F,P).
-\end{verbatim}
-that samples \verb|heads(coin)| 1000 times and returns in \verb|T| the number of successes, in \verb|F| the number of failures and in \verb|P| the
-estimated probability (\verb|T/1000|).
 
 \input{parameters}
 
