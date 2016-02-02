@@ -1,0 +1,51 @@
+You can ask the probability of an atom using \verb|pita| using the predicate using \verb| prob(:Query:atom,-Probability:float)|
+and query it with \verb|pita| using \verb| prob(:Query:atom,-Probability:float)| as in
+\begin{verbatim}
+?- prob(heads(coin),P).
+\end{verbatim}
+If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
+
+When using \verb|mcintyre|, the predicate for querying is 
+\begin{verbatim}
+mc_prob(:Query:atom,-Probability:float)
+\end{verbatim} as in
+\begin{verbatim}
+?- mc_prob(heads(coin),P).
+\end{verbatim}
+With \verb|mcintyre|, you can also take a given number of sample with
+\begin{verbatim}
+mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,
+  -Probability:float).
+\end{verbatim}
+as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+\begin{verbatim}
+?- mc_sample(heads(coin),1000,S,F,P).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
+estimated probability (\verb|S/1000|).
+
+Moreover, you can sample arguments of queries with
+\begin{verbatim}
+mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+\end{verbatim}
+The predicate samples \verb|Query| a number of \verb|Samples| times. 
+\verb|Arg| should be a variable in \verb|Query|.
+The predicate returns in \verb|Values| a list of couples \verb|L-N| where
+\verb|L| is the list of values of \verb|Arg| obtained with
+\verb|findall(Arg,Query,L)| and \verb|N|
+is the number of samples
+returning that list of values.
+If \verb|L| is the empty list, it means that for that
+sample the query failed. If, in all couples \verb|L-N|, \verb|L| 
+is a list with a 
+single element, it means that the clauses in the program 
+are mutually exclusive, i.e., that in every sample, only
+one clause for each subgoal has the body true. This is one
+of the assumptions taken for programs of the PRISM system \cite{DBLP:journals/jair/SatoK01}.
+
+An example of use of the above predicate is
+\begin{verbatim}
+?- mc_sample_arg(reach(s0,0,S),50,S,Values). 
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
+that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
