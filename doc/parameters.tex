@@ -56,3 +56,6 @@ shows that \verb|mcintyre| can perform inference in presence of an infinite numb
 the goal. Differently from \verb|pita|, no depth bound is necessary, as the probability of selecting
 the infinite computation branch is 0. However, also \verb|mcintyre| may not terminate if loops not
 involving probabilistic predicates are present.
+
+If you want to set the seed of the random number generator, you can use SWI-Prolog predicates \verb|setrand/1| and \verb|getrand/1|, see
+\href{http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1}{SWI-Prolog manual}.
