@@ -16,6 +16,7 @@ details.
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
   mc_sample/5,mc_sample_bar/3,
+  mc_sample_arg/4,mc_sample_arg_bar/4,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4]).
@@ -24,11 +25,14 @@ details.
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_sample_bar(:,+,-).
+:-meta_predicate mc_sample_arg(:,+,+,-).
+:-meta_predicate mc_sample_arg_bar(:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
+:-use_module(library(assoc)).
 
 :- style_check(-discontiguous).
 
@@ -227,6 +231,64 @@ mc_sample_bar(M:Goal,S,Chart):-
                  y:_{min:0.0,padding:_{bottom:0.0}}},
 	           size:_{height: 100},
 	          legend:_{show: false}}.
+
+/** 
+ * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query Samples times. Arg should be a variable
+ * in Query.
+ * The predicate returns in Values a list of couples ListOfValues-N where 
+ * ListOfValues is the list of values of Arg obtained with 
+ * findall(Arg,Query,ListOfValues) and N is the number of samples
+ * returning that list of values.
+ */
+mc_sample_arg(M:Goal,S,Arg,ValList):-
+  empty_assoc(Values0),
+  sample_arg(S,M:Goal,Arg, Values0,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+/** 
+ * mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate samples Query Samples times. Arg should be a variable
+ * in Query.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each possible value of 
+ * ListOfValues, the list of values of Arg obtained with 
+ * findall(Arg,Query,ListOfValues).
+ * The size of the bar is the number of samples
+ * returning that list of values.
+ */
+mc_sample_arg_bar(M:Goal,S,Arg,Chart):-
+  mc_sample_arg(M:Goal,S,Arg,ValList0),
+  maplist(to_atom,ValList0,ValList),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	         %  size:_{height: 100},
+	          legend:_{show: false}}.
+
+
+to_atom(A0-N,A-N):-
+  term_to_atom(A0,A).
+
+sample_arg(0,_Goals,_Arg,V,V):-!.
+
+sample_arg(K1, M:Goals,Arg,V0,V):-
+  erase_samples,
+  copy_term((Goals,Arg),(Goals1,Arg1)),
+  findall(Arg1,M:Goals1,L),
+  numbervars(L),
+  (get_assoc(L, V0, N)->
+    N1 is N+1,
+    put_assoc(L,V0,N1,V1)
+  ;
+    put_assoc(L,V0,1,V1)
+  ),
+  K2 is K1-1,
+  sample_arg(K2,M:Goals,Arg,V1,V).
 
 
 load(FileIn,C1,R):-
@@ -1018,4 +1080,6 @@ sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_bar(_,_,_,_), []).
 
