@@ -26,12 +26,13 @@ You ask queries by writing the atom of which you want to compute the probability
 ?- heads(coin).
 \end{verbatim}
 
-In Prolog programs, you have to enter the program above (\verb|coin.pl|) and ask the probability of an atom using \verb|pita| using the predicate \verb|prob/2| as in
-\begin{verbatim}
-?- prob(heads(coin),P).
-\end{verbatim}
+In Prolog programs, you have to enter the program above (\verb|coin.pl|).
+
+\input{inf_goals}
+
+
 You can also see the probability of the query being true and 
-being false as a bar chart with
+being false as a bar chart with \verb|prob_bar(:Query:atom,-Probability:dict)| as in
 \begin{verbatim}
 ?- prob_bar(heads(coin),P).
 \end{verbatim}
@@ -39,31 +40,40 @@ if you include
 \begin{verbatim}
 :- use_rendering(c3).
 \end{verbatim}
-before \verb|:- pita.|
+before \verb|:- pita.| \verb|P| will be instantiated with a
+dict for rendering with \verb|c3|. It will be shown as a bar chart with
+a bar for the probability of \verb|heads(coin)| true and a bar for the probability of \verb|heads(coin)| false.
 
-If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
 
-When using \verb|mcintyre|, the predicates for querying are \verb|mc_prob/2| and \verb|mc_prob_bar/2| as in
+When using \verb|mcintyre|, you can use
 \begin{verbatim}
-?- mc_prob(heads(coin),P).
+mc_prob_bar(:Query:atom,-Probability:dict)
+\end{verbatim}
+as in
+\begin{verbatim}
 ?- mc_prob_bar(heads(coin),P).
 \end{verbatim}
-With \verb|mcintyre|, you can also take a given number of sample with a call such as
-\begin{verbatim}
-?- mc_sample(heads(coin),1000,T,F,P).
-\end{verbatim}
-that samples \verb|heads(coin)| 1000 times and returns in \verb|T| the number of successes, in \verb|F| the number of failures and in \verb|P| the
-estimated probability (\verb|T/1000|).
+to obtain a chart representation of the probability.
 
 You can obtain a bar chart of the samples with
 \begin{verbatim}
 ?- mc_sample_bar(heads(coin),1000,Chart).
 \end{verbatim}
-that samples \verb|heads(coin)| 1000 times and returns in \verb|Char| a diagram with one bar for the number of successes and 
+that returns in \verb|Chart| a diagram with one bar for the number of successes and 
 one bar for the number of failures.
 
-If the query is non-ground, \verb|mc_prob/2|, \verb|mc_prob_bar/2|, \verb|mc_sample/5| and \verb|mc_sample_bar/3|  consider the query as existential
-so they estimate the probability that there is a successful ground instantiation.
+You can also graph the results of sampling arguments with
+\begin{verbatim}
+mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict).
+\end{verbatim} 
+that returns in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
+returning that value.
+
+An example is
+\begin{verbatim}
+?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
 
 \input{parameters}
 
