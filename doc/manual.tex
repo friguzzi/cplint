@@ -1,5 +1,5 @@
 %\ifnum\pdfoutput>0 % pdflatex compilation
-\documentclass[a4paper,10pt]{article}
+\documentclass[a4paper,10pt]{scrartcl}
 \usepackage[pdftex]{graphicx}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \RequirePackage[hyperindex]{hyperref}
@@ -16,8 +16,9 @@
 
 
 \begin{document}
-\title{SWI-Prolog \texttt{cplint} Pack Manual}
+\title{\texttt{cplint} Manual}
 
+\subtitle{SWI-Prolog Version}
 
 \author{Fabrizio Riguzzi\\
 fabrizio.riguzzi@unife.it}
@@ -31,6 +32,9 @@ fabrizio.riguzzi@unife.it}
 \texttt{cplint} is a suite of programs for reasoning with LPADs/CP-logic programs  \cite{VenVer03-TR}, \cite{VenVer04-ICLP04-IC},
 \cite{VenDenBru-JELIA06},
 \cite{DBLP:journals/tplp/VennekensDB09}. It contains modules for both inference and learning.
+
+\texttt{cplint} is available in two versions, one for Yap Prolog and one for SWI-Prolog. They differ slightly in the features offered.
+This manual is about the SWI-Prolog version. You can find the manual for the Yap version at \url{http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html}.
 
 \section{Installation}
 \texttt{cplint} is distributed as a \href{http://www.swi-prolog.org/pack/list?p=cplint}{pack} of \href{http://www.swi-prolog.org/}{SWI-Prolog}. To install it, use

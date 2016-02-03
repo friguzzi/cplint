@@ -71,7 +71,9 @@ female(cathy).
 \end{verbatim}
 Aggregate predicates on probabilistic subgoals are not implemented due to their high
 computational cost (if the aggregation is over $n$ atoms, the values of the
-aggregation are potentially $2^n$).
+aggregation are potentially $2^n$). The Yap version of \verb|cplint| includes
+reasoning algorithms that allows aggregate predicates on probabilistic subgoals,
+see \}.
 
 In \verb|mcintyre| you can query database clauses in the body of probabilistic clauses without any special syntax. You can also 
 use \verb|findall/3|.
