@@ -929,39 +929,15 @@ list2and([X],X):-
 
 list2and([H|T],(H,Ta)):-!,
     list2and(T,Ta).
- 
-builtin(_A is _B).
-builtin(_A > _B).
-builtin(_A < _B).
-builtin(_A >= _B).
-builtin(_A =< _B).
-builtin(_A =:= _B).
-builtin(_A =\= _B).
-builtin(true).
-builtin(false).
-builtin(_A = _B).
-builtin(_A==_B).
-builtin(_A\=_B).
-builtin(_A\==_B).
-builtin('!').
-builtin(length(_L,_N)).
-builtin(member(_El,_L)).
+
+
 builtin(average(_L,_Av)).
-builtin(max_list(_L,_Max)).
-builtin(min_list(_L,_Max)).
-builtin(nth0(_,_,_)).
-builtin(nth(_,_,_)).
-builtin(name(_,_)).
-builtin(float(_)).
-builtin(integer(_)).
-builtin(var(_)).
-builtin(_ @> _).
-builtin(memberchk(_,_)).
-builtin(select(_,_,_)).
-builtin(dif(_,_)).
 builtin(prob(_,_)).
-builtin(findall(_,_,_)).
-builtin(between(_,_,_)).
+builtin(G):-
+  predicate_property(G,built_in).
+builtin(G):-
+  predicate_property(G,imported_from(lists)).
+ 
 
 average(L,Av):-
         sum_list(L,Sum),
