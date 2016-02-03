@@ -5,12 +5,13 @@
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
   <meta name="author" content="Fabrizio Riguzzi fabrizio.riguzzi@unife.it" />
-  <title>SWI-Prolog cplint Pack Manual</title>
+  <title>cplint Manual</title>
   <style type="text/css">code{white-space: pre;}</style>
 </head>
 <body>
 <div id="header">
-<h1 class="title">SWI-Prolog <code>cplint</code> Pack Manual</h1>
+<h1 class="title"><code>cplint</code> Manual</h1>
+<h1 class="subtitle">SWI-Prolog Version</h1>
 <h2 class="author">Fabrizio Riguzzi<br />
 fabrizio.riguzzi@unife.it</h2>
 </div>
@@ -34,6 +35,7 @@ fabrizio.riguzzi@unife.it</h2>
 </div>
 <h1 id="introduction">Introduction</h1>
 <p><code>cplint</code> is a suite of programs for reasoning with LPADs/CP-logic programs <span class="citation">[12]</span>, <span class="citation">[15]</span>, <span class="citation">[13]</span>, <span class="citation">[14]</span>. It contains modules for both inference and learning.</p>
+<p><code>cplint</code> is available in two versions, one for Yap Prolog and one for SWI-Prolog. They differ slightly in the features offered. This manual is about the SWI-Prolog version. You can find the manual for the Yap version at <a href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html" class="uri">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <h1 id="installation">Installation</h1>
 <p><code>cplint</code> is distributed as a <a href="http://www.swi-prolog.org/pack/list?p=cplint">pack</a> of <a href="http://www.swi-prolog.org/">SWI-Prolog</a>. To install it, use</p>
 <pre><code>?- pack_install(cplint).</code></pre>
@@ -143,7 +145,7 @@ male(david).
 female(anna).
 female(elen).
 female(cathy).</code></pre>
-<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>).</p>
+<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see }.</p>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
 <p>Then you can simply load <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a> as</p>
 <pre><code>?- [coin].</code></pre>
