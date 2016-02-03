@@ -20,6 +20,7 @@ details.
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
+  mc_expectation/4,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4
@@ -36,6 +37,7 @@ details.
 :-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
+:-meta_predicate mc_expectation(:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-use_module(library(lists)).
@@ -450,6 +452,35 @@ sample_one(List,El):-
   length(List,L),
   random(0,L,Pos),
   nth0(Pos,List,El).
+
+
+/** 
+ * mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_expectation(M:Goal,S,Arg,E):-
+  sample_val(S,M:Goal,Arg, 0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+sample_val(0,_Goals,_Arg,Sum,Sum):-!.
+
+sample_val(K1, M:Goals,Arg,Sum0,Sum):-
+  erase_samples,
+  copy_term((Goals,Arg),(Goals1,Arg1)),
+  (M:Goals1->
+    Sum1 is Sum0+Arg1
+  ;
+    Sum1=Sum
+  ),
+  K2 is K1-1,
+  sample_val(K2,M:Goals,Arg,Sum1,Sum).
+
 
 load(FileIn,C1,R):-
   open(FileIn,read,SI),
