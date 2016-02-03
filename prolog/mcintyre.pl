@@ -22,8 +22,7 @@ details.
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
-  sample_head/4,
-  builtin/1
+  sample_head/4
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -1197,13 +1196,19 @@ list2and([H|T],(H,Ta)):-!,
  * Succeeds if Goal is an atom whose predicate is defined in Prolog 
  * (either builtin or defined in a standard library).
  */
-builtin(average(_L,_Av)).
-builtin(mc_prob(_,_)).
-builtin(mc_sample(_,_,_)).
 builtin(G):-
+  builtin_int(G),!.
+
+builitin_int(average(_L,_Av)).
+builitin_int(mc_prob(_,_)).
+builitin_int(mc_sample(_,_,_)).
+builitin_int(G):-
   predicate_property(G,built_in).
-builtin(G):-
+builitin_int(G):-
   predicate_property(G,imported_from(lists)).
+builitin_int(G):-
+  predicate_property(G,imported_from(apply)).
+
 
 
 average(L,Av):-
