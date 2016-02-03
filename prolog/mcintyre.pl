@@ -15,7 +15,8 @@ details.
 
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
-  mc_sample/5,mc_sample_bar/3,
+  mc_sample/5,
+  mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
@@ -26,6 +27,7 @@ details.
 :-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
+:-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
 :-meta_predicate mc_sample_arg_bar(:,+,+,-).
@@ -42,7 +44,7 @@ details.
 
 :- style_check(-discontiguous).
 
-:- thread_local v/3,rule_n/1,mc_module/1,mc_input_mod/1,local_mc_setting/2.
+:- thread_local v/3,rule_n/1,mc_module/1,mc_input_mod/1,local_mc_setting/2,mem/3.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -120,9 +122,30 @@ s(M:Goal,P):-
   Mo:local_mc_setting(k, K),
 % Resetting the clocks...
 % Performing resolution...
+  copy_term(Goal,Goal1),
+  numbervars(Goal1),
+  save_samples(Goal1),
   montecarlo_cycle(0, 0, M:Goal, K, MinError, _Samples, _Lower, P, _Upper),
   !,
-  erase_samples.
+  erase_samples,
+  restore_samples(Goal1).
+
+save_samples(G):-
+  mc_input_mod(M),
+  recorded(R,Val,Ref),
+  assert(M:mem(G,R,Val)),
+  erase(Ref),
+  fail.
+
+save_samples(_G).
+
+restore_samples(G):-
+  mc_input_mod(M),
+  retract(M:mem(G,R,Val)),
+  recorda(R,Val),
+  fail.
+
+restore_samples(_G).
 
 
 erase_samples:-
@@ -207,9 +230,19 @@ mc_prob_bar(M:Goal,Chart):-
 	          legend:_{show: false}}.
 
 /** 
+ * mc_sample(:Query:atom,+Samples:int,-Probability:float) is det
+ *
+ * The predicate samples Query a number of Samples times and returns
+ * the resulting Probability (Successes/Samples)
+ * If Query is not ground, it considers it as an existential query
+ */
+mc_sample(M:Goal,S,P):-
+  mc_sample(M:Goal,S,_T,_F,P).
+
+/** 
  * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
- * The predicate samples Query Samples times and returns
+ * The predicate samples Query  a number of Samples times and returns
  * the number of Successes, of Failures and the 
  * Probability (Successes/Samples)
  * If Query is not ground, it considers it as an existential query
@@ -224,7 +257,7 @@ mc_sample(M:Goal,S,T,F,P):-
 /** 
  * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
  *
- * The predicate samples Query Samples times and returns
+ * The predicate samples Query a number of Samples times and returns
  * a dict for rendering with c3 as a bar chart with 
  * a bar for the number of successes and a bar for the number
  * of failures.
@@ -1186,6 +1219,7 @@ builtin(memberchk(_,_)).
 builtin(select(_,_,_)).
 builtin(dif(_,_)).
 builtin(mc_prob(_,_)).
+builtin(mc_sample(_,_,_)).
 builtin(findall(_,_,_)).
 builtin(between(_,_,_)).
 
@@ -1205,6 +1239,7 @@ sandbox:safe_meta(mcintyre:s(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_bar(_,_,_,_), []).
