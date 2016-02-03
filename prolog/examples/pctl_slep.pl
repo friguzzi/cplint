@@ -51,30 +51,46 @@ comp(Q,=<,P):-
 
 
 % Path Formulae
-pmodels(S, PF) :-
-  pmodels(S, PF,[]).
+pmodels(S,F):-
+  pmodels(S,F,[],nolimit,0,_Time).
 
-pmodels(S, until(_F1, F2),_Hist) :-
-	models(S, F2).
+pmodels(S, until(_F1, F2),_Hist,_Limit,Time,Time) :-
+	models(S, F2),!.
 	
-pmodels(S, until(F1, F2),Hist0) :-
+pmodels(S, until(F1, F2),Hist0,Limit,Time0,Time) :-
+	within_limit(Time0,Limit),
 	models(S, F1),
 	ctrans(S, _, T, Hist0, Hist),
-	pmodels(T, until(F1,F2), Hist).
+	Time1 is Time0+1,
+	pmodels(T, until(F1,F2),Hist,Limit,Time1,Time).
 
-pmodels(S, next(F), Hist) :-
-	ctrans(S, _, T, Hist, _),
+pmodels(S, next(F), Hist,Limit,Time0,Time) :-
+	within_limit(Time0,Limit),
+	ctrans(S, _, T, Hist, _),!,
+	Time is Time0+1,
 	models(T, F).
 
-top_models(PCTLF) :-
-	init(S),
-	pctlspec(PCTLF, F),
-	pmodels(S, F).
+within_limit(_Time,nolimit):-!.
 
-top_pmodels(PCTLPF, P) :-
+within_limit(Time,Limit):-
+  Time<Limit.
+
+bounded_eventually(Prop,L):-
+  num(N),
+  B is L*(N+1),
+  eventually(Prop,B,_T).
+
+eventually(Prop):-
+  eventually(Prop,_T).
+
+eventually(Prop,T):-
+  eventually(Prop,nolimit,T).
+
+eventually(Prop,Limit,T) :-
 	init(S),
-	pctlspec(PCTLPF, PF),
-	prob(pmodels(S, PF, _),P).
+	pctlspec(Prop, F),
+	pmodels(S, F,[],Limit,0,T).
+
 
 pctlspec(X, until(tt, prop(X))).
 proposition(P, S) :- final(P, S).
@@ -222,7 +238,7 @@ pick_fact(_,_,P):P.
 %pick(H,0):0.5; pick(H,1):0.5.
 
 num(4).
-kr(4).
+kr(2).
 
 ctrans(S, A, T, Hi, Ho) :-
 	config(P),
@@ -305,11 +321,14 @@ nl(S,P):-
 /** <examples>
 % see http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
 % What is the probability that eventually a leader is elected?
-?-  mc_sample( top_`models(elect),1,P).
+?- mc_sample(eventually(elect),100,P).
 % expected result 1
 
-% What is the probability of electing a leader within L rounds?
+% What is the probability of electing a leader within 3 rounds?
+?- mc_sample(bounded_eventually(elect,3),1000,P).
+% expected result 0.875
 
 % What is the expected number of rounds to elect a leader?
+?- mc_expectation(eventually(elect,T),100,T,E).
 */
 
