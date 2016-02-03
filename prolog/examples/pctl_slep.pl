@@ -75,16 +75,18 @@ within_limit(_Time,nolimit):-!.
 within_limit(Time,Limit):-
   Time<Limit.
 
-bounded_eventually(Prop,L):-
+bounded_eventually(Prop,Rounds):-
   num(N),
-  B is L*(N+1),
+  B is Rounds*(N+1),
   eventually(Prop,B,_T).
 
 eventually(Prop):-
   eventually(Prop,_T).
 
-eventually(Prop,T):-
-  eventually(Prop,nolimit,T).
+eventually(Prop,Rounds):-
+  eventually(Prop,nolimit,T),
+  num(N),
+  Rounds is T/(N+1).
 
 eventually(Prop,Limit,T) :-
 	init(S),
@@ -237,9 +239,6 @@ pick_fact(_,_,P):P.
 
 %pick(H,0):0.5; pick(H,1):0.5.
 
-num(4).
-kr(2).
-
 ctrans(S, A, T, Hi, Ho) :-
 	config(P),
 	find_matching_trans(P,S,S,[],A,T,Hi,Ho).
@@ -314,6 +313,10 @@ nonlocal_access(process(_,_), value, 3).
 nl(S,P):-
   nonlocal(process(P, _), uniqueid, 0,S).
 
+num(4).
+kr(4).
+
+
 :- end_lpad.
 
 
@@ -325,10 +328,11 @@ nl(S,P):-
 % expected result 1
 
 % What is the probability of electing a leader within 3 rounds?
-?- mc_sample(bounded_eventually(elect,3),1000,P).
-% expected result 0.875
+?- mc_sample(bounded_eventually(elect,2),1000,P).
+% expected result 0.97
 
 % What is the expected number of rounds to elect a leader?
-?- mc_expectation(eventually(elect,T),100,T,E).
+?- mc_expectation(eventually(elect,T),1000,T,E).
+% expected result 1.2
 */
 
