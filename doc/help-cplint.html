@@ -131,14 +131,16 @@ male(david).
 female(anna).
 female(elen).
 female(cathy).</code></pre>
-<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see }.</p>
+<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see <a href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html" class="uri">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
 <p><code>cplint</code> on SWISH allows two types of programs: LPAD and Prolog. In the first, you create a new LPAD in the editor, in the latter a Prolog program.</p>
 <p>In LPADs, you write in the editor the program without the library import and the compiler directives. <code>pita</code> is used for inference.</p>
 <p>You ask queries by writing the atom of which you want to compute the probability. In the coin example, the probability of <code>heads(coin)</code> can be obtained with the</p>
 <pre><code>?- heads(coin).</code></pre>
 <p>In Prolog programs, you have to enter the program above (<code>coin.pl</code>).</p>
-<p>You can ask the probability of an atom using <code>pita</code> using the predicate using <code> prob(:Query:atom,-Probability:float)</code> and query it with <code>pita</code> using <code> prob(:Query:atom,-Probability:float)</code> as in</p>
+<p>You can ask the probability of an atom using <code>pita</code> using the predicate using</p>
+<pre><code>prob(:Query:atom,-Probability:float)|</code></pre>
+<p>as in</p>
 <pre><code>?- prob(heads(coin),P).</code></pre>
 <p>If the query is non-ground, <code>prob/2</code> returns in backtracking the succesful instantiations together with their probability.</p>
 <p>When using <code>mcintyre</code>, the predicate for querying is</p>

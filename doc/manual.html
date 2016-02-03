@@ -145,12 +145,14 @@ male(david).
 female(anna).
 female(elen).
 female(cathy).</code></pre>
-<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see }.</p>
+<p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline"><em>n</em></span> atoms, the values of the aggregation are potentially <span class="math inline">2<sup><em>n</em></sup></span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see <a href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html" class="uri">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
 <p>Then you can simply load <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a> as</p>
 <pre><code>?- [coin].</code></pre>
 <p>Note that supplying <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a> as an argument to the <code>swipl</code> command currently returns errors due to bad interaction between <code>pita</code> and the top-level. The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.</p>
-<p>You can ask the probability of an atom using <code>pita</code> using the predicate using <code> prob(:Query:atom,-Probability:float)</code> and query it with <code>pita</code> using <code> prob(:Query:atom,-Probability:float)</code> as in</p>
+<p>You can ask the probability of an atom using <code>pita</code> using the predicate using</p>
+<pre><code>prob(:Query:atom,-Probability:float)|</code></pre>
+<p>as in</p>
 <pre><code>?- prob(heads(coin),P).</code></pre>
 <p>If the query is non-ground, <code>prob/2</code> returns in backtracking the succesful instantiations together with their probability.</p>
 <p>When using <code>mcintyre</code>, the predicate for querying is</p>
