@@ -1266,4 +1266,5 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 
