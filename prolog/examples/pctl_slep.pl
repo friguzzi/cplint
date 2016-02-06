@@ -1,6 +1,13 @@
 /*
 Model checking of the Synchronous Leader Election Protocol expressed in 
 Probabilistic Computation Tree Logic (PCTL).
+
+Given a synchronous ring of N processes the protocol is used 
+to elect a leader (a uniquely designated processor) by sending messages around 
+the ring.
+
+The protocol proceeds in rounds and is parametrised by a constant K. Each round begins by all processors (independently) choosing a random number (uniformly) from {1,...,K} as an id. The processors then pass their ids around the ring. If there is a unique id, then the processor with the maximum unique id is elected the leader, and otherwise the processors begin a new round.
+
 With this program you can 
 - check that the probability of eventually electing a leader is 1
 - compute the probability of electing a leader within a certain 
@@ -12,7 +19,7 @@ With this program you can
 From
 Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
 This program was kindly provided by Andrey Gorlin and modified by Fabrizio 
-Riguzzi
+Riguzzi.
 See also http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
 */
 
@@ -387,9 +394,7 @@ graph_exp_rounds_n(G):-
     LV),
   G=c3{data:_{x:x, rows:[x-'Expected rounds to elect a leader (K=3)'|LV]},%legend:_{show: false},
     axis:_{x:_{min:3,max:8,label:'N',padding:_{bottom:0.0,top:0.0}},
-%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
            y:_{label:'Expected rounds',padding:_{bottom:0.0,top:0.0}}}},
-%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
   retract(kr(3)),
   assert(num(NI)),
   assert(kr(KI)).
@@ -406,9 +411,7 @@ graph_exp_rounds_k(G):-
     LV),
   G=c3{data:_{x:x, rows:[x-'Expected rounds to elect a leader (N=3)'|LV]},%legend:_{show: false},
     axis:_{x:_{min:3,max:8,label:'K',padding:_{bottom:0.0,top:0.0}},
-%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
            y:_{label:'Expected rounds',padding:_{bottom:0.0,top:0.0}}}},
-%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
   retract(num(3)),
   assert(num(NI)),
   assert(kr(KI)).
