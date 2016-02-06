@@ -339,7 +339,8 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  * Arg should be a variable in Query.
  * The predicate returns in Values a list of couples V-N where 
  * V is the value of Arg returned as the first answer by Query in 
- * a world sampled at random and N is the number of samples.
+ * a world sampled at random and N is the number of samples
+ * returning that value.
  * V is failure if the query fails.
  */
 mc_sample_arg_first(M:Goal,S,Arg,ValList):-
@@ -356,7 +357,7 @@ mc_sample_arg_first(M:Goal,S,Arg,ValList):-
  * in Query.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each value of Arg returned as a first answer by Query in 
- * a world sampled at random. 
+ * a world sampled at random.
  * The size of the bar is the number of samples that returned that value.
  * The value is failure if the query fails.
  */
@@ -397,7 +398,8 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  * Arg should be a variable in Query.
  * The predicate returns in Values a list of couples V-N where 
  * V is a value of Arg sampled with uniform probability from those returned 
- * Query in a world sampled at random and N is the number of samples.
+ * by Query in a world sampled at random and N is the number of samples
+ * returning that value.
  * V is failure if the query fails.
  */
 mc_sample_arg_one(M:Goal,S,Arg,ValList):-

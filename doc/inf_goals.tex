@@ -27,6 +27,18 @@ as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt
 that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
 estimated probability (\verb|S/1000|).
 
+If you are just interested in the probability, you can use
+\begin{verbatim}
+mc_sample(:Query:atom,+Samples:int,-Probability:float) 
+\end{verbatim}
+as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+\begin{verbatim}
+?- mc_sample(heads(coin),1000,Prob).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns the
+estimated probability that a sample is true (i.e., that a sample succeeds).
+
+
 Moreover, you can sample arguments of queries with
 \begin{verbatim}
 mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).
@@ -36,7 +48,7 @@ The predicate samples \verb|Query| a number of \verb|Samples| times.
 The predicate returns in \verb|Values| a list of couples \verb|L-N| where
 \verb|L| is the list of values of \verb|Arg| for which \verb|Query|
 succeeds in a world sampled at random and \verb|N|
-is the number of samples.
+is the number of samples returning that list of values.
 If \verb|L| is the empty list, it means that for that
 sample the query failed. 
 If \verb|L| is a list with a 
@@ -59,3 +71,43 @@ An example of use of the above predicate is
 \end{verbatim}
 of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
 that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
+
+You can sample arguments of queries also with
+\begin{verbatim}
+mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+\end{verbatim}
+samples \verb|Query| a number of \verb|Samples| times 
+and returns in \verb|Values| a list of couples \verb|V-N| where 
+\verb|V| is the value of \verb|Arg| returned as the first answer by \verb|Query| in 
+a world sampled at random and \verb|N| is the number of samples
+returning that value.
+\verb|V| is failure if the query fails.
+\verb|mc_sample_arg_first/4| differs from \verb|mc_sample_arg/4| because the first just computes the first
+answer of the query for each sampled world.
+
+%Alternatively, you can use
+%\begin{verbatim}
+%mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list)
+%\end{verbatim}
+%that samples \verb|Query| a number of \verb|Samples| times 
+%and returns in \verb|Values| a list of couples \verb|V-N| where 
+%\verb|V| is a value sampled with uniform probability from those returned 
+%by \verb|Query| in a world sampled at random and \verb|N| is the number of samples
+%returning that value.
+%\verb|V| is failure if the query fails.
+
+Finally, you can compute expectations with 
+\begin{verbatim}
+mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).
+\end{verbatim}
+that computes the expected value of \verb|Arg| in \verb|Query| by
+sampling.
+It takes \verb|N| samples of \verb|Query| and sums up the value of \verb|Arg| for
+each sample. The overall sum is divided by \verb|N| to give \verb|Exp|.
+
+An example of use of the above predicate is
+\begin{verbatim}
+?- mc_expectation(eventually(elect,T),1000,T,E).
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
+that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
