@@ -1,40 +1,76 @@
 /*
 Model checking of the Synchronous Leader Election Protocol expressed in 
 Probabilistic Computation Tree Logic (PCTL).
+With this program you can 
+- check that the probability of eventually electing a leader is 1
+- compute the probability of electing a leader within a certain 
+  number of rounds
+- compute the expected number of rounds to elect a leader
+- graph the probability of electing a leader within L rounds as a function of L
+- graph the expected number of rounds to elect a leader as a function of the 
+  number of processes or of K
 From
 Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
-
+This program was kindly provided by Andrey Gorlin and modified by Fabrizio 
+Riguzzi
 See also http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
 */
 
+/** <examples>
+% see http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
+% What is the probability that eventually a leader is elected?
+?- mc_sample(eventually(elect),100,P).
+% expected result 1
+
+% What is the probability of electing a leader within 3 rounds?
+?- mc_sample(bounded_eventually(elect,3),1000,P).
+% expected result 0.97
+
+% What is the expected number of rounds to elect a leader?
+?- mc_expectation(eventually(elect,T),1000,T,E).
+% expected result 1.2
+
+
+?- graph_prob(G). 
+% graph the probability of electing a leader within L rounds as
+% a function of L
+
+?- graph_exp_rounds_n(G).
+% graph the expected number of rounds to elect a leader as a
+% funtion of the number of processes when K=3
+
+?- graph_exp_rounds_k(G).
+% graph the expected number of rounds to elect a leader as a
+% funtion of K when N=3
+*/
 :- use_module(library(mcintyre)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- endif.
-
+:- dynamic kr/1,num/1.
 :- mc.
 
 :- begin_lpad.
 
 % State Formulae 
-models(_S, tt).
-models(S, prop(P)) :-
+models(_S, tt,_Hist,_Limit,_Time).
+models(S, prop(P),_Hist,_Limit,_Time) :-
 	proposition(P, S).
-models(S, and(F1, F2)) :-
-	models(S, F1), models(S, F2).
-models(S, or(F1, _F2)) :-
-	models(S, F1).
-models(S, or(F1, F2)) :-
-	\+ models(S, F1),
-	models(S, F2).
-models(S, not(F)) :-
-	\+ models(S, F).
-models(S, prob_until(comp(Op, P), F1, F2)) :-
-	mc_sample(pmodels(S, until(F1, F2)),20, Q),
+models(S, and(F1, F2),Hist,Limit,Time) :-
+	models(S, F1,Hist,Limit,Time), models(S, F2,Hist,Limit,Time).
+models(S, or(F1, _F2),Hist,Limit,Time) :-
+	models(S, F1,Hist,Limit,Time).
+models(S, or(F1, F2),Hist,Limit,Time) :-
+	\+ models(S, F1,Hist,Limit,Time),
+	models(S, F2,Hist,Limit,Time).
+models(S, not(F), Hist,Limit,Time) :-
+	\+ models(S, F,Hist,Limit,Time).
+models(S, prob_until(comp(Op, P), F1, F2),Hist,Limit,Time) :-
+	mc_sample(pmodels(S, until(F1, F2),Hist,Limit,Time),20, Q),
 	comp(Q, Op, P).
-models(S, prob_next(comp(Op, P), F)) :-
-	mc_sample(pmodels(S, next(F)),20, Q),
+models(S, prob_next(comp(Op, P), F),Hist,Limit,Time) :-
+	mc_sample(pmodels(S, next(F),Hist,Limit,Time),20, Q),
 	comp(Q, Op, P).
 
 comp(Q,>,P):-
@@ -54,13 +90,16 @@ comp(Q,=<,P):-
 pmodels(S,F):-
   pmodels(S,F,[],nolimit,0,_Time).
 
-pmodels(S, until(_F1, F2),_Hist,_Limit,Time,Time) :-
-	models(S, F2),!.
+pmodels(S,F,Hist,Limit,Time):-
+  pmodels(S,F,Hist,Limit,Time,_Time).
+
+pmodels(S, until(_F1, F2),Hist,Limit,Time,Time) :-
+	models(S, F2,Hist,Limit,Time),!.
 	
 pmodels(S, until(F1, F2),Hist0,Limit,Time0,Time) :-
 	within_limit(Time0,Limit),
-	models(S, F1),
-	ctrans(S, _, T, Hist0, Hist),
+	models(S, F1,Hist0,Limit,Time0),
+	ctrans(S, _, T, Hist0, Hist),!,
 	Time1 is Time0+1,
 	pmodels(T, until(F1,F2),Hist,Limit,Time1,Time).
 
@@ -68,7 +107,7 @@ pmodels(S, next(F), Hist,Limit,Time0,Time) :-
 	within_limit(Time0,Limit),
 	ctrans(S, _, T, Hist, _),!,
 	Time is Time0+1,
-	models(T, F).
+	models(T, F,Hist,Limit,Time).
 
 within_limit(_Time,nolimit):-!.
 
@@ -319,20 +358,60 @@ kr(4).
 
 :- end_lpad.
 
+graph_prob(G):-
+  retract(num(N)),
+  retract(kr(K)),
+  assert(num(4)),
+  assert(kr(2)),
+  findall(L-P,
+    (between(1,6,L),mc_sample(bounded_eventually(elect,L),100,P)),LV),
+  G=c3{data:_{x:x, rows:[x-'Probability of leader elected within L rounds (N=4, K=2)'|LV]},%legend:_{show: false},
+    axis:_{x:_{min:1,max:6,label:'L',padding:_{bottom:0.0,top:0.0}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
+           y:_{label:'Probability',padding:_{bottom:0.0,top:0.0}}}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
+  retract(num(4)),
+  retract(kr(2)),
+  assert(num(N)),
+  assert(kr(K)).
+
+graph_exp_rounds_n(G):-
+  retract(num(NI)),
+  retract(kr(KI)),
+  assert(kr(3)),
+  findall(N-E,
+    (between(3,8,N),
+     assert(num(N)),
+     mc_expectation(eventually(elect,T),100,T,E),
+     retract(num(N))),
+    LV),
+  G=c3{data:_{x:x, rows:[x-'Expected rounds to elect a leader (K=3)'|LV]},%legend:_{show: false},
+    axis:_{x:_{min:3,max:8,label:'N',padding:_{bottom:0.0,top:0.0}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
+           y:_{label:'Expected rounds',padding:_{bottom:0.0,top:0.0}}}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
+  retract(kr(3)),
+  assert(num(NI)),
+  assert(kr(KI)).
+
+graph_exp_rounds_k(G):-
+  retract(num(NI)),
+  retract(kr(KI)),
+  assert(num(3)),
+  findall(K-E,
+    (between(3,8,K),
+     assert(kr(K)),
+     mc_expectation(eventually(elect,T),500,T,E),
+     retract(kr(K))),
+    LV),
+  G=c3{data:_{x:x, rows:[x-'Expected rounds to elect a leader (N=3)'|LV]},%legend:_{show: false},
+    axis:_{x:_{min:3,max:8,label:'K',padding:_{bottom:0.0,top:0.0}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
+           y:_{label:'Expected rounds',padding:_{bottom:0.0,top:0.0}}}},
+%        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
+  retract(num(3)),
+  assert(num(NI)),
+  assert(kr(KI)).
 
 
-/** <examples>
-% see http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
-% What is the probability that eventually a leader is elected?
-?- mc_sample(eventually(elect),100,P).
-% expected result 1
-
-% What is the probability of electing a leader within 3 rounds?
-?- mc_sample(bounded_eventually(elect,2),1000,P).
-% expected result 0.97
-
-% What is the expected number of rounds to elect a leader?
-?- mc_expectation(eventually(elect,T),1000,T,E).
-% expected result 1.2
-*/
 
