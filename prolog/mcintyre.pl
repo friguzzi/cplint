@@ -848,7 +848,7 @@ process_head(HeadList0, HeadList):-
   foldl(minus,PL,1,PNull),
   append(HeadList0,['':PNull],HeadList).
 
-minus(A,B,A-B).
+minus(A,B,B-A).
 
 prob_ann(_:P,P).
 
