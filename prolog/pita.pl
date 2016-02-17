@@ -309,7 +309,7 @@ retract_all([H|T]):-
   erase(H),
   retract_all(T).
 
-/** 
+/**
  * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with 
@@ -566,6 +566,7 @@ or_list1([H|T],Env,B0,B1):-
  * For a list of parameters see 
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ *
  */
 set_pita(Parameter,Value):-
   pita_input_mod(M),
