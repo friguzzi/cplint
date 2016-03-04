@@ -14,7 +14,8 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,
+:- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
+  set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
@@ -23,6 +24,8 @@ details.
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
+:-meta_predicate prob(:,:,-).
+:-meta_predicate prob_bar(:,:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -226,6 +229,7 @@ s(M:Goal,P):-
   end_test(Env),
   member((Goal,P),L).
 
+
 /** 
  * prob(:Query:atom,-Probability:float) is nondet
  *
@@ -256,10 +260,50 @@ prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
+/** 
+ * s(:Query:atom,-Probability:float) is nondet
+ *
+ * The predicate computes the probability of the ground query Query.
+ * If Query is not ground, it returns in backtracking all instantiations of
+ * Query together with their probabilities
+ */
+prob(M:Goal,M:Evidence,P):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  findall((Goal,P),get_cond_p(M:Goal,M:Evidence,Env,P),L),
+  end_test(Env),
+  member((Goal,P),L).
+
+/** 
+ * prob_bar(:Query:atom,-Probability:dict) is nondet
+ *
+ * The predicate computes the probability of the ground query Query
+ * and returns it as a dict for rendering with c3 as a bar chart with 
+ * a bar for the probability of Query true and a bar for the probability of 
+ * Query false.
+ * If Query is not ground, it returns in backtracking all instantiations of
+ * Query together with their probabilities
+ */
+prob_bar(M:Goal,M:Evidence,Chart):-
+  prob(M:Goal,M:Evidence,P),
+  PF is 1.0-P,
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
+
 
 get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_prob(Env,BDD,P).
+
+get_cond_p(M:Goal,M:Evidence,Env,P):-
+  get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
+  ret_prob(Env,BDDE,PE),
+  ret_prob(Env,BDDGE,PGE),
+  P is PGE/PE.
 
 load(FileIn,C1,R):-
   open(FileIn,read,SI),
@@ -287,6 +331,44 @@ get_node(Goal,Env,B):- %with DB=false
   ;  
     zero(Env,B)
   ).
+
+get_cond_node(Goal,Ev,Env,BGE,BE):-
+  pita_input_mod(M),
+  M:local_pita_setting(depth_bound,true),!,
+  M:local_pita_setting(depth,DB),
+  retractall(v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;
+    zero(Env,BG)
+  ),
+  add_bdd_arg_db(Ev,Env,BDDE,DB,Ev1),%DB=depth bound
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
+
+
+get_cond_node(Goal,Ev,Env,BGE,BE):- %with DB=false
+  retractall(v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;  
+    zero(Env,BG)
+  ),
+  add_bdd_arg(Ev,Env,BDDE,Ev1),
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;  
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
 
 
 get_next_rule_number(R):-
@@ -970,4 +1052,6 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
+sandbox:safe_meta(pita:prob(_,_,_), []).
+sandbox:safe_meta(pita:prob_bar(_,_,_), []).
 
