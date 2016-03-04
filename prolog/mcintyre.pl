@@ -167,6 +167,12 @@ save_samples_copy(G):-
 
 save_samples_copy(_G).
 
+delete_samples_copy(G):-
+  mc_input_mod(M),
+  retract(M:mem(G,_R,_Val)),
+  fail.
+
+delete_samples_copy(_G).
 
 count_samples(N):-
   findall(Ref,recorded(_Key,_Val,Ref),L),
@@ -181,8 +187,6 @@ resample(N):-
   erase(Ref),
   N1 is N-1,
   resample(N1).
-
-erase_samples.
 
 
 erase_samples:-
@@ -270,36 +274,47 @@ mh_montecarlo(_L,0,_NC0,N,S,_Succ0, _Goals,_Ev,N,S):-!.
 
 mh_montecarlo(L,K0,NC0,N0, S0,Succ0, M:Goal, M:Evidence, N, S):-
   save_samples_copy(Goal),
+  count_samples(_),
   resample(L),
+  count_samples(_),
   copy_term(Evidence,Ev1),
   (M:Ev1->
+  count_samples(_),
     copy_term(Goal,Goal1),
     (M:Goal1->
+  count_samples(_),
       Succ1=1
     ;
+  count_samples(_),
       Succ1=0
     ),
     count_samples(NC1),
     (accept(NC0,NC1)->
-      Succ = Succ1
+      Succ = Succ1,
+      delete_samples_copy(Goal)
     ;
       Succ = Succ0,
       erase_samples,
+  count_samples(_),
       restore_samples(Goal)
     ),
+  count_samples(_),
     N1 is N0 + 1,
     S1 is S0 + Succ,
   %format("Sample ~d Valid ~d~n",[N,Valid]),
   %flush_output,
     K1 is K0-1
   ;
+  count_samples(_),
     N1 = N0,
     S1 = S0,
     K1 = K0,
     NC1 = NC0,
     Succ = Succ0,
     erase_samples,
-    restore_samples(Goal)
+  count_samples(_),
+    restore_samples(Goal),
+  count_samples(_)
   ),
   mh_montecarlo(L,K1,NC1,N1, S1,Succ, M:Goal,M:Evidence, N,S).
 
