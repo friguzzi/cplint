@@ -19,19 +19,22 @@ details.
   mc_rejection_sample/6,  
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
+  mc_mh_sample/7,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_expectation/4,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
-  sample_head/4
+  sample_head/4,
+  initial_sample/1
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
@@ -45,6 +48,7 @@ details.
 :-meta_predicate mc_expectation(:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
+:-meta_predicate initial_sample(:).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -155,6 +159,31 @@ restore_samples(G):-
 
 restore_samples(_G).
 
+save_samples_copy(G):-
+  mc_input_mod(M),
+  recorded(R,Val,_Ref),
+  assert(M:mem(G,R,Val)),
+  fail.
+
+save_samples_copy(_G).
+
+
+count_samples(N):-
+  findall(Ref,recorded(_Key,_Val,Ref),L),
+  length(L,N).
+
+
+resample(0):-!.
+
+resample(N):-
+  findall((Key,Val,Ref),recorded(Key,Val,Ref),L),
+  sample_one(L,(Key,Val,Ref)),
+  erase(Ref),
+  N1 is N-1,
+  resample(N1).
+
+erase_samples.
+
 
 erase_samples:-
   recorded(_Key,_Val,Ref),
@@ -212,28 +241,72 @@ montecarlo(K1,Count, Success, M:Goals,N1,S1):-
   K2 is K1-1,
   montecarlo(K2,N, S, M:Goals, N1,S1).
 
+
 rejection_montecarlo(0,N,S , _Goals,_Ev,N,S):-!.
 
 rejection_montecarlo(K1,Count, Success, M:Goals,M:Ev,N1,S1):-
   erase_samples,
-  copy_term(Goals,Goals1),
-  (M:Goals1->
-    Succ=1
-  ;
-    Succ=0
-  ),
-  (M:Ev->
-    Valid=1
-  ;
-    Valid=0
-  ),
-  N is Count + Valid,
-  S is Success + Succ*Valid,
+  copy_term(Ev,Ev1),
+  (M:Ev1->
+    copy_term(Goals,Goals1),
+    (M:Goals1->
+      Succ=1
+    ;
+      Succ=0
+    ),
+    N is Count + 1,
+    S is Success + Succ,
   %format("Sample ~d Valid ~d~n",[N,Valid]),
   %flush_output,
-  K2 is K1-1,
+    K2 is K1-1
+  ;
+    N = Count,
+    S = Success,
+    K2 = K1
+  ),
   rejection_montecarlo(K2,N, S, M:Goals,M:Ev, N1,S1).
 
+mh_montecarlo(_L,0,_NC0,N,S,_Succ0, _Goals,_Ev,N,S):-!.
+
+mh_montecarlo(L,K0,NC0,N0, S0,Succ0, M:Goal, M:Evidence, N, S):-
+  save_samples_copy(Goal),
+  resample(L),
+  copy_term(Evidence,Ev1),
+  (M:Ev1->
+    copy_term(Goal,Goal1),
+    (M:Goal1->
+      Succ1=1
+    ;
+      Succ1=0
+    ),
+    count_samples(NC1),
+    (accept(NC0,NC1)->
+      Succ = Succ1
+    ;
+      Succ = Succ0,
+      erase_samples,
+      restore_samples(Goal)
+    ),
+    N1 is N0 + 1,
+    S1 is S0 + Succ,
+  %format("Sample ~d Valid ~d~n",[N,Valid]),
+  %flush_output,
+    K1 is K0-1
+  ;
+    N1 = N0,
+    S1 = S0,
+    K1 = K0,
+    NC1 = NC0,
+    Succ = Succ0,
+    erase_samples,
+    restore_samples(Goal)
+  ),
+  mh_montecarlo(L,K1,NC1,N1, S1,Succ, M:Goal,M:Evidence, N,S).
+
+accept(NC1,NC2):-
+  P is min(1,NC1/NC2),
+  random(P0),
+  P>P0.
 
 /** 
  * mc_prob(:Query:atom,-Probability:float) is det
@@ -305,6 +378,57 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   F is N - T,
   erase_samples.
 
+/** 
+ * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times and returns
+ * the number of Successes, of Failures and the 
+ * Probability (Successes/Samples)
+ * If Query is not ground, it considers it as an existential query
+ */
+mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
+  copy_term(Evidence,Ev1),
+  initial_sample(M:Ev1),!,
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  count_samples(NC),
+  mh_montecarlo(L,S,NC,0, 0,Succ, M:Goal, M:Evidence, N, T),
+  P is T / N,
+  F is N - T,
+  erase_samples.
+
+initial_sample(_M:true):-!.
+
+initial_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
+  check(R,VC,N).
+
+initial_sample(M:(G1,G2)):-!,
+  initial_sample(M:G1),
+  initial_sample(M:G2).
+
+initial_sample(M:(\+ G)):-
+  \+ initial_sample(M:G).
+
+initial_sample(_M:G):-
+  builtin(G),!,
+  call(G).
+
+initial_sample(M:G):-
+  findall((G,B),M:clause(G,B),L),
+  sample_one_back(L,(G,B)),
+  initial_sample(B).
+
+check(R,VC,N):-
+  recorded(R,sampled(VC,N)),!.
+
+check(R,VC,N):-
+  \+ recorded(R,sampled(VC,_N)),
+  recorda(R,sampled(VC,N)).
+ 
 
 /** 
  * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
@@ -408,7 +532,8 @@ rejection_sample_arg(0,_Goals,_Ev,_Arg,V,V):-!.
 
 rejection_sample_arg(K1, M:Goals,M:Ev,Arg,V0,V):-
   erase_samples,
-  (M:Ev->
+  copy_term(Ev,Ev1),
+  (M:Ev1->
     copy_term((Goals,Arg),(Goals1,Arg1)),
     findall(Arg1,M:Goals1,L),
     numbervars(L),
@@ -564,7 +689,21 @@ sample_one(List,El):-
   random(0,L,Pos),
   nth0(Pos,List,El).
 
+sample_one_back([],_):-!,
+  fail.
 
+sample_one_back(List,El):-
+  length(List,L),
+  random(0,L,Pos),
+  nth0(Pos,List,El0,Rest),
+  sample_backtracking(Rest,El0,El).
+
+sample_backtracking([],El,El):-!.
+
+sample_backtracking(_,El,El).
+
+sample_backtracking(L,_El,El):-
+  sample_one_back(L,El).
 /** 
  * mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
  *
@@ -1341,14 +1480,14 @@ list2and([H|T],(H,Ta)):-!,
 builtin(G):-
   builtin_int(G),!.
 
-builitin_int(average(_L,_Av)).
-builitin_int(mc_prob(_,_)).
-builitin_int(mc_sample(_,_,_)).
-builitin_int(G):-
+builtin_int(average(_L,_Av)).
+builtin_int(mc_prob(_,_)).
+builtin_int(mc_sample(_,_,_)).
+builtin_int(G):-
   predicate_property(G,built_in).
-builitin_int(G):-
+builtin_int(G):-
   predicate_property(G,imported_from(lists)).
-builitin_int(G):-
+builtin_int(G):-
   predicate_property(G,imported_from(apply)).
 
 
