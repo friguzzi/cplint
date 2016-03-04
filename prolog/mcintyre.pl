@@ -16,8 +16,10 @@ details.
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
   mc_sample/5,  
+  mc_rejection_sample/6,  
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
+  mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_expectation/4,
@@ -29,10 +31,13 @@ details.
 :-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
+:-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
+:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_sample_arg_bar(:,+,+,-).
+:-meta_predicate mc_rejection_sample_arg_bar(:,:,+,+,-).
 :-meta_predicate mc_sample_arg_first(:,+,+,-).
 :-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
@@ -158,6 +163,14 @@ erase_samples:-
 
 erase_samples.
 
+print_samples:-
+  recorded(Key,Val,_Ref),
+  write(Key-Val),nl,
+  fail.
+
+print_samples:-
+  write(end),nl.
+
 montecarlo_cycle(N0, S0, M:Goals, K, MinError, Samples, Lower, Prob, Upper):-!,
   montecarlo(K,N0, S0, M:Goals, N, S),
   P is S / N,
@@ -198,6 +211,28 @@ montecarlo(K1,Count, Success, M:Goals,N1,S1):-
   %flush_output,
   K2 is K1-1,
   montecarlo(K2,N, S, M:Goals, N1,S1).
+
+rejection_montecarlo(0,N,S , _Goals,_Ev,N,S):-!.
+
+rejection_montecarlo(K1,Count, Success, M:Goals,M:Ev,N1,S1):-
+  erase_samples,
+  copy_term(Goals,Goals1),
+  (M:Goals1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  (M:Ev->
+    Valid=1
+  ;
+    Valid=0
+  ),
+  N is Count + Valid,
+  S is Success + Succ*Valid,
+  %format("Sample ~d Valid ~d~n",[N,Valid]),
+  %flush_output,
+  K2 is K1-1,
+  rejection_montecarlo(K2,N, S, M:Goals,M:Ev, N1,S1).
 
 
 /** 
@@ -252,6 +287,20 @@ mc_sample(M:Goal,S,P):-
  */
 mc_sample(M:Goal,S,T,F,P):-
   montecarlo(S,0, 0, M:Goal, N, T),
+  P is T / N,
+  F is N - T,
+  erase_samples.
+
+/** 
+ * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times and returns
+ * the number of Successes, of Failures and the 
+ * Probability (Successes/Samples)
+ * If Query is not ground, it considers it as an existential query
+ */
+mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
+  rejection_montecarlo(S,0, 0, M:Goal,M:Evidence, N, T),
   P is T / N,
   F is N - T,
   erase_samples.
@@ -312,9 +361,69 @@ mc_sample_arg_bar(M:Goal,S,Arg,Chart):-
 	         %  size:_{height: 100},
 	          legend:_{show: false}}.
 
+/** 
+ * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query a number of Samples times. 
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where 
+ * L is the list of values of Arg for which Query succeeds in 
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ */
+mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList):-
+  empty_assoc(Values0),
+  rejection_sample_arg(S,M:Goal,M:Ev,Arg, Values0,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+/** 
+ * mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate samples Query Samples times. Arg should be a variable
+ * in Query.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each possible value of L,
+ * the list of values of Arg for which Query succeeds in 
+ * a world sampled at random. 
+ * The size of the bar is the number of samples
+ * returning that list of values.
+ */
+mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
+  mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList0),
+  maplist(to_atom,ValList0,ValList),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	         %  size:_{height: 100},
+	          legend:_{show: false}}.
+
+
 
 to_atom(A0-N,A-N):-
   term_to_atom(A0,A).
+
+rejection_sample_arg(0,_Goals,_Ev,_Arg,V,V):-!.
+
+rejection_sample_arg(K1, M:Goals,M:Ev,Arg,V0,V):-
+  erase_samples,
+  (M:Ev->
+    copy_term((Goals,Arg),(Goals1,Arg1)),
+    findall(Arg1,M:Goals1,L),
+    numbervars(L),
+    (get_assoc(L, V0, N)->
+      N1 is N+1,
+      put_assoc(L,V0,N1,V1)
+    ;
+      put_assoc(L,V0,1,V1)
+    ),
+    K2 is K1-1
+  ;
+    V1=V0,
+    K2 is K1
+  ),
+  rejection_sample_arg(K2,M:Goals,M:Ev,Arg,V1,V).
 
 sample_arg(0,_Goals,_Arg,V,V):-!.
 
@@ -1260,6 +1369,7 @@ sandbox:safe_meta(mcintyre:s(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
