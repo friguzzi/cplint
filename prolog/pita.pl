@@ -233,8 +233,9 @@ s(M:Goal,P):-
 /** 
  * prob(:Query:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query
- * If Query is not ground, it returns in backtracking all instantiations of
+ * The predicate computes the probability of Query
+ * If Query is not ground, it returns in backtracking all ground
+ * instantiations of
  * Query together with their probabilities
  */
 prob(M:Goal,P):-
@@ -243,11 +244,12 @@ prob(M:Goal,P):-
 /** 
  * prob_bar(:Query:atom,-Probability:dict) is nondet
  *
- * The predicate computes the probability of the ground query Query
+ * The predicate computes the probability of Query
  * and returns it as a dict for rendering with c3 as a bar chart with 
  * a bar for the probability of Query true and a bar for the probability of 
  * Query false.
- * If Query is not ground, it returns in backtracking all instantiations of
+ * If Query is not ground, it returns in backtracking all ground 
+ * instantiations of
  * Query together with their probabilities
  */
 prob_bar(M:Goal,Chart):-
@@ -261,11 +263,13 @@ prob_bar(M:Goal,Chart):-
 	          legend:_{show: false}}.
 
 /** 
- * s(:Query:atom,-Probability:float) is nondet
+ * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query.
- * If Query is not ground, it returns in backtracking all instantiations of
- * Query together with their probabilities
+ * The predicate computes the probability of Query given
+ * Evidence
+ * If Query/Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
  */
 prob(M:Goal,M:Evidence,P):-
   M:rule_n(NR),
@@ -275,14 +279,15 @@ prob(M:Goal,M:Evidence,P):-
   member((Goal,P),L).
 
 /** 
- * prob_bar(:Query:atom,-Probability:dict) is nondet
+ * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
  *
- * The predicate computes the probability of the ground query Query
+ * The predicate computes the probability of the Query given Evidence
  * and returns it as a dict for rendering with c3 as a bar chart with 
  * a bar for the probability of Query true and a bar for the probability of 
- * Query false.
- * If Query is not ground, it returns in backtracking all instantiations of
- * Query together with their probabilities
+ * Query false given Evidence.
+ * If Query /Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
  */
 prob_bar(M:Goal,M:Evidence,Chart):-
   prob(M:Goal,M:Evidence,P),
