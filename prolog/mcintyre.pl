@@ -48,7 +48,9 @@ details.
 :-meta_predicate mc_expectation(:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
+:-meta_predicate initial_sample_cycle(:).
 :-meta_predicate initial_sample(:).
+:-meta_predicate initial_sample_neg(:).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -392,8 +394,7 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
  * If Query is not ground, it considers it as an existential query
  */
 mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
-  copy_term(Evidence,Ev1),
-  initial_sample(M:Ev1),!,
+  initial_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -406,17 +407,31 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   F is N - T,
   erase_samples.
 
+initial_sample_cycle(M:G):-
+  copy_term(G,G1),
+  (initial_sample(M:G1)->
+    true
+  ;
+    erase_samples,
+    initial_sample_cycle(M:G)
+  ).
+
 initial_sample(_M:true):-!.
 
-initial_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
-  check(R,VC,N).
+initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
+  sample_head(R,VC,HL,NH),
+  NH=N. 
 
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
   initial_sample(M:G2).
 
-initial_sample(M:(\+ G)):-
-  \+ initial_sample(M:G).
+initial_sample(M:(G1;G2)):-!,
+  initial_sample(M:G1);
+  initial_sample(M:G2).
+
+initial_sample(M:(\+ G)):-!,
+  initial_sample_neg(M:G).
 
 initial_sample(_M:G):-
   builtin(G),!,
@@ -427,6 +442,42 @@ initial_sample(M:G):-
   sample_one_back(L,(G,B)),
   initial_sample(B).
 
+initial_sample_neg(_M:true):-!,
+  fail.
+
+initial_sample_neg(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
+  sample_head(R,VC,HL,NH),
+  NH\=N.
+/*
+length(HL,Len),
+  listN(Len,NL),
+  check_neg(R,VC,NL,N).
+*/
+initial_sample_neg(M:(G1,G2)):-!,
+  (initial_sample_neg(M:G1);
+  initial_sample_neg(M:G2)).
+
+initial_sample_neg(M:(G1;G2)):-!,
+  initial_sample_neg(M:G1),
+  initial_sample_neg(M:G2).
+
+initial_sample_neg(M:(\+ G)):-!,
+  initial_sample(M:G).
+
+initial_sample_neg(_M:G):-
+  builtin(G),!,
+  \+ call(G).
+
+initial_sample_neg(M:G):-
+  findall(B,M:clause(G,B),L),
+  initial_sample_neg_all(L).
+
+initial_sample_neg_all([]).
+
+initial_sample_neg_all([H|T]):-
+  initial_sample_neg(H),
+  initial_sample_neg_all(T).
+
 check(R,VC,N):-
   recorded(R,sampled(VC,N)),!.
 
@@ -434,6 +485,26 @@ check(R,VC,N):-
   \+ recorded(R,sampled(VC,_N)),
   recorda(R,sampled(VC,N)).
  
+check_neg(R,VC,_LN,N):-
+  recorded(R,sampled(VC,N1)),!,
+  N\=N1.
+
+check_neg(R,VC,LN,N):-
+  \+ recorded(R,sampled(VC,_N)),
+  member(N1,LN),
+  N1\= N,
+  (recorded(R,sampled(VC,_N1),Ref)->
+    erase(Ref)
+  ;
+    true
+  ),
+  recorda(R,sampled(VC,N1)).
+
+listN(0,[]):-!.
+
+listN(N,[N1|T]):-
+  N1 is N-1,
+  listN(N1,T).
 
 /** 
  * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
