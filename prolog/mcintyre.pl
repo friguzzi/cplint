@@ -372,12 +372,15 @@ mc_sample(M:Goal,S,T,F,P):-
   erase_samples.
 
 /** 
- * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
- * The predicate samples Query  a number of Samples times and returns
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns
  * the number of Successes, of Failures and the 
- * Probability (Successes/Samples)
- * If Query is not ground, it considers it as an existential query
+ * Probability (Successes/Samples).
+ * It performs rejection sampling: if in a sample Evidence is false, the 
+ * sample is discarded.
+ * If Query/Evidence are not ground, it considers them an existential queries.
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   rejection_montecarlo(S,0, 0, M:Goal,M:Evidence, N, T),
@@ -386,12 +389,14 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   erase_samples.
 
 /** 
- * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
- * The predicate samples Query  a number of Samples times and returns
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns
  * the number of Successes, of Failures and the 
- * Probability (Successes/Samples)
- * If Query is not ground, it considers it as an existential query
+ * Probability (Successes/Samples).
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability. * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   initial_sample_cycle(M:Evidence),!,
