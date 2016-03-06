@@ -65,7 +65,12 @@ one bar for the number of failures.
 You can also graph the results of sampling arguments with
 \begin{verbatim}
 mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict).
-mc_sample_arg_first_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) .
+mc_sample_arg_first_bar(:Query:atom,+Samples:int,
+  ?Arg:var,-Chart:dict).
+mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
+  ?Arg:var,-Chart:dict).
+mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
+  +Lag:int,?Arg:var,-Chart:dict).
 \end{verbatim} 
 that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
 returning that value.
