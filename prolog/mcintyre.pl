@@ -25,6 +25,7 @@ details.
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_expectation/4,
+  mc_mh_expectation/6,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4
@@ -48,6 +49,7 @@ details.
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
+:-meta_predicate mc_mh_expectation(:,:,+,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-meta_predicate initial_sample_cycle(:).
@@ -586,7 +588,7 @@ mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList):-
   sort(2, @>=,ValList0,ValList).
 
 /** 
- * mc_rejection_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ * mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate call mc_rejection_sample_arg/5 and build a c3 graph
  * of the results.
@@ -870,6 +872,7 @@ sample_backtracking(_,El,El).
 
 sample_backtracking(L,_El,El):-
   sample_one_back(L,El).
+
 /** 
  * mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
  *
@@ -883,6 +886,25 @@ mc_expectation(M:Goal,S,Arg,E):-
   sample_val(S,M:Goal,Arg, 0,Sum),
   erase_samples,
   E is Sum/S.
+
+/** 
+ * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Lag:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_mh_expectation(M:Goal,M:Evidence,S,L,Arg,E):-
+  mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList),
+  foldl(value_cont,ValList,0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+value_cont([]-_,0):-!.
+
+value_cont([H|_T]-N,S,S+N*H).
 
 sample_val(0,_Goals,_Arg,Sum,Sum):-!.
 
@@ -1684,8 +1706,9 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
