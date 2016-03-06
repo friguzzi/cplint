@@ -3,7 +3,7 @@
   author={Nampally, Arun and Ramakrishnan, CR},
   journal={arXiv preprint arXiv:1403.6036},
   year={2014},
-  pdf={http://arxiv.org/pdf/1403.6036.pdf}
+  url={http://arxiv.org/pdf/1403.6036.pdf}
 }
 @inproceedings{Rig15-PLP-IW,
   title = {The Distribution Semantics is Well-Defined for All Normal Programs},
@@ -46,13 +46,13 @@ Logic Programs with Annotated Disjunctions,
 ProbLog},
   year = {2013},
   publisher = {{IOS} Press},
-  pdf = {http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf},
-  doi = {10.3233/FI-2013-847},
+  url = {http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf},
   volume = {124},
   number = {4},
   pages = {521-541},
   copyright = {IOS Press}
 }
+  doi = {10.3233/FI-2013-847},
 @inproceedings{RaeLae95-ALT95,
     Author       = "De Raedt, L. and Van Laer, W.",
     Title        = "Inductive constraint logic",
@@ -82,17 +82,50 @@ ProbLog},
   journal = {Theory and Practice of Logic Programming},
   publisher = {Cambridge University Press},
   copyright = {Cambridge University Press},
-  year = {2013}
+  year = {2015},
+  volume = {15},
+  number = {2},
+  pages = {169-212},
+  url = {http://arxiv.org/abs/1309.2080},
+  pdf = {http://journals.cambridge.org/abstract_S1471068413000689},
+  keywords = {probabilistic inductive logic programming, statistical relational learning, structure learning, distribution semantics, logic programs with annotated disjunction, CP-logic},
+  abstract = {Learning probabilistic logic programming languages is receiving an increasing attention,
+and systems are available for learning the parameters (PRISM, LeProbLog, LFI-ProbLog
+and EMBLEM) or both structure and parameters (SEM-CP-logic and SLIPCASE) of these
+languages. In this paper we present the algorithm SLIPCOVER for "Structure LearnIng
+of Probabilistic logic programs by searChing OVER the clause space." It performs a beam
+search in the space of probabilistic clauses and a greedy search in the space of theories
+using the log likelihood of the data as the guiding heuristics. To estimate the log likelihood,
+SLIPCOVER performs Expectation Maximization with EMBLEM. The algorithm has been
+tested on five real world datasets and compared with SLIPCASE, SEM-CP-logic, Aleph and
+two algorithms for learning Markov Logic Networks (Learning using Structural Motifs (LSM)
+and ALEPH++ExactL1). SLIPCOVER achieves higher areas under the precision-recall and
+receiver operating characteristic curves in most cases.}
 }
-@article{BelRig11-IDA,
-  author = {Elena Bellodi and Fabrizio Riguzzi},
-    title = { Expectation {Maximization} over Binary Decision Diagrams for Probabilistic Logic Programs},
-      year = {2012},
-      volume={16},
-      number={6},
-      journal={Intel. Data Anal.},
-      }
+  doi = {10.1017/S1471068413000689},
 
+@article{BelRig11-IDA-IJ,
+  author = {Elena Bellodi and Fabrizio Riguzzi},
+  title = { Expectation {Maximization} over Binary Decision Diagrams for Probabilistic Logic Programs},
+  year = {2013},
+  volume = {17},
+  number = {2},
+  journal = {Intelligent Data Analysis},
+  publisher = {IOS Press},
+  copyright = {IOS Press},
+  pages = {343-363},
+  url = {http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf},
+  abstract = {Recently much work in Machine Learning has concentrated on using expressive representation languages that combine aspects of logic and probability. A whole field has emerged, called Statistical Relational Learning, rich of successful applications in a variety of domains.
+In this paper we present a Machine Learning technique targeted to Probabilistic Logic Programs, a family of formalisms where uncertainty is represented using Logic Programming tools.
+Among various proposals for Probabilistic Logic Programming, the one based on the distribution semantics is gaining popularity and is the basis for languages such as ICL, PRISM, ProbLog and Logic Programs with Annotated Disjunctions.
+This paper proposes a technique for learning parameters of these languages. Since their equivalent Bayesian networks contain hidden variables, an Expectation Maximization (EM) algorithm is adopted.
+In order to speed the computation up, expectations are computed directly on the Binary Decision Diagrams that are built for inference.
+The resulting system, called EMBLEM for ``EM over Bdds for probabilistic Logic programs Efficient Mining'', has been applied to a number of datasets and showed good performances both in terms of speed and memory usage. In particular its speed allows the execution of a high number of restarts, resulting in good  quality of the solutions.},
+  keywords = {Statistical Relational Learning, Probabilistic Inductive Logic Programming, Probabilistic Logic Programs, Logic Programs with Annotated Disjunctions, Expectation Maximization, Binary Decision Diagrams
+}
+}
+  doi = {10.3233/IDA-130582},
+  url = {http://iospress.metapress.com/content/k1wu917722636526/?issue=2&genre=article&spage=343&issn=1088-467X&volume=17},
 @article{DBLP:journals/jmlr/ElidanF05,
   author    = {G. Elidan and
                N. Friedman},
