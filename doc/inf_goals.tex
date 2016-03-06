@@ -131,7 +131,7 @@ In rejection sampling, you first query the evidence and, if the query is success
 the sample is discarded.
 In Metropolis-Hastings MCMC, \verb|mcintyre| follows the algorithm proposed in \cite{nampally2014adaptive} (the non adaptive version):
 after a sample, a number of sampled probabilistic choices are deleted and the others are retained for the next sample.
-The sample is accepted with a probability of \verb|min{1,N0/N}| where \verb|N0| is the number of choices sampled
+The sample is accepted with a probability of \verb|min{1,N0/N1}| where \verb|N0| is the number of choices sampled
 in the previous sample and \verb|N1| is the number of choices sampled in the current sample.
 
 
