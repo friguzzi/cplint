@@ -411,9 +411,9 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   ),
   count_samples(NC),
   S1 is S-1,
-  mh_montecarlo(L,S1,NC,0, 0,Succ, M:Goal, M:Evidence, N, T),
-  P is T / N,
-  F is N - T,
+  mh_montecarlo(L,S1,NC,0, Succ,Succ, M:Goal, M:Evidence, _N, T),
+  P is T / S,
+  F is S - T,
   erase_samples.
 
 initial_sample_cycle(M:G):-
@@ -429,7 +429,7 @@ initial_sample(_M:true):-!.
 
 initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
-  NH=N. 
+  NH=N.
 
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
@@ -449,7 +449,7 @@ initial_sample(_M:G):-
 initial_sample(M:G):-
   findall((G,B),M:clause(G,B),L),
   sample_one_back(L,(G,B)),
-  initial_sample(B).
+  initial_sample(M:B).
 
 initial_sample_neg(_M:true):-!,
   fail.
@@ -457,11 +457,7 @@ initial_sample_neg(_M:true):-!,
 initial_sample_neg(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
   NH\=N.
-/*
-length(HL,Len),
-  listN(Len,NL),
-  check_neg(R,VC,NL,N).
-*/
+
 initial_sample_neg(M:(G1,G2)):-!,
   (initial_sample_neg(M:G1);
   initial_sample_neg(M:G2)).
@@ -479,13 +475,13 @@ initial_sample_neg(_M:G):-
 
 initial_sample_neg(M:G):-
   findall(B,M:clause(G,B),L),
-  initial_sample_neg_all(L).
+  initial_sample_neg_all(L,M).
 
-initial_sample_neg_all([]).
+initial_sample_neg_all([],_M).
 
-initial_sample_neg_all([H|T]):-
-  initial_sample_neg(H),
-  initial_sample_neg_all(T).
+initial_sample_neg_all([H|T],M):-
+  initial_sample_neg(M:H),
+  initial_sample_neg_all(T,M).
 
 check(R,VC,N):-
   recorded(R,sampled(VC,N)),!.
@@ -680,13 +676,14 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,V0,V):-
       ;
         put_assoc(La,V0,1,V1)
       ),
-      delete_samples_copy(Goal)
+      delete_samples_copy(Goal),
+      K1 is K0-1
     ;
       V1=V0,
+      K1=K0,
       erase_samples,
       restore_samples(Goal)
-    ),
-    K1 is K0-1
+    )
   ;
     K1 = K0,
     NC1 = NC0,
@@ -715,7 +712,7 @@ rejection_sample_arg(K1, M:Goals,M:Ev,Arg,V0,V):-
     K2 is K1-1
   ;
     V1=V0,
-    K2 is K1
+    K2=K1
   ),
   rejection_sample_arg(K2,M:Goals,M:Ev,Arg,V1,V).
 
