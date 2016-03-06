@@ -25,6 +25,7 @@ details.
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_expectation/4,
+  mc_mh_expectation/6,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_head/4
@@ -48,6 +49,7 @@ details.
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
+:-meta_predicate mc_mh_expectation(:,:,+,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-meta_predicate initial_sample_cycle(:).
@@ -411,9 +413,9 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   ),
   count_samples(NC),
   S1 is S-1,
-  mh_montecarlo(L,S1,NC,0, 0,Succ, M:Goal, M:Evidence, N, T),
-  P is T / N,
-  F is N - T,
+  mh_montecarlo(L,S1,NC,0, Succ,Succ, M:Goal, M:Evidence, _N, T),
+  P is T / S,
+  F is S - T,
   erase_samples.
 
 initial_sample_cycle(M:G):-
@@ -429,7 +431,7 @@ initial_sample(_M:true):-!.
 
 initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
-  NH=N. 
+  NH=N.
 
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
@@ -449,7 +451,7 @@ initial_sample(_M:G):-
 initial_sample(M:G):-
   findall((G,B),M:clause(G,B),L),
   sample_one_back(L,(G,B)),
-  initial_sample(B).
+  initial_sample(M:B).
 
 initial_sample_neg(_M:true):-!,
   fail.
@@ -457,11 +459,7 @@ initial_sample_neg(_M:true):-!,
 initial_sample_neg(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
   NH\=N.
-/*
-length(HL,Len),
-  listN(Len,NL),
-  check_neg(R,VC,NL,N).
-*/
+
 initial_sample_neg(M:(G1,G2)):-!,
   (initial_sample_neg(M:G1);
   initial_sample_neg(M:G2)).
@@ -479,13 +477,13 @@ initial_sample_neg(_M:G):-
 
 initial_sample_neg(M:G):-
   findall(B,M:clause(G,B),L),
-  initial_sample_neg_all(L).
+  initial_sample_neg_all(L,M).
 
-initial_sample_neg_all([]).
+initial_sample_neg_all([],_M).
 
-initial_sample_neg_all([H|T]):-
-  initial_sample_neg(H),
-  initial_sample_neg_all(T).
+initial_sample_neg_all([H|T],M):-
+  initial_sample_neg(M:H),
+  initial_sample_neg_all(T,M).
 
 check(R,VC,N):-
   recorded(R,sampled(VC,N)),!.
@@ -590,7 +588,7 @@ mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList):-
   sort(2, @>=,ValList0,ValList).
 
 /** 
- * mc_rejection_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
+ * mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate call mc_rejection_sample_arg/5 and build a c3 graph
  * of the results.
@@ -680,13 +678,14 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,V0,V):-
       ;
         put_assoc(La,V0,1,V1)
       ),
-      delete_samples_copy(Goal)
+      delete_samples_copy(Goal),
+      K1 is K0-1
     ;
       V1=V0,
+      K1=K0,
       erase_samples,
       restore_samples(Goal)
-    ),
-    K1 is K0-1
+    )
   ;
     K1 = K0,
     NC1 = NC0,
@@ -715,7 +714,7 @@ rejection_sample_arg(K1, M:Goals,M:Ev,Arg,V0,V):-
     K2 is K1-1
   ;
     V1=V0,
-    K2 is K1
+    K2=K1
   ),
   rejection_sample_arg(K2,M:Goals,M:Ev,Arg,V1,V).
 
@@ -873,6 +872,7 @@ sample_backtracking(_,El,El).
 
 sample_backtracking(L,_El,El):-
   sample_one_back(L,El).
+
 /** 
  * mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
  *
@@ -886,6 +886,25 @@ mc_expectation(M:Goal,S,Arg,E):-
   sample_val(S,M:Goal,Arg, 0,Sum),
   erase_samples,
   E is Sum/S.
+
+/** 
+ * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Lag:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_mh_expectation(M:Goal,M:Evidence,S,L,Arg,E):-
+  mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList),
+  foldl(value_cont,ValList,0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+value_cont([]-_,0):-!.
+
+value_cont([H|_T]-N,S,S+N*H).
 
 sample_val(0,_Goals,_Arg,Sum,Sum):-!.
 
@@ -1687,8 +1706,9 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
