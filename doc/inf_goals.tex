@@ -2,7 +2,7 @@
 \label{uncondq}
 You can ask the unconditional probability of an atom using \verb|pita| with the predicate
 \begin{verbatim}
-prob(:Query:atom,-Probability:float)|
+prob(:Query:atom,-Probability:float).
 \end{verbatim}
 as in
 \begin{verbatim}
@@ -12,7 +12,7 @@ If the query is non-ground, \verb|prob/2| returns in backtracking the succesful 
 
 When using \verb|mcintyre|, the predicate for querying is 
 \begin{verbatim}
-mc_prob(:Query:atom,-Probability:float)
+mc_prob(:Query:atom,-Probability:float).
 \end{verbatim} as in
 \begin{verbatim}
 ?- mc_prob(heads(coin),P).
@@ -28,6 +28,8 @@ as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt
 \end{verbatim}
 that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
 estimated probability (\verb|S/1000|).
+
+Differently from exact inference, in approximate inference the query can be a conjunction of atoms.
 
 If you are just interested in the probability, you can use
 \begin{verbatim}
@@ -118,13 +120,23 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 \label{condq}
 You can ask the conditional probability of an atom given another atom using \verb|pita| with the predicate 
 \begin{verbatim}
-prob(:Query:atom,:Evidence:atom,-Probability:float)|
+prob(:Query:atom,:Evidence:atom,-Probability:float).
 \end{verbatim}
 as in
 \begin{verbatim}
 ?- prob(heads(coin),biased(coin),P).
 \end{verbatim}
 If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability.
+
+If the evidence is composed of more than one atom, add a clause of the form
+\begin{verbatim}
+evidence:- e1,...,en.
+\end{verbatim}
+to the program, where \verb|e1,...,en| are the evidence atoms, and use the query
+\begin{verbatim}
+?- prob(goal,evidence,P).
+\end{verbatim}
+
 
 When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
 In rejection sampling, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
@@ -146,6 +158,8 @@ as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt
 that takes 1000 samples where \verb|biased(coin)| is true and returns in \verb|S| the number of samples where 
 \verb|heads(coin)| is true, in \verb|F| the number of samples where \verb|heads(coin)| is false and in \verb|P| the
 estimated probability (\verb|S/1000|).
+
+Differently from exact inference, in approximate inference the evidence can be a conjunction of atoms.
 
 You can take a given number of sample with Metropolis-Hastings MCMC using
 \begin{verbatim}
