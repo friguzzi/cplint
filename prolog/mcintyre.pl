@@ -28,6 +28,7 @@ details.
   mc_mh_expectation/6,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
+  sample_gauss/5,
   sample_head/4
   ]).
 :-meta_predicate s(:,-).
@@ -433,6 +434,9 @@ initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
   NH=N.
 
+initial_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
+  sample_gauss(R,VC,Mean,Variance,S).
+
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
   initial_sample(M:G2).
@@ -459,6 +463,10 @@ initial_sample_neg(_M:true):-!,
 initial_sample_neg(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
   sample_head(R,VC,HL,NH),
   NH\=N.
+
+initial_sample_neg(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
+  sample_gauss(R,VC,Mean,Variance,S).
+
 
 initial_sample_neg(M:(G1,G2)):-!,
   (initial_sample_neg(M:G1);
@@ -1042,6 +1050,24 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
 
+sample_gauss(R,VC,_Mean,_Variance,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_gauss(R,VC,Mean,Variance,S):-
+  gauss(Mean,Variance,S),
+  recorda(R,sampled(VC,S)).
+
+gauss(Mean,Variance,S):-
+  random(U1),
+  random(U2),
+  R is sqrt(-2*log(U1)),
+  Theta is 2*pi*U2,
+  S0 is R*cos(Theta),
+  StdDev is sqrt(Variance),
+  S is StdDev*S0+Mean.
+
+
+
 generate_rules_fact([],_HL,_VC,_R,_N,[]).
 
 generate_rules_fact([Head:_P1,'':_P2],HeadList,VC,R,N,[Clause]):-!,
@@ -1068,6 +1094,9 @@ generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
 
 generate_clause(Head,Body,HeadList,VC,R,N,Clause):-
   Clause=(Head:-(Body,sample_head(R,VC,HeadList,NH),NH=N)).
+
+generate_clause_gauss(Head,Body,VC,R,Var,Mean,Variance,Clause):-
+  Clause=(Head:-(Body,sample_gauss(R,VC,Mean,Variance,Var))).
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
@@ -1561,6 +1590,19 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,HeadList,[],R,0,Clauses)
   ;
     generate_rules_fact(HeadList,HeadList,VC,R,0,Clauses)
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:gaussian(Var,Mean,Variance)), !, 
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_gauss(H,true,[],R,Var,Mean,Variance,Clause)
+  ;
+    generate_clause_gauss(H,true,VC,R,Var,Mean,Variance,Clause)
   ).
 
 user:term_expansion(Head,[]) :- 
