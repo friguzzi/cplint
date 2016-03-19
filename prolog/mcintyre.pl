@@ -29,7 +29,8 @@ details.
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_gauss/5,
-  sample_head/4
+  sample_head/4,
+  mc_lw_sample_arg/5
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -56,6 +57,10 @@ details.
 :-meta_predicate initial_sample_cycle(:).
 :-meta_predicate initial_sample(:).
 :-meta_predicate initial_sample_neg(:).
+
+:-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
+:-meta_predicate lw_sample_cycle(:).
+:-meta_predicate lw_sample_weight_cycle(:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -743,6 +748,155 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   sample_arg(K2,M:Goals,Arg,V1,V).
 
 /** 
+ * mc_lw_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability.
+ */
+mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
+  lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
+  foldl(value_cont,ValList0,0,Sum),
+  Norm is S/Sum,
+  maplist(norm(Norm),ValList0,ValList).
+
+value_cont(_ -N,S,S+N).
+
+norm(NF,V-W,V-W1):-
+  W1 is W*NF.
+
+lw_sample_arg(0,_Goals,_Ev,_Arg,[]):-!.
+
+lw_sample_arg(K0,M:Goal, M:Evidence, Arg,[Arg1-W|V]):-
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  K1 is K0-1,
+  erase_samples,
+  lw_sample_arg(K1,M:Goal,M:Evidence,Arg,V).
+
+lw_sample_cycle(M:G):-
+  (lw_sample(M:G)->
+    true
+  ;
+    erase_samples,
+    lw_sample_cycle(M:G)
+  ).
+
+lw_sample(_M:true):-!.
+
+lw_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
+  check(R,VC,N).
+
+lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
+  sample_gauss(R,VC,Mean,Variance,S).
+
+lw_sample(M:(G1,G2)):-!,
+  lw_sample(M:G1),
+  lw_sample(M:G2).
+
+lw_sample(M:(G1;G2)):-!,
+  lw_sample(M:G1);
+  lw_sample(M:G2).
+
+lw_sample(M:(\+ G)):-!,
+  lw_sample_neg(M:G).
+
+lw_sample(_M:G):-
+  builtin(G),!,
+  call(G).
+
+lw_sample(M:G):-
+  findall((G,B),M:clause(G,B),L),
+  sample_one_back(L,(G,B)),
+  lw_sample(M:B).
+
+lw_sample_neg(_M:true):-!,
+  fail.
+
+lw_sample_neg(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
+  sample_head(R,VC,HL,NH),
+  NH\=N.
+
+lw_sample_neg(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
+  sample_gauss(R,VC,Mean,Variance,S).
+
+
+lw_sample_neg(M:(G1,G2)):-!,
+  (lw_sample_neg(M:G1);
+  lw_sample_neg(M:G2)).
+
+lw_sample_neg(M:(G1;G2)):-!,
+  lw_sample_neg(M:G1),
+  lw_sample_neg(M:G2).
+
+lw_sample_neg(M:(\+ G)):-!,
+  lw_sample(M:G).
+
+lw_sample_neg(_M:G):-
+  builtin(G),!,
+  \+ call(G).
+
+lw_sample_neg(M:G):-
+  findall(B,M:clause(G,B),L),
+  lw_sample_neg_all(L,M).
+
+lw_sample_neg_all([],_M).
+
+lw_sample_neg_all([H|T],M):-
+  lw_sample_neg(M:H),
+  lw_sample_neg_all(T,M).
+
+
+lw_sample_weight_cycle(M:G,W):-
+  (lw_sample_weight(M:G,1,W)->
+    true
+  ;
+    erase_samples,
+    lw_sample_weight_cycle(M:G,W)
+  ).
+
+lw_sample_weight(_M:true,W,W):-!.
+
+lw_sample_weight(_M:(sample_head(R,VC,_HL,NH),NH=N),W,W):-!,
+  check(R,VC,N).
+
+lw_sample_weight(_M:sample_gauss(R,VC,Mean,Variance,S),W0,W):-!,
+  (var(S)->
+    sample_gauss(R,VC,Mean,Variance,S),
+    W=W0
+  ;
+    gauss_density(Mean,Variance,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(M:(G1,G2),W0,W):-!,
+  lw_sample_weight(M:G1,W0,W1),
+  lw_sample_weight(M:G2,W1,W).
+
+lw_sample_weight(M:(G1;G2),W0,W):-!,
+  lw_sample_weight(M:G1,W0,W);
+  lw_sample_weight(M:G2,W0,W).
+
+lw_sample_weight(_M:G,W,W):-
+  builtin(G),!,
+  call(G).
+
+lw_sample_weight(M:G,W0,W):-
+  findall((G,B),M:clause(G,B),L),
+  sample_one_back(L,(G,B)),
+  lw_sample_weight(M:B,W0,W).
+
+
+
+/** 
  * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query a number of Samples times. 
@@ -1066,7 +1220,9 @@ gauss(Mean,Variance,S):-
   StdDev is sqrt(Variance),
   S is StdDev*S0+Mean.
 
-
+gauss_density(Mean,Variance,S,D):-
+  StdDev is sqrt(Variance),
+  D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
 
 generate_rules_fact([],_HL,_VC,_R,_N,[]).
 
@@ -1719,6 +1875,9 @@ builtin_int(G):-
   predicate_property(G,imported_from(lists)).
 builtin_int(G):-
   predicate_property(G,imported_from(apply)).
+builtin_int(G):-
+  predicate_property(G,imported_from(nf_r)).
+
 
 
 
@@ -1754,3 +1913,6 @@ sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
+
+sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
+
