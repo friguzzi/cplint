@@ -65,6 +65,7 @@ details.
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
+:-use_module(library(clpr)).
 
 :- style_check(-discontiguous).
 
@@ -762,11 +763,11 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  */
 mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
-  foldl(value_cont,ValList0,0,Sum),
+  foldl(agg_val,ValList0,0,Sum),
   Norm is S/Sum,
   maplist(norm(Norm),ValList0,ValList).
 
-value_cont(_ -N,S,S+N).
+agg_val(_ -N,S,S+N).
 
 norm(NF,V-W,V-W1):-
   W1 is W*NF.
@@ -1204,6 +1205,17 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
 
+sample_uniform(R,VC,_L,_U,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_uniform(R,VC,L,U,S):-
+  random(V),
+  S is L+V*(U-L),
+  recorda(R,sampled(VC,S)).
+
+uniform_density(L,U,D):-
+  D is 1/(U-L).
+
 sample_gauss(R,VC,_Mean,_Variance,S):-
   recorded(R,sampled(VC,S)),!.
 
@@ -1253,6 +1265,10 @@ generate_clause(Head,Body,HeadList,VC,R,N,Clause):-
 
 generate_clause_gauss(Head,Body,VC,R,Var,Mean,Variance,Clause):-
   Clause=(Head:-(Body,sample_gauss(R,VC,Mean,Variance,Var))).
+
+generate_clause_uniform(Head,Body,VC,R,Var,L,U,Clause):-
+  Clause=(Head:-(Body,sample_uniform(R,VC,L,U,Var))).
+
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
@@ -1746,6 +1762,19 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,HeadList,[],R,0,Clauses)
   ;
     generate_rules_fact(HeadList,HeadList,VC,R,0,Clauses)
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,L,U)), !, 
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_uniform(H,true,[],R,Var,L,U,Clause)
+  ;
+    generate_clause_uniform(H,true,VC,R,Var,L,U,Clause)
   ).
 
 user:term_expansion(Head,Clause) :- 
