@@ -961,6 +961,7 @@ builtin(select(_,_,_)).
 builtin(dif(_,_)).
 builtin(prob(_,_)).
 builtin(findall(_,_,_)).
+builtin(between(_,_,_)).
 
 average(L,Av):-
         sum_list(L,Sum),
