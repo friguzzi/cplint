@@ -12,19 +12,39 @@ volume 3131 of LNCS, pages 195-209. Springer, 2004.
 :- mc.
 :- begin_lpad.
 
-heads(Coin): 1/2; tails(Coin) : 1/2:-toss(Coin),\+biased(Coin).
-% if we toss a Coin that is not biased then it lands heads with probability 1/2
-% and tails with probability 1/2
-heads(Coin): 0.6 ; tails(Coin) : 0.4:-toss(Coin),biased(Coin).
-% if we toss a Coin that is biased then it lands heads with probability 0.6
-% % and tails with probability 0.4
-fair(Coin):0.9 ; biased(Coin):0.1.
-% a Coin is fair with probability 0.9 and biased with probability 0.1
-toss(coin).
-% coin is certainly tossed
+heads:0.6;tails:0.4. 
+g(X): gaussian(X,0, 1).
+h(X):gaussian(X,5, 2).
+
+mix(X) :- heads, g(X).
+mix(X) :- tails, h(X).
+
 
 :- end_lpad.
 
+hist(G):-
+  mc_sample_arg(mix(X),1000,X,L0),
+  maplist(val,L0,L),
+  max_list(L,Max),
+  min_list(L,Min),
+  D is Max-Min,
+  NBins=20,
+  BinWidth is D/NBins,
+  bin(NBins,L,Min,BinWidth,LB),
+  Chart = c3{data:_{x:elem, rows:[elem-freq|LB], type:bar},
+          axis:_{ rotated: true
+             },
+                   size:_{height: 100},
+                  legend:_{show: false}}.
+
+bin(0,_L,_Min,_BW,[]):-!.
+
+bin(N,L,Lower,BW,[V-Freq|T]):-
+  V is Lower+BW/2,
+  Upper is Lower+BW,
+  
+
+val([E]-_,E).
 /** <examples>
 
 ?- mc_prob(heads(coin),Prob).  % what is the probability that coin lands heads?

@@ -14,7 +14,8 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,
+:- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
+  set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
@@ -23,6 +24,8 @@ details.
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
+:-meta_predicate prob(:,:,-).
+:-meta_predicate prob_bar(:,:,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -226,11 +229,13 @@ s(M:Goal,P):-
   end_test(Env),
   member((Goal,P),L).
 
+
 /** 
  * prob(:Query:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query
- * If Query is not ground, it returns in backtracking all instantiations of
+ * The predicate computes the probability of Query
+ * If Query is not ground, it returns in backtracking all ground
+ * instantiations of
  * Query together with their probabilities
  */
 prob(M:Goal,P):-
@@ -239,11 +244,12 @@ prob(M:Goal,P):-
 /** 
  * prob_bar(:Query:atom,-Probability:dict) is nondet
  *
- * The predicate computes the probability of the ground query Query
+ * The predicate computes the probability of Query
  * and returns it as a dict for rendering with c3 as a bar chart with 
  * a bar for the probability of Query true and a bar for the probability of 
  * Query false.
- * If Query is not ground, it returns in backtracking all instantiations of
+ * If Query is not ground, it returns in backtracking all ground 
+ * instantiations of
  * Query together with their probabilities
  */
 prob_bar(M:Goal,Chart):-
@@ -256,10 +262,53 @@ prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
+/** 
+ * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ *
+ * The predicate computes the probability of Query given
+ * Evidence
+ * If Query/Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
+ */
+prob(M:Goal,M:Evidence,P):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  findall((Goal,P),get_cond_p(M:Goal,M:Evidence,Env,P),L),
+  end_test(Env),
+  member((Goal,P),L).
+
+/** 
+ * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
+ *
+ * The predicate computes the probability of the Query given Evidence
+ * and returns it as a dict for rendering with c3 as a bar chart with 
+ * a bar for the probability of Query true and a bar for the probability of 
+ * Query false given Evidence.
+ * If Query /Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
+ */
+prob_bar(M:Goal,M:Evidence,Chart):-
+  prob(M:Goal,M:Evidence,P),
+  PF is 1.0-P,
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
+
 
 get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_prob(Env,BDD,P).
+
+get_cond_p(M:Goal,M:Evidence,Env,P):-
+  get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
+  ret_prob(Env,BDDE,PE),
+  ret_prob(Env,BDDGE,PGE),
+  P is PGE/PE.
 
 load(FileIn,C1,R):-
   open(FileIn,read,SI),
@@ -288,6 +337,44 @@ get_node(Goal,Env,B):- %with DB=false
     zero(Env,B)
   ).
 
+get_cond_node(Goal,Ev,Env,BGE,BE):-
+  pita_input_mod(M),
+  M:local_pita_setting(depth_bound,true),!,
+  M:local_pita_setting(depth,DB),
+  retractall(v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;
+    zero(Env,BG)
+  ),
+  add_bdd_arg_db(Ev,Env,BDDE,DB,Ev1),%DB=depth bound
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
+
+
+get_cond_node(Goal,Ev,Env,BGE,BE):- %with DB=false
+  retractall(v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;  
+    zero(Env,BG)
+  ),
+  add_bdd_arg(Ev,Env,BDDE,Ev1),
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;  
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
+
 
 get_next_rule_number(R):-
   pita_module(PName),
@@ -309,7 +396,7 @@ retract_all([H|T]):-
   erase(H),
   retract_all(T).
 
-/** 
+/**
  * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with 
@@ -498,7 +585,7 @@ process_head(HeadList0, HeadList):-
   foldl(minus,PL,1,PNull),
   append(HeadList0,['':PNull],HeadList).
 
-minus(A,B,A-B).
+minus(A,B,B-A).
 
 prob_ann(_:P,P).
 
@@ -566,6 +653,7 @@ or_list1([H|T],Env,B0,B1):-
  * For a list of parameters see 
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ *
  */
 set_pita(Parameter,Value):-
   pita_input_mod(M),
@@ -929,40 +1017,15 @@ list2and([X],X):-
 
 list2and([H|T],(H,Ta)):-!,
     list2and(T,Ta).
- 
-builtin(_A is _B).
-builtin(_A > _B).
-builtin(_A < _B).
-builtin(_A >= _B).
-builtin(_A =< _B).
-builtin(_A =:= _B).
-builtin(_A =\= _B).
-builtin(true).
-builtin(false).
-builtin(_A = _B).
-builtin(_A==_B).
-builtin(_A\=_B).
-builtin(_A\==_B).
-builtin('!').
-builtin(length(_L,_N)).
-builtin(member(_El,_L)).
-builtin(average(_L,_Av)).
-builtin(max_list(_L,_Max)).
-builtin(min_list(_L,_Max)).
-builtin(nth0(_,_,_)).
-builtin(nth(_,_,_)).
-builtin(name(_,_)).
-builtin(float(_)).
-builtin(integer(_)).
-builtin(var(_)).
-builtin(_ @> _).
-builtin(memberchk(_,_)).
-builtin(select(_,_,_)).
-builtin(dif(_,_)).
-builtin(prob(_,_)).
-builtin(findall(_,_,_)).
-builtin(between(_,_,_)).
 
+
+builtin(average(_L,_Av)).
+builtin(prob(_,_)).
+builtin(G):-
+  predicate_property(G,built_in).
+builtin(G):-
+  predicate_property(G,imported_from(lists)).
+ 
 average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
@@ -993,4 +1056,6 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
+sandbox:safe_meta(pita:prob(_,_,_), []).
+sandbox:safe_meta(pita:prob_bar(_,_,_), []).
 

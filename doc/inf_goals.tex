@@ -1,0 +1,226 @@
+\subsection{Unconditional Queries}
+\label{uncondq}
+You can ask the unconditional probability of an atom using \verb|pita| with the predicate
+\begin{verbatim}
+prob(:Query:atom,-Probability:float).
+\end{verbatim}
+as in
+\begin{verbatim}
+?- prob(heads(coin),P).
+\end{verbatim}
+If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
+
+When using \verb|mcintyre|, the predicate for querying is 
+\begin{verbatim}
+mc_prob(:Query:atom,-Probability:float).
+\end{verbatim} as in
+\begin{verbatim}
+?- mc_prob(heads(coin),P).
+\end{verbatim}
+With \verb|mcintyre|, you can also take a given number of sample with
+\begin{verbatim}
+mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,
+  -Probability:float).
+\end{verbatim}
+as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+\begin{verbatim}
+?- mc_sample(heads(coin),1000,S,F,P).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
+estimated probability (\verb|S/1000|).
+
+Differently from exact inference, in approximate inference the query can be a conjunction of atoms.
+
+If you are just interested in the probability, you can use
+\begin{verbatim}
+mc_sample(:Query:atom,+Samples:int,-Probability:float) 
+\end{verbatim}
+as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+\begin{verbatim}
+?- mc_sample(heads(coin),1000,Prob).
+\end{verbatim}
+that samples \verb|heads(coin)| 1000 times and returns the
+estimated probability that a sample is true (i.e., that a sample succeeds).
+
+
+Moreover, you can sample arguments of queries with
+\begin{verbatim}
+mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+\end{verbatim}
+The predicate samples \verb|Query| a number of \verb|Samples| times. 
+\verb|Arg| should be a variable in \verb|Query|.
+The predicate returns in \verb|Values| a list of couples \verb|L-N| where
+\verb|L| is the list of values of \verb|Arg| for which \verb|Query|
+succeeds in a world sampled at random and \verb|N|
+is the number of samples returning that list of values.
+If \verb|L| is the empty list, it means that for that
+sample the query failed. 
+If \verb|L| is a list with a 
+single element, it means that for that sample the query is 
+determinate. 
+If, in all couples \verb|L-N|, \verb|L| 
+is a list with a 
+single element, it means that the clauses in the program 
+are mutually exclusive, i.e., that in every sample, only
+one clause for each subgoal has the body true. This is one
+of the assumptions taken for programs of the PRISM system \cite{DBLP:journals/jair/SatoK01}.
+For example
+\href{http://cplint.lamping.unife.it/example/inference/pfcglr.pl}{\texttt{pfcglr.pl}} and \href{http://cplint.lamping.unife.it/example/inference/plcg.pl}{\texttt{plcg.pl}} satisfy this constraint while
+ \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}} and \href{http://cplint.lamping.unife.it/example/inference/var_obj.pl}{\texttt{var\_obj.pl}} don't.
+
+
+An example of use of the above predicate is
+\begin{verbatim}
+?- mc_sample_arg(reach(s0,0,S),50,S,Values). 
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
+that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
+
+You can sample arguments of queries also with
+\begin{verbatim}
+mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+\end{verbatim}
+samples \verb|Query| a number of \verb|Samples| times 
+and returns in \verb|Values| a list of couples \verb|V-N| where 
+\verb|V| is the value of \verb|Arg| returned as the first answer by \verb|Query| in 
+a world sampled at random and \verb|N| is the number of samples
+returning that value.
+\verb|V| is failure if the query fails.
+\verb|mc_sample_arg_first/4| differs from \verb|mc_sample_arg/4| because the first just computes the first
+answer of the query for each sampled world.
+
+%Alternatively, you can use
+%\begin{verbatim}
+%mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list)
+%\end{verbatim}
+%that samples \verb|Query| a number of \verb|Samples| times 
+%and returns in \verb|Values| a list of couples \verb|V-N| where 
+%\verb|V| is a value sampled with uniform probability from those returned 
+%by \verb|Query| in a world sampled at random and \verb|N| is the number of samples
+%returning that value.
+%\verb|V| is failure if the query fails.
+
+Finally, you can compute expectations with 
+\begin{verbatim}
+mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).
+\end{verbatim}
+that computes the expected value of \verb|Arg| in \verb|Query| by
+sampling.
+It takes \verb|N| samples of \verb|Query| and sums up the value of \verb|Arg| for
+each sample. The overall sum is divided by \verb|N| to give \verb|Exp|.
+
+An example of use of the above predicate is
+\begin{verbatim}
+?- mc_expectation(eventually(elect,T),1000,T,E).
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
+that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
+
+\subsection{Conditional Queries}
+\label{condq}
+You can ask the conditional probability of an atom given another atom using \verb|pita| with the predicate 
+\begin{verbatim}
+prob(:Query:atom,:Evidence:atom,-Probability:float).
+\end{verbatim}
+as in
+\begin{verbatim}
+?- prob(heads(coin),biased(coin),P).
+\end{verbatim}
+If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability.
+
+If the evidence is composed of more than one atom, add a clause of the form
+\begin{verbatim}
+evidence:- e1,...,en.
+\end{verbatim}
+to the program, where \verb|e1,...,en| are the evidence atoms, and use the query
+\begin{verbatim}
+?- prob(goal,evidence,P).
+\end{verbatim}
+
+
+When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
+In rejection sampling, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
+the sample is discarded.
+In Metropolis-Hastings MCMC, \verb|mcintyre| follows the algorithm proposed in \cite{nampally2014adaptive} (the non adaptive version):
+after a sample, a number of sampled probabilistic choices are deleted and the others are retained for the next sample.
+The sample is accepted with a probability of $\min\{1,\frac{N_0}{N_1}\}$ where $N_0$ is the number of choices sampled
+in the previous sample and $N_1$ is the number of choices sampled in the current sample.
+
+You can take a given number of sample with rejection sampling using
+\begin{verbatim}
+mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Successes:int,-Failures:int,-Probability:float).
+\end{verbatim}
+as in (\href{http://cplint.lamping.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+\begin{verbatim}
+?- mc_rejection_sample(heads(coin),biased(coin),1000,S,F,P).
+\end{verbatim}
+that takes 1000 samples where \verb|biased(coin)| is true and returns in \verb|S| the number of samples where 
+\verb|heads(coin)| is true, in \verb|F| the number of samples where \verb|heads(coin)| is false and in \verb|P| the
+estimated probability (\verb|S/1000|).
+
+Differently from exact inference, in approximate inference the evidence can be a conjunction of atoms.
+
+You can take a given number of sample with Metropolis-Hastings MCMC using
+\begin{verbatim}
+mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,
+  -Successes:int,-Failures:int,-Probability:float).
+\end{verbatim}
+where \verb|Lag| is the number of sampled choices to forget before taking a new sample.
+For example (\href{http://cplint.lamping.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}})
+\begin{verbatim}
+?- mc_mh_sample(eval(2,4),eval(1,3),10000,1,T,F,P).
+\end{verbatim}
+takes 10000 accepted samples and returns in \verb|T| the number of samples where 
+\verb|eval(2,4)| is true, in \verb|F| the number of samples where \verb|eval(2,4)| is false and in \verb|P| the
+estimated probability (\verb|T/10000|).
+
+
+Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using
+\begin{verbatim}
+mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
+  +Samples:int,?Arg:var,-Values:list).
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,
+  +Samples:int,+Lag:int,?Arg:var,-Values:list).
+\end{verbatim}
+that return the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
+\verb|Query| given that \verb|Evidence| is true.
+The predicate returns in \verb|Values| a list of couples \verb|L-N| where
+\verb|L| is the list of values of \verb|Arg| for which \verb|Query|
+succeeds in a world sampled at random where \verb|Evidence| is true and \verb|N|
+is the number of samples returning that list of values.
+
+An example of use of the above predicates is
+\begin{verbatim}
+?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,1,Y,V).
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}.
+
+Finally, you can compute expectations with 
+\begin{verbatim}
+mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).
+\end{verbatim}
+that computes the expected value of \verb|Arg| in \verb|Query| by
+sampling.
+It takes \verb|N| samples of \verb|Query| and sums up the value of \verb|Arg| for
+each sample. The overall sum is divided by \verb|N| to give \verb|Exp|.
+
+An example of use of the above predicate is
+\begin{verbatim}
+?- mc_expectation(eventually(elect,T),1000,T,E).
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
+that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
+
+To compute conditional expectations, use
+\begin{verbatim}
+mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
+  +Lag:int,?Arg:var,-Exp:float).
+\end{verbatim}
+as in
+\begin{verbatim}
+?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,1,Y,E).
+\end{verbatim}
+of \href{http://cplint.lamping.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}
+that computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that 
+\verb|eval(1,3)| is true by taking 1000 samples using Metropolis-Hastings MCMC.

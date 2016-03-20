@@ -315,7 +315,7 @@ The last part of the file contains the data.
 You can specify data with two modalities:
 models and keys.
 In the models type, you specify an example model (or interpretation or megaexample) as a list of Prolog facts initiated by 
-\texttt{begin(model(<name>)).} and terminated by \texttt{end(model(<name>)).} as in
+\verb|begin(model(<name>)).| and terminated by \verb|end(model(<name>)).| as in
 \begin{verbatim}
 begin(model(2)).
 pos.
@@ -358,6 +358,9 @@ config(2,o1,up).
 which is contained in the \href{http://cplint.lamping.unife.it/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}}
 This is also how model \verb|2| above is stored in SWI-Prolog database.
 The two modalities, models and keys, can be mixed in the same file.
+Facts for \verb|int/1| are not asserted for interpretations in the key
+modality but can be added by the user explicitly.
+
 
 Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument. For example (\texttt{carc.pl})
 contains
