@@ -39,13 +39,16 @@ Moreover, the bodies of rules may contain the built-in predicates:
 \begin{verbatim}
 is/2, >/2, </2, >=/2 ,=</2,
 =:=/2, =\=/2, true/0, false/0,
-=/2, ==/2, \=/2 ,\==/2, length/2
+=/2, ==/2, \=/2 ,\==/2, !/0, length/2
 \end{verbatim}
 The bodies may also contain the following
  library predicates:
 \begin{verbatim}
 member/2, max_list/2, min_list/2
-nth0/3, nth/3, dif/2, select/3
+nth0/3, nth/3, name/2, float/1,
+integer/1, var/1, @>/2, 
+memberchk/2, select/3, dif/2,
+between/3
 \end{verbatim}
 plus the predicate
 \begin{verbatim}

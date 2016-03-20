@@ -11,6 +11,7 @@ Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with pr
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
+:- use_rendering(graphviz).
 :- endif.
 
 :- mc.
@@ -33,27 +34,56 @@ trans(s1,S,s1):0.4; trans(s1,S,s3):0.1; trans(s1,S,s4):0.5.
 trans(s4,_,s3).
 :- end_lpad.
 
+markov_chain(digraph(G)):-
+    findall(edge(A -> B,[label=P]),
+      (clause(trans(A,_,B),
+        (sample_head(_,_,Probs,_),_=N)),
+        nth0(N,Probs,_:P)),
+      G0),
+    findall(edge(A -> B,[label=1.0]),
+      clause(trans(A,_,B),true),
+      G1),
+    append(G0,G1,G).
 
 
 /** <examples>
 
 ?- mc_prob(reach(s0,0,s0),P).
-% expecte result ~ 1.
+% expected result ~ 1.
 
 ?- mc_prob(reach(s0,0,s1),P).
-% expecte result ~ 0.5984054054054054.
+% expected result ~ 0.5984054054054054.
 
 ?- mc_prob(reach(s0,0,s2),P).
-% expecte result ~ 0.4025135135135135.
+% expected result ~ 0.4025135135135135.
 
 ?- mc_prob(reach(s0,0,s3),P).
-% expecte result ~ 0.5998378378378378.
+% expected result ~ 0.5998378378378378.
 
 ?- mc_prob(reach(s0,0,s4),P).
-% expecte result ~ 0.49948717948717947.
+% expected result ~ 0.49948717948717947.
 
 ?- mc_prob(reach(s1,0,s0),P).
-% expecte result ~ 0.
+% expected result ~ 0.
 
+?- mc_sample(reach(s0,0,s1),1000,T,F,P).
+% expected result ~ 0.5984054054054054.
+
+?- mc_sample_bar(reach(s0,0,s1),1000,Chart).
+
+?- mc_sample_arg(reach(s0,0,S),50,S,Values). 
+% take 50 samples of L in findall(S,reach(s0,0,S),L)
+
+?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
+% take 50 samples of L in findall(S,reach(s0,0,S),L)
+
+?- mc_sample_arg_first(reach(s0,0,S),50,S,Values). 
+% take 50 samples of the first value returned for S in reach(s0,0,S)
+
+?- mc_sample_arg_first_bar(reach(s0,0,S),50,S,Chart).
+% take 50 samples of the first value returned for S in reach(s0,0,S)
+
+?- markov_chain(G).
+% draw the Markov chain
 */
 
