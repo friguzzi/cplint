@@ -29,6 +29,7 @@ details.
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_gauss/5,
+  sample_uniform/5,
   sample_head/4,
   mc_lw_sample_arg/5
   ]).
@@ -443,6 +444,9 @@ initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
 initial_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+initial_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
+  sample_uniform(R,VC,L,U,S).
+
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
   initial_sample(M:G2).
@@ -799,6 +803,9 @@ lw_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
 lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
+  sample_uniform(R,VC,L,U,S).
+
 lw_sample(M:(G1,G2)):-!,
   lw_sample(M:G1),
   lw_sample(M:G2).
@@ -868,6 +875,15 @@ lw_sample_weight(_M:true,W,W):-!.
 
 lw_sample_weight(_M:(sample_head(R,VC,_HL,NH),NH=N),W,W):-!,
   check(R,VC,N).
+
+lw_sample_weight(_M:sample_uniform(R,VC,L,U,S),W0,W):-!,
+  (var(S)->
+    sample_uniform(R,VC,L,U,S),
+    W=W0
+  ;
+    uniform_density(L,U,D),
+    W is W0*D
+   ).
 
 lw_sample_weight(_M:sample_gauss(R,VC,Mean,Variance,S),W0,W):-!,
   (var(S)->
