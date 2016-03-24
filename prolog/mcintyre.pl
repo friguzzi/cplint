@@ -1324,7 +1324,7 @@ cycle_gamma(D,C,S):-
 getv(C,X,V):-
   gauss(0.0,1.0,X),
   V0 is (1+C*X)^3,
-  (V0<=0->
+  (V0=<0->
     getv(C,X,V)
   ;
     V=V0
@@ -1381,7 +1381,7 @@ pick_val(S:P,(P0,V0),(P1,V1)):-
   var(V0),
   PF is P/P0,
   random(U),
-  (U<=PF->
+  (U=<PF->
     P1=PF,
     V1=S
   ;
