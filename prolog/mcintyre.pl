@@ -30,6 +30,9 @@ details.
   mc_load/1,mc_load_file/1,
   sample_gauss/5,
   sample_uniform/5,
+  sample_dirichlet/4,
+  sample_gamma/5,
+  sample_discrete/4,
   sample_head/4,
   mc_lw_sample_arg/5
   ]).
@@ -444,6 +447,9 @@ initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
 initial_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+initial_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
+  sample_gamma(R,VC,Shape,Scale,S).
+
 initial_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
 
@@ -803,6 +809,12 @@ lw_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
 lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+lw_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
+  sample_gamma(R,VC,Shape,Scale,S).
+
+lw_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
+  sample_dirichlet(R,VC,Par,S).
+
 lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
 
@@ -891,6 +903,24 @@ lw_sample_weight(_M:sample_gauss(R,VC,Mean,Variance,S),W0,W):-!,
     W=W0
   ;
     gauss_density(Mean,Variance,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_gamma(R,VC,Shape,Scale,S),W0,W):-!,
+  (var(S)->
+    sample_gamma(R,VC,Shape,Scale,S),
+    W=W0
+  ;
+    gamma_density(Shape,Scale,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_dirichlet(R,VC,Par,S),W0,W):-!,
+  (var(S)->
+    sample_dirichlet(R,VC,Par,S),
+    W=W0
+  ;
+    dirichlet_density(Par,S,D),
     W is W0*D
    ).
 
@@ -1251,6 +1281,113 @@ gauss(Mean,Variance,S):-
 gauss_density(Mean,Variance,S,D):-
   StdDev is sqrt(Variance),
   D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
+
+sample_gamma(R,VC,_Shape,_Scale,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_gamma(R,VC,Shape,Scale,S):-
+  gamma(Shape,Scale,S),
+  recorda(R,sampled(VC,S)).
+
+gamma(A,Scale,S):-
+  (A>=1->
+    gamma_gt1(A,S1)
+  ;
+    random(U),
+    A1 is A+1,
+    gamma_gt1(A1,S0),
+    S1 is S0*U^(1/A)
+  ),
+  S is Scale*S1.
+
+gamma_gt1(A,S):-
+  D is A-1.0/3.0,
+  C is 1.0/sqrt(9.0*D),
+  cycle_gamma(D,C,S).
+
+cycle_gamma(D,C,S):-
+  getv(C,X,V),
+  random(U),
+  S0 is D*V,
+  (U<1-0.0331*X^4->
+    S=S0
+  ;
+    LogU is log(U),
+    LogV is log(V),
+    (LogU<0.5*X^2+D*(1-V+LogV)->
+      S=S0
+    ;
+      cycle_gamma(D,C,S)
+    )
+  ).
+
+getv(C,X,V):-
+  gauss(0.0,1.0,X),
+  V0 is (1+C*X)^3,
+  (V0<=0->
+    getv(C,X,V)
+  ;
+    V=V0
+  ).
+
+gamma_density(K,Scale,S,D):-
+  D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
+
+sample_dirichlet(R,VC,_Par,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_dirichlet(R,VC,Par,S):-
+  dirichlet(Par,S),
+  recorda(R,sampled(VC,S)).
+
+dirichlet(Par,S):-
+  maplist(get_gamma,Par,Gammas),
+  sumlist(Gammas,Sum),
+  maplist(divide(Sum),Gammas,S).
+
+divide(S0,A,S):-
+  S is A/S0.
+
+get_gamma(A,G):-
+  gamma(A,1.0,G).
+
+dirichlet_density(Par,S,D):-
+  beta(Par,B),
+  foldl(prod,S,Par,1,D0),
+  D is D0*B.
+
+prod(X,A,P0,P0*X^(A-1)).
+
+sample_dscrete(R,VC,_D,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_discrete(R,VC,D,S):-
+  discrete(D,S),
+  recorda(R,sampled(VC,S)).
+
+discrete(D,S):-
+  append(D0,[LastS:_P],D),
+  foldl(pick_val,D0,(1,_),(_,S)),
+  (var(S)->  
+    S=LastS
+  ;
+    true
+  ).
+
+pick_val(_,(P0,V0),(P0,V0)):-
+  nonvar(V0).
+
+pick_val(S:P,(P0,V0),(P1,V1)):-
+  var(V0),
+  PF is P/P0,
+  random(U),
+  (U<=PF->
+    P1=PF,
+    V1=S
+  ;
+    P1 is P0*(1-PF),
+    V1=V0
+  ).
 
 generate_rules_fact([],_HL,_VC,_R,_N,[]).
 
@@ -1791,6 +1928,45 @@ user:term_expansion(Head,Clause) :-
     generate_clause_uniform(H,true,[],R,Var,L,U,Clause)
   ;
     generate_clause_uniform(H,true,VC,R,Var,L,U,Clause)
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:gamma(Var,Shape,Scale)), !, 
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_gamma(R,VC,Shape,Scale,Var))
+  ;
+    Clause=(H:-sample_gamma(R,[],Shape,Scale,Var))
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:discrete(Var,D)), !, 
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_discrete(R,VC,D,Var))
+  ;
+    Clause=(H:-sample_discrete(R,[],D,Var))
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:dirichlet(Var,Par)), !, 
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_dirichlet(R,VC,Par,Var))
+  ;
+    Clause=(H:-sample_dirichlet(R,[],Par,Var))
   ).
 
 user:term_expansion(Head,Clause) :- 
