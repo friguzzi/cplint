@@ -36,7 +36,9 @@ details.
   sample_discrete/4,
   sample_head/4,
   mc_lw_sample_arg/5,
-  mc_lw_sample_arg_log/5
+  mc_lw_sample_arg_log/5,
+  gauss_density/4,
+  gauss/3
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -1460,12 +1462,13 @@ cycle_gamma(D,C,S):-
   ).
 
 getv(C,X,V):-
-  gauss(0.0,1.0,X),
-  V0 is (1+C*X)^3,
+  gauss(0.0,1.0,X0),
+  V0 is (1+C*X0)^3,
   (V0=<0->
     getv(C,X,V)
   ;
-    V=V0
+    V=V0,
+    X=X0
   ).
 
 gamma_density(K,Scale,S,D):-
@@ -1887,6 +1890,14 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
+delete_equal([],_,[]).
+
+delete_equal([H|T],E,T):-
+  H == E,!.
+
+delete_equal([H|T],E,[H|T1]):-
+  delete_equal(T,E,T1).
+
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
@@ -2060,7 +2071,8 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:uniform(Var,L,U)), !, 
-  extract_vars_list(Head,[],VC),
+  extract_vars_list(Head,[],VC0),
+  (Var,VC0,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H,true,[],R,Var,L,U,Clause)
@@ -2073,12 +2085,13 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:gamma(Var,Shape,Scale)), !, 
-  extract_vars_list(Head,[],VC),
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_gamma(R,VC,Shape,Scale,Var))
-  ;
     Clause=(H:-sample_gamma(R,[],Shape,Scale,Var))
+  ;
+    Clause=(H:-sample_gamma(R,VC,Shape,Scale,Var))
   ).
 
 user:term_expansion(Head,Clause) :- 
@@ -2086,12 +2099,13 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:discrete(Var,D)), !, 
-  extract_vars_list(Head,[],VC),
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_discrete(R,VC,D,Var))
-  ;
     Clause=(H:-sample_discrete(R,[],D,Var))
+  ;
+    Clause=(H:-sample_discrete(R,VC,D,Var))
   ).
 
 user:term_expansion(Head,Clause) :- 
@@ -2099,12 +2113,13 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:dirichlet(Var,Par)), !, 
-  extract_vars_list(Head,[],VC),
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_dirichlet(R,VC,Par,Var))
-  ;
     Clause=(H:-sample_dirichlet(R,[],Par,Var))
+  ;
+    Clause=(H:-sample_dirichlet(R,VC,Par,Var))
   ).
 
 user:term_expansion(Head,Clause) :- 
@@ -2112,7 +2127,8 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:gaussian(Var,Mean,Variance)), !, 
-  extract_vars_list(Head,[],VC),
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H,true,[],R,Var,Mean,Variance,Clause)
