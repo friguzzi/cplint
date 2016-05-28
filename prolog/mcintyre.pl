@@ -387,10 +387,14 @@ mc_sample(M:Goal,S,P):-
  * If Query is not ground, it considers it as an existential query
  */
 mc_sample(M:Goal,S,T,F,P):-
+  copy_term(Goal,Goal1),
+  numbervars(Goal1),
+  save_samples(Goal1),
   montecarlo(S,0, 0, M:Goal, N, T),
   P is T / N,
   F is N - T,
-  erase_samples.
+  erase_samples,
+  restore_samples(Goal1).
 
 /** 
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
@@ -2072,7 +2076,7 @@ user:term_expansion(Head,Clause) :-
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:uniform(Var,L,U)), !, 
   extract_vars_list(Head,[],VC0),
-  (Var,VC0,VC),
+  delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H,true,[],R,Var,L,U,Clause)
