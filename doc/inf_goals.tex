@@ -142,9 +142,14 @@ When using \verb|mcintyre|, you can ask conditional queries with rejection sampl
 In rejection sampling, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
 the sample is discarded.
 In Metropolis-Hastings MCMC, \verb|mcintyre| follows the algorithm proposed in \cite{nampally2014adaptive} (the non adaptive version):
-after a sample, a number of sampled probabilistic choices are deleted and the others are retained for the next sample.
+after a sample,  a sampled probabilistic choice is deleted and the others are retained for the next sample.
 The sample is accepted with a probability of $\min\{1,\frac{N_0}{N_1}\}$ where $N_0$ is the number of choices sampled
 in the previous sample and $N_1$ is the number of choices sampled in the current sample.
+Since the proof in \cite{nampally2014adaptive} that the above acceptance
+probability yields a valid
+Metropolis-Hastings algorithm holds also when forgetting more than one 
+sampled probabilistic choice, a user defined number of sampled probabilistic choices are deleted (parameter\verb|Lag|).
+
 
 You can take a given number of sample with rejection sampling using
 \begin{verbatim}
@@ -224,3 +229,34 @@ as in
 of \href{http://cplint.lamping.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}
 that computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that 
 \verb|eval(1,3)| is true by taking 1000 samples using Metropolis-Hastings MCMC.
+
+When you have continuous random variables, you may be interested in 
+sampling arguments of goals representing continuous random variables.
+In this way you can build a probability density of the sampled argument.
+When you do not have evidence or you have evidence on atoms not depending
+on continuous random variables, you can use the above predicates for sampling
+arguments.
+
+For example
+\begin{verbatim}
+?- mc_sample_arg(value(0,X),1000,X,L).
+\end{verbatim}
+from (\href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}})) samples 1000 values for \verb|X| in
+\verb|value(0,X)| and returns them in \verb|L|.
+
+When you have evidence on ground atoms that have continuous values as 
+arguments, you cannot use rejection sampling or Metropolis-Hastings,
+as the probability of the evidence is 0. 
+Instead, you can use likelihood weighting \cite{fung1990weighing,koller2009probabilistic} to obtain samples of 
+continuous arguments of a goal. The predicate 
+\begin{verbatim}
+mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-ValList)
+\end{verbatim}
+returns in \verb|ValList| a list of \verb|N| values of argument
+\verb|Arg| of goal \verb|Query| given \verb|Evidence| (a conjunction of atoms is allowed here).
+For example
+\begin{verbatim}
+?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).
+\end{verbatim}
+from (\href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}})) samples 100 values for \verb|X| in
+\verb|value(0,X)| given that \verb|value(1,9)| and \verb|value(2,8)| have been observed.
