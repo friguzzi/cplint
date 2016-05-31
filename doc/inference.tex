@@ -1,7 +1,8 @@
 \section{Inference}
 \label{inf}
 \texttt{cplint} answers queries using the module \verb|pita| or \verb|mcintyre|. The first performs the program transformation technique of \cite{RigSwi10-ICLP10-IC}. Differently from that work, techniques alternative to tabling and answer subsumption are used. The latter performs approximate inference by sampling
-using a different program transformation technique and is described in \cite{Rig13-FI-IJ}.
+using a different program transformation technique and is described in \cite{Rig13-FI-IJ}. Only \verb|mcintyre| is able to handle continuous
+random variables.
 
 For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \verb|pita|), initialize it with a directive (for example \verb|:- pita|) and then enclose the LPAD
 clauses in \verb|:-begin_lpad.| and \verb|:-end_lpad.| For example, the coin program above can be stored in \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference

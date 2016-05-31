@@ -77,3 +77,109 @@ draw_red(R, G):-
 \end{verbatim}
 Variables in probabilistic annotations must be ground when resolution reaches the end of the body, 
 otherwise an exception is raised.
+
+Facts of the form
+\begin{verbatim}
+A:discrete(Var,D).
+\end{verbatim}
+where \verb|A| is an atom containg variable \verb|Var| and \verb|D|
+is a list of couples \verb|Value:Prob| assigning probability \verb|Prob|
+to \verb|Value|. 
+
+\verb|cplint| handles continuous random variables as well with its
+sampling inference module.
+To specify a probability density on an argument \verb|Var| of an atom
+\verb|A| you can used a fact of the form
+\begin{verbatim}
+A:Density.
+\end{verbatim}
+where \verb|Density| is a special atom identifying a probability  density on variable \verb|Var|.
+Allows \verb|Density| atoms are
+\begin{itemize}
+\item \verb|uniform(Var,L,U)|: \verb|Var| is uniformly distributed in $[L,U]$
+\item \verb|gaussian(Var,Mean,Variance)|: \verb|Var| follows a Gaussian distribution with mean \verb|Mean| and variance \verb|Variance|
+\item \verb|dirichlet(Var,Par))|: \verb|Var| is a list of real
+numbers following a Dirichlet distribution with $\alpha$ parameters specified
+by the list \verb|Par|
+\item \verb|gamma(Var,Shape,Scale)|  \verb|Var| follows a gamma distribution 
+with shape parameter \verb|Shape| and scale parameter \verb|Scale|.
+\end{itemize}
+For example
+\begin{verbatim}
+g(X): gaussian(X,0, 1).
+\end{verbatim}
+states that argument \verb|X| of \verb|g(X)| follows a Gaussian 
+distribution with mean 0 and variance 1.
+
+For example, (\href{http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}})) defines a mixture of two Gaussians:
+\begin{verbatim}
+heads:0.6;tails:0.4.
+g(X): gaussian(X,0, 1).
+h(X): gaussian(X,5, 2).
+
+mix(X) :- heads, g(X).
+mix(X) :- tails, h(X).
+\end{verbatim}
+The argument \verb|X| of
+\verb|mix(X)| follows a distribution that is a mixture of two Gaussian,
+one with mean 0 and variance 1 with probability 0.6 and one with 
+mean 5 and variance 2 with probability 0.4.
+
+The parameters of the distribution atoms can be taken from the probabilistic
+atom, the example (\href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}))
+\begin{verbatim}
+value(I,X) :-
+  Var is sqrt(5),
+  mean(M,Var),
+  value(I,M,X).
+
+mean(M,Var): gaussian(M,1.0, Var).
+value(_,M,X): gaussian(X,M, 2.0).
+\end{verbatim}
+states that for an index \verb|I| the continuous variable \verb|X| is 
+sampled from a Gaussian whose mean is sampled from a Guassian with mean 1 and
+variance $\sqrt{5}$ and whose variance is 2.
+
+Any operation is allowed on continuous random variables. For example
+(\href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}))
+\begin{verbatim}
+kf(N,O, T) :-
+  init(S),
+  kf_part(0, N, S,O,T).
+kf(N, T) :-
+  init(S),
+  kf_part(0, N, S,_O,T).
+
+kf_part(I, N, S,[V|RO], T) :-
+  I < N,
+  NextI is I+1,
+  trans(S,I,NextS),
+  emit(NextS,I,V),
+  kf_part(NextI, N, NextS,RO, T).
+kf_part(N, N, S, [],S).
+
+trans(S,I,NextS) :-
+  {E =:= NextS - S},
+  trans_err(I,E).
+
+emit(NextS,I,V) :-
+  {X =:= V - NextS},
+  obs_err(I,X).
+
+init(S):gaussian(S,0,1).
+
+trans_err(_,E):gaussian(E,0,2).
+
+obs_err(_,E):gaussian(E,0,1).
+\end{verbatim}
+encodes a Kalman filter. Continuous random variables are involved
+in arithmetic expressions (in \verb|trans/3| and \verb|emit/3|). It
+is often convenient, as in this case, to use CLP(R) constraints (by
+including the directive \verb|:- use_module(library(clpr)).|) as 
+in this way the expressions can be used in multiple directions and 
+the same program can be used to evaluate both the query and the evidence,
+otherwise two different programs have to be written.
+In case random variables are not sufficiently instantiated to 
+exploit expressions for inferring the values of other variables, 
+inference will return an error.
+
