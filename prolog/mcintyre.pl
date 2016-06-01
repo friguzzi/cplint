@@ -38,7 +38,9 @@ details.
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
   gauss_density/4,
-  gauss/3
+  gauss/3,
+  histogram/3,
+  densities/4
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -2265,10 +2267,80 @@ average(L,Av):-
         length(L,N),
         Av is Sum/N.
 
+histogram(L0,NBins,Chart):-
+  maplist(to_pair,L0,L1),
+  maplist(key,L1,L2),
+  max_list(L2,Max),
+  min_list(L2,Min),
+  keysort(L1,L),
+  D is Max-Min,
+  BinWidth is D/NBins,
+  bin(NBins,L,Min,BinWidth,LB),
+  maplist(key,LB,X),
+  maplist(y,LB,Y),
+  Chart = c3{data:_{x:x, 
+    columns:[[x|X],[freq|Y]], type:bar},
+    axis:_{ x:_{ tick:_{fit:false}}},
+     bar:_{
+     width:_{ ratio: 1.0 }},
+     legend:_{show: false}}.
+
+densities(Pri0,Post0,NBins,Chart):-
+  maplist(to_pair,Pri0,Pri1),
+  maplist(key,Pri1,Pri),
+  maplist(key,Post0,Post),
+  append(Pri,Post,All),
+  max_list(All,Max),
+  min_list(All,Min),
+  D is Max-Min,
+  BinWidth is D/NBins,
+  keysort(Pri1,Pr),
+  keysort(Post0,Po),
+  bin(NBins,Pr,Min,BinWidth,LPr),
+  bin(NBins,Po,Min,BinWidth,LPo),
+  maplist(key,LPr,X),
+  maplist(y,LPr,YPr),
+  maplist(y,LPo,YPo),
+  Chart = c3{data:_{x: x,
+  columns: [[x|X],
+    [pre|YPr],[post|YPo]]},
+   axis:_{ x:_{ tick:_{fit:false}}}
+  }.
+
+
+to_pair([E]-W,E-W).
+
+key(K-_,K).
+
+y(_ - Y,Y).
+
+bin(0,_L,_Min,_BW,[]):-!.
+
+bin(N,L,Lower,BW,[V-Freq|T]):-
+  V is Lower+BW/2,
+  Upper is Lower+BW,
+  count_bin(L,Upper,0,Freq,L1),
+  N1 is N-1,
+  bin(N1,L1,Upper,BW,T).
+
+count_bin([],_U,F,F,[]).
+
+count_bin([H-W|T0],U,F0,F,T):-
+  (H>=U->
+    F=F0,
+    T=T0
+  ;
+    F1 is F0+W,
+    count_bin(T0,U,F1,F,T)
+  ).
+
+
 :- multifile sandbox:safe_primitive/1.
 
 sandbox:safe_primitive(mcintyre:set_mc(_,_)).
 sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
+sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
+sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 
 :- multifile sandbox:safe_meta/2.
 
