@@ -1,6 +1,9 @@
 \section{Syntax}
 \label{syn}
-
+\texttt{cplint} permits the definition of discrete probability distributions and continuous probaility
+densities.
+\subsection{Discrete Probability Distributions}
+\label{discrete}
 LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
 Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used.
 A general CP-logic clause has the form
@@ -86,6 +89,9 @@ where \verb|A| is an atom containg variable \verb|Var| and \verb|D|
 is a list of couples \verb|Value:Prob| assigning probability \verb|Prob|
 to \verb|Value|. 
 
+\subsection{Continuous Probability Densities}
+\label{cont}
+
 \verb|cplint| handles continuous random variables as well with its
 sampling inference module.
 To specify a probability density on an argument \verb|Var| of an atom
@@ -98,7 +104,7 @@ Allows \verb|Density| atoms are
 \begin{itemize}
 \item \verb|uniform(Var,L,U)|: \verb|Var| is uniformly distributed in $[L,U]$
 \item \verb|gaussian(Var,Mean,Variance)|: \verb|Var| follows a Gaussian distribution with mean \verb|Mean| and variance \verb|Variance|
-\item \verb|dirichlet(Var,Par))|: \verb|Var| is a list of real
+\item \verb|dirichlet(Var,Par)|: \verb|Var| is a list of real
 numbers following a Dirichlet distribution with $\alpha$ parameters specified
 by the list \verb|Par|
 \item \verb|gamma(Var,Shape,Scale)|  \verb|Var| follows a gamma distribution 
@@ -116,7 +122,6 @@ For example, (\href{http://cplint.lamping.unife.it/example/inference/gaussian_mi
 heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
 h(X): gaussian(X,5, 2).
-
 mix(X) :- heads, g(X).
 mix(X) :- tails, h(X).
 \end{verbatim}
@@ -129,26 +134,21 @@ The parameters of the distribution atoms can be taken from the probabilistic
 atom, the example (\href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}))
 \begin{verbatim}
 value(I,X) :-
-  Var is sqrt(5),
-  mean(M,Var),
+  mean(M),
   value(I,M,X).
-
-mean(M,Var): gaussian(M,1.0, Var).
+mean(M): gaussian(M,1.0, 5.0).
 value(_,M,X): gaussian(X,M, 2.0).
 \end{verbatim}
 states that for an index \verb|I| the continuous variable \verb|X| is 
 sampled from a Gaussian whose mean is sampled from a Guassian with mean 1 and
-variance $\sqrt{5}$ and whose variance is 2.
+variance 5 and whose variance is 2.
 
 Any operation is allowed on continuous random variables. For example
-(\href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}))
+\href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}
 \begin{verbatim}
 kf(N,O, T) :-
   init(S),
   kf_part(0, N, S,O,T).
-kf(N, T) :-
-  init(S),
-  kf_part(0, N, S,_O,T).
 
 kf_part(I, N, S,[V|RO], T) :-
   I < N,
@@ -156,14 +156,15 @@ kf_part(I, N, S,[V|RO], T) :-
   trans(S,I,NextS),
   emit(NextS,I,V),
   kf_part(NextI, N, NextS,RO, T).
+
 kf_part(N, N, S, [],S).
 
 trans(S,I,NextS) :-
-  {E =:= NextS - S},
+  {NextS =:= E + S},
   trans_err(I,E).
 
 emit(NextS,I,V) :-
-  {X =:= V - NextS},
+  {NextS =:= V+X},
   obs_err(I,X).
 
 init(S):gaussian(S,0,1).
@@ -177,7 +178,8 @@ in arithmetic expressions (in \verb|trans/3| and \verb|emit/3|). It
 is often convenient, as in this case, to use CLP(R) constraints (by
 including the directive \verb|:- use_module(library(clpr)).|) as 
 in this way the expressions can be used in multiple directions and 
-the same program can be used to evaluate both the query and the evidence,
+the same program can be used to evaluate both to sample and the weight the sample on the basis
+of evidence,
 otherwise two different programs have to be written.
 In case random variables are not sufficiently instantiated to 
 exploit expressions for inferring the values of other variables, 
