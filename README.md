@@ -6,6 +6,8 @@ It contains programs for both inference and learning.
 
 You can find the manual at https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
 
+You can try it online at http://cplint.lamping.unife.it/
+
 Example of use
 ---------------
 

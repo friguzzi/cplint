@@ -100,7 +100,7 @@ To specify a probability density on an argument \verb|Var| of an atom
 A:Density.
 \end{verbatim}
 where \verb|Density| is a special atom identifying a probability  density on variable \verb|Var|.
-Allows \verb|Density| atoms are
+Allowed \verb|Density| atoms are
 \begin{itemize}
 \item \verb|uniform(Var,L,U)|: \verb|Var| is uniformly distributed in $[L,U]$
 \item \verb|gaussian(Var,Mean,Variance)|: \verb|Var| follows a Gaussian distribution with mean \verb|Mean| and variance \verb|Variance|
@@ -117,7 +117,7 @@ g(X): gaussian(X,0, 1).
 states that argument \verb|X| of \verb|g(X)| follows a Gaussian 
 distribution with mean 0 and variance 1.
 
-For example, (\href{http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}})) defines a mixture of two Gaussians:
+For example, \href{http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}} defines a mixture of two Gaussians:
 \begin{verbatim}
 heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
@@ -131,7 +131,7 @@ one with mean 0 and variance 1 with probability 0.6 and one with
 mean 5 and variance 2 with probability 0.4.
 
 The parameters of the distribution atoms can be taken from the probabilistic
-atom, the example (\href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}))
+atom, the example \href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 \begin{verbatim}
 value(I,X) :-
   mean(M),
@@ -140,8 +140,8 @@ mean(M): gaussian(M,1.0, 5.0).
 value(_,M,X): gaussian(X,M, 2.0).
 \end{verbatim}
 states that for an index \verb|I| the continuous variable \verb|X| is 
-sampled from a Gaussian whose mean is sampled from a Guassian with mean 1 and
-variance 5 and whose variance is 2.
+sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Guassian with mean 1 and
+variance 5.
 
 Any operation is allowed on continuous random variables. For example
 \href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}
@@ -149,28 +149,21 @@ Any operation is allowed on continuous random variables. For example
 kf(N,O, T) :-
   init(S),
   kf_part(0, N, S,O,T).
-
 kf_part(I, N, S,[V|RO], T) :-
   I < N,
   NextI is I+1,
   trans(S,I,NextS),
   emit(NextS,I,V),
   kf_part(NextI, N, NextS,RO, T).
-
 kf_part(N, N, S, [],S).
-
 trans(S,I,NextS) :-
   {NextS =:= E + S},
   trans_err(I,E).
-
 emit(NextS,I,V) :-
   {NextS =:= V+X},
   obs_err(I,X).
-
 init(S):gaussian(S,0,1).
-
 trans_err(_,E):gaussian(E,0,2).
-
 obs_err(_,E):gaussian(E,0,1).
 \end{verbatim}
 encodes a Kalman filter. Continuous random variables are involved
@@ -178,9 +171,9 @@ in arithmetic expressions (in \verb|trans/3| and \verb|emit/3|). It
 is often convenient, as in this case, to use CLP(R) constraints (by
 including the directive \verb|:- use_module(library(clpr)).|) as 
 in this way the expressions can be used in multiple directions and 
-the same program can be used to evaluate both to sample and the weight the sample on the basis
+the same clauses can be used both to sample and to evaluate the weight the sample on the basis
 of evidence,
-otherwise two different programs have to be written.
+otherwise different clauses have to be written.
 In case random variables are not sufficiently instantiated to 
 exploit expressions for inferring the values of other variables, 
 inference will return an error.
