@@ -1,8 +1,9 @@
-/** <module> pita
+/** <module> mcintyre
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
-It reads probabilistic program andcomputes the probability of queries.
+It reads probabilistic program and computes the probability of queries
+using sampling.
 
 See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
 http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
@@ -771,17 +772,16 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   sample_arg(K2,M:Goals,Arg,V1,V).
 
 /** 
- * mc_lw_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_lw_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples L-N where
- * L is the list of values of Arg for which Query succeeds in
- * a world sampled at random and N is the number of samples
- * returning that list of values.
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability.
+ * The predicate returns in Values a list of couples V-W where
+ * V is a value of Arg for which Query succeeds in
+ * a world sampled at random and W is the weight of the sample.
+ * It performs likelihood weighting: each sample is weighted by the
+ * likelihood of evidence in the sample.
  */
 mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
@@ -790,17 +790,19 @@ mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   maplist(norm(Norm),ValList0,ValList).
 
 /** 
- * mc_lw_sample_arg_log(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_lw_sample_arg_log(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples L-N where
- * L is the list of values of Arg for which Query succeeds in
- * a world sampled at random and N is the number of samples
- * returning that list of values.
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability.
+ * The predicate returns in Values a list of couples V-W where
+ * V is a value of Arg for which Query succeeds in
+ * a world sampled at random and W is the natural logarithm of the weight of \
+ * the sample.
+ * It performs likelihood weighting: each sample is weighted by the
+ * likelihood of evidence in the sample.
+ * It differs from mc_lw_sample_arg/5 because the natural logarithm of the
+ * weight is returned, useful when the evidence is very unlikely.
  */
 mc_lw_sample_arg_log(M:Goal,M:Evidence,S,Arg,ValList):-
   lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList).
@@ -1396,7 +1398,14 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		HeadId = Index;
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
-
+/**
+ * sample_uniform(+R:int,+VC:list,+Lower:float,+Upper:float,-S:float) is det
+ *
+ * Returns in S a sample from a distribution uniform in (Lower,Upper)
+ * associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
 sample_uniform(R,VC,_L,_U,S):-
   recorded(R,sampled(VC,S)),!.
 
@@ -1408,13 +1417,26 @@ sample_uniform(R,VC,L,U,S):-
 uniform_density(L,U,D):-
   D is 1/(U-L).
 
+/** 
+ * sample_gauss(+R:int,+VC:list,+Mean:float,+Variance:float,-S:float) is det
+ *
+ * Returns in S a sample for a Gaussian variable with mean Mean and variance
+ * Variance associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
 sample_gauss(R,VC,_Mean,_Variance,S):-
   recorded(R,sampled(VC,S)),!.
 
 sample_gauss(R,VC,Mean,Variance,S):-
   gauss(Mean,Variance,S),
   recorda(R,sampled(VC,S)).
-
+/** 
+ * gauss(+Mean:float,+Variance:float,-S:float) is det
+ *
+ * samples a value from a Gaussian with mean Mean and variance
+ * Variance and returns it in S
+ */
 gauss(Mean,Variance,S):-
   random(U1),
   random(U2),
@@ -1424,10 +1446,24 @@ gauss(Mean,Variance,S):-
   StdDev is sqrt(Variance),
   S is StdDev*S0+Mean.
 
+/**
+ * gauss_density(+Mean:float,+Variance:float,+S:float,-Density:float) is det
+ *
+ * Computes the probability density of value S according to a Gaussian with
+ * mean Mean and variance Variance and returns it in Density.
+ */
 gauss_density(Mean,Variance,S,D):-
   StdDev is sqrt(Variance),
   D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
 
+/**
+ * sample_gamma(+R:int,+VC:list,+Shape:float,+Scale:float,-S:float) is det
+ *
+ * Returns in S a sample for a Gamma distributed variable with shape Shape and
+ * scale Scale associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
 sample_gamma(R,VC,_Shape,_Scale,S):-
   recorded(R,sampled(VC,S)),!.
 
@@ -1435,6 +1471,12 @@ sample_gamma(R,VC,Shape,Scale,S):-
   gamma(Shape,Scale,S),
   recorda(R,sampled(VC,S)).
 
+/**
+ * gamma(+Shape:float,+Scale:float,-S:float) is det
+ *
+ * samples a value from a Gamma density function with shape Shape and
+ * scale Scale returns it in S
+ */
 gamma(A,Scale,S):-
   (A>=1->
     gamma_gt1(A,S1)
@@ -1479,7 +1521,14 @@ getv(C,X,V):-
 
 gamma_density(K,Scale,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
-
+/**
+ * sample_dirichlet(+R:int,+VC:list,+Par:list,-S:float) is det
+ *
+ * Returns in S a sample for a Dirichlet distributed variable with parameters
+ * Par associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
 sample_dirichlet(R,VC,_Par,S):-
   recorded(R,sampled(VC,S)),!.
 
@@ -1487,6 +1536,12 @@ sample_dirichlet(R,VC,Par,S):-
   dirichlet(Par,S),
   recorda(R,sampled(VC,S)).
 
+/**
+ * dirichlet(+Par:list,-S:float) is det
+ *
+ * samples a value from a Dirichlet probability density with parameters
+ * Par and returns it in S
+ */
 dirichlet(Par,S):-
   maplist(get_gamma,Par,Gammas),
   sumlist(Gammas,Sum),
@@ -1508,10 +1563,25 @@ prod(X,A,P0,P0*X^(A-1)).
 sample_dscrete(R,VC,_D,S):-
   recorded(R,sampled(VC,S)),!.
 
+/**
+ * sample_discrete(+R:int,+VC:list,+Distribution:list,-S:float) is det
+ *
+ * Returns in S a sample from a discrete distribution Distribution (a list
+ * of couples Val:Prob) associated to rule R with substitution VC. 
+ * If the variable has already been sampled, it retrieves the sampled 
+ * value, otherwise it takes a new sample and records it for rule R with 
+ * substitution VC.
+ */
 sample_discrete(R,VC,D,S):-
   discrete(D,S),
   recorda(R,sampled(VC,S)).
 
+/**
+ * discrete(+Distribution:list,-S:float) is det
+ *
+ * samples a value from a discrete distribution Distribution (a list
+ * of couples Val:Prob) and returns it in S
+ */
 discrete(D,S):-
   append(D0,[LastS:_P],D),
   foldl(pick_val,D0,(1,_),(_,S)),
