@@ -2266,7 +2266,13 @@ average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
         Av is Sum/N.
-
+/** 
+ * histogram(+List:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a histogram of the samples in List dividing the domain in
+ * NBins bins. List must be a list of couples of the form [V]-W
+ * where V is a sampled value and W is its weight.
+ */
 histogram(L0,NBins,Chart):-
   maplist(to_pair,L0,L1),
   maplist(key,L1,L2),
@@ -2285,6 +2291,16 @@ histogram(L0,NBins,Chart):-
      width:_{ ratio: 1.0 }},
      legend:_{show: false}}.
 
+/** 
+ * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of two sets of samples, usually
+ * prior and post observations. The samples from the prior are in PriorList
+ * as couples [V]-W, while the samples from the posterior are in PostList
+ * as couples V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. 
+ */
 densities(Pri0,Post0,NBins,Chart):-
   maplist(to_pair,Pri0,Pri1),
   maplist(key,Pri1,Pri),
