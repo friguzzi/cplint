@@ -1,26 +1,5 @@
 /*
-Model checking of the Synchronous Leader Election Protocol expressed in 
-Probabilistic Computation Tree Logic (PCTL).
-
-Given a synchronous ring of N processes the protocol is used 
-to elect a leader (a uniquely designated processor) by sending messages around 
-the ring.
-
-The protocol proceeds in rounds and is parametrised by a constant K. Each round begins by all processors (independently) choosing a random number (uniformly) from {1,...,K} as an id. The processors then pass their ids around the ring. If there is a unique id, then the processor with the maximum unique id is elected the leader, and otherwise the processors begin a new round.
-
-With this program you can 
-- check that the probability of eventually electing a leader is 1
-- compute the probability of electing a leader within a certain 
-  number of rounds
-- compute the expected number of rounds to elect a leader
-- graph the probability of electing a leader within L rounds as a function of L
-- graph the expected number of rounds to elect a leader as a function of the 
-  number of processes or of K
-From
-Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
-This program was kindly provided by Andrey Gorlin and adapted to MCINTYRE
-by Fabrizio Riguzzi.
-See also http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
+duello a tre, vedi libro di federico peiretti il grande gioco dei numeri
 */
 
 /** <examples>
