@@ -1891,7 +1891,7 @@ ground_prob([_Head:ProbHead|Tail]) :-!,
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
-ground_prob([_Head::ProbHead|Tail]) :-
+ground_prob([ProbHead::_Head|Tail]) :-
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
