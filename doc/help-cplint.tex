@@ -30,56 +30,7 @@ In Prolog programs, you have to enter the program above (\verb|coin.pl|).
 
 \input{inf_goals}
 
-
-You can also see the probability of the query being true and 
-being false as a bar chart with \verb|prob_bar(:Query:atom,-Probability:dict)| as in
-\begin{verbatim}
-?- prob_bar(heads(coin),P).
-\end{verbatim}
-if you include
-\begin{verbatim}
-:- use_rendering(c3).
-\end{verbatim}
-before \verb|:- pita.| \verb|P| will be instantiated with a
-dict for rendering with \verb|c3|. It will be shown as a bar chart with
-a bar for the probability of \verb|heads(coin)| true and a bar for the probability of \verb|heads(coin)| false.
-
-
-When using \verb|mcintyre|, you can use
-\begin{verbatim}
-mc_prob_bar(:Query:atom,-Probability:dict).
-\end{verbatim}
-as in
-\begin{verbatim}
-?- mc_prob_bar(heads(coin),P).
-\end{verbatim}
-to obtain a chart representation of the probability.
-
-You can obtain a bar chart of the samples with
-\begin{verbatim}
-?- mc_sample_bar(heads(coin),1000,Chart).
-\end{verbatim}
-that returns in \verb|Chart| a diagram with one bar for the number of successes and 
-one bar for the number of failures.
-
-You can also graph the results of sampling arguments with
-\begin{verbatim}
-mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict).
-mc_sample_arg_first_bar(:Query:atom,+Samples:int,
-  ?Arg:var,-Chart:dict).
-mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
-  ?Arg:var,-Chart:dict).
-mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
-  +Lag:int,?Arg:var,-Chart:dict).
-\end{verbatim} 
-that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
-returning that value.
-
-An example is
-\begin{verbatim}
-?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
-\end{verbatim}
-of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
+\input{graphics}
 
 \input{parameters}
 
