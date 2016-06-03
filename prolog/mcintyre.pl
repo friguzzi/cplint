@@ -41,7 +41,8 @@ details.
   gauss_density/4,
   gauss/3,
   histogram/3,
-  densities/4
+  densities/4,
+  op(600,xfy,'::')
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -1857,12 +1858,14 @@ process_head(HeadList0, HeadList):-
 
 minus(A,B,B-A).
 
-prob_ann(_:P,P).
+prob_ann(_:P,P):-!.
+prob_ann(P::_,P).
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
-process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
+process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
+  (H=Head:ProbHead;H=ProbHead::Head),!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
   mc_input_mod(M),
@@ -1875,7 +1878,8 @@ process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
     Null = []
   ). 
 
-process_head_ground([Head:ProbHead|Tail], Prob, [Head:ProbHead1|Next]) :- 
+process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :- 
+  (H=Head:ProbHead;H=ProbHead::Head),!,
   ProbHead1 is ProbHead,
   ProbNext is Prob + ProbHead1, 
   process_head_ground(Tail, ProbNext, Next).
@@ -1883,7 +1887,11 @@ process_head_ground([Head:ProbHead|Tail], Prob, [Head:ProbHead1|Next]) :-
 
 ground_prob([]).
 
-ground_prob([_Head:ProbHead|Tail]) :- 
+ground_prob([_Head:ProbHead|Tail]) :-!, 
+  ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
+  ground_prob(Tail).
+
+ground_prob([_Head::ProbHead|Tail]) :-
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
@@ -2030,7 +2038,7 @@ user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (_H:P),
+  (Head = (_:P);Head=(P::_)),
   ground(P),
   P=:=0.0, !. 
 
@@ -2068,7 +2076,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (H:_), !, 
+  (Head = (H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   list2and(BodyList, Body), 
@@ -2089,7 +2097,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (H:_), !, 
+  (Head = (H:_);Head = (_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list((Head :- Body),[],VC),
@@ -2216,7 +2224,7 @@ user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (_H:P),
+  (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
   
@@ -2225,7 +2233,7 @@ user:term_expansion(Head,H) :-
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),
+  (Head = (H:P);Head = (P::H)),
   ground(P),
   P=:=1.0, !.
 
@@ -2233,7 +2241,7 @@ user:term_expansion(Head,H) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),
+  (Head = (H:P);Head =(P::H)),
   ground(P),
   P=:=1.0, !.
 
@@ -2242,7 +2250,7 @@ user:term_expansion(Head,Clause) :-
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:_), !, 
+  (Head=(H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list(Head,[],VC),
@@ -2257,7 +2265,7 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:_), !, 
+  (Head=(H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list(HeadList,[],VC),
