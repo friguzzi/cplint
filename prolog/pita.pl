@@ -20,7 +20,9 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
-  load/1,load_file/1]).
+  load/1,load_file/1,
+  op(600,xfy,'::')
+    ]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -458,6 +460,21 @@ generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
   generate_rules_fact(T,Env,VC,R,Probs,N1,Clauses,Module).
 
 
+generate_rules_fact_vars([],_Env,_R,_Probs,_N,[],_Module).
+
+generate_rules_fact_vars([Head:_P1,'':_P2],Env,R,Probs,N,[Clause],Module):-!,
+  extract_vars_list([Head],[],VC),
+  add_bdd_arg(Head,Env,BDD,Module,Head1),
+  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+
+generate_rules_fact_vars([Head:_P|T],Env,R,Probs,N,[Clause|Clauses],Module):-
+  extract_vars_list([Head],[],VC),
+  add_bdd_arg(Head,Env,BDD,Module,Head1),
+  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  N1 is N+1,
+  generate_rules_fact_vars(T,Env,R,Probs,N1,Clauses,Module).
+
+
 generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module).
 
 generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module):-!,
@@ -590,7 +607,10 @@ minus(A,B,B-A).
 prob_ann(_:P,P).
 prob_ann(P::_,P).
 
-add_prob(P,A,A:P).
+
+gen_head(H,P,V,V1,H1:P):-copy_term((H,V),(H1,V1)).
+gen_head_disc(H,V,V1:P,H1:P):-copy_term((H,V),(H1,V1)).
+
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
@@ -706,6 +726,16 @@ extract_vars_tree([], Var, Var).
 extract_vars_tree([Term|Tail], Var0, Var1) :- 
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
+
+
+delete_equal([],_,[]).
+
+delete_equal([H|T],E,T):-
+  H == E,!.
+
+delete_equal([H|T],E,[H|T1]):-
+  delete_equal(T,E,T1).
+
 
 user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
@@ -882,7 +912,7 @@ user:term_expansion(Head,Clauses) :-
   Head=(_;_), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
-  extract_vars_list(HeadList,[],VC),
+extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
@@ -904,6 +934,37 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
   ;
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
+  ).
+
+user:term_expansion(Head,Clauses) :- 
+  prolog_load_context(module, M),pita_module(M),
+% disjunctive fact with uniform distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,D0)),!, 
+  length(D0,Len),
+  Prob is 1.0/Len,
+  maplist(gen_head(H,Prob,Var),D0,HeadList),
+  get_next_rule_number(R),
+  get_probs(HeadList,Probs), %**** test single_var
+  (M:local_pita_setting(single_var,true)->
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+  ;
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
+  ).
+
+
+user:term_expansion(Head,Clauses) :- 
+  prolog_load_context(module, M),pita_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
+  maplist(gen_head_disc(H,Var),D,HeadList),
+  get_next_rule_number(R),
+  get_probs(HeadList,Probs), %**** test single_var
+  (M:local_pita_setting(single_var,true)->
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+  ;
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
   ).
 
 user:term_expansion(Head,[]) :- 
