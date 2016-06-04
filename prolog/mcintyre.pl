@@ -1951,7 +1951,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   ). 
 
 process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :- 
-  (H=Head:ProbHead;H=ProbHead::Head),!,
+  (H=Head:ProbHead;H=ProbHead::Head),
   ProbHead1 is ProbHead,
   ProbNext is Prob + ProbHead1, 
   process_head_ground(Tail, ProbNext, Next).
@@ -2224,7 +2224,7 @@ user:term_expansion(Head,Clauses) :-
 
 user:term_expansion(Head,Clause) :- 
   prolog_load_context(module, M),mc_module(M),
-% disjunctive fact with guassia distr
+% fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:uniform(Var,L,U)), !, 
   extract_vars_list(Head,[],VC0),
