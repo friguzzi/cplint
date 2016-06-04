@@ -34,6 +34,8 @@ details.
   sample_uniform/5,
   sample_dirichlet/4,
   sample_gamma/5,
+  sample_poisson/4,
+  sample_beta/5,
   sample_discrete/4,
   sample_head/4,
   mc_lw_sample_arg/5,
@@ -1522,6 +1524,75 @@ getv(C,X,V):-
 
 gamma_density(K,Scale,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
+    
+/**
+ * sample_beta(+R:int,+VC:list,+Alpha:float,+Beta:float,-S:float) is det
+ *
+ * Returns in S a sample for a beta distributed variable with parameters
+ * Alpha and Beta associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_beta(R,VC,_A,_B,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_beta(R,VC,A,B,S):-
+  beta(A,B,S),
+  recorda(R,sampled(VC,S)).
+
+/**
+ * beta(+Alpha:float,+Beta:float,-S:float) is det
+ *
+ * samples a value from a beta probability distribution with parameters
+ * Alpha and Beta and returns it in S.
+ * Uses the algorithm of
+ * van der Waerden, B. L., "Mathematical Statistics", Springer
+ * see also
+ * https://en.wikipedia.org/wiki/Beta_distribution#Generating_beta-distributed_random_variates
+ */
+beta(Alpha,Beta,S):-
+  gamma(Alpha,1,X),
+  gamma(Beta,1,Y),
+  S is X/(X+Y).
+     
+/**
+ * sample_poisson(+R:int,+VC:list,+Lambda:float,-S:int) is det
+ *
+ * Returns in S a sample for a Poisson distributed variable with parameter
+ * lambda Lambda associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_poisson(R,VC,_L,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_poisson(R,VC,L,S):-
+  poisson(L,S),
+  recorda(R,sampled(VC,S)).
+
+/**
+ * poisson(+Lambda:float,-S:int) is det
+ *
+ * samples a value from a Poisson probability distribution with parameter
+ * Lambda and returns it in S.
+ * Uses the inversion by sequential search
+ * Devroye, Luc (1986). "Discrete Univariate Distributions"
+ * Non-Uniform Random Variate Generation. New York: Springer-Verlag. p. 505.
+ */
+poisson(Lambda,X):-
+  P is exp(-Lambda),
+  random(U),
+  poisson_cycle(0,X,Lambda,P,P,U).
+
+poisson_cycle(X,X,_L,_P,S,U):-
+  U=<S,!.
+
+poisson_cycle(X0,X,L,P0,S0,U):-
+  X1 is X0+1,
+  P is P0*L/X1,
+  S is S0+P,
+  poisson_cycle(X1,X,L,P,S,U).
+
 /**
  * sample_dirichlet(+R:int,+VC:list,+Par:list,-S:float) is det
  *
@@ -2182,7 +2253,52 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:discrete(Var,D)), !, 
+  Head=(H:beta(Var,Alpha,Beta)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_beta(R,[],Alpha,Beta,Var))
+  ;
+    Clause=(H:-sample_beta(R,VC,Alpha,Beta,Var))
+  ).
+
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:poisson(Var,Lambda)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_poisson(R,[],Lambda,Var))
+  ;
+    Clause=(H:-sample_poisson(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,D)),!, 
+  length(D,Len),
+  maplist(
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_discrete(R,[],D,Var))
+  ;
+    Clause=(H:-sample_discrete(R,VC,D,Var))
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -2422,7 +2538,7 @@ count_bin([],_U,F,F,[]).
 count_bin([H-W|T0],U,F0,F,T):-
   (H>=U->
     F=F0,
-    T=T0
+    T=[H-W|T0]
   ;
     F1 is F0+W,
     count_bin(T0,U,F1,F,T)
