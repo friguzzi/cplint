@@ -1932,6 +1932,7 @@ minus(A,B,B-A).
 prob_ann(_:P,P):-!.
 prob_ann(P::_,P).
 
+add_prob(P,A,A:P).
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
@@ -2282,9 +2283,10 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:uniform(Var,D)),!, 
-  length(D,Len),
-  maplist(
+  Head=(H:uniform(Var,D0)),!, 
+  length(D0,Len),
+  Prob is 1.0/Len,
+  maplist(add_prob(Prob),D0,D),
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
