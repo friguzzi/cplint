@@ -2301,7 +2301,7 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -2315,7 +2315,7 @@ user:term_expansion(Head,Clause) :-
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:dirichlet(Var,Par)), !, 
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
