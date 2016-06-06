@@ -2125,6 +2125,123 @@ user:term_expansion((:- end_lpad), []) :-
   mc_input_mod(_M0),!,
   retractall(mc_module(_M)).
 
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% fact with uniform distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,L,U)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_uniform(H,Body,[],R,Var,L,U,Clause)
+  ;
+    generate_clause_uniform(H,Body,VC,R,Var,L,U,Clause)
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:gamma(Var,Shape,Scale)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_gamma(R,[],Shape,Scale,Var))
+  ;
+    Clause=(H:-Body,sample_gamma(R,VC,Shape,Scale,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:beta(Var,Alpha,Beta)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_beta(R,[],Alpha,Beta,Var))
+  ;
+    Clause=(H:-Body,sample_beta(R,VC,Alpha,Beta,Var))
+  ).
+
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:poisson(Var,Lambda)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_poisson(R,[],Lambda,Var))
+  ;
+    Clause=(H:-Body,sample_poisson(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,D0)),!, 
+  length(D0,Len),
+  Prob is 1.0/Len,
+  maplist(add_prob(Prob),D0,D),
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_discrete(R,[],D,Var))
+  ;
+    Clause=(H:-Body,sample_discrete(R,VC,D,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
+  extract_vars_list([Head],[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_discrete(R,[],D,Var))
+  ;
+    Clause=(H:-Body,sample_discrete(R,VC,D,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:dirichlet(Var,Par)), !, 
+  extract_vars_list([H],[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_dirichlet(R,[],Par,Var))
+  ;
+    Clause=(H:-Body,sample_dirichlet(R,VC,Par,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:gaussian(Var,Mean,Variance)), !, 
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_gauss(H,Body,[],R,Var,Mean,Variance,Clause)
+  ;
+    generate_clause_gauss(H,Body,VC,R,Var,Mean,Variance,Clause)
+  ).
+
+
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
