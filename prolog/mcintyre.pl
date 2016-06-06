@@ -1686,9 +1686,6 @@ dirichlet_density(Par,S,D):-
 
 prod(X,A,P0,P0*X^(A-1)).
 
-sample_dscrete(R,VC,_D,S):-
-  recorded(R,sampled(VC,S)),!.
-
 /**
  * sample_discrete(+R:int,+VC:list,+Distribution:list,-S:float) is det
  *
@@ -1698,6 +1695,9 @@ sample_dscrete(R,VC,_D,S):-
  * value, otherwise it takes a new sample and records it for rule R with 
  * substitution VC.
  */
+sample_discrete(R,VC,_D,S):-
+  recorded(R,sampled(VC,S)),!.
+
 sample_discrete(R,VC,D,S):-
   discrete(D,S),
   recorda(R,sampled(VC,S)).
@@ -1708,13 +1708,13 @@ sample_discrete(R,VC,D,S):-
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
  */
-discrete(D,S):-
+discrete(D,S0):-
   append(D0,[LastS:_P],D),
   foldl(pick_val,D0,(1,_),(_,S)),
   (var(S)->  
-    S=LastS
+    S0=LastS
   ;
-    true
+    S0=S
   ).
 
 pick_val(_,(P0,V0),(P0,V0)):-
