@@ -51,7 +51,9 @@ details.
   op(500,xfx,'~='),
   op(1200,xfy,':='),
   ~= /2,
-  swap/2
+  swap/2,
+  msw/2,
+  set_sw/2
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
@@ -86,7 +88,9 @@ details.
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
-:-meta_predicate ~=(:,+).
+:-meta_predicate ~=(:,-).
+:-meta_predicate msw(:,-).
+
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -469,6 +473,9 @@ initial_sample(_M:true):-!.
 initial_sample(M:(A~= B)):-!,
   add_arg(A,B,A1),
   initial_sample(M:A1).
+
+initial_sample(M:msw(A,B)):-!,
+  msw(M:A,B).
 
 initial_sample(_M:(sample_head(R,VC,HL,NH))):-!,
   sample_head(R,VC,HL,NH).
@@ -920,6 +927,9 @@ lw_sample(M:A~=B):-!,
   add_arg(A,B,A1),
   lw_sample(M:A1).
 
+lw_sample(M:msw(A,B)):-!,
+  msw(M:A,B).
+
 lw_sample(_M:(sample_head(R,VC,_HL,N))):-!,
   check(R,VC,N).
 
@@ -982,6 +992,10 @@ lw_sample_weight(_M:true,W,W):-!.
 lw_sample_weight(M:A~= B,W0,W):-!,
   add_arg(A,B,A1),
   lw_sample_weight(M:A1,W0,W).
+
+lw_sample_weight(M:msw(A,B),W0,W):-!,
+  msw_weight(M:A,B,W1),
+  W is W0*W1.
 
 lw_sample_weight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
@@ -1071,6 +1085,14 @@ lw_sample_weight(M:G,W0,W):-
 
 
 lw_sample_logweight(_M:true,W,W):-!.
+
+lw_sample_logweight(M:A~= B,W0,W):-!,
+  add_arg(A,B,A1),
+  lw_sample_logweight(M:A1,W0,W).
+
+lw_sample_weight(M:msw(A,B),W0,W):-!,
+  msw_weight(M:A,B,W1),
+  W is W0+log(W1).
 
 lw_sample_logweight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
@@ -2156,6 +2178,38 @@ add_arg(A,Arg,A1):-
   append(L,[Arg],L1),
   A1=..L1.
 
+set_sw(A,B):-
+  mc_module(M),
+  assert(M:sw(A,B)).
+
+msw(M:A,B):-
+  M:values(A,V),
+  M:sw(A,D),
+  sample_msw(V,D,B).
+
+sample_msw(real,norm(Mean,Variance),V):-!,
+  gauss(Mean,Variance,S),
+  S=V.
+
+sample_msw(Values,Dist,V):-
+  maplist(combine,Values,Dist,VD),
+  sample(VD,N),
+  nth0(N,Values,V).
+
+combine(V,P,V:P).
+
+msw_weight(M:A,B,W):-
+  M:values(A,V),
+  M:sw(A,D),
+  msw_weight(V,D,B,W).
+
+msw_weight(real,norm(Mean,Variance),V,W):-!,
+  gauss_density(Mean,Variance,V,W).
+
+msw_weight(Values,Dist,V,W):-
+  maplist(combine,Values,Dist,VD),
+  member(V:W,VD).
+
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
@@ -3022,6 +3076,7 @@ sandbox:safe_primitive(mcintyre:set_mc(_,_)).
 sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
+sandbox:safe_primitive(mcintyre:set_sw(_,_)).
 
 :- multifile sandbox:safe_meta/2.
 
@@ -3050,4 +3105,5 @@ sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:msw(_,_), []).
 
