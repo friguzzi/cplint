@@ -463,6 +463,18 @@ initial_sample(_M:(sample_head(R,VC,HL,NH),NH=N)):-!,
 initial_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+initial_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
+  sample_dirichlet(R,VC,Par,S).
+
+initial_sample(_M:sample_discrete(R,VC,D,S)):-!,
+  sample_discrete(R,VC,D,S).
+
+initial_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
+  sample_poisson(R,VC,Lambda,S).
+
+initial_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
+  sample_beta(R,VC,Alpha,Beta,S).
+
 initial_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
   sample_gamma(R,VC,Shape,Scale,S).
 
@@ -855,6 +867,12 @@ lw_sample(_M:(sample_head(R,VC,_HL,NH),NH=N)):-!,
 lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
 
+lw_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
+  sample_poisson(R,VC,Lambda,S).
+
+lw_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
+  sample_gamma(R,VC,Alpha,Beta,S).
+
 lw_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
   sample_gamma(R,VC,Shape,Scale,S).
 
@@ -863,6 +881,9 @@ lw_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
 
 lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
+
+lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
+  sample_discrete(R,VC,D,S).
 
 lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
   sample_head(R,VC,D,SN),
@@ -962,12 +983,30 @@ lw_sample_weight(_M:sample_gauss(R,VC,Mean,Variance,S),W0,W):-!,
     W is W0*D
    ).
 
+lw_sample_weight(_M:sample_poisson(R,VC,Lambda,S),W0,W):-!,
+  (var(S)->
+    sample_poisson(R,VC,Lambda,S),
+    W=W0
+  ;
+    poisson_prob(Lambda,S,D),
+    W is W0*D
+   ).
+
 lw_sample_weight(_M:sample_gamma(R,VC,Shape,Scale,S),W0,W):-!,
   (var(S)->
     sample_gamma(R,VC,Shape,Scale,S),
     W=W0
   ;
     gamma_density(Shape,Scale,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_beta(R,VC,Alpha,Beta,S),W0,W):-!,
+  (var(S)->
+    sample_beta(R,VC,Alpha,Beta,S),
+    W=W0
+  ;
+    beta_density(Alpha,Beta,S,D),
     W is W0*D
    ).
 
@@ -1554,7 +1593,12 @@ beta(Alpha,Beta,S):-
   gamma(Alpha,1,X),
   gamma(Beta,1,Y),
   S is X/(X+Y).
-     
+
+beta_density(Alpha,Beta,X,D):-
+  B is exp(lgamma(Alpha)+lgamma(Beta)-lgamma(Alpha+Beta)),
+  D is X^(Alpha-1)*(1-X)^(Beta-1)/B.
+
+
 /**
  * sample_poisson(+R:int,+VC:list,+Lambda:float,-S:int) is det
  *
@@ -1593,6 +1637,16 @@ poisson_cycle(X0,X,L,P0,S0,U):-
   S is S0+P,
   poisson_cycle(X1,X,L,P,S,U).
 
+poisson_prob(Lambda,X,P):-
+  fact(X,1,FX),
+  P is (Lambda^X)*exp(-Lambda)/FX.
+
+fact(0,F,F):-!.
+
+fact(N,F0,F):-
+  F1 is F0*N,
+  N1 is N-1,
+  fact(N1,F1,F).
 /**
  * sample_dirichlet(+R:int,+VC:list,+Par:list,-S:float) is det
  *
