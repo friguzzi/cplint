@@ -21,6 +21,7 @@ details.
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/7,
+  mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
@@ -73,6 +74,7 @@ details.
 :-meta_predicate initial_sample(:).
 :-meta_predicate initial_sample_neg(:).
 
+:-meta_predicate mc_lw_sample(:,:,+,-).
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
@@ -787,6 +789,29 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   sample_arg(K2,M:Goals,Arg,V1,V).
 
 /** 
+ * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples V-W where
+ * V is a value of Arg for which Query succeeds in
+ * a world sampled at random and W is the weight of the sample.
+ * It performs likelihood weighting: each sample is weighted by the
+ * likelihood of evidence in the sample.
+ */
+mc_lw_sample(M:Goal,M:Evidence,S,P):-
+  erase_samples,
+  lw_sample_bool(S,M:Goal,M:Evidence,ValList),
+  foldl(agg_val,ValList,0,Sum),
+  foldl(value_cont_single,ValList,0,SumTrue),
+  P is SumTrue/Sum.
+
+
+value_cont_single(H-W,S,S+H*W).
+
+
+/** 
  * mc_lw_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -827,6 +852,25 @@ agg_val(_ -N,S,S+N).
 
 norm(NF,V-W,V-W1):-
   W1 is W*NF.
+
+lw_sample_bool(0,_Goals,_Ev,[]):-!.
+
+lw_sample_bool(K0,M:Goal, M:Evidence, [S-W|V]):-
+  copy_term(Goal,Goal1),
+  (lw_sample(M:Goal1)->
+    S=1
+  ;
+    S=0
+  ),
+  copy_term(Evidence,Ev1),
+  (lw_sample_weight(M:Ev1,1,W0)->
+    W=W0
+  ;
+    W=0
+  ),
+  K1 is K0-1,
+  erase_samples,
+  lw_sample_bool(K1,M:Goal,M:Evidence,V).
 
 lw_sample_arg(0,_Goals,_Ev,_Arg,[]):-!.
 
@@ -882,8 +926,8 @@ lw_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
 lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
 
-lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
-  sample_discrete(R,VC,D,S).
+%lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
+%  sample_discrete(R,VC,D,S).
 
 lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
   sample_head(R,VC,D,SN),
@@ -1698,8 +1742,9 @@ prod(X,A,P0,P0*X^(A-1)).
 sample_discrete(R,VC,_D,S):-
   recorded(R,sampled(VC,S)),!.
 
-sample_discrete(R,VC,D,S):-
+sample_discrete(R,VC,D,S0):-
   discrete(D,S),
+  S=S0,
   recorda(R,sampled(VC,S)).
 
 /**
@@ -2749,6 +2794,7 @@ sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 
+sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 
