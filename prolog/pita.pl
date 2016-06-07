@@ -23,8 +23,7 @@ details.
   load/1,load_file/1,
   op(600,xfy,'::'),
   msw/4,
-  msw/5,
-  set_sw/2
+  msw/5
     ]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
