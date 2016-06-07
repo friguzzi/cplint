@@ -21,13 +21,18 @@ details.
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
   load/1,load_file/1,
-  op(600,xfy,'::')
+  op(600,xfy,'::'),
+  msw/4,
+  msw/5,
+  set_sw/2
     ]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
+:-meta_predicate msw(:,-,-,-).
+:-meta_predicate msw(:,-,-,-,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -419,6 +424,34 @@ get_var_n(Env,R,S,Probs0,V):-
     trhow(error('Non ground probailities not instantiated by the body'))
   ).
 
+msw(M:A,B,Env,BDD):-
+  M:values(A,Values),
+  M:sw(R,A,Probs0),
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    length(Probs,L),
+    add_var(Env,L,Probs,R,V),
+    nth0(N,Values,B),
+    equality(Env,V,N,BDD)
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
+msw(M:A,B,Env,BDD,_DB):-
+  M:values(A,Values),
+  M:sw(R,A,Probs0),
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    length(Probs,L),
+    add_var(Env,L,Probs,R,V),
+    nth0(N,Values,B),
+    equality(Env,V,N,BDD)
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
+combine(V,P,V:P).
+
 add_bdd_arg(M:A,Env,BDD,M:A1):-
   A=..[P|Args],
   append(Args,[Env,BDD],Args1),
@@ -736,6 +769,11 @@ delete_equal([H|T],E,T):-
 delete_equal([H|T],E,[H|T1]):-
   delete_equal(T,E,T1).
 
+set_sw(A,B):-
+  get_next_rule_number(R),
+  pita_module(M),
+  assert(M:sw(R,A,B)).
+
 
 user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
@@ -746,6 +784,14 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
+user:term_expansion((:- begin_plp), []) :-
+  pita_input_mod(M),!,
+  assert(pita_module(M)).
+
+user:term_expansion((:- end_plp), []) :-
+  pita_input_mod(_M0),!,
+  retractall(pita_module(_M)).
+
 user:term_expansion((:- begin_lpad), []) :-
   pita_input_mod(M),!,
   assert(pita_module(M)).
@@ -753,6 +799,9 @@ user:term_expansion((:- begin_lpad), []) :-
 user:term_expansion((:- end_lpad), []) :-
   pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
+
+user:term_expansion(values(A,B), values(A,B)) :-
+  prolog_load_context(module, M),pita_module(M),!.
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_module(M),
@@ -1037,6 +1086,10 @@ user:term_expansion((:- set_pita(P,V)), []) :-!,
   prolog_load_context(module, M),pita_module(M),
   set_pita(P,V).
 
+user:term_expansion((:- set_sw(A,B)), []) :-!,
+  prolog_load_context(module, M),pita_module(M),
+  set_sw(A,B).
+
 
 user:term_expansion(Head, (Head1:-one(Env,One))) :- 
   prolog_load_context(module, M),pita_module(M),
@@ -1106,6 +1159,7 @@ average(L,Av):-
 
 sandbox:safe_primitive(pita:set_pita(_,_)).
 sandbox:safe_primitive(pita:setting_pita(_,_)).
+sandbox:safe_primitive(pita:set_sw(_,_)).
 /*sandbox:safe_primitive(pita:init(_,_,_)).
 sandbox:safe_primitive(pita:init_bdd(_,_)).
 sandbox:safe_primitive(pita:init_test(_,_)).
@@ -1129,4 +1183,6 @@ sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_,_), []).
+sandbox:safe_meta(pita:msw(_,_,_,_), []).
+sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 
