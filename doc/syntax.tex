@@ -8,8 +8,9 @@ LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
 Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used.
 A general CP-logic clause has the form
 \begin{verbatim}
-h1:p1 ; ... ; hn:pn :- b1,...,bm,\+ c1,....,\+ cl
+h1:p1 ; ... ; hn:pn :- Body.
 \end{verbatim}
+where \verb|Body| is a conjunction of goals as in Prolog.
  No parentheses are necessary. The \texttt{pi} are numeric expressions. It is up to the user to ensure that the numeric expressions are legal, i.e. that they sum up to less than one.
 
 If the clause has an empty body, it can be represented like this
@@ -18,11 +19,11 @@ h1:p1 ; ... ; hn:pn.
 \end{verbatim}
 If the clause has a single head with probability 1, the annotation can be omitted and the clause takes the form of a normal prolog clause, i.e. 
 \begin{verbatim}
-h1 :- b1,...,bm,\+ c1,...,\+ cl.
+h1 :- Body.
 \end{verbatim}
 stands for 
 \begin{verbatim}
-h1:1 :- b1,...,bm,\+ c1,...,\+ cl.
+h1:1 :- Body.
 \end{verbatim}
 The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \href{http://cplint.lamping.unife.it/example/inference/coin.cpl}{\texttt{coin.cpl}})
 \begin{verbatim}
@@ -38,21 +39,8 @@ toss(coin).
 \end{verbatim}
 The first clause states that if we toss a coin that is not biased it has equal probability of landing heads and tails. The second states that if the coin is biased it has a slightly higher probability of landing heads. The third states that the coin is fair with probability 0.9 and biased with probability 0.1 and the last clause states that we toss a coin with certainty.
 
-Moreover, the bodies of rules may contain the built-in predicates:
-\begin{verbatim}
-is/2, >/2, </2, >=/2 ,=</2,
-=:=/2, =\=/2, true/0, false/0,
-=/2, ==/2, \=/2 ,\==/2, !/0, length/2
-\end{verbatim}
-The bodies may also contain the following
- library predicates:
-\begin{verbatim}
-member/2, max_list/2, min_list/2
-nth0/3, nth/3, name/2, float/1,
-integer/1, var/1, @>/2, 
-memberchk/2, select/3, dif/2,
-between/3
-\end{verbatim}
+Moreover, the bodies of rules may contain built-in predicates, predicates
+from the libraries \verb|lists|, \verb|apply| and \verb|clpr/nf_r|
 plus the predicate
 \begin{verbatim}
 average/2
@@ -81,25 +69,72 @@ draw_red(R, G):-
 Variables in probabilistic annotations must be ground when resolution reaches the end of the body, 
 otherwise an exception is raised.
 
-Facts of the form
+Alternative ways of specifying probability distribution include
 \begin{verbatim}
-A:discrete(Var,D).
+A:discrete(Var,D):-Body.
+\end{verbatim}
+or
+\begin{verbatim}
+A:finite(Var,D):-Body.
 \end{verbatim}
 where \verb|A| is an atom containg variable \verb|Var| and \verb|D|
 is a list of couples \verb|Value:Prob| assigning probability \verb|Prob|
 to \verb|Value|. 
+Moreover, you can use
+\begin{verbatim}
+A:uniform(Var,D):-Body.
+\end{verbatim}
+where \verb|A| is an atom containg variable \verb|Var| and \verb|D|
+is a list of values each taking the same probability (1 over the length
+of \verb|D|).
+\subsubsection{ProbLog Syntax}
+You can also use ProbLog \cite{DBLP:conf/ijcai/RaedtKT07} syntax, so a general clause takes the form
+\begin{verbatim}
+p1::h1 ; ... ; pn::hn :- Body
+\end{verbatim}
+where the \texttt{pi} are numeric expressions. 
 
+\subsubsection{PRISM Syntax}
+You can also use PRISM \cite{DBLP:conf/ijcai/SatoK97} syntax, so a program is composed of
+a set of regular Prolog rules whose body may contain calls to the \verb|msw/2| predicate (multi-ary 
+switch). A call \verb|msw(term,value)| means that a random variable associated to \verb|term|
+assumes value \verb|value|. The admissible values  for a discrete random variable are 
+specified using facts for the \verb|values/2| predicate of the form
+\begin{verbatim}
+values(T,L).
+\end{verbatim}
+where \verb|T| is a term (possibly containing variables) and \verb|L| is a list of values.
+The distribution over values is specified using directives for \verb|set_sw/2| of the form
+\begin{verbatim}
+:- set_sw(T,LP).
+\end{verbatim}
+where \verb|T| is a term (possibly containing variables) and \verb|LP| is a list of
+probability values.
+Remember that in PRISM each call to \verb|msw/2| refers to a different random
+variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog.
+
+For example, the coin example above in PRISM syntax becomes
+\begin{verbatim}
+values(throw(_),[heads,tails]).
+:- set_sw(throw(fair),[0.5,0.5]).
+:- set_sw(throw(biased),[0.6,0.4]).
+values(fairness,[fair,biased]).
+:- set_sw(fairness,[0.9,0.1]).
+res(Coin,R):- toss(Coin),fairness(Coin,Fairness),msw(throw(Fairness),R).
+fairness(_Coin,Fairness) :- msw(fairness,Fairness).
+toss(coin).
+\end{verbatim}
 \subsection{Continuous Probability Densities}
 \label{cont}
 
 \verb|cplint| handles continuous random variables as well with its
 sampling inference module.
 To specify a probability density on an argument \verb|Var| of an atom
-\verb|A| you can used a fact of the form
+\verb|A| you can used rules of the form
 \begin{verbatim}
-A:Density.
+A:Density:- Body
 \end{verbatim}
-where \verb|Density| is a special atom identifying a probability  density on variable \verb|Var|.
+where \verb|Density| is a special atom identifying a probability  density on variable \verb|Var| and \verb|Body| (optional) is a regular clause body.
 Allowed \verb|Density| atoms are
 \begin{itemize}
 \item \verb|uniform(Var,L,U)|: \verb|Var| is uniformly distributed in $[L,U]$
@@ -109,6 +144,10 @@ numbers following a Dirichlet distribution with $\alpha$ parameters specified
 by the list \verb|Par|
 \item \verb|gamma(Var,Shape,Scale)|  \verb|Var| follows a gamma distribution 
 with shape parameter \verb|Shape| and scale parameter \verb|Scale|.
+\item \verb|beta(Var,Alpha,Beta)|  \verb|Var| follows a beta distribution 
+with parameters \verb|Alpha| and \verb|Beta|.
+\item \verb|poisson(Var,Lambda)|  \verb|Var| follows a Poisson distribution 
+with parameter \verb|Lambda|.
 \end{itemize}
 For example
 \begin{verbatim}
@@ -178,3 +217,20 @@ In case random variables are not sufficiently instantiated to
 exploit expressions for inferring the values of other variables, 
 inference will return an error.
 
+\subsubsection{Distributional Clauses Syntax}
+\label{dc}
+You can also use the syntax of Distributional Clauses (DC) \cite{Nitti2016}.
+Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in
+\begin{verbatim}
+T~Density' := Body.
+\end{verbatim}
+Here \verb|:=| replaces the implication symbol, \verb|T| is a term and \verb|Density'| is one of the density atoms above witthout the \verb|Var| argument, because \verb|T|
+itself represents a random variables. In the body of clauses you can use the infix operator \verb|~=| to equate a term representing a random variable with a logical variable or
+a constant as in \verb|T ~= X|. Internally \verb|cplint| transforms the terms representing random variables into atoms with an extra argument for holding the variable.
+DC can be used to represent also discrete distributions using
+\begin{verbatim}
+T~uniform(L) := Body.
+T~finite(D) := Body.
+\end{verbatim} 
+where \verb|L| is a list of values and \verb|D| is a list of couples \verb|P:V| with \verb|P| a probability and \verb|V| a value.
+If \verb|Body| is empty, as in regular Prolog, the implication symbol \verb|:=| can be omitted.

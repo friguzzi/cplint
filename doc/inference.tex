@@ -5,7 +5,7 @@ using a different program transformation technique and is described in \cite{Rig
 random variables.
 
 For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \verb|pita|), initialize it with a directive (for example \verb|:- pita|) and then enclose the LPAD
-clauses in \verb|:-begin_lpad.| and \verb|:-end_lpad.| For example, the coin program above can be stored in \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference
+clauses in \verb|:-begin_lpad.| or \verb|:-begin_plp.| and \verb|:-end_lpad.| or \verb|:-end_plp.| For example, the coin program above can be stored in \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference
 with \verb|pita| as follows
 \begin{verbatim}
 :- use_module(library(pita)).
