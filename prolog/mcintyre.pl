@@ -811,10 +811,7 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
- * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples V-W where
- * V is a value of Arg for which Query succeeds in
- * a world sampled at random and W is the weight of the sample.
+ * The predicate returns in Prob the probability that the query is true.
  * It performs likelihood weighting: each sample is weighted by the
  * likelihood of evidence in the sample.
  */
