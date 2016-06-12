@@ -1,6 +1,6 @@
 \subsection{Unconditional Queries}
 \label{uncondq}
-You can ask the unconditional probability of an atom using \verb|pita| with the predicate
+The unconditional probability of an atom can be asked using \verb|pita| with the predicate
 \begin{verbatim}
 prob(:Query:atom,-Probability:float).
 \end{verbatim}
@@ -118,7 +118,7 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 \subsection{Conditional Queries on Discrete Variables}
 \label{condq}
-You can ask the conditional probability of an atom given another atom using \verb|pita| with the predicate 
+The conditional probability of an atom query given another atom evidence can be asked using \verb|pita| with the predicate 
 \begin{verbatim}
 prob(:Query:atom,:Evidence:atom,-Probability:float).
 \end{verbatim}
@@ -128,14 +128,11 @@ as in
 \end{verbatim}
 If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability.
 
-If the evidence is composed of more than one atom, add a clause of the form
+If the evidence is composed of more than one atom, a clause of the form
 \begin{verbatim}
 evidence:- e1,...,en.
 \end{verbatim}
-to the program, where \verb|e1,...,en| are the evidence atoms, and use the query
-\begin{verbatim}
-?- prob(goal,evidence,P).
-\end{verbatim}
+should be added to the program, where \verb|e1,...,en| are the evidence atoms, and the query \verb|prob(goal,evidence,P).| should be asked.
 
 
 When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
@@ -292,6 +289,23 @@ If so, it computes the probability density of the sampled value and multiplies t
 leaving the weight unchanged. 
 In this way, each sample in the result has a weight that is 1 for the prior distribution and that may be different from the posterior distribution,
 reflecting the influence of evidence.
+
+
+ The predicate 
+\begin{verbatim}
+mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
+\end{verbatim}
+samples \verb|Query|  a number of \verb|Samples| times given that \verb|Evidence|
+(a conjunction of atoms is allowed here). is true.
+The predicate returns in \verb|Prob| the probability that the query is true.
+It performs likelihood weighting: each sample is weighted by the
+likelihood of evidence in the sample.
+For example
+\begin{verbatim}
+?- mc_lw_sample(nation(a),student_gpa(4.0),1000,PPost).
+\end{verbatim}
+from \href{http://cplint.lamping.unife.it/example/inference/indian_gpa.pl}{\texttt{indian\_gpa.pl}} samples 1000 the query
+\verb|nation(a)| given that \verb|student_gpa(4.0)| has been observed.
 
 
  The predicate 

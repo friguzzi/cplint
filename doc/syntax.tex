@@ -114,6 +114,7 @@ Remember that in PRISM each call to \verb|msw/2| refers to a different random
 variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog.
 
 For example, the coin example above in PRISM syntax becomes
+(\href{http://cplint.lamping.unife.it/example/inference/coinmsw.pl}{\texttt{coinmsw.pl}})
 \begin{verbatim}
 values(throw(_),[heads,tails]).
 :- set_sw(throw(fair),[0.5,0.5]).
@@ -182,8 +183,8 @@ states that for an index \verb|I| the continuous variable \verb|X| is
 sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Guassian with mean 1 and
 variance 5.
 
-Any operation is allowed on continuous random variables. For example
-\href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}
+Any operation is allowed on continuous random variables. The example below
+(\href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}) encodes a Kalman filter:
 \begin{verbatim}
 kf(N,O, T) :-
   init(S),
@@ -205,7 +206,7 @@ init(S):gaussian(S,0,1).
 trans_err(_,E):gaussian(E,0,2).
 obs_err(_,E):gaussian(E,0,1).
 \end{verbatim}
-encodes a Kalman filter. Continuous random variables are involved
+Continuous random variables are involved
 in arithmetic expressions (in \verb|trans/3| and \verb|emit/3|). It
 is often convenient, as in this case, to use CLP(R) constraints (by
 including the directive \verb|:- use_module(library(clpr)).|) as 
@@ -234,3 +235,51 @@ T~finite(D) := Body.
 \end{verbatim} 
 where \verb|L| is a list of values and \verb|D| is a list of couples \verb|P:V| with \verb|P| a probability and \verb|V| a value.
 If \verb|Body| is empty, as in regular Prolog, the implication symbol \verb|:=| can be omitted.
+
+The Indian GPA problem from \url{http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa}in distributional clauses syntax  (\url{https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl})
+takes the form (\href{http://cplint.lamping.unife.it/example/inference/indian_gpadc.pl}{\texttt{indian\_gpadc.pl}}):
+\begin{verbatim}
+is_density_A:0.95;is_discrete_A:0.05.
+% the probability distribution of GPA scores for American students is
+% continuous with probability 0.95 and discrete with probability 0.05
+
+agpa(A): beta(A,8,2) :- is_density_A.
+% the GPA of American students follows a beta distribution if the
+% distribution is continuous
+
+american_gpa(G) : finite(G,[4.0:0.85,0.0:0.15]) :- is_discrete_A.
+% the GPA of American students is 4.0 with probability 0.85 and 0.0
+% with 
+% probability 0.15 if the
+% distribution is discrete
+american_gpa(A):- agpa(A0), A is A0*4.0.
+% the GPA of American students is obtained by rescaling the value of
+% agpa
+% to the (0.0,4.0) interval
+is_density_I : 0.99; is_discrete_I:0.01.
+% the probability distribution of GPA scores for Indian students is
+% continuous with probability 0.99 and discrete with probability 
+% 0.01
+igpa(I): beta(I,5,5) :- is_density_I.
+% the GPA of Indian students follows a beta distribution if the
+% distribution is continuous
+indian_gpa(I): finite(I,[0.0:0.1,10.0:0.9]):-  is_discrete_I.
+% the GPA of Indian students is 10.0 with probability 0.9 and 0.0
+% with
+% probability 0.1 if the
+% distribution is discrete
+indian_gpa(I) :- igpa(I0), I is I0*10.0.
+% the GPA of Indian students is obtained by rescaling the value 
+% of igpa
+% to the (0.0,4.0) interval
+nation(N) : finite(N,[a:0.25,i:0.75]).
+% the nation is America with probability 0.25 and India with 
+% probability 0.75
+student_gpa(G):- nation(a),american_gpa(G).
+% the GPA of the student is given by american_gpa if the nation is 
+% America
+student_gpa(G) :- nation(i),indian_gpa(G).
+% the GPA of the student is given by indian_gpa if the nation 
+%is India
+\end{verbatim}
+See 
