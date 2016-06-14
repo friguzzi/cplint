@@ -1487,8 +1487,8 @@ sample_head(R,VC,_HeadList,N):-
 
 sample_head(R,VC,HeadList,N):-
   sample(HeadList,NH),
-  N=NH,
-  recorda(R,sampled(VC,NH)).
+  recorda(R,sampled(VC,NH)),
+  N=NH.
 
 sample(HeadList, HeadId) :-
   random(Prob), 
