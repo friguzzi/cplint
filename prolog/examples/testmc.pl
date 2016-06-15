@@ -1,7 +1,7 @@
 
 
 main:-
-	format("~nTesting pita~n",[]),
+	format("~nTesting mcintyre~n",[]),
 	setof(File,A^test(A,File),F),
 	statistics(runtime,[_,_]),
 	test_files(F),
@@ -30,11 +30,32 @@ test_all([],_F).
 
 test_all([H|T],F):-
 	copy_term(H,NH),
-	NH=(_Query,close_to('P',_Prob)),
+	numbervars(NH),
+%	NH=(_Query,close_to('P',_Prob)),
 	format("~a ~p.~n",[F,NH]),
-	call(H),!,
+	(H=(G,R)),
+	call(G),!,
+	format("\t~p.~n",[G]),
+	call(R),!,
 	test_all(T,F).
 
+epsilon(0.05).
+
+close_to(V,T):-
+	epsilon(E),
+	TLow is T-E,
+	THigh is T+E,
+	TLow<V,
+	V<THigh.
+
+relative_epsilon(0.1).
+
+relatively_close_to(V,T):-
+	relative_epsilon(E),
+	TLow is T*(1-E),
+	THigh is T*(1+E),
+	TLow<V,
+	V<THigh.
 
 test((mc_sample(heads(coin),1000,P),close_to(P,0.51)),coinmc).
 test((mc_sample(tails(coin),1000,P),close_to(P,0.49)),coinmc).
@@ -48,6 +69,16 @@ test((mc_sample(on(0,1),1000,P),close_to(P,0.333333333333333)),threesideddicemc)
 test((mc_sample(on(1,1),1000,P),close_to(P,0.222222222222222)),threesideddicemc).
 test((mc_sample(on(2,1),1000,P),close_to(P,0.148148147703704)),threesideddicemc).
 
+test((mc_sample(reach(s0,0,s0),1000,P),close_to(P,1)),markov_chain).
+test((mc_sample(reach(s0,0,s1),1000,P),close_to(P,0.5984054054054054)),markov_chain).
+test((mc_sample(reach(s0,0,s2),1000,P),close_to(P,0.4025135135135135)),markov_chain).
+test((mc_sample(reach(s0,0,s3),1000,P),close_to(P,0.5998378378378378)),markov_chain).
+test((mc_sample(reach(s0,0,s4),1000,P),close_to(P,0.49948717948717947)),markov_chain).
+test((mc_sample(reach(s1,0,s0),1000,P),close_to(P,0)),markov_chain).
+test((mc_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values)),markov_chain).
+test((mc_sample_arg_first(reach(s0,0,S),50,S,Values),member(s3-_,Values),member(s2-_,Values)),markov_chain).
+
+test((mc_sample(pre_pcfg([a]),1000,P),close_to(P,0.5)),prefix).
 test((mc_sample(pre_pcfg([a]),1000,P),close_to(P,0.5)),prefix).
 test((mc_sample(pre_pcfg([a,b]),1000,P),close_to(P,0.09692857142857143)),prefix).
 test((mc_sample(pre_pcfg([b]),1000,P),close_to(P,0.5)),prefix).
@@ -58,7 +89,11 @@ test((mc_sample(pre_plc([a,b]),1000,P),close_to(P,0.0326)),pre_plcg).
 
 test((mc_sample(eventually(elect),100,P),close_to(P,1)),pctl_slep).
 test((mc_sample(bounded_eventually(elect,3),100,P),close_to(P,0.97)),pctl_slep).
-test((mc_expectation(eventually(elect,T),100,T,P),close_to(P,1.2)),pctl_slep).
+test((mc_expectation(eventually(elect,T),100,T,P),relatively_close_to(P,1.2)),pctl_slep).
+
+test((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),1000,T,E),relatively_close_to(E,1.8572993496171497)),kalman_filter).
+
+test((mc_expectation(kf(1,_O2,T),1000,T,E),close_to(E,0)),kalman_filtermsw).
 
 test((mc_sample(is_word,1000,P),close_to(P,0.067222)),slp_pdcg).
 
@@ -76,12 +111,4 @@ test((mc_sample(drawn(1,1),1000,P),close_to(P,0.285)),nballsdc).
 test((mc_sample((drawn(1,1),material(1,wood)),1000,P),close_to(P,0.086)),nballsdc).
 test((mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,P),close_to(P,0.044)),nballsdc).
 
-epsilon(0.05).
-
-close_to(V,T):-
-	epsilon(E),
-	TLow is T-E,
-	THigh is T+E,
-	TLow<V,
-	V<THigh.
 
