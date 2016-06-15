@@ -48,6 +48,26 @@ test((mc_sample(on(0,1),1000,P),close_to(P,0.333333333333333)),threesideddicemc)
 test((mc_sample(on(1,1),1000,P),close_to(P,0.222222222222222)),threesideddicemc).
 test((mc_sample(on(2,1),1000,P),close_to(P,0.148148147703704)),threesideddicemc).
 
+test((mc_sample(eventually(elect),1000,P),close_to(P,1)),pctl_slep).
+test((mc_sample(bounded_eventually(elect,3),1000,P),close_to(P,0.97)),pctl_slep).
+test((mc_expectation(eventually(elect,T),1000,T,P),close_to(P,1.2)),pctl_slep).
+
+test((mc_sample(is_word,1000,P),close_to(P,0.067222)),slp_pdcg).
+
+test((mc_lw_sample(nation(a),student_gpa(4.0),1000,P),close_to(P,1.0)),indian_gpa).
+test((mc_sample(nation(a),1000,P),close_to(P,0.25)),indian_gpa).
+
+test((mc_lw_sample(nation(a),student_gpa(4.0),1000,P),close_to(P,1.0)),indian_gpadc).
+test((mc_sample(nation(a),1000,P),close_to(P,0.25)),indian_gpadc).
+
+test((mc_sample(drawn(1,1),1000,P),close_to(P,0.285)),nballs).
+test((mc_sample((drawn(1,1),material(1,wood)),1000,P),close_to(P,0.086)),nballs).
+test((mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,P),close_to(P,0.044)),nballs).
+
+test((mc_sample(drawn(1,1),1000,P),close_to(P,0.285)),nballsdc).
+test((mc_sample((drawn(1,1),material(1,wood)),1000,P),close_to(P,0.086)),nballsdc).
+test((mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,P),close_to(P,0.044)),nballsdc).
+
 epsilon(0.05).
 
 close_to(V,T):-
