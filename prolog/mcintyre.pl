@@ -41,6 +41,7 @@ details.
   sample_head/4,
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
+  mc_lw_expectation/5,
   gauss_density/4,
   gauss/3,
   histogram/3,
@@ -86,6 +87,7 @@ details.
 :-meta_predicate mc_lw_sample(:,:,+,-).
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
+:-meta_predicate mc_lw_expectation(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -862,6 +864,25 @@ mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
 mc_lw_sample_arg_log(M:Goal,M:Evidence,S,Arg,ValList):-
   lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList).
 
+/** 
+ * mc_lw_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query given Evidence by
+ * likelihood weighting.
+ * It takes N samples of Query and sums up the weighted value of Arg for
+ * each sample. The overall sum is divided by the sum of weights to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_lw_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  foldl(single_value_cont,ValList,0,Sum),
+  erase_samples,
+  foldl(agg_val,ValList,0,SW),
+  E is Sum/SW.
+
+
+single_value_cont(H-N,S,S+N*H).
+
 
 agg_val(_ -N,S,S+N).
 
@@ -991,8 +1012,13 @@ lw_sample_weight(M:A~= B,W0,W):-!,
   lw_sample_weight(M:A1,W0,W).
 
 lw_sample_weight(M:msw(A,B),W0,W):-!,
-  msw_weight(M:A,B,W1),
-  W is W0*W1.
+  (var(B)->
+    msw(M:A,B),
+    W=W0
+  ;
+    msw_weight(M:A,B,W1),
+    W is W0*W1
+  ).
 
 lw_sample_weight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
@@ -1087,21 +1113,24 @@ lw_sample_logweight(M:A~= B,W0,W):-!,
   add_arg(A,B,A1),
   lw_sample_logweight(M:A1,W0,W).
 
-lw_sample_weight(M:msw(A,B),W0,W):-!,
-  msw_weight(M:A,B,W1),
-  W is W0+log(W1).
+lw_sample_logweight(M:msw(A,B),W0,W):-!,
+  (var(B)->
+    msw(M:A,B),
+    W=W0
+  ;
+    msw_weight(M:A,B,W1),
+    W is W0+log(W1)
+  ).
 
 lw_sample_logweight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
   nth0(N,HL,_:P),
   W is W0+log(P).
 
-
 lw_sample_logweight(_M:sample_discrete(R,VC,D,S),W0,W):-!,
   sample_head(R,VC,D,SN),
   nth0(SN,D,S:P),
   W is W0+log(P).
-
 
 lw_sample_logweight(_M:sample_uniform(R,VC,L,U,S),W0,W):-!,
   (var(S)->
@@ -3124,5 +3153,6 @@ sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
