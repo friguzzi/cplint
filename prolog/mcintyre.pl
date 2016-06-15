@@ -18,9 +18,11 @@ details.
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
   mc_sample/5,  
   mc_rejection_sample/6,  
+  mc_rejection_sample/4,  
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/7,
+  mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
@@ -61,7 +63,9 @@ details.
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
+:-meta_predicate mc_rejection_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
@@ -419,6 +423,18 @@ mc_sample(M:Goal,S,T,F,P):-
   restore_samples(Goal1).
 
 /** 
+ * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns
+ * the Probability of Query.
+ * It performs rejection sampling: if in a sample Evidence is false, the 
+ * sample is discarded.
+ * If Query/Evidence are not ground, it considers them an existential queries.
+ */
+mc_rejection_sample(M:Goal,M:Evidence,S,P):-
+  mc_rejection_sample(M:Goal,M:Evidence,S,_T,_F,P).
+ /** 
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -436,6 +452,19 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   erase_samples.
 
 /** 
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns the
+ * Probability of the query.
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability. 
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ */
+mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
+  mc_mh_sample(M:Goal,M:Evidence,S,L,_T,_F,P).
+
+ /** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -3133,7 +3162,9 @@ sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
