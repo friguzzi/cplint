@@ -1,8 +1,12 @@
 /*
-Throwing a coin with uncertainty on its fairness, from
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
-disjunctions. In International Conference on Logic Programming, 
-volume 3131 of LNCS, pages 195-209. Springer, 2004.
+Mixture of two Gaussians. A biased coin is thrown, if it lands heads X in mix(X)
+is sampled from a Gaussian with mean 0 and variance 1. if it lands tails X is
+sampled from a Gaussian with mean 5 and variance 2.
+The example illustrates the use of continuous random variables and
+the use of sampling, including
+rejection sampling and Metropolis/Hastings. Moreover the example
+illustrates the use of the predicate histogram/3 for graphing the
+probability density function of continuous random variables.
 */
 :- use_module(library(mcintyre)).
 
@@ -13,75 +17,84 @@ volume 3131 of LNCS, pages 195-209. Springer, 2004.
 :- begin_lpad.
 
 heads:0.6;tails:0.4. 
+% a coin is thrown. The coin is biased: with probability 0.6 it lands heads,
+% with probabiity 0.4 it lands tails
+
 g(X): gaussian(X,0, 1).
-h(X):gaussian(X,5, 2).
+% X in g(X)  follows a Gaussian distribution with mean 0 and variance 1
+h(X): gaussian(X,5, 2).
+% X in h(X)  follows a Gaussian distribution with mean 5 and variance 2
 
 mix(X) :- heads, g(X).
+% if the coin lands heads, X in mix(X) is given by g(X)
 mix(X) :- tails, h(X).
-
+% if the coin lands tails, X in mix(X) is given by h(X)
 
 :- end_lpad.
 
-hist(G):-
-  mc_sample_arg(mix(X),1000,X,L0),
-  maplist(val,L0,L),
-  max_list(L,Max),
-  min_list(L,Min),
-  D is Max-Min,
-  NBins=20,
-  BinWidth is D/NBins,
-  bin(NBins,L,Min,BinWidth,LB),
-  Chart = c3{data:_{x:elem, rows:[elem-freq|LB], type:bar},
-          axis:_{ rotated: true
-             },
-                   size:_{height: 100},
-                  legend:_{show: false}}.
+hist_uncond(Samples,NBins,Chart):-
+  mc_sample_arg(mix(X),Samples,X,L0),
+  histogram(L0,NBins,Chart).
+% take SAmples samples of X in mix(X) and draw a histogram with NBins bins representing 
+% the probability density of X 
 
-bin(0,_L,_Min,_BW,[]):-!.
+hist_rej_heads(Samples,NBins,Chart):-
+  mc_rejection_sample_arg(mix(X),heads,Samples,X,L0),
+  histogram(L0,NBins,Chart).
+% take Samples samples of X in mix(X) given that heads was true using 
+% rejection sampling and draw an
+% histogram with NBins bins representing the probability density of X
 
-bin(N,L,Lower,BW,[V-Freq|T]):-
-  V is Lower+BW/2,
-  Upper is Lower+BW,
-  
+hist_mh_heads(Samples,Lag,NBins,Chart):-
+  mc_mh_sample_arg(mix(X),heads,Samples,Lag,X,L0),
+  histogram(L0,NBins,Chart).
+% take Samples samples of X in mix(X) given that heads was true using 
+% Metropolis-Hastings and draw an
+% histogram with NBins bins representing the probability density of X
 
-val([E]-_,E).
+hist_rej_dis(Samples,NBins,Chart):-
+  mc_rejection_sample_arg(mix(X),(mix(Y),Y>2),Samples,X,L0),
+  histogram(L0,NBins,Chart).
+% take Samples samples of X in mix(X) given that X>2 was true using 
+% rejection sampling and draw an
+% histogram with NBins bins representing the probability density of X
+
+hist_mh_dis(Samples,Lag,NBins,Chart):-
+  mc_mh_sample_arg(mix(X),(mix(Y),Y>2),Samples,Lag,X,L0),
+  histogram(L0,NBins,Chart).
+% take Samples samples of X in mix(X) given that X>2 was true using 
+% Metropolis-Hastings and draw an
+% histogram with NBins bins representing the probability density of X
+
+
 /** <examples>
+?- hist_uncond(10000,40,G).
+% take 10000 samples of X in mix(X) and draw a histogram with 40 bins representing 
+% the probability density of X 
+?- mc_sample_arg(mix(X),1000,X,L),histogram(L,40,Chart).
+% take 10000 samples of X in mix(X) and draw a histogram with 40 bins representing 
+% the probability density of X
+?- mc_expectation(mix(X),1000,X,E).
+% E=2.017964749114414
+?- hist_rej_heads(10000,40,G).
+% take 10000 samples of X in mix(X) given that heads was true using 
+% rejection sampling and draw an
+% histogram with 40 bins representing the probability density of X
+?- hist_mh_heads(10000,2,40,G).
+% take 10000 samples of X in mix(X) given that heads was true using 
+% Metropolis-Hastings and draw an
+% histogram with 40 bins representing the probability density of X
+?- mc_mh_expectation(mix(X),heads,1000,2,X,E).
+% E=-0.018433307290594284
+?- hist_rej_dis(10000,40,G).
+% take 10000 samples of X in mix(X) given that X>2 was true using 
+% rejection sampling and draw an
+% histogram with 40 bins representing the probability density of X
+?- hist_mh_dis(10000,2,40,G).
+% take 10000 samples of X in mix(X) given that X>2 was true using 
+% Metropolis-Hastings and draw an
+% histogram with 40 bins representing the probability density of X
+?- mc_mh_expectation(mix(X),(mix(Y),Y>2),1000,2,X,E).
 
-?- mc_prob(heads(coin),Prob).  % what is the probability that coin lands heads?
-% expected result 0.51
-?- mc_prob(tails(coin),Prob).  % what is the probability that coin lands tails?
-% expected result 0.49
-?- mc_prob_bar(heads(coin),Prob).  % what is the probability that coin lands heads?
-% expected result 0.51
-?- mc_prob_bar(tails(coin),Prob).  % what is the probability that coin lands tails?
-% expected result 0.49
-?- mc_sample(heads(coin),1000,T,F,Prob).  
-% take 1000 sample of heads(coin) and return the number of successes (T),
-% the number of failures (F) and the probability
-
-?- mc_sample(tails(coin),1000,T,F,Prob).  
-% take 1000 sample of tails(coin) and return the number of successes (T),
-% the number of failures (F) and the probability
-
-?- mc_sample(heads(coin),1000,Prob).  
-% take 1000 sample of heads(coin) and return the probability
-
-?- mc_sample(tails(coin),1000,Prob).  
-% take 1000 sample of tails(coin) and return the probability
-
-?- mc_sample_bar(heads(coin),1000,Chart).  
-% take 1000 sample of heads(coin) and chart the number of successes and 
-% faliures
-
-?- mc_sample_bar(tails(coin),1000,Chart).  
-% take 1000 sample of tails(coin) and chart the number of successes and 
-% faliures
-
-?- mc_rejection_sample(heads(coin),biased(coin),1000,S,F,P).
-% take 1000 sample of heads(coin) given that biasdd(coin) is true
-% Use rejection sampling
-% F = 387,
-% P = 0.613,
-% S = 613
 */
  
