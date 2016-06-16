@@ -2267,8 +2267,10 @@ msw_weight(Values,Dist,V,W):-
 
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
+  retractall(local_mc_setting(_,_)),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
+  retractall(mc_input_mod(_)),
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),

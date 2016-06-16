@@ -103,7 +103,7 @@ test((mc_sample(eventually(elect),100,P),close_to(P,1)),pctl_slep).
 test((mc_sample(bounded_eventually(elect,3),100,P),close_to(P,0.97)),pctl_slep).
 test((mc_expectation(eventually(elect,T),100,T,P),relatively_close_to(P,1.2)),pctl_slep).
 
-test((mc_mh_sample(eval(2,4),eval(1,3),100,1,P),close_to(P,0.1151,0.2)),arithm).
+test((mc_mh_sample(eval(2,4),eval(1,3),100,1,P),close_to(P,0.1151,0.3)),arithm).
 test((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),100,1,P),close_to(P,1)),arithm).
 %test((mc_rejection_sample(eval(2,4),eval(1,3),1000,P),close_to(P,0.1151)),arithm).
 %test((mc_rejection_sample(eval(2,4),(eval(0,2),eval(1,3)),1000,P),close_to(P,1)),arithm).
