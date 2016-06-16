@@ -49,7 +49,7 @@ trans(S,I,NextS) :-
   trans_err(I,E).
 
 emit(NextS,I,V) :-
-  {NextS =:= V+X},
+  {V =:= NextS +X},
   obs_err(I,X).
 
 init(S):gaussian(S,0,1).
@@ -82,7 +82,7 @@ dens_lw(Samples,NBins,Chart):-
 % plot the density of the state at time 1 in case of no observation
 % by taking 1000 samples and dividing the domain
 % in 40 bins
-?- mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),100,T,E).
+
 
 */
  
