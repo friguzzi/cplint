@@ -23,7 +23,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :-module(slipcover,[set_sc/2,setting_sc/2,
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
   sample/4,
-  op(500,fx,#),op(500,fx,'-#')]).
+  op(500,fx,#),op(500,fx,'-#'),
+  test_no_area/5]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
@@ -175,6 +176,29 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   retract_all(ThRef),
   retract_all(RFRef).
  
+test_no_area(P,TestFolds,NPos,NNeg,Results) :-
+  write2('Testing\n'),
+  input_mod(M),
+  make_dynamic(M),
+  findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
+  append(L,TE),
+  set_sc(compiling,on),
+  process_clauses(P,[],_,[],PRules),
+  generate_clauses(PRules,RuleFacts,0,[],Th), 
+  assert_all(Th,M,ThRef),
+  assert_all(RuleFacts,M,RFRef),
+  (M:bg(RBG0)->
+    process_clauses(RBG0,[],_,[],RBG),
+    generate_clauses(RBG,_RBGRF,0,[],ThBG),
+    generate_clauses_bg(RBG,ClBG), 
+    assert_all(ClBG,M,ClBGRef),
+    assert_all(ThBG,ThBGRef)
+%    assert_all(RBGRF,RBGRFRef)
+  ;
+    true
+  ),
+  set_sc(compiling,off),
+  test_no_area([TE],NPos,NNeg,Results). 
 
 induce_rules(Folds,R):-
 %tell(ciao),
@@ -3461,6 +3485,14 @@ sandbox:safe_primitive(slipcover:equality(_,_,_)).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 
 */
+test_no_area(TestSet,NPos,NNeg,Results):-
+%  S= user_output,
+%  SA= user_output,
+%  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
+  %gtrace,
+  test_folds(TestSet,[],Results,0,NPos,0,NNeg,0,_CLL).
+
+
 test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  S= user_output,
 %  SA= user_output,
