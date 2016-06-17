@@ -1,3 +1,72 @@
+@String{ML_J = "Mach. Learn."}
+
+@article{TLP:8688161,
+author = {Islam,Muhammad Asiful and Ramakrishnan,CR and Ramakrishnan,IV},
+title = {Inference in probabilistic logic programs with continuous random variables},
+journal = TPLP_J,
+volume = {12},
+issue = {Special Issue 4-5},
+month = {7},
+year = {2012},
+issn = {1475-3081},
+pages = {505--523},
+numpages = {19},
+doi = {10.1017/S1471068412000154},
+}
+@article{von195113,
+  title={Various Techniques Used in Connection With Random Digits},
+  author={Von Neumann, John},
+  year={1951},
+  journal={Nat. Bureau Stand. Appl. Math.
+Ser.},
+ volume={12},
+ pages={36-38},
+}
+
+@inproceedings{fung1990weighing,
+  title={Weighing and Integrating Evidence for Stochastic Simulation in Bayesian Networks},
+  author={Fung, Robert M and Chang, Kuo-Chu},
+  booktitle={Fifth Annual Conference on Uncertainty in Artificial Intelligence},
+  pages={209--220},
+  year={1990},
+  organization={North-Holland Publishing Co.}
+}
+@book{koller2009probabilistic,
+  title={Probabilistic Graphical Models: Principles and Techniques},
+  author={Koller, D. and Friedman, N.},
+  isbn={9780262013192},
+  lccn={2009008615},
+  series={Adaptive computation and machine learning},
+  year={2009},
+  publisher={MIT Press},
+  address={Cambridge, MA}
+}
+  url={https://books.google.it/books?id=7dzpHCHzNQ4C},
+
+
+@Article{Nitti2016,
+author="Nitti, Davide
+and De Laet, Tinne
+and De Raedt, Luc",
+title="Probabilistic logic programming for hybrid relational domains",
+journal=ML_J,
+year="2016",
+volume="103",
+number="3",
+pages="407--449",
+abstract="We introduce a probabilistic language and an efficient inference algorithm based on distributional clauses for static and dynamic inference in hybrid relational domains. Static inference is based on sampling, where the samples represent (partial) worlds (with discrete and continuous variables). Furthermore, we use backward reasoning to determine which facts should be included in the partial worlds. For filtering in dynamic models we combine the static inference algorithm with particle filters and guarantee that the previous partial samples can be safely forgotten, a condition that does not hold in most logical filtering frameworks. Experiments show that the proposed framework can outperform classic sampling methods for static and dynamic inference and that it is promising for robotics and vision applications. In addition, it provides the correct results in domains in which most probabilistic programming languages fail.",
+issn="1573-0565",
+doi="10.1007/s10994-016-5558-8",
+}
+url="http://dx.doi.org/10.1007/s10994-016-5558-8"
+
+@article{nampally2014adaptive,
+  title={Adaptive MCMC-Based Inference in Probabilistic Logic Programs},
+  author={Nampally, Arun and Ramakrishnan, CR},
+  journal={arXiv preprint arXiv:1403.6036},
+  year={2014},
+  url={http://arxiv.org/pdf/1403.6036.pdf}
+}
 @inproceedings{Rig15-PLP-IW,
   title = {The Distribution Semantics is Well-Defined for All Normal Programs},
   author = {Fabrizio Riguzzi},
@@ -39,13 +108,13 @@ Logic Programs with Annotated Disjunctions,
 ProbLog},
   year = {2013},
   publisher = {{IOS} Press},
-  pdf = {http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf},
-  doi = {10.3233/FI-2013-847},
+  url = {http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf},
   volume = {124},
   number = {4},
   pages = {521-541},
   copyright = {IOS Press}
 }
+  doi = {10.3233/FI-2013-847},
 @inproceedings{RaeLae95-ALT95,
     Author       = "De Raedt, L. and Van Laer, W.",
     Title        = "Inductive constraint logic",
@@ -75,17 +144,50 @@ ProbLog},
   journal = {Theory and Practice of Logic Programming},
   publisher = {Cambridge University Press},
   copyright = {Cambridge University Press},
-  year = {2013}
+  year = {2015},
+  volume = {15},
+  number = {2},
+  pages = {169-212},
+  url = {http://arxiv.org/abs/1309.2080},
+  pdf = {http://journals.cambridge.org/abstract_S1471068413000689},
+  keywords = {probabilistic inductive logic programming, statistical relational learning, structure learning, distribution semantics, logic programs with annotated disjunction, CP-logic},
+  abstract = {Learning probabilistic logic programming languages is receiving an increasing attention,
+and systems are available for learning the parameters (PRISM, LeProbLog, LFI-ProbLog
+and EMBLEM) or both structure and parameters (SEM-CP-logic and SLIPCASE) of these
+languages. In this paper we present the algorithm SLIPCOVER for "Structure LearnIng
+of Probabilistic logic programs by searChing OVER the clause space." It performs a beam
+search in the space of probabilistic clauses and a greedy search in the space of theories
+using the log likelihood of the data as the guiding heuristics. To estimate the log likelihood,
+SLIPCOVER performs Expectation Maximization with EMBLEM. The algorithm has been
+tested on five real world datasets and compared with SLIPCASE, SEM-CP-logic, Aleph and
+two algorithms for learning Markov Logic Networks (Learning using Structural Motifs (LSM)
+and ALEPH++ExactL1). SLIPCOVER achieves higher areas under the precision-recall and
+receiver operating characteristic curves in most cases.}
 }
-@article{BelRig11-IDA,
-  author = {Elena Bellodi and Fabrizio Riguzzi},
-    title = { Expectation {Maximization} over Binary Decision Diagrams for Probabilistic Logic Programs},
-      year = {2012},
-      volume={16},
-      number={6},
-      journal={Intel. Data Anal.},
-      }
+  doi = {10.1017/S1471068413000689},
 
+@article{BelRig11-IDA-IJ,
+  author = {Elena Bellodi and Fabrizio Riguzzi},
+  title = { Expectation {Maximization} over Binary Decision Diagrams for Probabilistic Logic Programs},
+  year = {2013},
+  volume = {17},
+  number = {2},
+  journal = {Intelligent Data Analysis},
+  publisher = {IOS Press},
+  copyright = {IOS Press},
+  pages = {343-363},
+  url = {http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf},
+  abstract = {Recently much work in Machine Learning has concentrated on using expressive representation languages that combine aspects of logic and probability. A whole field has emerged, called Statistical Relational Learning, rich of successful applications in a variety of domains.
+In this paper we present a Machine Learning technique targeted to Probabilistic Logic Programs, a family of formalisms where uncertainty is represented using Logic Programming tools.
+Among various proposals for Probabilistic Logic Programming, the one based on the distribution semantics is gaining popularity and is the basis for languages such as ICL, PRISM, ProbLog and Logic Programs with Annotated Disjunctions.
+This paper proposes a technique for learning parameters of these languages. Since their equivalent Bayesian networks contain hidden variables, an Expectation Maximization (EM) algorithm is adopted.
+In order to speed the computation up, expectations are computed directly on the Binary Decision Diagrams that are built for inference.
+The resulting system, called EMBLEM for ``EM over Bdds for probabilistic Logic programs Efficient Mining'', has been applied to a number of datasets and showed good performances both in terms of speed and memory usage. In particular its speed allows the execution of a high number of restarts, resulting in good  quality of the solutions.},
+  keywords = {Statistical Relational Learning, Probabilistic Inductive Logic Programming, Probabilistic Logic Programs, Logic Programs with Annotated Disjunctions, Expectation Maximization, Binary Decision Diagrams
+}
+}
+  doi = {10.3233/IDA-130582},
+  url = {http://iospress.metapress.com/content/k1wu917722636526/?issue=2&genre=article&spage=343&issn=1088-467X&volume=17},
 @article{DBLP:journals/jmlr/ElidanF05,
   author    = {G. Elidan and
                N. Friedman},
