@@ -14,15 +14,24 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2, set_pita/2,setting_pita/2,
+:- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
+  set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
   em/9,randomize/1,
-  load/1,load_file/1]).
+  load/1,load_file/1,
+  op(600,xfy,'::'),
+  msw/4,
+  msw/5
+    ]).
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
+:-meta_predicate prob(:,:,-).
+:-meta_predicate prob_bar(:,:,-).
+:-meta_predicate msw(:,-,-,-).
+:-meta_predicate msw(:,-,-,-,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -226,11 +235,13 @@ s(M:Goal,P):-
   end_test(Env),
   member((Goal,P),L).
 
+
 /** 
  * prob(:Query:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query
- * If Query is not ground, it returns in backtracking all instantiations of
+ * The predicate computes the probability of Query
+ * If Query is not ground, it returns in backtracking all ground
+ * instantiations of
  * Query together with their probabilities
  */
 prob(M:Goal,P):-
@@ -239,11 +250,12 @@ prob(M:Goal,P):-
 /** 
  * prob_bar(:Query:atom,-Probability:dict) is nondet
  *
- * The predicate computes the probability of the ground query Query
+ * The predicate computes the probability of Query
  * and returns it as a dict for rendering with c3 as a bar chart with 
  * a bar for the probability of Query true and a bar for the probability of 
  * Query false.
- * If Query is not ground, it returns in backtracking all instantiations of
+ * If Query is not ground, it returns in backtracking all ground 
+ * instantiations of
  * Query together with their probabilities
  */
 prob_bar(M:Goal,Chart):-
@@ -256,10 +268,53 @@ prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
+/** 
+ * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ *
+ * The predicate computes the probability of Query given
+ * Evidence
+ * If Query/Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
+ */
+prob(M:Goal,M:Evidence,P):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  findall((Goal,P),get_cond_p(M:Goal,M:Evidence,Env,P),L),
+  end_test(Env),
+  member((Goal,P),L).
+
+/** 
+ * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
+ *
+ * The predicate computes the probability of the Query given Evidence
+ * and returns it as a dict for rendering with c3 as a bar chart with 
+ * a bar for the probability of Query true and a bar for the probability of 
+ * Query false given Evidence.
+ * If Query /Evidence are not ground, it returns in backtracking all 
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
+ */
+prob_bar(M:Goal,M:Evidence,Chart):-
+  prob(M:Goal,M:Evidence,P),
+  PF is 1.0-P,
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
+
 
 get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_prob(Env,BDD,P).
+
+get_cond_p(M:Goal,M:Evidence,Env,P):-
+  get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
+  ret_prob(Env,BDDE,PE),
+  ret_prob(Env,BDDGE,PGE),
+  P is PGE/PE.
 
 load(FileIn,C1,R):-
   open(FileIn,read,SI),
@@ -287,6 +342,44 @@ get_node(Goal,Env,B):- %with DB=false
   ;  
     zero(Env,B)
   ).
+
+get_cond_node(Goal,Ev,Env,BGE,BE):-
+  pita_input_mod(M),
+  M:local_pita_setting(depth_bound,true),!,
+  M:local_pita_setting(depth,DB),
+  retractall(v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;
+    zero(Env,BG)
+  ),
+  add_bdd_arg_db(Ev,Env,BDDE,DB,Ev1),%DB=depth bound
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
+
+
+get_cond_node(Goal,Ev,Env,BGE,BE):- %with DB=false
+  retractall(v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,BG)
+  ;  
+    zero(Env,BG)
+  ),
+  add_bdd_arg(Ev,Env,BDDE,Ev1),
+  (bagof(BDDE,Ev1,LE)*->
+    or_list(LE,Env,BE)
+  ;  
+    zero(Env,BE)
+  ),
+  and(Env,BG,BE,BGE).
+
 
 
 get_next_rule_number(R):-
@@ -330,6 +423,34 @@ get_var_n(Env,R,S,Probs0,V):-
     trhow(error('Non ground probailities not instantiated by the body'))
   ).
 
+msw(M:A,B,Env,BDD):-
+  M:values(A,Values),
+  M:sw(R,A,Probs0),
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    length(Probs,L),
+    add_var(Env,L,Probs,R,V),
+    nth0(N,Values,B),
+    equality(Env,V,N,BDD)
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
+msw(M:A,B,Env,BDD,_DB):-
+  M:values(A,Values),
+  M:sw(R,A,Probs0),
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    length(Probs,L),
+    add_var(Env,L,Probs,R,V),
+    nth0(N,Values,B),
+    equality(Env,V,N,BDD)
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
+combine(V,P,V:P).
+
 add_bdd_arg(M:A,Env,BDD,M:A1):-
   A=..[P|Args],
   append(Args,[Env,BDD],Args1),
@@ -369,6 +490,21 @@ generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
   Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact(T,Env,VC,R,Probs,N1,Clauses,Module).
+
+
+generate_rules_fact_vars([],_Env,_R,_Probs,_N,[],_Module).
+
+generate_rules_fact_vars([Head:_P1,'':_P2],Env,R,Probs,N,[Clause],Module):-!,
+  extract_vars_list([Head],[],VC),
+  add_bdd_arg(Head,Env,BDD,Module,Head1),
+  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+
+generate_rules_fact_vars([Head:_P|T],Env,R,Probs,N,[Clause|Clauses],Module):-
+  extract_vars_list([Head],[],VC),
+  add_bdd_arg(Head,Env,BDD,Module,Head1),
+  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  N1 is N+1,
+  generate_rules_fact_vars(T,Env,R,Probs,N1,Clauses,Module).
 
 
 generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module).
@@ -501,11 +637,18 @@ process_head(HeadList0, HeadList):-
 minus(A,B,B-A).
 
 prob_ann(_:P,P).
+prob_ann(P::_,P).
+
+
+gen_head(H,P,V,V1,H1:P):-copy_term((H,V),(H1,V1)).
+gen_head_disc(H,V,V1:P,H1:P):-copy_term((H,V),(H1,V1)).
+
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
-process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
+process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
+  (H=Head:ProbHead;H=ProbHead::Head),!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
   pita_input_mod(M),
@@ -518,7 +661,8 @@ process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
     Null = []
   ). 
 
-process_head_ground([Head:ProbHead|Tail], Prob, [Head:ProbHead1|Next]) :- 
+process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :- 
+  (H=Head:ProbHead;H=ProbHead::Head),
   ProbHead1 is ProbHead,
   ProbNext is Prob + ProbHead1, 
   process_head_ground(Tail, ProbNext, Next).
@@ -526,9 +670,14 @@ process_head_ground([Head:ProbHead|Tail], Prob, [Head:ProbHead1|Next]) :-
 
 ground_prob([]).
 
-ground_prob([_Head:ProbHead|Tail]) :- 
+ground_prob([_Head:ProbHead|Tail]) :-!, 
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
+
+ground_prob([ProbHead::_Head|Tail]) :-
+  ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
+  ground_prob(Tail).
+
 
 get_probs(Head, PL):-
   maplist(prob_ann,Head,PL).
@@ -610,6 +759,21 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var), 
   extract_vars_tree(Tail, Var, Var1).
 
+
+delete_equal([],_,[]).
+
+delete_equal([H|T],E,T):-
+  H == E,!.
+
+delete_equal([H|T],E,[H|T1]):-
+  delete_equal(T,E,T1).
+
+set_sw(A,B):-
+  get_next_rule_number(R),
+  pita_module(M),
+  assert(M:sw(R,A,B)).
+
+
 user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
@@ -619,6 +783,14 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
+user:term_expansion((:- begin_plp), []) :-
+  pita_input_mod(M),!,
+  assert(pita_module(M)).
+
+user:term_expansion((:- end_plp), []) :-
+  pita_input_mod(_M0),!,
+  retractall(pita_module(_M)).
+
 user:term_expansion((:- begin_lpad), []) :-
   pita_input_mod(M),!,
   assert(pita_module(M)).
@@ -626,6 +798,9 @@ user:term_expansion((:- begin_lpad), []) :-
 user:term_expansion((:- end_lpad), []) :-
   pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
+
+user:term_expansion(values(A,B), values(A,B)) :-
+  prolog_load_context(module, M),pita_module(M),!.
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_module(M),
@@ -672,7 +847,7 @@ user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (_H:P),
+  (Head = (_:P);Head=(P::_)),
   ground(P),
   P=:=0.0, !. 
 
@@ -710,7 +885,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (H:_), !, 
+  (Head = (H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   list2and(BodyList, Body), 
@@ -731,7 +906,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  Head = (H:_), !, 
+  (Head = (H:_);Head = (_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   list2and(BodyList, Body), 
@@ -785,7 +960,7 @@ user:term_expansion(Head,Clauses) :-
   Head=(_;_), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
-  extract_vars_list(HeadList,[],VC),
+extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
@@ -809,11 +984,42 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
   ).
 
+user:term_expansion(Head,Clauses) :- 
+  prolog_load_context(module, M),pita_module(M),
+% disjunctive fact with uniform distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:uniform(Var,D0)),!, 
+  length(D0,Len),
+  Prob is 1.0/Len,
+  maplist(gen_head(H,Prob,Var),D0,HeadList),
+  get_next_rule_number(R),
+  get_probs(HeadList,Probs), %**** test single_var
+  (M:local_pita_setting(single_var,true)->
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+  ;
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
+  ).
+
+
+user:term_expansion(Head,Clauses) :- 
+  prolog_load_context(module, M),pita_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
+  maplist(gen_head_disc(H,Var),D,HeadList),
+  get_next_rule_number(R),
+  get_probs(HeadList,Probs), %**** test single_var
+  (M:local_pita_setting(single_var,true)->
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+  ;
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
+  ).
+
 user:term_expansion(Head,[]) :- 
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (_H:P),
+  (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
   
@@ -822,7 +1028,7 @@ user:term_expansion(Head,Clause) :-
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),
+  (Head = (H:P); Head = (P::H)),
   ground(P),
   P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
@@ -833,7 +1039,7 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head = (H:P),
+  (Head = (H:P);Head =(P::H)),
   ground(P),
   P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
@@ -845,7 +1051,7 @@ user:term_expansion(Head,Clause) :-
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:_), !, 
+  (Head=(H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list(HeadList,[],VC),
@@ -862,7 +1068,7 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:_), !, 
+  (Head=(H:_);Head=(_::H)), !, 
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list(HeadList,[],VC),
@@ -878,6 +1084,10 @@ user:term_expansion(Head,Clause) :-
 user:term_expansion((:- set_pita(P,V)), []) :-!,
   prolog_load_context(module, M),pita_module(M),
   set_pita(P,V).
+
+user:term_expansion((:- set_sw(A,B)), []) :-!,
+  prolog_load_context(module, M),pita_module(M),
+  set_sw(A,B).
 
 
 user:term_expansion(Head, (Head1:-one(Env,One))) :- 
@@ -939,7 +1149,6 @@ builtin(G):-
 builtin(G):-
   predicate_property(G,imported_from(lists)).
  
-
 average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
@@ -949,6 +1158,7 @@ average(L,Av):-
 
 sandbox:safe_primitive(pita:set_pita(_,_)).
 sandbox:safe_primitive(pita:setting_pita(_,_)).
+sandbox:safe_primitive(pita:set_sw(_,_)).
 /*sandbox:safe_primitive(pita:init(_,_,_)).
 sandbox:safe_primitive(pita:init_bdd(_,_)).
 sandbox:safe_primitive(pita:init_test(_,_)).
@@ -970,4 +1180,8 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
+sandbox:safe_meta(pita:prob(_,_,_), []).
+sandbox:safe_meta(pita:prob_bar(_,_,_), []).
+sandbox:safe_meta(pita:msw(_,_,_,_), []).
+sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 
