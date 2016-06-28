@@ -175,7 +175,15 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   ),
   retract_all(ThRef),
   retract_all(RFRef).
- 
+
+/** 
+ * test_prob(-P:probabilistic_program,+TrainFolds:list_of_atoms,-NPos:int,-NNeg:int,-Results:list) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns 
+ * the number of positive examples in NPos, the number of negative examples in NNeg 
+ * and in Results a list containing the probabilistic result for each query contained in TestFolds.
+ */
 test_prob(P,TestFolds,NPos,NNeg,Results) :-
   write2('Testing\n'),
   input_mod(M),
