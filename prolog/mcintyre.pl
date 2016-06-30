@@ -18,9 +18,11 @@ details.
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
   mc_sample/5,  
   mc_rejection_sample/6,  
+  mc_rejection_sample/4,  
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/7,
+  mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
@@ -41,6 +43,7 @@ details.
   sample_head/4,
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
+  mc_lw_expectation/5,
   gauss_density/4,
   gauss/3,
   histogram/3,
@@ -60,7 +63,9 @@ details.
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
+:-meta_predicate mc_rejection_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
@@ -86,6 +91,7 @@ details.
 :-meta_predicate mc_lw_sample(:,:,+,-).
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
+:-meta_predicate mc_lw_expectation(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -417,6 +423,18 @@ mc_sample(M:Goal,S,T,F,P):-
   restore_samples(Goal1).
 
 /** 
+ * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns
+ * the Probability of Query.
+ * It performs rejection sampling: if in a sample Evidence is false, the 
+ * sample is discarded.
+ * If Query/Evidence are not ground, it considers them an existential queries.
+ */
+mc_rejection_sample(M:Goal,M:Evidence,S,P):-
+  mc_rejection_sample(M:Goal,M:Evidence,S,_T,_F,P).
+ /** 
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -434,6 +452,19 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   erase_samples.
 
 /** 
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true and returns the
+ * Probability of the query.
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability. 
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ */
+mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
+  mc_mh_sample(M:Goal,M:Evidence,S,L,_T,_F,P).
+
+ /** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -862,6 +893,25 @@ mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
 mc_lw_sample_arg_log(M:Goal,M:Evidence,S,Arg,ValList):-
   lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList).
 
+/** 
+ * mc_lw_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query given Evidence by
+ * likelihood weighting.
+ * It takes N samples of Query and sums up the weighted value of Arg for
+ * each sample. The overall sum is divided by the sum of weights to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_lw_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  foldl(single_value_cont,ValList,0,Sum),
+  erase_samples,
+  foldl(agg_val,ValList,0,SW),
+  E is Sum/SW.
+
+
+single_value_cont(H-N,S,S+N*H).
+
 
 agg_val(_ -N,S,S+N).
 
@@ -991,8 +1041,13 @@ lw_sample_weight(M:A~= B,W0,W):-!,
   lw_sample_weight(M:A1,W0,W).
 
 lw_sample_weight(M:msw(A,B),W0,W):-!,
-  msw_weight(M:A,B,W1),
-  W is W0*W1.
+  (var(B)->
+    msw(M:A,B),
+    W=W0
+  ;
+    msw_weight(M:A,B,W1),
+    W is W0*W1
+  ).
 
 lw_sample_weight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
@@ -1087,21 +1142,24 @@ lw_sample_logweight(M:A~= B,W0,W):-!,
   add_arg(A,B,A1),
   lw_sample_logweight(M:A1,W0,W).
 
-lw_sample_weight(M:msw(A,B),W0,W):-!,
-  msw_weight(M:A,B,W1),
-  W is W0+log(W1).
+lw_sample_logweight(M:msw(A,B),W0,W):-!,
+  (var(B)->
+    msw(M:A,B),
+    W=W0
+  ;
+    msw_weight(M:A,B,W1),
+    W is W0+log(W1)
+  ).
 
 lw_sample_logweight(_M:(sample_head(R,VC,HL,N)),W0,W):-!,
   check(R,VC,N),
   nth0(N,HL,_:P),
   W is W0+log(P).
 
-
 lw_sample_logweight(_M:sample_discrete(R,VC,D,S),W0,W):-!,
   sample_head(R,VC,D,SN),
   nth0(SN,D,S:P),
   W is W0+log(P).
-
 
 lw_sample_logweight(_M:sample_uniform(R,VC,L,U,S),W0,W):-!,
   (var(S)->
@@ -1487,8 +1545,8 @@ sample_head(R,VC,_HeadList,N):-
 
 sample_head(R,VC,HeadList,N):-
   sample(HeadList,NH),
-  N=NH,
-  recorda(R,sampled(VC,NH)).
+  recorda(R,sampled(VC,NH)),
+  N=NH.
 
 sample(HeadList, HeadId) :-
   random(Prob), 
@@ -2209,8 +2267,10 @@ msw_weight(Values,Dist,V,W):-
 
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
+  retractall(local_mc_setting(_,_)),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
+  retractall(mc_input_mod(_)),
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
@@ -2315,7 +2375,7 @@ user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H:dirichlet(Par)), !, 
+  Head=(H~dirichlet(Par)), !, 
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
   get_next_rule_number(R),
@@ -2339,6 +2399,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:gaussian(Mean,Variance)), !, 
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
@@ -2711,6 +2773,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:dirichlet(Var,Par)), !, 
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2725,6 +2789,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:gaussian(Var,Mean,Variance)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2739,6 +2805,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:uniform(Var,L,U)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2753,6 +2821,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:gamma(Var,Shape,Scale)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2767,6 +2837,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:beta(Var,Alpha,Beta)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2782,6 +2854,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:poisson(Var,Lambda)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2796,6 +2870,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:uniform(Var,D0)),!, 
   length(D0,Len),
   Prob is 1.0/Len,
@@ -2813,6 +2889,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2827,6 +2905,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:dirichlet(Var,Par)), !, 
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2841,6 +2921,8 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
   Head=(H:gaussian(Var,Mean,Variance)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -3082,7 +3164,9 @@ sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
@@ -3102,5 +3186,6 @@ sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
