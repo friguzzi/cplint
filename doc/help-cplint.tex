@@ -98,6 +98,54 @@ described above.
 
 \input{learning_par}
 
+\section{Download query results through an API}
+The results of queries can also be downloaded programmatically by directly
+approaching the Pengine API. Example client code is 
+\href{https://github.com/friguzzi/swish/tree/master/client}{available}.  For example, the `swish-ask.sh` client
+can be used with `bash` to download the results for a query in CSV.  The call
+below downloads a CSV file for the coin example.
+\begin{verbatim}
+$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \   
+  examples/inference/coin.pl Prob "prob(heads(coin),Prob)"
+\end{verbatim}
+The script can ask queries against Prolog scripts stored in 
+\url{http://cplint.lamping.unife.it} by specifying
+the script on the commandline.  User defined files stored
+in \texttt{cplint} on SWISH (locations of type
+\url{http://cplint.lamping.unife.it/p/coin_user.pl}) can
+be directly used, for example:
+\begin{verbatim}
+$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \
+  coin_user.pl Prob "prob(heads(coin),Prob)"
+\end{verbatim}
+Example programs can be used by specifying the folder portion of the url of the example,
+as in the first coin example above where the url for the program is 
+\url{http://cplint.lamping.unife.it/examples/inference/coin.pl}.
+
+Results can be downloaded in JSON using the option \verb|--json-s| or
+\verb|--json-html|.
+With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. E.g.
+\begin{verbatim}
+$ bash swish-ask.sh --json-s --server=http://cplint.lamping.unife.it \
+  coin_user.pl Prob "prob(heads(coin),Prob)"
+\end{verbatim}
+The JSON format can also be modified. See
+\url{http://www.swi-prolog.org/pldoc/doc_for?object=pengines%3Aevent_to_json/4}.
+
+Prolog can exploit the Pengine API directly.  For example, the above can
+be called as:
+\begin{verbatim}
+?- [library(pengines)].
+?- pengine_rpc('http://cplint.lamping.unife.it',
+     prob(heads(coin),Prob),
+     [ src_url('https://raw.githubusercontent.com/friguzzi/swish/\  
+master/examples/inference/coin.pl'),
+     application(swish)
+     ]).
+Prob = 0.51.
+?-
+\end{verbatim}
+
 \section{Manual in PDF}
 A PDF version of the manual is available at
 \url{https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf}.
