@@ -34,7 +34,7 @@ fabrizio.riguzzi@unife.it</h2>
 <li><a href="#uncondq">Unconditional Queries</a></li>
 <li><a href="#condq">Conditional Queries on Discrete Variables</a></li>
 <li><a href="#condqcont">Conditional Queries on Continuous Variables</a></li>
-<li><a href="#condqcont">Graphing the Results</a></li>
+<li><a href="#graphing">Graphing the Results</a></li>
 <li><a href="#parameters">Parameters</a></li>
 </ul></li>
 <li><a href="#learning">Learning</a><ul>
@@ -393,7 +393,7 @@ mc_mh_sample_arg(:Query:atom,:Evidence:atom,
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
 <pre><code>?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>value(0,X)</code> given that <code>value(1,9)</code> and <code>value(2,8)</code> have been observed.</p>
-<h2 id="condqcont">Graphing the Results</h2>
+<h2 id="graphing">Graphing the Results</h2>
 <p>in <code>cplint</code> on SWISH you can draw graphs for visualizing the results. There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.</p>
 <p>You can draw the probability of a query being true and being false as a bar chart with <code>prob_bar(:Query:atom,-Probability:dict)</code> as in</p>
 <pre><code>?- prob_bar(heads(coin),P).</code></pre>
