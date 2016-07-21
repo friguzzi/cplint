@@ -80,6 +80,7 @@ default_setting_sc(background_clauses,50).
 default_setting_sc(specialization,bottom).
 %setting_sc(specialization,mode).
 /* allowed values: mode,bottom */
+default_setting_sc(specialize_head,false).
 
 default_setting_sc(seed,rand(10,1231,3032)).  
 default_setting_sc(score,ll).
@@ -1904,11 +1905,12 @@ specialize_rule(Rule,M,SpecRule,Lit):-
   specialize_rule(BLS,Rule,M,SpecRule,Lit).
 
 %specializes the clause's head
-specialize_rule(rule(ID,LH,BL,Lits),_M,rule(ID,LH2,BL,Lits),Lit):-
+specialize_rule(rule(ID,LH,BL,Lits),M,rule(ID,LH2,BL,Lits),Lit):-
+  M:local_setting(specialize_head,true),
 	length(LH,L), 
 	L>2,
 	delete_one(LH,LH1,Lit),  %deletes Lit
-	Lit\=' ',
+	Lit\='',
 	update_head1(LH1,L-1,LH2).  %updates parameters
 
 update_head1([],_N,[]):-!.
