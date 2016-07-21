@@ -636,7 +636,7 @@ process_head(HeadList0, HeadList):-
 
 minus(A,B,B-A).
 
-prob_ann(_:P,P).
+prob_ann(_:P,P):-!.
 prob_ann(P::_,P).
 
 
@@ -988,6 +988,8 @@ user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:uniform(Var,D0)),!, 
   length(D0,Len),
   Prob is 1.0/Len,
@@ -1005,6 +1007,8 @@ user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
   maplist(gen_head_disc(H,Var),D,HeadList),
   get_next_rule_number(R),
@@ -1068,7 +1072,7 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:_);Head=(_::H)), !, 
+  (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head), 
   process_head(HeadListOr, HeadList), 
   extract_vars_list(HeadList,[],VC),

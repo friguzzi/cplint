@@ -2435,6 +2435,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:uniform(Var,L,U)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2449,6 +2451,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:gamma(Var,Shape,Scale)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2463,6 +2467,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:beta(Var,Alpha,Beta)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2478,6 +2484,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:poisson(Var,Lambda)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2492,6 +2500,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:uniform(Var,D0)),!, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2508,6 +2518,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2522,6 +2534,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:dirichlet(Var,Par)), !, 
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -2536,6 +2550,8 @@ user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
   Head=(H:gaussian(Var,Mean,Variance)), !, 
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
