@@ -122,6 +122,12 @@ Example programs can be used by specifying the folder portion of the url of the 
 as in the first coin example above where the url for the program is 
 \url{http://cplint.lamping.unife.it/examples/inference/coin.pl}.
 
+You can also use an url for the program as in 
+\begin{verbatim}
+$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \
+  https://raw.githubusercontent.com/friguzzi/swish/\  
+  master/examples/inference/coin.pl Prob "prob(heads(coin),Prob)"
+\end{verbatim}
 Results can be downloaded in JSON using the option \verb|--json-s| or
 \verb|--json-html|.
 With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. E.g.
