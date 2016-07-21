@@ -48,6 +48,7 @@ details.
   gauss/3,
   histogram/3,
   densities/4,
+  density/5,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -962,7 +963,7 @@ lw_sample_arg_log(K0,M:Goal, M:Evidence, Arg,[Arg1-W|V]):-
   copy_term((Goal,Arg),(Goal1,Arg1)),
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
-  lw_sample_logweight(M:Ev1,0,W),
+  lw_sample_logweight_cycle(M:Ev1,W),
   K1 is K0-1,
   erase_samples,
   lw_sample_arg_log(K1,M:Goal,M:Evidence,Arg,V).
@@ -987,7 +988,7 @@ lw_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
   sample_poisson(R,VC,Lambda,S).
 
 lw_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
-  sample_gamma(R,VC,Alpha,Beta,S).
+  sample_beta(R,VC,Alpha,Beta,S).
 
 lw_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
   sample_gamma(R,VC,Shape,Scale,S).
@@ -1136,6 +1137,15 @@ lw_sample_weight(M:G,W0,W):-
   lw_sample_weight(M:B,W0,W).
 
 
+lw_sample_logweight_cycle(M:G,W):-
+  (lw_sample_logweight(M:G,0,W)->
+    true
+  ;
+    erase_samples,
+    lw_sample_logweight_cycle(M:G,W)
+  ).
+
+
 lw_sample_logweight(_M:true,W,W):-!.
 
 lw_sample_logweight(M:A~= B,W0,W):-!,
@@ -1167,6 +1177,15 @@ lw_sample_logweight(_M:sample_uniform(R,VC,L,U,S),W0,W):-!,
     W=W0
   ;
     uniform_density(L,U,D),
+    W is W0+log(D)
+   ).
+
+lw_sample_logweight(_M:sample_beta(R,VC,Alpha,Beta,S),W0,W):-!,
+  (var(S)->
+    sample_beta(R,VC,Alpha,Beta,S),
+    W=W0
+  ;
+    beta_density(Alpha,Beta,S,D),
     W is W0+log(D)
    ).
 
@@ -3114,6 +3133,19 @@ densities(Pri0,Post0,NBins,Chart):-
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
 
+density(Post0,Min,Max,NBins,Chart):-
+  D is Max-Min,
+  BinWidth is D/NBins,
+  keysort(Post0,Po),
+  bin(NBins,Po,Min,BinWidth,LPo),
+  maplist(key,LPo,X),
+  maplist(y,LPo,YPo),
+  Chart = c3{data:_{x: x,
+  columns: [[x|X],
+    [dens|YPo]]},
+   axis:_{ x:_{ tick:_{fit:false}}}
+  }.
+
 
 to_pair([E]-W,E-W).
 
@@ -3155,6 +3187,7 @@ sandbox:safe_primitive(mcintyre:set_mc(_,_)).
 sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
+sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:set_sw(_,_)).
 
 :- multifile sandbox:safe_meta/2.
