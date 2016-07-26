@@ -3734,16 +3734,28 @@ find_ex_pred_cw([],_DB,LG,LG,Pos,Pos,Neg,Neg).
 
 find_ex_pred_cw([P/A|T],DB,LG0,LG,Pos0,Pos,Neg0,Neg):-
   functor(At,P,A),
-  get_types(At,Types),
-  remove_duplicates(Types,Types1),
+  findall(Types,get_types(At,Types),LT),
+  append(LT,LLT),
+  remove_duplicates(LLT,Types1),
   find_ex_db_cw(DB,At,Types1,LG0,LG1,Pos0,Pos1,Neg0,Neg1),
   find_ex_pred_cw(T,DB,LG1,LG,Pos1,Pos,Neg1,Neg).
+
+get_types(At,[]):-
+  At=..[_],!.
 
 get_types(At,Types):-
   input_mod(M),
   M:modeh(_,At),
   At=..[_|Args],
   get_args(Args,Types).
+
+get_types(At,Types):-
+  input_mod(M),
+  M:modeh(_,HT,_,_),
+  member(At,HT),
+  At=..[_|Args],
+  get_args(Args,Types).
+
 
 get_args([],[]).
 
@@ -3842,7 +3854,7 @@ find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   input_mod(M),
   get_constants(Types,H,C),
   At=..[P|L],
-  get_types(At,TypesA),
+  get_types(At,TypesA),!,
   length(L,N),
   length(LN,N),
   At1=..[P,H|LN],
@@ -3877,7 +3889,8 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   end_test(Env),!,
   PG1 is 1-PG,
   (PG1=:=0.0->
-    CLL2 is CLL0-10
+    setting_sc(logzero,LZ),
+    CLL2 is CLL0+LZ
   ;
     CLL2 is CLL0+ log(PG1)
   ),		
@@ -3894,7 +3907,8 @@ compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
   ret_prob(Env,BDD,PG),
   end_test(Env),!,
   (PG=:=0.0->
-    CLL2 is CLL0-10
+    setting_sc(logzero,LZ),
+    CLL2 is CLL0+LZ
   ;	
     CLL2 is CLL0+ log(PG)
   ),
