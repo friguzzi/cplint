@@ -853,7 +853,7 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
 
 double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
 {
-  int i,j,mVarIndex,bVarIndex;
+  int i,j,mVarIndex,bVarIndex,firstBoolVarOfRule;
   double **eta_rule;
   double theta,rootProb, T=0;
 
@@ -886,12 +886,11 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
 
       mVarIndex=ex_d->env[nex].bVar2mVar[bVarIndex];
       eta_rule=ex_d->eta_temp[ex_d->env[nex].vars[mVarIndex].nRule];
-      for (i=0; i<ex_d->env[nex].vars[mVarIndex].nVal-1;i++)
-      {
-        theta=ex_d->env[nex].probs[bVarIndex];
-        eta_rule[i][0]=eta_rule[i][0]+T*(1-theta);
-        eta_rule[i][1]=eta_rule[i][1]+T*theta;
-      }   
+      firstBoolVarOfRule=ex_d->env[nex].vars[mVarIndex].firstBoolVar;
+      i=bVarIndex-firstBoolVarOfRule;
+      theta=ex_d->env[nex].probs[bVarIndex];
+      eta_rule[i][0]=eta_rule[i][0]+T*(1-theta);
+      eta_rule[i][1]=eta_rule[i][1]+T*theta;
     }
 
     for (j=0; j<ex_d->nRules; j++)
