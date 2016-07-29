@@ -5,7 +5,8 @@ LIBDIR=lib/$(SWIARCH)/
 #
 #
 CC=gcc
-INC1=cudd-2.5.1/include
+INC1=cudd-3.0.0/cudd
+CURRDIR=$(shell pwd)
 #INC2=$(shell while read one two three; \
 #do TEMP=$two; \
 #done <<< `whereis swipl`; \
@@ -21,7 +22,8 @@ CFLAGSBDDEM= $(CFLAGS) -fPIC -DBP_FREE -O3 -fomit-frame-pointer -Wall -g -O2 ${I
 #
 # You shouldn't need to change what follows.
 #
-LDFLAGS= $(LDSOFLAGS) -shared -Lcudd-2.5.1/cudd -Lcudd-2.5.1/mtr -Lcudd-2.5.1/st -Lcudd-2.5.1/util -Lcudd-2.5.1/epd -lcudd  -lmtr -lst -lepd -lutil -lm 
+LDFLAGS= $(LDSOFLAGS) -shared -Wl,-rpath=$(CURRDIR)/cudd-3.0.0/cudd/.libs -Lcudd-3.0.0/cudd/.libs/ -lcudd
+#cudd-3.0.0/cudd/.libs/libcudd-3.0.0.so.0.0.0
 
 #
 
@@ -35,14 +37,16 @@ bddem.so: bddem.o
 #-Wl,-R,$(YAPLIBDIR) -Wl,-R,$(LIBDIR)
 
 bddem.o : bddem.c
-	cd cudd-2.5.1 && make && cd ..
+	cd cudd-3.0.0 &&  make && cd ..
 	$(CC) -c $(CFLAGSBDDEM) bddem.c -o bddem.o
+
 
 distclean: 
 	rm -f *.o bddem.so
-	cd cudd-2.5.1 && make distclean && cd ..
+	cd cudd-3.0.0 && make distclean && cd ..
 check:
 	@echo "no check"
 install: all
 	cp bddem.so $(LIBDIR)
+	
 	
