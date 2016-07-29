@@ -22,7 +22,7 @@ CFLAGSBDDEM= $(CFLAGS) -fPIC -DBP_FREE -O3 -fomit-frame-pointer -Wall -g -O2 ${I
 #
 # You shouldn't need to change what follows.
 #
-LDFLAGS= $(LDSOFLAGS) -shared -Wl,-rpath=$(CURRDIR)/cudd-3.0.0/cudd/.libs -Lcudd-3.0.0/cudd/.libs/ -lcudd
+LDFLAGS= $(LDSOFLAGS) -shared -Lcudd-3.0.0/cudd/.libs/ -lcudd
 #cudd-3.0.0/cudd/.libs/libcudd-3.0.0.so.0.0.0
 
 #
@@ -48,5 +48,5 @@ check:
 	@echo "no check"
 install: all
 	cp bddem.so $(LIBDIR)
-	
+
 	
