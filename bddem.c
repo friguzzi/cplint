@@ -13,7 +13,7 @@ for the relative license.
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "cuddInt.h"
+#include "cudd.h"
 #include <SWI-Prolog.h>
 #define LOGZERO log(0.01)
 #define CACHE_SLOTS 1 
