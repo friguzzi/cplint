@@ -1234,26 +1234,26 @@ write_disj_clause(S,(H:-B)):-
 
 
 write_head(S,[A:1.0|_Rest]):-!,
-  format(S,"~p:1.0",[A]).
+  format(S,"~q:1.0",[A]).
   
 write_head(S,[A:P,'':_P]):-!, 
-  format(S,"~p:~g",[A,P]).
+  format(S,"~q:~g",[A,P]).
 
 write_head(S,[A:P]):-!,
-  format(S,"~p:~g",[A,P]).
+  format(S,"~q:~g",[A,P]).
 
 write_head(S,[A:P|Rest]):-
-  format(S,"~p:~g ; ",[A,P]),
+  format(S,"~q:~g ; ",[A,P]),
   write_head(S,Rest).
 
 write_body(S,[]):-!,
   format(S,"  true.~n~n",[]).
 
 write_body(S,[A]):-!,
-  format(S,"  ~p.~n~n",[A]).
+  format(S,"  ~q.~n~n",[A]).
     
 write_body(S,[A|T]):-
-  format(S,"  ~p,~n",[A]),
+  format(S,"  ~q,~n",[A]),
   write_body(S,T).
 
 /** 
@@ -1439,7 +1439,7 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
   gen_head(Head,Prob,HP),
   copy_term((HP,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
-  format2("Bottom clause: example ~p~nClause~n",[H]),
+  format2("Bottom clause: example ~q~nClause~n",[H]),
   write_disj_clause2(user_output,(HeadV:-BodyListV)),
   generate_body(T,Mod,CL0).
 
@@ -1458,7 +1458,7 @@ generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0])
   get_next_rule_number(R),
   copy_term((Head,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
-  format2("Bottom clause: example ~p~nClause~n~p:0.5 :-~n",[H,HeadV]),
+  format2("Bottom clause: example ~q~nClause~n~q:0.5 :-~n",[H,HeadV]),
   write_body2(user_output,BodyListV),
   generate_body(T,Mod,CL0).
 
@@ -3917,10 +3917,10 @@ compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
 
 
 writes([H-H1],S):-
-  format(S,"~f - (~p)]).~n~n",[H,H1]).
+  format(S,"~f - (~q)]).~n~n",[H,H1]).
 
 writes([H-H1|T],S):-
-  format(S,"~f - (~p),~n",[H,H1]),
+  format(S,"~f - (~q),~n",[H,H1]),
   writes(T,S).
 
 write_p(P,S):-
