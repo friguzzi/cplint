@@ -47,6 +47,7 @@ details.
   gauss_density/4,
   gauss/3,
   histogram/3,
+  histogram/5,
   densities/4,
   density/5,
   add_prob/3,
@@ -103,6 +104,9 @@ details.
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
 :-use_module(library(clpr)).
+:-use_module(library(clpr)).
+:-use_module(library(clpfd)).
+:-use_module(library(matrix)).
 
 :- style_check(-discontiguous).
 
@@ -1618,6 +1622,7 @@ sample_gauss(R,VC,Mean,Variance,S):-
  * Variance and returns it in S
  */
 gauss(Mean,Variance,S):-
+  number(Mean),!,
   random(U1),
   random(U2),
   R is sqrt(-2*log(U1)),
@@ -1626,6 +1631,17 @@ gauss(Mean,Variance,S):-
   StdDev is sqrt(Variance),
   S is StdDev*S0+Mean.
 
+gauss([Mean1,Mean2],Covariance,[X1,X2]):-!,
+  random(U1),
+  random(U2),
+  R is sqrt(-2*log(U1)),
+  Theta is 2*pi*U2,
+  S0 is R*cos(Theta),
+  S1 is R*sin(Theta),
+  cholesky_decomposition(Covariance,A),
+  matrix_multiply(A,[[S0],[S1]],Az),
+  matrix_sum([[Mean1],[Mean2]],Az,[[X1],[X2]]).
+
 /**
  * gauss_density(+Mean:float,+Variance:float,+S:float,-Density:float) is det
  *
@@ -1633,8 +1649,19 @@ gauss(Mean,Variance,S):-
  * mean Mean and variance Variance and returns it in Density.
  */
 gauss_density(Mean,Variance,S,D):-
+  number(Mean),!,
   StdDev is sqrt(Variance),
   D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
+
+gauss_density(Mean,Covariance,S,D):-
+  determinant(Covariance,Det),
+  matrix_diff([Mean],[S],S_M),
+  matrix_inversion(Covariance,Cov_1),
+  transpose(S_M,S_MT),
+  matrix_multiply(S_M,Cov_1,Aux),
+  matrix_multiply(Aux,S_MT,[[V]]),
+  length(Mean,K),
+  D is 1/sqrt((2*pi)^K*Det)*exp(-V/2).
 
 /**
  * sample_gamma(+R:int,+VC:list,+Shape:float,+Scale:float,-S:float) is det
@@ -3096,7 +3123,7 @@ average(L,Av):-
  * histogram(+List:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a histogram of the samples in List dividing the domain in
- * NBins bins. List must be a list of couples of the form [V]-W
+ * NBins bins. List must be a list of couples of the form [V]-W or V-W
  * where V is a sampled value and W is its weight.
  */
 histogram(L0,NBins,Chart):-
@@ -3117,20 +3144,36 @@ histogram(L0,NBins,Chart):-
      width:_{ ratio: 1.0 }},
      legend:_{show: false}}.
 
+histogram(L0,NBins,Min,Max,Chart):-
+  maplist(to_pair,L0,L1),
+  keysort(L1,L),
+  D is Max-Min,
+  BinWidth is D/NBins,
+  bin(NBins,L,Min,BinWidth,LB),
+  maplist(key,LB,X),
+  maplist(y,LB,Y),
+  Chart = c3{data:_{x:x, 
+    columns:[[x|X],[freq|Y]], type:bar},
+    axis:_{ x:_{ tick:_{fit:false}}},
+     bar:_{
+     width:_{ ratio: 1.0 }},
+     legend:_{show: false}}.
+
 /** 
  * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a line chart of the density of two sets of samples, usually
  * prior and post observations. The samples from the prior are in PriorList
- * as couples [V]-W, while the samples from the posterior are in PostList
- * as couples V-W where V is a value and W its weigth.
+ * while the samples from the posterior are in PostList 
+ * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
  * NBins bins. 
  */
 densities(Pri0,Post0,NBins,Chart):-
   maplist(to_pair,Pri0,Pri1),
+  maplist(to_pair,Post0,Post1),
   maplist(key,Pri1,Pri),
-  maplist(key,Post0,Post),
+  maplist(key,Post1,Post),
   append(Pri,Post,All),
   max_list(All,Max),
   min_list(All,Min),
@@ -3150,9 +3193,10 @@ densities(Pri0,Post0,NBins,Chart):-
   }.
 
 density(Post0,Min,Max,NBins,Chart):-
-  D is Max-Min,
+  maplist(to_pair,Post0,Post),
+   D is Max-Min,
   BinWidth is D/NBins,
-  keysort(Post0,Po),
+  keysort(Post,Po),
   bin(NBins,Po,Min,BinWidth,LPo),
   maplist(key,LPo,X),
   maplist(y,LPo,YPo),
@@ -3163,7 +3207,8 @@ density(Post0,Min,Max,NBins,Chart):-
   }.
 
 
-to_pair([E]-W,E-W).
+to_pair([E]-W,E-W):- !.
+to_pair(E-W,E-W).
 
 key(K-_,K).
 
@@ -3174,19 +3219,23 @@ bin(0,_L,_Min,_BW,[]):-!.
 bin(N,L,Lower,BW,[V-Freq|T]):-
   V is Lower+BW/2,
   Upper is Lower+BW,
-  count_bin(L,Upper,0,Freq,L1),
+  count_bin(L,Lower,Upper,0,Freq,L1),
   N1 is N-1,
   bin(N1,L1,Upper,BW,T).
 
-count_bin([],_U,F,F,[]).
+count_bin([],_L,_U,F,F,[]).
 
-count_bin([H-W|T0],U,F0,F,T):-
+count_bin([H-_W|T0],L,U,F0,F,T):-
+  H<L,!,
+  count_bin(T0,L,U,F0,F,T).
+
+count_bin([H-W|T0],L,U,F0,F,T):-
   (H>=U->
     F=F0,
     T=[H-W|T0]
   ;
     F1 is F0+W,
-    count_bin(T0,U,F1,F,T)
+    count_bin(T0,L,U,F1,F,T)
   ).
 
 swap(A:B,B:A).
@@ -3202,6 +3251,7 @@ swap(A:B,B:A).
 sandbox:safe_primitive(mcintyre:set_mc(_,_)).
 sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
+sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:set_sw(_,_)).
