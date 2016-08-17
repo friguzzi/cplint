@@ -44,8 +44,10 @@ bddem.o : bddem.c
 distclean: 
 	rm -f *.o bddem.so
 	cd cudd-3.0.0 && make distclean && cd ..
+
 check:
 	@echo "no check"
+
 install: all
 	cp bddem.so $(LIBDIR)
 
