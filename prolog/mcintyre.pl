@@ -1642,6 +1642,37 @@ gauss([Mean1,Mean2],Covariance,[X1,X2]):-!,
   matrix_multiply(A,[[S0],[S1]],Az),
   matrix_sum([[Mean1],[Mean2]],Az,[[X1],[X2]]).
 
+gauss(Mean,Covariance,X):-
+  length(Mean,N),
+  n_gauss_var(0,N,Z),
+  cholesky_decomposition(Covariance,A),
+  transpose([Z],ZT),
+  matrix_multiply(A,ZT,Az),
+  transpose([Mean],MT),
+  matrix_sum(MT,Az,XT),
+  transpose(XT,[X]).
+
+n_gauss_var(N,N,[]):-!.
+
+n_gauss_var(N1,N,[Z]):-
+  N1 is N-1,!,
+  random(U1),
+  random(U2),
+  R is sqrt(-2*log(U1)),
+  Theta is 2*pi*U2,
+  Z is R*cos(Theta).
+
+n_gauss_var(N1,N,[Z1,Z2|T]):-
+  N2 is N1+2,
+  random(U1),
+  random(U2),
+  R is sqrt(-2*log(U1)),
+  Theta is 2*pi*U2,
+  Z1 is R*cos(Theta),
+  Z2 is R*sin(Theta),
+  n_gauss_var(N2,N,T).
+
+
 /**
  * gauss_density(+Mean:float,+Variance:float,+S:float,-Density:float) is det
  *
