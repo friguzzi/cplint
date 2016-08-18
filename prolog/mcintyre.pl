@@ -909,6 +909,17 @@ mc_lw_sample_arg_log(M:Goal,M:Evidence,S,Arg,ValList):-
  */
 mc_lw_expectation(M:Goal,M:Evidence,S,Arg,E):-
   mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  aggregate(ValList,E).
+
+aggregate([H-W|T],E):-
+  is_list(H),!,
+  length(H,N),
+  list0(N,L0),
+  foldl(single_value_vect,[H-W|T],L0,Sum),
+  foldl(agg_val,[H-W|T],0,SW),
+  matrix_div_scal([Sum],SW,[E]).
+
+aggregate(ValList,E):-
   foldl(single_value_cont,ValList,0,Sum),
   erase_samples,
   foldl(agg_val,ValList,0,SW),
@@ -916,6 +927,10 @@ mc_lw_expectation(M:Goal,M:Evidence,S,Arg,E):-
 
 
 single_value_cont(H-N,S,S+N*H).
+
+single_value_vect(H-N,S0,S):-
+  matrix_mult_scal([H],N,[H1]),
+  matrix_sum([H1],[S0],[S]).
 
 
 agg_val(_ -N,S,S+N).
@@ -982,6 +997,11 @@ lw_sample(M:A~=B):-!,
 lw_sample(M:msw(A,B)):-!,
   msw(M:A,B).
 
+lw_sample(M:G):-
+  G=..[call,P|A],!,
+  G1=..[P|A],
+  lw_sample(M:G1).
+
 lw_sample(_M:(sample_head(R,VC,_HL,N))):-!,
   check(R,VC,N).
 
@@ -1044,6 +1064,11 @@ lw_sample_weight(_M:true,W,W):-!.
 lw_sample_weight(M:A~= B,W0,W):-!,
   add_arg(A,B,A1),
   lw_sample_weight(M:A1,W0,W).
+
+lw_sample_weight(M:G,W0,W):-
+  G=..[call,P|A],!,
+  G1=..[P|A],
+  lw_sample_weight(M:G1,W0,W).
 
 lw_sample_weight(M:msw(A,B),W0,W):-!,
   (var(B)->
@@ -3142,6 +3167,10 @@ builtin_int(G):-
   predicate_property(G,imported_from(apply)).
 builtin_int(G):-
   predicate_property(G,imported_from(nf_r)).
+builtin_int(G):-
+  predicate_property(G,imported_from(matrix)).
+builtin_int(G):-
+  predicate_property(G,imported_from(clpfd)).
 
 
 
