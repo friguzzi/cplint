@@ -343,12 +343,18 @@ female(cathy).</code></pre>
 <p>where <code>Lag</code> is the number of sampled choices to forget before taking a new sample. For example (<a href="http://cplint.lamping.unife.it/example/inference/arithm.pl"><code>arithm.pl</code></a>)</p>
 <pre><code>?- mc_mh_sample(eval(2,4),eval(1,3),10000,1,T,F,P).</code></pre>
 <p>takes 10000 accepted samples and returns in <code>T</code> the number of samples where <code>eval(2,4)</code> is true, in <code>F</code> the number of samples where <code>eval(2,4)</code> is false and in <code>P</code> the estimated probability (<code>T/10000</code>).</p>
+<p>You can allow for mixing time with</p>
+<pre><code>mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,
+  -Successes:int,-Failures:int,-Probability:float).</code></pre>
+<p>that takes <code>Mix+Samples</code> samples and discards the first <code>Mix</code>.</p>
 <p>Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using</p>
 <pre><code>mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
   +Samples:int,?Arg:var,-Values:list).
 mc_mh_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,+Lag:int,?Arg:var,-Values:list).</code></pre>
-<p>that return the distribution of values for <code>Arg</code> in <code>Query</code> in <code>Samples</code> of <code>Query</code> given that <code>Evidence</code> is true. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random where <code>Evidence</code> is true and <code>N</code> is the number of samples returning that list of values.</p>
+  +Samples:int,+Lag:int,?Arg:var,-Values:list).
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,
+  +Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list).</code></pre>
+<p>that return the distribution of values for <code>Arg</code> in <code>Query</code> in <code>Samples</code> of <code>Query</code> given that <code>Evidence</code> is true. <code>Mix</code> indicates the number of mixing samples. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random where <code>Evidence</code> is true and <code>N</code> is the number of samples returning that list of values.</p>
 <p>An example of use of the above predicates is</p>
 <pre><code>?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,1,Y,V).</code></pre>
 <p>of <a href="http://cplint.lamping.unife.it/example/inference/arithm.pl"><code>arithm.pl</code></a>.</p>
@@ -360,10 +366,16 @@ mc_mh_sample_arg(:Query:atom,:Evidence:atom,
 <p>of <a href="http://cplint.lamping.unife.it/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <p>To compute conditional expectations, use</p>
 <pre><code>mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-  +Lag:int,?Arg:var,-Exp:float).</code></pre>
+  +Lag:int,?Arg:var,-Exp:float).
+mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float).</code></pre>
 <p>as in</p>
 <pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,1,Y,E).</code></pre>
 <p>of <a href="http://cplint.lamping.unife.it/example/inference/arithm.pl"><code>arithm.pl</code></a> that computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
+<p>The predicate</p>
+<pre><code>mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,
+  +Lag:int,?Arg:var,-Exp:float).</code></pre>
+<p>allows for <code>Mix</code> mixing samples.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
 <p>For example</p>
