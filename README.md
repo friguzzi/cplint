@@ -8,6 +8,14 @@ You can find the manual at https://github.com/friguzzi/cplint/blob/master/doc/ma
 
 You can try it online at http://cplint.lamping.unife.it/
 
+Requirements
+-------------
+It requires packs =auc= and =matrix=:
+
+    $ swipl
+    ?- pack_install(auc).
+    ?- pack_install(matrix).
+
 Example of use
 ---------------
 
