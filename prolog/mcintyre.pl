@@ -21,16 +21,21 @@ details.
   mc_rejection_sample/4,  
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
+  mc_mh_sample/8,
   mc_mh_sample/7,
+  mc_mh_sample/6,
   mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
+  mc_mh_sample_arg/7,mc_mh_sample_arg_bar/7,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_sample_arg_raw/4,
   mc_expectation/4,
   mc_mh_expectation/6,
+  mc_mh_expectation/7,
+  mc_rejection_expectation/5,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
   sample_gauss/5,
@@ -66,7 +71,9 @@ details.
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample_bar(:,+,-).
@@ -75,7 +82,9 @@ details.
 :-meta_predicate mc_rejection_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_rejection_sample_arg_bar(:,:,+,+,-).
 :-meta_predicate mc_mh_sample_arg(:,:,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg(:,:,+,+,+,+,-).
 :-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,+,-).
 :-meta_predicate mc_sample_arg_first(:,+,+,-).
 :-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
@@ -83,6 +92,8 @@ details.
 :-meta_predicate mc_sample_arg_raw(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
 :-meta_predicate mc_mh_expectation(:,:,+,+,+,-).
+:-meta_predicate mc_mh_expectation(:,:,+,+,+,+,-).
+:-meta_predicate mc_rejection_expectation(:,:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-meta_predicate initial_sample_cycle(:).
@@ -99,6 +110,9 @@ details.
 :-meta_predicate ~=(:,-).
 :-meta_predicate msw(:,-).
 
+:-meta_predicate mh_sample_arg(+,+,+,:,:,-,+,-,+,-).
+:-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
+:-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -324,9 +338,9 @@ rejection_montecarlo(K1,Count, Success, M:Goals,M:Ev,N1,S1):-
   ),
   rejection_montecarlo(K2,N, S, M:Goals,M:Ev, N1,S1).
 
-mh_montecarlo(_L,0,_NC0,N,S,_Succ0, _Goals,_Ev,N,S):-!.
+mh_montecarlo(_L,0,_NC0,N,S,Succ0,Succ0, _Goals,_Ev,N,S):-!.
 
-mh_montecarlo(L,K0,NC0,N0, S0,Succ0, M:Goal, M:Evidence, N, S):-
+mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
   save_samples_copy(Goal),
   resample(L),
   copy_term(Evidence,Ev1),
@@ -360,7 +374,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, M:Goal, M:Evidence, N, S):-
     erase_samples,
     restore_samples(Goal)
   ),
-  mh_montecarlo(L,K1,NC1,N1, S1,Succ, M:Goal,M:Evidence, N,S).
+  mh_montecarlo(L,K1,NC1,N1, S1,Succ, SuccNew,M:Goal,M:Evidence, N,S).
 
 accept(NC1,NC2):-
   P is min(1,NC1/NC2),
@@ -455,6 +469,49 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
   P is T / N,
   F is N - T,
   erase_samples.
+/** 
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Mix+Samples times given that 
+ * Evidence
+ * is true and returns
+ * the number of Successes, of Failures and the 
+ * Probability (Successes/Samples). 
+ * The first Mix samples are discarded (mixing time).
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability. 
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ */
+mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P):-
+  initial_sample_cycle(M:Evidence),!,
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  count_samples(NC),
+  Mix1 is Mix-1,
+  mh_montecarlo(L,Mix1,NC,0, Succ,Succ,Succ1,M:Goal, M:Evidence, _NMix, _TMix),
+  count_samples(NC1),
+  mh_montecarlo(L,S,NC1,0, 0,Succ1,_Succ1, M:Goal, M:Evidence, _N, T),
+  P is T / S,
+  F is S - T,
+  erase_samples.
+
+
+/** 
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Probability:float) is det
+ *
+ * The predicate samples Query  a number of Mix+Samples times given that Evidence
+ * is true and returns the
+ * Probability of the query. The first Mix samples are discarded (mixing time).
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability. 
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ */
+mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,P):-
+  mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,_T,_F,P):.
 
 /** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
@@ -469,7 +526,7 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
 mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
   mc_mh_sample(M:Goal,M:Evidence,S,L,_T,_F,P).
 
- /** 
+/** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -490,7 +547,7 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   ),
   count_samples(NC),
   S1 is S-1,
-  mh_montecarlo(L,S1,NC,0, Succ,Succ, M:Goal, M:Evidence, _N, T),
+  mh_montecarlo(L,S1,NC,0, Succ,Succ, _SuccNew,M:Goal, M:Evidence, _N, T),
   P is T / S,
   F is S - T,
   erase_samples.
@@ -717,6 +774,34 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
 	          legend:_{show: false}}.
 
 /** 
+ * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability.
+ */
+mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList):-
+  initial_sample_cycle(M:Evidence),!,
+  empty_assoc(Values0),
+  findall(Arg,M:Goal,La),
+  numbervars(La),
+  put_assoc(La,Values0,1,Values1),
+  count_samples(NC),
+  Mix1 is Mix-1,
+  mh_sample_arg(L,Mix1,NC,M:Goal,M:Evidence,Arg, La,La1,Values1,_Values),
+  count_samples(NC1),
+  mh_sample_arg(L,S,NC1,M:Goal,M:Evidence,Arg, La1,_La,Values0,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+/** 
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -737,10 +822,32 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList):-
   put_assoc(La,Values0,1,Values1),
   count_samples(NC),
   S1 is S-1,
-  mh_sample_arg(L,S1,NC,M:Goal,M:Evidence,Arg, Values1,Values),
+  mh_sample_arg(L,S1,NC,M:Goal,M:Evidence,Arg,La,_La, Values1,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList).
+
+/** 
+ * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate call mc_mh_sample_arg/7 and build a c3 graph
+ * of the results.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each possible value of L,
+ * the list of values of Arg for which Query succeeds in 
+ * a world sampled at random. 
+ * The size of the bar is the number of samples
+ * returning that list of values.
+ */
+mc_mh_sample_arg_bar(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
+  mc_mh_sample_arg(M:Goal,M:Ev,S,Mix,L,Arg,ValList0),
+  maplist(to_atom,ValList0,ValList),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
+	         %  size:_{height: 100},
+	          legend:_{show: false}}.
+
 
 /** 
  * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict) is det
@@ -769,9 +876,9 @@ mc_mh_sample_arg_bar(M:Goal,M:Ev,S,L,Arg,Chart):-
 to_atom(A0-N,A-N):-
   term_to_atom(A0,A).
 
-mh_sample_arg(_L,0,_NC0,_Goals,_Ev,_Arg,V,V):-!.
+mh_sample_arg(_L,0,_NC0,_Goals,_Ev,_Arg,AP,AP,V,V):-!.
 
-mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,V0,V):-
+mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
   save_samples_copy(Goal),
   resample(L),
   copy_term(Evidence,Ev1),
@@ -787,10 +894,17 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,V0,V):-
         put_assoc(La,V0,1,V1)
       ),
       delete_samples_copy(Goal),
-      K1 is K0-1
+      K1 is K0-1,
+      AP1 = La
     ;
-      V1=V0,
-      K1=K0,
+      (get_assoc(AP0, V0, N)->
+        N1 is N+1,
+        put_assoc(AP0,V0,N1,V1)
+      ;
+        put_assoc(AP0,V0,1,V1)
+      ),
+      K1 is K0-1,
+      AP1=AP0,
       erase_samples,
       restore_samples(Goal)
     )
@@ -798,10 +912,11 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,V0,V):-
     K1 = K0,
     NC1 = NC0,
     V1 = V0,
+    AP1=AP0,
     erase_samples,
     restore_samples(Goal)
   ),
-  mh_sample_arg(L,K1,NC1,M:Goal,M:Evidence,Arg,V1,V).
+  mh_sample_arg(L,K1,NC1,M:Goal,M:Evidence,Arg,AP1,AP,V1,V).
 
 
 rejection_sample_arg(0,_Goals,_Ev,_Arg,V,V):-!.
@@ -1448,6 +1563,36 @@ sample_arg_raw(K1, M:Goals,Arg,[Val|V]):-
  */
 mc_expectation(M:Goal,S,Arg,E):-
   sample_val(S,M:Goal,Arg, 0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+/** 
+ * mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  mc_rejection_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  foldl(value_cont,ValList,0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+/** 
+ * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,+Lag:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_mh_expectation(M:Goal,M:Evidence,S,Mix,L,Arg,E):-
+  mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList),
+  foldl(value_cont,ValList,0,Sum),
   erase_samples,
   E is Sum/S.
 
@@ -3324,7 +3469,9 @@ sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
@@ -3340,7 +3487,9 @@ sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_expectation(_,_,_,_,_), []).
 
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
