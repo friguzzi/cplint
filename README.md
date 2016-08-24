@@ -10,7 +10,7 @@ You can try it online at http://cplint.lamping.unife.it/
 
 Requirements
 -------------
-It requires packs =auc= and =matrix=:
+It requires packs auc and matrix:
 
     $ swipl
     ?- pack_install(auc).
