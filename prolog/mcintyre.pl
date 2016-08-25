@@ -511,7 +511,7 @@ mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P):-
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,P):-
-  mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,_T,_F,P):.
+  mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,_T,_F,P).
 
 /** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
@@ -3485,7 +3485,9 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_raw(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
