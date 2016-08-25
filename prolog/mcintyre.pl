@@ -49,6 +49,7 @@ details.
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
   mc_lw_expectation/5,
+  mc_particle_sample_arg/5,
   gauss_density/4,
   gauss/3,
   histogram/3,
@@ -106,6 +107,7 @@ details.
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
+:-meta_predicate mc_particle_sample_arg(:,+,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -211,6 +213,15 @@ s(M:Goal,P):-
   erase_samples,
   restore_samples(Goal1).
 
+save_samples(I,S):-
+  mc_input_mod(M),
+  recorded(R,Val,Ref),
+  assert(M:mem(I,S,R,Val)),
+  erase(Ref),
+  fail.
+
+save_samples(_I,_S).
+
 save_samples(G):-
   mc_input_mod(M),
   recorded(R,Val,Ref),
@@ -219,6 +230,14 @@ save_samples(G):-
   fail.
 
 save_samples(_G).
+
+restore_samples(I,S):-
+  mc_input_mod(M),
+  retract(M:mem(I,S,R,Val)),
+  recorda(R,Val),
+  fail.
+
+restore_samples(_I,_S).
 
 restore_samples(G):-
   mc_input_mod(M),
@@ -957,6 +976,111 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   ),
   K2 is K1-1,
   sample_arg(K2,M:Goals,Arg,V1,V).
+
+/** 
+ * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:floar) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true. Evidence is a list of goals.
+ * The predicate returns in Prob the probability that the query is true.
+ * It performs particle filtering with likelihood weighting: 
+ * each sample is weighted by the
+ * likelihood of an element of the Evidence list and constitutes a particle. 
+ * After weighting, particles are resampled and the next element of Evidence
+ * is consisered.
+ */
+mc_particle_sample(M:Goal,M:Evidence,S,P):-
+  erase_samples,
+  lw_sample_bool(S,M:Goal,M:Evidence,ValList),
+  foldl(agg_val,ValList,0,Sum),
+  foldl(value_cont_single,ValList,0,SumTrue),
+  P is SumTrue/Sum.
+
+/** 
+ * mc_particle_sample_arg(:Query:atom,+vidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query. Evidence is a list of goals.
+ * The predicate returns in Values a list of couples V-W where
+ * V is a value of Arg for which Query succeeds in
+ * a world sampled at random and W is the weight of the sample.
+ * It performs particle filtering with likelihood weighting: 
+ * each sample is weighted by the
+ * likelihood of an element of the Evidence list and constitutes a particle. 
+ * After weighting, particles are resampled and the next element of Evidence
+ * is consisered.
+ */
+mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
+  Evidence=[Ev1|EvR],
+  particle_sample_first(0,S,M:Goal,M:Ev1,Arg),
+  particle_sample_arg(EvR,M:Goal,1,S,ValList0),
+  foldl(agg_val,ValList0,0,Sum),
+  Norm is S/Sum,
+  retractall(mem(_,_,_,_)),
+  retractall(value_particle(_,_,_)),
+  retractall(weight_particle(_,_,_)),
+  maplist(norm(Norm),ValList0,ValList).
+
+particle_sample_arg([],_Goal,I,_S,L):-
+  get_values(I,L).
+
+particle_sample_arg([HE|TE],M:Goal,I,S,L):-
+  I1 is I+1,
+  resample(I,I1,S),
+  particle_sample(0,S, M:HE, I1),
+  particle_sample_arg(TE,M:Goal,I1,S,L).
+
+resample(I,I1,S):-
+  get_values(I,V0),
+  foldl(agg_val,V0,0,Sum),
+  Norm is 1.0/Sum,
+  maplist(norm(Norm),V0,V1),
+  numlist(1,S,L),
+  maplist(weight_to_prob,L,V1,V2),
+  W is 1.0/S,
+  take_samples(0,S,I,I1,W,V2).
+
+take_samples(S,S,_I,_I1,_W,_V):-!.
+
+take_samples(S0,S,I,I1,W,V):-
+  S1 is S0+1,
+  discrete(V,SInd),
+  restore_samples(I,SInd),
+  save_samples(I1,S1),
+  erase_samples,
+  value_particle(I,S1,Arg),
+  assert(value_particle(I1,S1,Arg)),
+  take_samples(S1,S,I,I1,W,V).
+
+particle_sample(K,K,_Ev,_I):-!.
+
+particle_sample(K0,S,M:Evidence,I):-
+  K1 is K0+1,
+  restore_samples(K1,I),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(I,K1),
+  assert(weight_particle(I,K1,W)),
+  erase_samples,
+  particle_sample(K1,S,M:Evidence,I).
+
+particle_sample_first(K,K,_Goals,_Ev,_Arg):-!.
+
+particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
+  K1 is K0+1,
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(1,K1),
+  assert(weight_particle(1,K1,W)),
+  assert(value_particle(1,K1,Arg1)),
+  erase_samples,
+  particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
+
+get_values(I,V):-
+  findall(A-W,(value_particle(I,S,A),weight_particle(I,S,W)),V).
 
 /** 
  * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
@@ -3460,6 +3584,8 @@ key(K-_,K).
 
 y(_ - Y,Y).
 
+weight_to_prob(I,_V-W,I:W).
+
 bin(0,_L,_Min,_BW,[]):-!.
 
 bin(N,L,Lower,BW,[V-Freq|T]):-
@@ -3549,5 +3675,6 @@ sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
