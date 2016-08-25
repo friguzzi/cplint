@@ -55,6 +55,7 @@ details.
   histogram/5,
   densities/4,
   density/5,
+  density/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -2353,7 +2354,13 @@ minus(A,B,B-A).
 prob_ann(_:P,P):-!.
 prob_ann(P::_,P).
 
+/**
+ * add_prob(?Prob:float,:Goal:atom,?AnnGoal:atom) is det
+ * 
+ * From Prob and Goal builds the annotated atom AnnGoal=Goal:Prob.
+ */
 add_prob(P,A,A:P).
+
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
@@ -2417,7 +2424,7 @@ or_list1([H|T],Env,B0,B1):-
   or_list1(T,Env,B2,B1).
 
 
-/** 
+/**
  * set_mc(++Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
@@ -2430,7 +2437,7 @@ set_mc(Parameter,Value):-
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
-/** 
+/**
  * setting_mc(?Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
@@ -2480,10 +2487,22 @@ add_arg(A,Arg,A1):-
   append(L,[Arg],L1),
   A1=..L1.
 
+/**
+ * set_sw(+Var:term,+List:lit) is det
+ * 
+ * Sets the domain of the random variable Var to List.
+ * This is a predicate for programs in the PRISM syntax
+ */
 set_sw(A,B):-
   mc_module(M),
   assert(M:sw(A,B)).
 
+/**
+ * msw(:Var:term,?Value:term) is det
+ * 
+ * Gets or tests the Value of the random variable Var.
+ * This is a predicate for programs in the PRISM syntax
+ */
 msw(M:A,B):-
   M:values(A,V),
   M:sw(A,D),
@@ -3324,7 +3343,7 @@ average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
         Av is Sum/N.
-/** 
+/**
  * histogram(+List:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a histogram of the samples in List dividing the domain in
@@ -3336,19 +3355,16 @@ histogram(L0,NBins,Chart):-
   maplist(key,L1,L2),
   max_list(L2,Max),
   min_list(L2,Min),
-  keysort(L1,L),
-  D is Max-Min,
-  BinWidth is D/NBins,
-  bin(NBins,L,Min,BinWidth,LB),
-  maplist(key,LB,X),
-  maplist(y,LB,Y),
-  Chart = c3{data:_{x:x, 
-    columns:[[x|X],[freq|Y]], type:bar},
-    axis:_{ x:_{ tick:_{fit:false}}},
-     bar:_{
-     width:_{ ratio: 1.0 }},
-     legend:_{show: false}}.
+  histogram(L0,NBins,Min,Max,Chart).
 
+/**
+ * histogram(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
+ *
+ * Draws a histogram of the samples in List dividing the domain in
+ * NBins bins. List must be a list of couples of the form [V]-W or V-W
+ * where V is a sampled value and W is its weight. The minimum and maximum
+ * values of the domains must be provided.
+ */
 histogram(L0,NBins,Min,Max,Chart):-
   maplist(to_pair,L0,L1),
   keysort(L1,L),
@@ -3364,7 +3380,7 @@ histogram(L0,NBins,Min,Max,Chart):-
      width:_{ ratio: 1.0 }},
      legend:_{show: false}}.
 
-/** 
+/**
  * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a line chart of the density of two sets of samples, usually
@@ -3397,9 +3413,18 @@ densities(Pri0,Post0,NBins,Chart):-
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
 
-density(Post0,Min,Max,NBins,Chart):-
+/**
+ * density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of a sets of samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. 
+ */
+density(Post0,NBins,Min,Max,Chart):-
   maplist(to_pair,Post0,Post),
-   D is Max-Min,
+  D is Max-Min,
   BinWidth is D/NBins,
   keysort(Post,Po),
   bin(NBins,Po,Min,BinWidth,LPo),
@@ -3410,6 +3435,22 @@ density(Post0,Min,Max,NBins,Chart):-
     [dens|YPo]]},
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
+
+/**
+ * density(+List:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of a sets of samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. 
+ */
+
+density(Post0,NBins,Chart):-
+  maplist(key,Post0,PoK),
+  max_list(PoK,Max),
+  min_list(PoK,Min),
+  density(Post0,NBins,Min,Max,Chart).
 
 
 to_pair([E]-W,E-W):- !.
@@ -3443,8 +3484,18 @@ count_bin([H-W|T0],L,U,F0,F,T):-
     count_bin(T0,L,U,F1,F,T)
   ).
 
+/**
+ * swap(?Term1:term,?Term2:term) is det
+ *
+ * If Term1 is of the form A:B, then Term2 is of the form B:A.
+ */
 swap(A:B,B:A).
 
+/**
+ * ~=(:Term:term, +B:term) is det
+ *
+ * equality predicate for distributional clauses
+ */
 (M:A) ~= B :-
   A=..L,
   append(L,[B],L1),
@@ -3459,6 +3510,7 @@ sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
+sandbox:safe_primitive(mcintyre:density(_,_,_)).
 sandbox:safe_primitive(mcintyre:set_sw(_,_)).
 
 :- multifile sandbox:safe_meta/2.
