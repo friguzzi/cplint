@@ -424,7 +424,7 @@ get_var_n(Env,R,S,Probs0,V):-
   ).
 
 /**
- * msw(:Var:term,?Value:term,++Environment:int,--BDD:int)) is det
+ * msw(:Var:term,?Value:term,++Environment:int,--BDD:int) is det
  * 
  * Returns a BDD representing Var=Value.
  * This is a predicate for programs in the PRISM syntax
@@ -443,7 +443,7 @@ msw(M:A,B,Env,BDD):-
   ).
 
 /**
- * msw(:Var:term,?Value:term,++Environment:int,--BDD:int)) is det
+ * msw(:Var:term,?Value:term,++Environment:int,--BDD:int) is det
  * 
  * Returns a BDD representing Var=Value when there is a depth bound on
  * derivations.
