@@ -233,7 +233,7 @@ save_samples(_G).
 
 restore_samples(I,S):-
   mc_input_mod(M),
-  retract(M:mem(I,S,R,Val)),
+  M:mem(I,S,R,Val),
   recorda(R,Val),
   fail.
 
@@ -1011,6 +1011,17 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
  * After weighting, particles are resampled and the next element of Evidence
  * is consisered.
  */
+mc_particle_sample_arg(M:Goal,Evidence,S,Arg,[V0|ValList]):-
+  Goal=[G1|GR],!,
+  Evidence=[Ev1|EvR],
+  Arg=[A1|AR],
+  particle_sample_first_gl(0,S,M:G1,M:Ev1,A1,V0),
+  particle_sample_arg_gl(M:GR,M:EvR,AR,1,S,ValList),
+  mc_input_mod(MI),
+  retractall(MI:mem(_,_,_,_)),
+  retractall(MI:value_particle(_,_,_)),
+  retractall(MI:weight_particle(_,_,_)).
+
 mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
   Evidence=[Ev1|EvR],
   particle_sample_first(0,S,M:Goal,M:Ev1,Arg),
@@ -1022,6 +1033,73 @@ mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
   retractall(MI:value_particle(_,_,_)),
   retractall(MI:weight_particle(_,_,_)),
   maplist(norm(Norm),ValList0,ValList).
+
+particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]).
+
+particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
+  I1 is I+1,
+  resample_gl(I,I1,S),
+  particle_sample_gl(0,S,M:HG,M:HE,HA,I1,HV),
+  particle_sample_arg_gl(M:TG,M:TE,TA,I1,S,TV).
+
+resample_gl(I,I1,S):-
+  get_values(I,V0),
+  foldl(agg_val,V0,0,Sum),
+  Norm is 1.0/Sum,
+  maplist(norm(Norm),V0,V1),
+  numlist(1,S,L),
+  maplist(weight_to_prob,L,V1,V2),
+  W is 1.0/S,
+  take_samples_gl(0,S,I,I1,W,V2).
+
+take_samples_gl(S,S,_I,_I1,_W,_V):-!.
+
+take_samples_gl(S0,S,I,I1,W,V):-
+  S1 is S0+1,
+  discrete(V,SInd),
+  restore_samples(I,SInd),
+  save_samples(I1,S1),
+  take_samples_gl(S1,S,I,I1,W,V).
+
+particle_sample_gl(K,K,_G,_Ev,_A,I,L):-!,
+  get_values(I,L0),
+  foldl(agg_val,L0,0,Sum),
+  Norm is K/Sum,
+  maplist(norm(Norm),L0,L).
+
+
+particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
+  K1 is K0+1,
+  restore_samples(K1,I),
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(I,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(I,K1,W)),
+  assert(MI:value_particle(I,K1,Arg1)),
+  particle_sample_gl(K1,S,M:Goal,M:Evidence,Arg,I,L).
+
+particle_sample_first_gl(K,K,_Goals,_Ev,_Arg,L):-!,
+  get_values(1,L0),
+  foldl(agg_val,L0,0,Sum),
+  Norm is K/Sum,
+  maplist(norm(Norm),L0,L).
+
+
+particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
+  K1 is K0+1,
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(1,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(1,K1,W)),
+  assert(MI:value_particle(1,K1,Arg1)),
+  particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
+
 
 particle_sample_arg([],_Goal,I,_S,L):-
   get_values(I,L).
@@ -1049,7 +1127,6 @@ take_samples(S0,S,I,I1,W,V):-
   discrete(V,SInd),
   restore_samples(I,SInd),
   save_samples(I1,S1),
-  erase_samples,
   mc_input_mod(M),
   M:value_particle(I,S1,Arg),!,
   assert(M:value_particle(I1,S1,Arg)),
@@ -1065,7 +1142,6 @@ particle_sample(K0,S,M:Evidence,I):-
   save_samples(I,K1),
   mc_input_mod(MI),
   assert(MI:weight_particle(I,K1,W)),
-  erase_samples,
   particle_sample(K1,S,M:Evidence,I).
 
 particle_sample_first(K,K,_Goals,_Ev,_Arg):-!.
@@ -1080,7 +1156,6 @@ particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
   mc_input_mod(MI),
   assert(MI:weight_particle(1,K1,W)),
   assert(MI:value_particle(1,K1,Arg1)),
-  erase_samples,
   particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
 
 get_values(I,V):-
