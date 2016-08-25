@@ -997,7 +997,7 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
   P is SumTrue/Sum.
 
 /** 
- * mc_particle_sample_arg(:Query:atom,+vidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_particle_sample_arg(:Query:atom,+Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1017,9 +1017,10 @@ mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
   particle_sample_arg(EvR,M:Goal,1,S,ValList0),
   foldl(agg_val,ValList0,0,Sum),
   Norm is S/Sum,
-  retractall(mem(_,_,_,_)),
-  retractall(value_particle(_,_,_)),
-  retractall(weight_particle(_,_,_)),
+  mc_input_mod(MI),
+  retractall(MI:mem(_,_,_,_)),
+  retractall(MI:value_particle(_,_,_)),
+  retractall(MI:weight_particle(_,_,_)),
   maplist(norm(Norm),ValList0,ValList).
 
 particle_sample_arg([],_Goal,I,_S,L):-
@@ -1049,8 +1050,9 @@ take_samples(S0,S,I,I1,W,V):-
   restore_samples(I,SInd),
   save_samples(I1,S1),
   erase_samples,
-  value_particle(I,S1,Arg),
-  assert(value_particle(I1,S1,Arg)),
+  mc_input_mod(M),
+  M:value_particle(I,S1,Arg),!,
+  assert(M:value_particle(I1,S1,Arg)),
   take_samples(S1,S,I,I1,W,V).
 
 particle_sample(K,K,_Ev,_I):-!.
@@ -1061,7 +1063,8 @@ particle_sample(K0,S,M:Evidence,I):-
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
   save_samples(I,K1),
-  assert(weight_particle(I,K1,W)),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(I,K1,W)),
   erase_samples,
   particle_sample(K1,S,M:Evidence,I).
 
@@ -1074,13 +1077,15 @@ particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
   save_samples(1,K1),
-  assert(weight_particle(1,K1,W)),
-  assert(value_particle(1,K1,Arg1)),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(1,K1,W)),
+  assert(MI:value_particle(1,K1,Arg1)),
   erase_samples,
   particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
 
 get_values(I,V):-
-  findall(A-W,(value_particle(I,S,A),weight_particle(I,S,W)),V).
+  mc_input_mod(M),
+  findall(A-W,(M:value_particle(I,S,A),M:weight_particle(I,S,W)),V).
 
 /** 
  * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
@@ -2210,7 +2215,7 @@ discrete(D,S0):-
   ).
 
 pick_val(_,(P0,V0),(P0,V0)):-
-  nonvar(V0).
+  nonvar(V0),!.
 
 pick_val(S:P,(P0,V0),(P1,V1)):-
   var(V0),
