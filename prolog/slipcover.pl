@@ -3474,6 +3474,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
 sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 
 %sandbox:safe_primitive(prolog_load_context(_,_)).
