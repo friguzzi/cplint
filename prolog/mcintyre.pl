@@ -49,12 +49,14 @@ details.
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
   mc_lw_expectation/5,
+  mc_particle_sample_arg/5,
   gauss_density/4,
   gauss/3,
   histogram/3,
   histogram/5,
   densities/4,
   density/5,
+  density/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -105,6 +107,7 @@ details.
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
+:-meta_predicate mc_particle_sample_arg(:,+,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -210,6 +213,15 @@ s(M:Goal,P):-
   erase_samples,
   restore_samples(Goal1).
 
+save_samples(I,S):-
+  mc_input_mod(M),
+  recorded(R,Val,Ref),
+  assert(M:mem(I,S,R,Val)),
+  erase(Ref),
+  fail.
+
+save_samples(_I,_S).
+
 save_samples(G):-
   mc_input_mod(M),
   recorded(R,Val,Ref),
@@ -218,6 +230,14 @@ save_samples(G):-
   fail.
 
 save_samples(_G).
+
+restore_samples(I,S):-
+  mc_input_mod(M),
+  M:mem(I,S,R,Val),
+  recorda(R,Val),
+  fail.
+
+restore_samples(_I,_S).
 
 restore_samples(G):-
   mc_input_mod(M),
@@ -956,6 +976,191 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   ),
   K2 is K1-1,
   sample_arg(K2,M:Goals,Arg,V1,V).
+
+/** 
+ * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:floar) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true. Evidence is a list of goals.
+ * The predicate returns in Prob the probability that the query is true.
+ * It performs particle filtering with likelihood weighting: 
+ * each sample is weighted by the
+ * likelihood of an element of the Evidence list and constitutes a particle. 
+ * After weighting, particles are resampled and the next element of Evidence
+ * is consisered.
+ */
+mc_particle_sample(M:Goal,M:Evidence,S,P):-
+  erase_samples,
+  lw_sample_bool(S,M:Goal,M:Evidence,ValList),
+  foldl(agg_val,ValList,0,Sum),
+  foldl(value_cont_single,ValList,0,SumTrue),
+  P is SumTrue/Sum.
+
+/** 
+ * mc_particle_sample_arg(:Query:atom,+Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query. Evidence is a list of goals.
+ * The predicate returns in Values a list of couples V-W where
+ * V is a value of Arg for which Query succeeds in
+ * a world sampled at random and W is the weight of the sample.
+ * It performs particle filtering with likelihood weighting: 
+ * each sample is weighted by the
+ * likelihood of an element of the Evidence list and constitutes a particle. 
+ * After weighting, particles are resampled and the next element of Evidence
+ * is consisered.
+ */
+mc_particle_sample_arg(M:Goal,Evidence,S,Arg,[V0|ValList]):-
+  Goal=[G1|GR],!,
+  Evidence=[Ev1|EvR],
+  Arg=[A1|AR],
+  particle_sample_first_gl(0,S,M:G1,M:Ev1,A1,V0),
+  particle_sample_arg_gl(M:GR,M:EvR,AR,1,S,ValList),
+  mc_input_mod(MI),
+  retractall(MI:mem(_,_,_,_)),
+  retractall(MI:value_particle(_,_,_)),
+  retractall(MI:weight_particle(_,_,_)).
+
+mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
+  Evidence=[Ev1|EvR],
+  particle_sample_first(0,S,M:Goal,M:Ev1,Arg),
+  particle_sample_arg(EvR,M:Goal,1,S,ValList0),
+  foldl(agg_val,ValList0,0,Sum),
+  Norm is S/Sum,
+  mc_input_mod(MI),
+  retractall(MI:mem(_,_,_,_)),
+  retractall(MI:value_particle(_,_,_)),
+  retractall(MI:weight_particle(_,_,_)),
+  maplist(norm(Norm),ValList0,ValList).
+
+particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]).
+
+particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
+  I1 is I+1,
+  resample_gl(I,I1,S),
+  particle_sample_gl(0,S,M:HG,M:HE,HA,I1,HV),
+  particle_sample_arg_gl(M:TG,M:TE,TA,I1,S,TV).
+
+resample_gl(I,I1,S):-
+  get_values(I,V0),
+  foldl(agg_val,V0,0,Sum),
+  Norm is 1.0/Sum,
+  maplist(norm(Norm),V0,V1),
+  numlist(1,S,L),
+  maplist(weight_to_prob,L,V1,V2),
+  W is 1.0/S,
+  take_samples_gl(0,S,I,I1,W,V2).
+
+take_samples_gl(S,S,_I,_I1,_W,_V):-!.
+
+take_samples_gl(S0,S,I,I1,W,V):-
+  S1 is S0+1,
+  discrete(V,SInd),
+  restore_samples(I,SInd),
+  save_samples(I1,S1),
+  take_samples_gl(S1,S,I,I1,W,V).
+
+particle_sample_gl(K,K,_G,_Ev,_A,I,L):-!,
+  get_values(I,L0),
+  foldl(agg_val,L0,0,Sum),
+  Norm is K/Sum,
+  maplist(norm(Norm),L0,L).
+
+
+particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
+  K1 is K0+1,
+  restore_samples(K1,I),
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(I,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(I,K1,W)),
+  assert(MI:value_particle(I,K1,Arg1)),
+  particle_sample_gl(K1,S,M:Goal,M:Evidence,Arg,I,L).
+
+particle_sample_first_gl(K,K,_Goals,_Ev,_Arg,L):-!,
+  get_values(1,L0),
+  foldl(agg_val,L0,0,Sum),
+  Norm is K/Sum,
+  maplist(norm(Norm),L0,L).
+
+
+particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
+  K1 is K0+1,
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(1,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(1,K1,W)),
+  assert(MI:value_particle(1,K1,Arg1)),
+  particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
+
+
+particle_sample_arg([],_Goal,I,_S,L):-
+  get_values(I,L).
+
+particle_sample_arg([HE|TE],M:Goal,I,S,L):-
+  I1 is I+1,
+  resample(I,I1,S),
+  particle_sample(0,S, M:HE, I1),
+  particle_sample_arg(TE,M:Goal,I1,S,L).
+
+resample(I,I1,S):-
+  get_values(I,V0),
+  foldl(agg_val,V0,0,Sum),
+  Norm is 1.0/Sum,
+  maplist(norm(Norm),V0,V1),
+  numlist(1,S,L),
+  maplist(weight_to_prob,L,V1,V2),
+  W is 1.0/S,
+  take_samples(0,S,I,I1,W,V2).
+
+take_samples(S,S,_I,_I1,_W,_V):-!.
+
+take_samples(S0,S,I,I1,W,V):-
+  S1 is S0+1,
+  discrete(V,SInd),
+  restore_samples(I,SInd),
+  save_samples(I1,S1),
+  mc_input_mod(M),
+  M:value_particle(I,S1,Arg),!,
+  assert(M:value_particle(I1,S1,Arg)),
+  take_samples(S1,S,I,I1,W,V).
+
+particle_sample(K,K,_Ev,_I):-!.
+
+particle_sample(K0,S,M:Evidence,I):-
+  K1 is K0+1,
+  restore_samples(K1,I),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(I,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(I,K1,W)),
+  particle_sample(K1,S,M:Evidence,I).
+
+particle_sample_first(K,K,_Goals,_Ev,_Arg):-!.
+
+particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
+  K1 is K0+1,
+  copy_term((Goal,Arg),(Goal1,Arg1)),
+  lw_sample_cycle(M:Goal1),
+  copy_term(Evidence,Ev1),
+  lw_sample_weight_cycle(M:Ev1,W),
+  save_samples(1,K1),
+  mc_input_mod(MI),
+  assert(MI:weight_particle(1,K1,W)),
+  assert(MI:value_particle(1,K1,Arg1)),
+  particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
+
+get_values(I,V):-
+  mc_input_mod(M),
+  findall(A-W,(M:value_particle(I,S,A),M:weight_particle(I,S,W)),V).
 
 /** 
  * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
@@ -2085,7 +2290,7 @@ discrete(D,S0):-
   ).
 
 pick_val(_,(P0,V0),(P0,V0)):-
-  nonvar(V0).
+  nonvar(V0),!.
 
 pick_val(S:P,(P0,V0),(P1,V1)):-
   var(V0),
@@ -2353,7 +2558,13 @@ minus(A,B,B-A).
 prob_ann(_:P,P):-!.
 prob_ann(P::_,P).
 
+/**
+ * add_prob(?Prob:float,:Goal:atom,?AnnGoal:atom) is det
+ * 
+ * From Prob and Goal builds the annotated atom AnnGoal=Goal:Prob.
+ */
 add_prob(P,A,A:P).
+
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
@@ -2417,7 +2628,7 @@ or_list1([H|T],Env,B0,B1):-
   or_list1(T,Env,B2,B1).
 
 
-/** 
+/**
  * set_mc(++Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
@@ -2430,7 +2641,7 @@ set_mc(Parameter,Value):-
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
-/** 
+/**
  * setting_mc(?Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
@@ -2480,10 +2691,22 @@ add_arg(A,Arg,A1):-
   append(L,[Arg],L1),
   A1=..L1.
 
+/**
+ * set_sw(+Var:term,+List:lit) is det
+ * 
+ * Sets the domain of the random variable Var to List.
+ * This is a predicate for programs in the PRISM syntax
+ */
 set_sw(A,B):-
   mc_module(M),
   assert(M:sw(A,B)).
 
+/**
+ * msw(:Var:term,?Value:term) is det
+ * 
+ * Gets or tests the Value of the random variable Var.
+ * This is a predicate for programs in the PRISM syntax
+ */
 msw(M:A,B):-
   M:values(A,V),
   M:sw(A,D),
@@ -3324,7 +3547,7 @@ average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
         Av is Sum/N.
-/** 
+/**
  * histogram(+List:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a histogram of the samples in List dividing the domain in
@@ -3336,19 +3559,16 @@ histogram(L0,NBins,Chart):-
   maplist(key,L1,L2),
   max_list(L2,Max),
   min_list(L2,Min),
-  keysort(L1,L),
-  D is Max-Min,
-  BinWidth is D/NBins,
-  bin(NBins,L,Min,BinWidth,LB),
-  maplist(key,LB,X),
-  maplist(y,LB,Y),
-  Chart = c3{data:_{x:x, 
-    columns:[[x|X],[freq|Y]], type:bar},
-    axis:_{ x:_{ tick:_{fit:false}}},
-     bar:_{
-     width:_{ ratio: 1.0 }},
-     legend:_{show: false}}.
+  histogram(L0,NBins,Min,Max,Chart).
 
+/**
+ * histogram(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
+ *
+ * Draws a histogram of the samples in List dividing the domain in
+ * NBins bins. List must be a list of couples of the form [V]-W or V-W
+ * where V is a sampled value and W is its weight. The minimum and maximum
+ * values of the domains must be provided.
+ */
 histogram(L0,NBins,Min,Max,Chart):-
   maplist(to_pair,L0,L1),
   keysort(L1,L),
@@ -3364,7 +3584,7 @@ histogram(L0,NBins,Min,Max,Chart):-
      width:_{ ratio: 1.0 }},
      legend:_{show: false}}.
 
-/** 
+/**
  * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
  *
  * Draws a line chart of the density of two sets of samples, usually
@@ -3397,9 +3617,18 @@ densities(Pri0,Post0,NBins,Chart):-
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
 
-density(Post0,Min,Max,NBins,Chart):-
+/**
+ * density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of a sets of samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. 
+ */
+density(Post0,NBins,Min,Max,Chart):-
   maplist(to_pair,Post0,Post),
-   D is Max-Min,
+  D is Max-Min,
   BinWidth is D/NBins,
   keysort(Post,Po),
   bin(NBins,Po,Min,BinWidth,LPo),
@@ -3411,6 +3640,22 @@ density(Post0,Min,Max,NBins,Chart):-
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
 
+/**
+ * density(+List:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of a sets of samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. 
+ */
+
+density(Post0,NBins,Chart):-
+  maplist(key,Post0,PoK),
+  max_list(PoK,Max),
+  min_list(PoK,Min),
+  density(Post0,NBins,Min,Max,Chart).
+
 
 to_pair([E]-W,E-W):- !.
 to_pair(E-W,E-W).
@@ -3418,6 +3663,8 @@ to_pair(E-W,E-W).
 key(K-_,K).
 
 y(_ - Y,Y).
+
+weight_to_prob(I,_V-W,I:W).
 
 bin(0,_L,_Min,_BW,[]):-!.
 
@@ -3443,8 +3690,18 @@ count_bin([H-W|T0],L,U,F0,F,T):-
     count_bin(T0,L,U,F1,F,T)
   ).
 
+/**
+ * swap(?Term1:term,?Term2:term) is det
+ *
+ * If Term1 is of the form A:B, then Term2 is of the form B:A.
+ */
 swap(A:B,B:A).
 
+/**
+ * ~=(:Term:term, +B:term) is det
+ *
+ * equality predicate for distributional clauses
+ */
 (M:A) ~= B :-
   A=..L,
   append(L,[B],L1),
@@ -3459,6 +3716,7 @@ sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
+sandbox:safe_primitive(mcintyre:density(_,_,_)).
 sandbox:safe_primitive(mcintyre:set_sw(_,_)).
 
 :- multifile sandbox:safe_meta/2.
@@ -3497,5 +3755,6 @@ sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
