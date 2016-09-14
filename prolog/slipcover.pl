@@ -1497,12 +1497,14 @@ variabilize_args([C|T],[# _Ty|TT],[C|TV],A0,A):-!,
 variabilize_args([C|T],[-# _Ty|TT],[C|TV],A0,A):-!,
   variabilize_args(T,TT,TV,A0,A).
 
-variabilize_args([C|T],[_Ty|TT],[V|TV],A0,A):-
-  member(C/V,A0),!,
+variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
+  (Ty = +Ty1;Ty = -Ty1),
+  member(C/Ty1/V,A0),!,
   variabilize_args(T,TT,TV,A0,A).
 
-variabilize_args([C|T],[_Ty|TT],[V|TV],A0,A):-
-  variabilize_args(T,TT,TV,[C/V|A0],A).
+variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
+  (Ty = +Ty1;Ty = -Ty1),
+  variabilize_args(T,TT,TV,[C/Ty1/V|A0],A).
 
 
 cycle_modeb(ArgsTypes,Args,ArgsTypes,Args,_Mod,_BL,L,L,L,_,_M):-!.
