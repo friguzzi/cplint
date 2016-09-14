@@ -1295,10 +1295,15 @@ deduct(NM,Mod,DB,InTheory0,InTheory):-
   sample(1,DB,Sampled,DB1),
   (Sampled=[M]->
     generate_head(O,M,Mod,[],HL),
-    generate_body(HL,Mod,InTheory1),
-    append(InTheory0,InTheory1,InTheory2),
-    NM1 is NM-1,
-    deduct(NM1,Mod,DB1,InTheory2,InTheory)
+    ( HL \== [] ->
+       (generate_body(HL,Mod,InTheory1),
+    	append(InTheory0,InTheory1,InTheory2),
+    	NM1 is NM-1,
+    	deduct(NM1,Mod,DB1,InTheory2,InTheory)
+       )
+      ;
+       deduct(NM,Mod,DB,InTheory0,InTheory)
+    )
   ;
     InTheory=InTheory0
   ).
