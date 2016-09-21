@@ -208,6 +208,7 @@ test_prob(P,TestFolds,NPos,NNeg,Results) :-
   ),
   set_sc(compiling,off),
   test_no_area([TE],NPos,NNeg,Results),
+  % write(Results), 
   (M:bg(RBG0)->
     retract_all(ThBGRef),
 %    retract_all(RBGRFRef),
