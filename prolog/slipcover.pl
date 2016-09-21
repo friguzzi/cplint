@@ -118,7 +118,7 @@ induce(Folds,R):-
 %  generate_clauses(R0,R,0,[],_Th).
 
 /** 
- * induce(+TrainFolds:list_of_atoms,+TrainFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * induce(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate performs structure learning using the folds indicated in 
  * TrainFolds for training. 
@@ -135,7 +135,7 @@ induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   test(ROut,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
 
 /** 
- * test(-P:probabilistic_program,+TrainFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * test(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns the
@@ -178,7 +178,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   retract_all(RFRef).
 
 /** 
- * test_prob(-P:probabilistic_program,+TrainFolds:list_of_atoms,-NPos:int,-NNeg:int,-Results:list) is det
+ * test_prob(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-Results:list) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns 
@@ -510,7 +510,7 @@ induce_parameters(Folds,R):-
   ).
 
 /** 
- * induce_par(+TrainFolds:list_of_atoms,+TrainFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * induce_par(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate learns the parameters of the program stored in the in/1 fact
  * of the input file using the folds indicated in TrainFolds for training. 
@@ -3526,7 +3526,7 @@ test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
   test_folds(TestSet,[],LG,0,_Pos,0,_Neg,0,CLL),
 %  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
-%  writes(LG1,S),
+%  write_prob(LG),
   compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
 /*
   ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
@@ -3930,6 +3930,7 @@ writes([H-H1],S):-
 writes([H-H1|T],S):-
   format(S,"~f - (~q),~n",[H,H1]),
   writes(T,S).
+
 
 write_p(P,S):-
   get_xy(P,PX,PY),
