@@ -186,7 +186,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
  * and in Results a list containing the probabilistic result for each query contained in TestFolds.
  */
 test_prob(P,TestFolds,NPos,NNeg,Results) :-
-  write2('Testing\n'),
+		%  write2('Testing\n'),
   input_mod(M),
   make_dynamic(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
