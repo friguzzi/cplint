@@ -112,10 +112,10 @@ default_setting_sc(single_var,true). %false:1 variable for every grounding of a 
  * TrainFolds for training. 
  * It returns in P the learned probabilistic program.
  */
-induce(Folds,R):-
-  induce_rules(Folds,R0),
-  rules2terms(R0,R).
-%  generate_clauses(R0,R,0,[],_Th).
+induce(TrainFolds,P):-
+  induce_rules(TrainFolds,P0),
+  rules2terms(P0,P).
+%  generate_clauses(P0,P,0,[],_Th).
 
 /** 
  * induce(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
