@@ -24,7 +24,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
   sample/4,
   op(500,fx,#),op(500,fx,'-#'),
-  test_prob/5]).
+  test_prob/6]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
@@ -145,6 +145,19 @@ induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
  * and a dict containing the points of the PR curve in PR
  */
 test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
+  test_prob(P,TestFolds,_NPos,_NNeg,LL,LG),
+  compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
+
+/** 
+ * test_prob(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-LL:float,-Results:list) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns 
+ * the number of positive examples in NPos, the number of negative examples 
+ * in NNeg, the log likelihood in LL
+ * and in Results a list containing the probabilistic result for each query contained in TestFolds.
+ */
+test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2('Testing\n'),
   input_mod(M),
   make_dynamic(M),
@@ -166,48 +179,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
     true
   ),
   set_sc(compiling,off),
-  test([TE],LL,AUCROC,ROC,AUCPR,PR),
-  (M:bg(RBG0)->
-    retract_all(ThBGRef),
-%    retract_all(RBGRFRef),
-    retract_all(ClBGRef)
-  ;
-    true
-  ),
-  retract_all(ThRef),
-  retract_all(RFRef).
-
-/** 
- * test_prob(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-Results:list) is det
- *
- * The predicate takes as input in P a probabilistic program,
- * tests P on the folds indicated in TestFolds and returns 
- * the number of positive examples in NPos, the number of negative examples in NNeg 
- * and in Results a list containing the probabilistic result for each query contained in TestFolds.
- */
-test_prob(P,TestFolds,NPos,NNeg,Results) :-
-		%  write2('Testing\n'),
-  input_mod(M),
-  make_dynamic(M),
-  findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
-  append(L,TE),
-  set_sc(compiling,on),
-  process_clauses(P,[],_,[],PRules),
-  generate_clauses(PRules,RuleFacts,0,[],Th), 
-  assert_all(Th,M,ThRef),
-  assert_all(RuleFacts,M,RFRef),
-  (M:bg(RBG0)->
-    process_clauses(RBG0,[],_,[],RBG),
-    generate_clauses(RBG,_RBGRF,0,[],ThBG),
-    generate_clauses_bg(RBG,ClBG), 
-    assert_all(ClBG,M,ClBGRef),
-    assert_all(ThBG,ThBGRef)
-%    assert_all(RBGRF,RBGRFRef)
-  ;
-    true
-  ),
-  set_sc(compiling,off),
-  test_no_area([TE],NPos,NNeg,Results),
+  test_no_area([TE],NPos,NNeg,CLL,Results),
   % write(Results), 
   (M:bg(RBG0)->
     retract_all(ThBGRef),
@@ -3482,7 +3454,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
 sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
-sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_)).
+sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 
 %sandbox:safe_primitive(prolog_load_context(_,_)).
@@ -3513,12 +3485,12 @@ sandbox:safe_primitive(slipcover:equality(_,_,_)).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 
 */
-test_no_area(TestSet,NPos,NNeg,Results):-
+test_no_area(TestSet,NPos,NNeg,CLL,Results):-
 %  S= user_output,
 %  SA= user_output,
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
   %gtrace,
-  test_folds(TestSet,[],Results,0,NPos,0,NNeg,0,_CLL).
+  test_folds(TestSet,[],Results,0,NPos,0,NNeg,0,CLL).
 
 
 test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
