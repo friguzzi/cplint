@@ -119,7 +119,7 @@ toss(coin).</code></pre>
 <p>where <code>Density</code> is a special atom identifying a probability density on variable <code>Var</code> and <code>Body</code> (optional) is a regular clause body. Allowed <code>Density</code> atoms are</p>
 <ul>
 <li><p><code>uniform(Var,L,U)</code>: <code>Var</code> is uniformly distributed in <span class="math inline">\([L,U]\)</span></p></li>
-<li><p><code>gaussian(Var,Mean,Variance)</code>: <code>Var</code> follows a Gaussian distribution with mean <code>Mean</code> and variance <code>Variance</code></p></li>
+<li><p><code>gaussian(Var,Mean,Variance)</code>: <code>Var</code> follows a Gaussian distribution with mean <code>Mean</code> and variance <code>Variance</code>. The distribution can be multivariate if <code>Mean</code> is a list and <code>Variance</code> a list of lists representing the mean vector and the covariance matrix. In this case the values of <code>Var</code> are lists of real values with the same length as that of <code>Mean</code></p></li>
 <li><p><code>dirichlet(Var,Par)</code>: <code>Var</code> is a list of real numbers following a Dirichlet distribution with <span class="math inline">\(\alpha\)</span> parameters specified by the list <code>Par</code></p></li>
 <li><p><code>gamma(Var,Shape,Scale)</code> <code>Var</code> follows a gamma distribution with shape parameter <code>Shape</code> and scale parameter <code>Scale</code>.</p></li>
 <li><p><code>beta(Var,Alpha,Beta)</code> <code>Var</code> follows a beta distribution with parameters <code>Alpha</code> and <code>Beta</code>.</p></li>
@@ -127,7 +127,12 @@ toss(coin).</code></pre>
 </ul>
 <p>For example</p>
 <pre><code>g(X): gaussian(X,0, 1).</code></pre>
-<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian distribution with mean 0 and variance 1.</p>
+<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian distribution with mean 0 and variance 1, while</p>
+<pre><code>g(X): gaussian(X,[0,0], [[1,0],[0,1]]).</code></pre>
+<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian multivariate distribution with mean vector <span class="math inline">\([0,0]\)</span> and covariance matrix <span class="math display">\[\left[\begin{array}{rr}
+1&amp;0\\
+0&amp;1
+\end{array}\right]\]</span>.</p>
 <p>For example, <a href="http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl"><code>gaussian_mixture.pl</code></a> defines a mixture of two Gaussians:</p>
 <pre><code>heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
@@ -690,14 +695,18 @@ fold(test,[490,491,...]).</code></pre>
 <pre><code>?- induce_par([train],P).</code></pre>
 <p>A program can also be tested on a test set with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds. This returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
+<p>or</p>
+<pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,LL,NPos,NNeg,ExampleList).</code></pre>
+<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds.</p>
+<p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
+<p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
 <p>For example, to test on fold <code>test</code> the program learned on fold <code>train</code> you can run the query</p>
 <pre><code>?- induce_par([train],P),
    test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>Or you can test the input program on the fold <code>test</code> with</p>
 <pre><code>?- in(P),
    test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<p>By including</p>
+<p>In <code>cplint</code> on SWISH, by including</p>
 <pre><code>:- use_rendering(c3).
 :- use_rendering(lpad).</code></pre>
 <p>in the code before <code>:- sc.</code> the curves will be shown as graphs and the output program will be pretty printed.</p>

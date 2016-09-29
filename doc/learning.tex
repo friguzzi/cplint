@@ -407,3 +407,73 @@ fold(all,F):-
 which however must be inserted after the input interpretations otherwise the facts for \verb|int/1| will not be available and
 the fold \verb|all| would be empty. This command uses  \verb|sample(N,List,Sampled,Rest)| exported from \verb|slipcover| that samples \verb|N| elements from \verb|List| and returns the sampled elements in \verb|Sampled| and the rest in \verb|Rest|. If \verb|List| has \verb|N| elements or less, \verb|Sampled| is equal to \verb|List| 
 and \verb|Rest| is empty.
+
+\subsection{Commands}
+\subsubsection{Parameter Learning}
+To execute EMBLEM, prepare an input file in the editor panel as indicated above 
+and call
+\begin{verbatim}
+?- induce_par(<list of folds>,P).
+\end{verbatim}
+where \verb|<list of folds>| is a list of the folds for training and
+\verb|P| will contain the input program with updated parameters.
+
+For example \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can 
+perform parameter learning on the \verb|train| fold with 
+\begin{verbatim}
+?- induce_par([train],P).
+\end{verbatim}
+A program can also be tested on a test set with
+\begin{verbatim}
+?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+or
+\begin{verbatim}
+?- test_prob(<program>,<list of folds>,LL,NPos,NNeg,ExampleList).
+\end{verbatim}
+where \verb|<program>| is a list of terms representing clauses and
+\verb|<list of folds>| is a list of folds.
+
+\verb|test/7| returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
+
+\verb|test_prob/6| returns the log likelihood of the test examples in \verb|LL|, the numbers of positive and negative examples in \verb|NPos| and \verb|NNeg| and the list 
+\verb|ExampleList| containing couples \verb|Prob-Ex| where \verb|Ex| is \verb|a| for \verb|a| a positive example and \verb|\+(a)| for \verb|a| a negative example
+and \verb|Prob| is the probability of example \verb|a|.
+
+
+For example, to test on fold \verb|test| the program learned on fold \verb|train| you can run the query
+\begin{verbatim}
+?- induce_par([train],P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+Or you can test the input program on the fold \verb|test| with
+\begin{verbatim}
+?- in(P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+In \verb|cplint| on SWISH, by including
+\begin{verbatim}
+:- use_rendering(c3).
+:- use_rendering(lpad).
+\end{verbatim}
+in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
+
+
+
+\subsubsection{Structure Learning}
+To execute SLIPCOVER,
+prepare an input file in the editor panel as indicated above 
+and call
+\begin{verbatim}
+?- induce(<list of folds>,P).
+\end{verbatim}
+where \verb|<list of folds>| is a list of the folds for training and
+\verb|P| will contain the learned program.
+
+For example \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
+\begin{verbatim}
+?- induce([train],P).
+\end{verbatim}
+A program can also be tested on a test set with \verb|test/7| as
+described above.

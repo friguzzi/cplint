@@ -139,7 +139,9 @@ where \verb|Density| is a special atom identifying a probability  density on var
 Allowed \verb|Density| atoms are
 \begin{itemize}
 \item \verb|uniform(Var,L,U)|: \verb|Var| is uniformly distributed in $[L,U]$
-\item \verb|gaussian(Var,Mean,Variance)|: \verb|Var| follows a Gaussian distribution with mean \verb|Mean| and variance \verb|Variance|
+\item \verb|gaussian(Var,Mean,Variance)|: \verb|Var| follows a Gaussian distribution with mean \verb|Mean| and variance \verb|Variance|. The distribution can be multivariate if \verb|Mean| 
+is a list and \verb|Variance| a list of lists representing the mean vector and the covariance matrix. In this case the values of \verb|Var| are lists of real values with the same length as
+that of \verb|Mean|
 \item \verb|dirichlet(Var,Par)|: \verb|Var| is a list of real
 numbers following a Dirichlet distribution with $\alpha$ parameters specified
 by the list \verb|Par|
@@ -155,7 +157,18 @@ For example
 g(X): gaussian(X,0, 1).
 \end{verbatim}
 states that argument \verb|X| of \verb|g(X)| follows a Gaussian 
-distribution with mean 0 and variance 1.
+distribution with mean 0 and variance 1, while
+\begin{verbatim}
+g(X): gaussian(X,[0,0], [[1,0],[0,1]]).
+\end{verbatim}
+states that argument \verb|X| of \verb|g(X)| follows a Gaussian 
+multivariate distribution with mean vector $[0,0]$ and covariance matrix
+$$\left[\begin{array}{rr}
+1&0\\
+0&1
+\end{array}\right]$$.
+
+
 
 For example, \href{http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}} defines a mixture of two Gaussians:
 \begin{verbatim}

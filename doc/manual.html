@@ -48,6 +48,9 @@ fabrizio.riguzzi@unife.it</h2>
 <li><a href="#parameter-learning">Parameter Learning</a></li>
 <li><a href="#structure-learning">Structure Learning</a></li>
 </ul></li>
+<li><a href="#commands-1">Commands</a><ul>
+<li><a href="#parameter-learning-1">Parameter Learning</a></li>
+</ul></li>
 <li><a href="#parameters-1">Parameters</a></li>
 <li><a href="#files">Files</a></li>
 </ul></li>
@@ -132,7 +135,7 @@ toss(coin).</code></pre>
 <p>where <code>Density</code> is a special atom identifying a probability density on variable <code>Var</code> and <code>Body</code> (optional) is a regular clause body. Allowed <code>Density</code> atoms are</p>
 <ul>
 <li><p><code>uniform(Var,L,U)</code>: <code>Var</code> is uniformly distributed in <span class="math inline">\([L,U]\)</span></p></li>
-<li><p><code>gaussian(Var,Mean,Variance)</code>: <code>Var</code> follows a Gaussian distribution with mean <code>Mean</code> and variance <code>Variance</code></p></li>
+<li><p><code>gaussian(Var,Mean,Variance)</code>: <code>Var</code> follows a Gaussian distribution with mean <code>Mean</code> and variance <code>Variance</code>. The distribution can be multivariate if <code>Mean</code> is a list and <code>Variance</code> a list of lists representing the mean vector and the covariance matrix. In this case the values of <code>Var</code> are lists of real values with the same length as that of <code>Mean</code></p></li>
 <li><p><code>dirichlet(Var,Par)</code>: <code>Var</code> is a list of real numbers following a Dirichlet distribution with <span class="math inline">\(\alpha\)</span> parameters specified by the list <code>Par</code></p></li>
 <li><p><code>gamma(Var,Shape,Scale)</code> <code>Var</code> follows a gamma distribution with shape parameter <code>Shape</code> and scale parameter <code>Scale</code>.</p></li>
 <li><p><code>beta(Var,Alpha,Beta)</code> <code>Var</code> follows a beta distribution with parameters <code>Alpha</code> and <code>Beta</code>.</p></li>
@@ -140,7 +143,12 @@ toss(coin).</code></pre>
 </ul>
 <p>For example</p>
 <pre><code>g(X): gaussian(X,0, 1).</code></pre>
-<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian distribution with mean 0 and variance 1.</p>
+<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian distribution with mean 0 and variance 1, while</p>
+<pre><code>g(X): gaussian(X,[0,0], [[1,0],[0,1]]).</code></pre>
+<p>states that argument <code>X</code> of <code>g(X)</code> follows a Gaussian multivariate distribution with mean vector <span class="math inline">\([0,0]\)</span> and covariance matrix <span class="math display">\[\left[\begin{array}{rr}
+1&amp;0\\
+0&amp;1
+\end{array}\right]\]</span>.</p>
 <p>For example, <a href="http://cplint.lamping.unife.it/example/inference/gaussian_mixture.pl"><code>gaussian_mixture.pl</code></a> defines a mixture of two Gaussians:</p>
 <pre><code>heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
@@ -694,31 +702,40 @@ fold(test,[490,491,...]).</code></pre>
 <p>which however must be inserted after the input interpretations otherwise the facts for <code>int/1</code> will not be available and the fold <code>all</code> would be empty. This command uses <code>sample(N,List,Sampled,Rest)</code> exported from <code>slipcover</code> that samples <code>N</code> elements from <code>List</code> and returns the sampled elements in <code>Sampled</code> and the rest in <code>Rest</code>. If <code>List</code> has <code>N</code> elements or less, <code>Sampled</code> is equal to <code>List</code> and <code>Rest</code> is empty.</p>
 <h2 id="commands">Commands</h2>
 <h3 id="parameter-learning">Parameter Learning</h3>
-<p>To execute EMBLEM, prepare an input file as indicated above, load it into SWI-Prolog and execute</p>
+<p>To execute EMBLEM, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce_par(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
-<p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can load it into SWI-Prolog with</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and perform parameter learning on the <code>train</code> fold with</p>
+<p>For example <a href="http://cplint.lamping.unife.it/example/bongard.pl"><code>bongard.pl</code></a>, you can perform parameter learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_par([train],P).</code></pre>
 <p>A program can also be tested on a test set with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
-<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds. This returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
+<p>or</p>
+<pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,LL,NPos,NNeg,ExampleList).</code></pre>
+<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds.</p>
+<p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
+<p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
 <p>For example, to test on fold <code>test</code> the program learned on fold <code>train</code> you can run the query</p>
 <pre><code>?- induce_par([train],P),
    test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>Or you can test the input program on the fold <code>test</code> with</p>
 <pre><code>?- in(P),
-test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<p>In <code>cplint</code> on SWISH, by including</p>
+<pre><code>:- use_rendering(c3).
+:- use_rendering(lpad).</code></pre>
+<p>in the code before <code>:- sc.</code> the curves will be shown as graphs and the output program will be pretty printed.</p>
 <h3 id="structure-learning">Structure Learning</h3>
-<p>To execute SLIPCOVER, prepare an input file as indicated above, load it into SWI-Prolog and call</p>
+<p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
-<p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can load it into SWI-Prolog with</p>
-<pre><code>?- [bongard].</code></pre>
-<p>and perform structure learning on the <code>train</code> fold with</p>
+<p>For example <a href="http://cplint.lamping.unife.it/example/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> as described above.</p>
+<h2 id="commands-1">Commands</h2>
+<h3 id="parameter-learning-1">Parameter Learning</h3>
+<p>To execute EMBLEM, prepare an input file as indicated above, load it into SWI-Prolog and execute</p>
+<pre><code>?- induce_par(&lt;list of folds&gt;,P).</code></pre>
+<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
