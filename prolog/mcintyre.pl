@@ -41,6 +41,7 @@ details.
   sample_gauss/5,
   sample_uniform/5,
   sample_dirichlet/4,
+  sample_geometric/4,
   sample_gamma/5,
   sample_poisson/4,
   sample_beta/5,
@@ -595,6 +596,9 @@ initial_sample(_M:(sample_head(R,VC,HL,NH))):-!,
 
 initial_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
+
+initial_sample(_M:sample_geometric(R,VC,Par,S)):-!,
+  sample_geometric(R,VC,Par,S).
 
 initial_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
   sample_dirichlet(R,VC,Par,S).
@@ -1340,6 +1344,9 @@ lw_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
 lw_sample(_M:sample_dirichlet(R,VC,Par,S)):-!,
   sample_dirichlet(R,VC,Par,S).
 
+lw_sample(_M:sample_geometric(R,VC,Par,S)):-!,
+  sample_geometric(R,VC,Par,S).
+
 lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
 
@@ -1464,6 +1471,15 @@ lw_sample_weight(_M:sample_dirichlet(R,VC,Par,S),W0,W):-!,
     W is W0*D
    ).
 
+lw_sample_weight(_M:sample_geometric(R,VC,Par,S),W0,W):-!,
+  (var(S)->
+    sample_geometric(R,VC,Par,S),
+    W=W0
+  ;
+    geometric_density(Par,S,D),
+    W is W0*D
+   ).
+
 lw_sample_weight(M:(G1,G2),W0,W):-!,
   lw_sample_weight(M:G1,W0,W1),
   lw_sample_weight(M:G2,W1,W).
@@ -1553,6 +1569,15 @@ lw_sample_logweight(_M:sample_gamma(R,VC,Shape,Scale,S),W0,W):-!,
     W=W0
   ;
     gamma_density(Shape,Scale,S,D),
+    W is W0+log(D)
+   ).
+
+lw_sample_logweight(_M:sample_geometric(R,VC,Par,S),W0,W):-!,
+  (var(S)->
+    sample_geometric(R,VC,Par,S),
+    W=W0
+  ;
+    geometric_density(Par,S,D),
     W is W0+log(D)
    ).
 
@@ -2258,6 +2283,42 @@ dirichlet_density(Par,S,D):-
 prod(X,A,P0,P0*X^(A-1)).
 
 /**
+ * sample_geometric(+R:int,+VC:list,+P:float,-S:int) is det
+ *
+ * Returns in S a sample for a geometrically distributed variable with 
+ * parameter P associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_geometric(R,VC,_Par,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_geometric(R,VC,Par,S):-
+  geometric(Par,S),
+  recorda(R,sampled(VC,S)).
+
+/**
+ * geometric(+P:float,-I:int) is det
+ *
+ * samples a value from a geometric probability distribution with parameters
+ * P and returns it in I (I belongs to [1,infinity]
+ */
+geometric(P,I):-
+  geometric_val(1,P,I).
+
+geometric_val(N0,P,N):-
+  random(R),
+  (R=<P->
+    N=N0
+  ;
+    N1 is N0+1,
+    geometric_val(N1,P,N)
+  ).
+
+geometric_density(P,I,D):-
+  D is (1-P)^(I-1)*P.
+
+/**
  * sample_discrete(+R:int,+VC:list,+Distribution:list,-S:float) is det
  *
  * Returns in S a sample from a discrete distribution Distribution (a list
@@ -2845,6 +2906,20 @@ user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~geometric(Par)), !, 
+  add_arg(H,Var,H1),
+  extract_vars_list([H],[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-Body,sample_geometric(R,[],Par,Var))
+  ;
+    Clause=(H1:-Body,sample_geometric(R,VC,Par,Var))
+  ).
+
+user:term_expansion((Head:=Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~dirichlet(Par)), !, 
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
@@ -2995,6 +3070,22 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_dirichlet(R,[],Par,Var))
   ;
     Clause=(H:-Body,sample_dirichlet(R,VC,Par,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
+  Head=(H:geometric(Var,Par)), !, 
+  extract_vars_list([H],[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_geometric(R,[],Par,Var))
+  ;
+    Clause=(H:-Body,sample_geometric(R,VC,Par,Var))
   ).
 
 user:term_expansion((Head:-Body),Clause) :- 
@@ -3269,6 +3360,22 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_dirichlet(R,[],Par,Var))
   ;
     Clause=(H:-sample_dirichlet(R,VC,Par,Var))
+  ).
+
+user:term_expansion(Head,Clause) :- 
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
+  Head=(H:geometric(Var,Par)), !, 
+  extract_vars_list([H],[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_geometric(R,[],Par,Var))
+  ;
+    Clause=(H:-sample_geometric(R,VC,Par,Var))
   ).
 
 user:term_expansion(Head,Clause) :- 
