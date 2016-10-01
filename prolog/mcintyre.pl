@@ -108,7 +108,7 @@ details.
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
-:-meta_predicate mc_particle_sample_arg(:,+,+,+,-).
+:-meta_predicate mc_particle_sample_arg(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
