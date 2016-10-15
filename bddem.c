@@ -15,6 +15,12 @@ for the relative license.
 #include <string.h>
 #include "cudd.h"
 #include <SWI-Prolog.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+
+#define BUFSIZE 200000
+#define MAXLINE 2000
 #define LOGZERO log(0.01)
 #define CACHE_SLOTS 1 
 #define UNIQUE_SLOTS 1
@@ -92,6 +98,7 @@ void add_or_replace_node(tablerow *tab, DdNode *node, double value);
 void add_node(tablerow *tab, DdNode *node, double value);
 void destroy_table(tablerow *tab,int varcnt);
 install_t install(void);
+void write_dot(environment * env, DdNode * bdd, FILE * file);
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -597,21 +604,107 @@ static int bdd_to_add(void)
 */
 static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
 {
-  char * onames[]={"Out"};
-  char ** inames;
-  DdNode * array[1];
-  int i,b,index;
-  size_t len;
   long env_l, node_l;
+  DdNode * node;
   environment *env;
-  variable v;
-  char numberVar[10],numberBit[10],*filename;
+  char *filename;
   FILE * file;
   PL_get_long(arg1,&env_l);
   env=(environment *)env_l;
   PL_get_long(arg2,&node_l);
-  array[0] = (DdNode *)node_l;
+  node = (DdNode *)node_l;
   PL_get_file_name(arg3,&filename,0);
+  file = open_file(filename, "w");
+  write_dot(env,node,file);
+  return TRUE; 
+}
+
+static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
+{
+  term_t out;
+  long env_l, node_l;
+  size_t len;
+  DdNode * node;
+  environment *env;
+  char *filename;
+  FILE * file;
+  size_t bytes_read;
+  char *buffer=NULL;
+  char * mem=NULL;
+  char line[MAXLINE];
+  PL_get_long(arg1,&env_l);
+  env=(environment *)env_l;
+  PL_get_long(arg2,&node_l);
+  node = (DdNode *)node_l;
+  out=PL_new_term_ref();
+  file=fmemopen(mem,BUFSIZE,"r+");
+  write_dot(env,node,file);
+  fprintf(file,"?");
+  fseek(file,0,SEEK_SET);
+    bytes_read = getdelim( &buffer, &len, '?', file);
+/*  buffer[0]=0;
+  while(fgets(line, MAXLINE, file) != NULL)
+  {
+    printf("%s\n",line);
+    strcat(buffer,line);
+  }
+*/
+  //bytes_read = getdelim( &buffer, &len, '\0', file);
+  fclose(file);
+  PL_put_string_chars(out,buffer);
+ 
+// from http://c.happycodings.com/gnu-linux/code25.html
+/*
+  FILE *fpin  = {0};
+  FILE *fpout = {0};
+  pid_t child = -1;
+  int fd[2] = {0};
+
+  pipe(fd);
+
+  if((child = fork()) == -1) {
+    perror("fork");
+    return 1;
+  }
+
+  if(child == 0) {
+    // child
+    close(fd[0]);
+
+    fpout = fdopen(fd[1], "w");
+    if(fpout == NULL) {
+      fprintf(stderr, "Error - fdopen(child)\n");
+      return 1;
+    }
+  
+    write_dot(env,node,fpout);
+    fclose(fpout);
+    return 0;
+  } else {
+    close(fd[1]);
+
+    fpin = fdopen(fd[0], "r");
+    if(fpin == NULL) {
+      fprintf(stderr, "Error - fdopen(parent)\n");
+      return 1;
+    }
+    bytes_read = getdelim( &buffer, &len, '\0', fpin);
+    fclose(fpin);
+    printf("buff %s",buffer);
+    PL_put_string_chars(out,buffer);
+    free(buffer);
+  }
+*/
+  return(PL_unify(out,arg3));
+}
+
+void write_dot(environment * env, DdNode * bdd, FILE * file)
+{
+  char * onames[]={"Out"};
+  char ** inames;
+  int i,b,index;
+  variable v;
+  char numberVar[10],numberBit[10];
   inames= (char **) malloc(sizeof(char *)*(env->boolVars));
   index=0;
   for (i=0;i<env->nVars;i++)
@@ -629,9 +722,7 @@ static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
     }
     index=index+v.nVal-1;
   }
-  file = open_file(filename, "w");
-  Cudd_DumpDot(env->mgr,1,array,inames,onames,file);
-  fclose(file);
+  Cudd_DumpDot(env->mgr,1,&bdd,inames,onames,file);
   index=0;
   for (i=0;i<env->nVars;i++)
   {
@@ -643,7 +734,6 @@ static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
     index=index+v.nVal-1;
   }
   free(inames);
-  return TRUE; 
 }
 
 /*
@@ -1177,6 +1267,7 @@ install_t install()
   PL_register_foreign("or",4,or,0);
   PL_register_foreign("bdd_not",3,bdd_not,0);
   PL_register_foreign("create_dot",3,create_dot,0);
+  PL_register_foreign("create_dot_string",3,create_dot_string,0);
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
