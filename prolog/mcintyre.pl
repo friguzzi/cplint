@@ -108,7 +108,7 @@ details.
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
-:-meta_predicate mc_particle_sample_arg(:,+,+,+,-).
+:-meta_predicate mc_particle_sample_arg(:,:,+,+,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -982,7 +982,7 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   sample_arg(K2,M:Goals,Arg,V1,V).
 
 /** 
- * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:floar) is det
+ * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true. Evidence is a list of goals.
@@ -991,7 +991,7 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  * each sample is weighted by the
  * likelihood of an element of the Evidence list and constitutes a particle. 
  * After weighting, particles are resampled and the next element of Evidence
- * is consisered.
+ * is considered.
  */
 mc_particle_sample(M:Goal,M:Evidence,S,P):-
   erase_samples,
@@ -1001,21 +1001,34 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
   P is SumTrue/Sum.
 
 /** 
- * mc_particle_sample_arg(:Query:atom,+Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_particle_sample_arg(:Query:atom,+Evidence:term,+Samples:int,?Arg:term,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
- * Arg should be a variable in Query. Evidence is a list of goals.
- * The predicate returns in Values a list of couples V-W where
- * V is a value of Arg for which Query succeeds in
- * a world sampled at random and W is the weight of the sample.
  * It performs particle filtering with likelihood weighting: 
  * each sample is weighted by the
  * likelihood of an element of the Evidence list and constitutes a particle. 
  * After weighting, particles are resampled and the next element of Evidence
- * is consisered.
+ * is considered.
+ * Arg should be a variable in Query. Evidence is a list of goals.
+ * Query can be either a single goal or a list of goals.
+ * When Query is a single goal, the predicate returns in Values
+ * a list of couples V-W where V is a value of Arg for which Query succeeds in
+ * a particle in the last set of particles and W is the weight of the particle.
+ * For each element of Evidence, the particles are obtained by sampling Query
+ * in each current particle and weighting the particle by the likelihood 
+ * of the evidence element.
+ * When Query is a list of goals, Arg is a list of variables, one for 
+ * each query of Query and Arg and Query must have the same length of Evidence.
+ * Values is then list of the same length of Evidence and each of its
+ * elements is a list of couples V-W where
+ * V is a value of the corresponding element of Arg for which the corresponding 
+ * element of Query succeeds in a particle and W is the weight of the particle.
+ * For each element of Evidence, the particles are obtained by sampling the 
+ * corresponding element of Query in each current particle and weighting 
+ * the particle by the likelihood of the evidence element.
  */
-mc_particle_sample_arg(M:Goal,Evidence,S,Arg,[V0|ValList]):-
+mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
   Goal=[G1|GR],!,
   Evidence=[Ev1|EvR],
   Arg=[A1|AR],
@@ -1026,7 +1039,7 @@ mc_particle_sample_arg(M:Goal,Evidence,S,Arg,[V0|ValList]):-
   retractall(MI:value_particle(_,_,_)),
   retractall(MI:weight_particle(_,_,_)).
 
-mc_particle_sample_arg(M:Goal,Evidence,S,Arg,ValList):-
+mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   Evidence=[Ev1|EvR],
   particle_sample_first(0,S,M:Goal,M:Ev1,Arg),
   particle_sample_arg(EvR,M:Goal,1,S,ValList0),
