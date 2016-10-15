@@ -594,27 +594,29 @@ static int bdd_to_add(void)
   out=YAP_MkIntTerm((YAP_Int) node2);
   return(YAP_Unify(out,arg2));
 }
-
-static int create_dot(void)
+*/
+static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
 {
   char * onames[]={"Out"};
   char ** inames;
-   DdNode * array[1];
-  YAP_Term arg1,arg2;
+  DdNode * array[1];
   int i,b,index;
+  size_t len;
+  long env_l, node_l;
+  environment *env;
   variable v;
-  char numberVar[10],numberBit[10],filename[1000];
+  char numberVar[10],numberBit[10],*filename;
   FILE * file;
-  
-  arg1=YAP_ARG1;
-  arg2=YAP_ARG2;
-
-  YAP_StringToBuffer(arg2,filename,1000);
-  inames= (char **) malloc(sizeof(char *)*(boolVars_ex[ex]));
+  PL_get_long(arg1,&env_l);
+  env=(environment *)env_l;
+  PL_get_long(arg2,&node_l);
+  array[0] = (DdNode *)node_l;
+  PL_get_file_name(arg3,&filename,0);
+  inames= (char **) malloc(sizeof(char *)*(env->boolVars));
   index=0;
-  for (i=0;i<nVars_ex[ex];i++)
+  for (i=0;i<env->nVars;i++)
   {
-    v=vars_ex[ex][i];
+    v=env->vars[i];
     for (b=0;b<v.nVal-1;b++)
     {  
       inames[b+index]=(char *) malloc(sizeof(char)*20);
@@ -627,14 +629,13 @@ static int create_dot(void)
     }
     index=index+v.nVal-1;
   }
-  array[0]=(DdNode *)YAP_IntOfTerm(arg1);
   file = open_file(filename, "w");
-  Cudd_DumpDot(mgr_ex[ex],1,array,inames,onames,file);
+  Cudd_DumpDot(env->mgr,1,array,inames,onames,file);
   fclose(file);
   index=0;
-  for (i=0;i<nVars_ex[ex];i++)
+  for (i=0;i<env->nVars;i++)
   {
-    v=vars_ex[ex][i];
+    v=env->vars[i];
     for (b=0;b<v.nVal-1;b++)
     {  
       free(inames[b+index]);
@@ -642,10 +643,10 @@ static int create_dot(void)
     index=index+v.nVal-1;
   }
   free(inames);
-  return 1;
+  return TRUE; 
 }
 
-
+/*
 static int rec_deref(void)
 {
   YAP_Term arg1;
@@ -1175,7 +1176,7 @@ install_t install()
   PL_register_foreign("zero",2,zero,0);
   PL_register_foreign("or",4,or,0);
   PL_register_foreign("bdd_not",3,bdd_not,0);
-//  PL_register_foreign("create_dot",2,create_dot,0);
+  PL_register_foreign("create_dot",3,create_dot,0);
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
