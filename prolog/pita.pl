@@ -15,6 +15,7 @@ details.
 
 
 :- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
+  bdd_dot_file/2,
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
@@ -30,6 +31,7 @@ details.
 :-meta_predicate prob_bar(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
+:-meta_predicate bdd_dot_file(:,+).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-use_module(library(lists)).
@@ -234,6 +236,19 @@ s(M:Goal,P):-
   findall((Goal,P),get_p(M:Goal,Env,P),L),
   end_test(Env),
   member((Goal,P),L).
+
+/** 
+ * bdd_dot_file(:Query:atom,+FileName:string) is det
+ *
+ * The predicate builds the BDD for Query and writes it to file name
+ * FileName
+ */
+bdd_dot_file(M:Goal,File):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  get_node(M:Goal,Env,BDD),
+  create_dot(Env,BDD,File),
+  end_test(Env).
 
 
 /** 
@@ -1199,6 +1214,7 @@ sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_,_), []).
+sandbox:safe_meta(pita:bdd_dot_file(_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 
