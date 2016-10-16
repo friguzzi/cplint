@@ -120,14 +120,23 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 With \verb|pita|, you can obtain the BDD for a query with the predicates
 \begin{verbatim}
-bdd_dot_file(:Query:atom,+FileName:string)
-bdd_dot_string(:Query:atom,-DotString:string)
+bdd_dot_file(:Query:atom,+FileName:string,-Var:list)
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
 \end{verbatim}
 The first write the BDD to a file, the latter returns it as a string.
 The BDD is represented in the dot format of graphviz.
 Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
 edges indicate 0-children with negation applied to the sub BDD.
+Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
+I indicates the rule index and J the index of the Boolean variable of rule I.
+The table \verb|Var| contains the associations between the rule groundings and the
+multivalued variables: the first column contains the rule index, corresponding
+to its position in the program, the second column contains the list 
+of constants grounding the rule, each replacing a variable in the order of appearance in the
+rule, and the last column contains the multivalued variable index.
+
 The BDD can be drawn in \verb|cplint| on SWISH by using the \verb|graphviz| renderer.
+
 
 \subsection{Conditional Queries on Discrete Variables}
 \label{condq}

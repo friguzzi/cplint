@@ -21,7 +21,7 @@ a bar for the probability of \verb|heads(coin)| true and a bar for the probabili
 
 You can obtain the BDD for a query with the predicate
 \begin{verbatim}
-bdd_dot_string(:Query:atom,-DotString:string)
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
 \end{verbatim}
 if you include
 \begin{verbatim}
@@ -30,11 +30,17 @@ if you include
 before \verb|:- pita.| 
 Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
 edges indicate 0-children with negation applied to the sub BDD.
+Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
+I indicates the rule index and J the index of the Boolean variable of rule I.
+The table =Var= contains the associations between the rule groundings and the
+multivalued variables.
+
 For example (\href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}})
 \begin{verbatim}
-?- bdd_dot_string(heads(coin),BDD).
+?- bdd_dot_string(heads(coin),BDD,Var).
 \end{verbatim}
-returns the BDD for the query \verb|heads(coin)|
+returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
+multivalued variables.
 
 When using \verb|mcintyre|, you can use
 \begin{verbatim}
