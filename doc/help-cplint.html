@@ -327,9 +327,10 @@ female(cathy).</code></pre>
 <p>of <a href="http://cplint.lamping.unife.it/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <h3 id="drawing-bdds">Drawing BDDs</h3>
 <p>With <code>pita</code>, you can obtain the BDD for a query with the predicates</p>
-<pre><code>bdd_dot_file(:Query:atom,+FileName:string)
-bdd_dot_string(:Query:atom,-DotString:string)</code></pre>
-<p>The first write the BDD to a file, the latter returns it as a string. The BDD is represented in the dot format of graphviz. Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer.</p>
+<pre><code>bdd_dot_file(:Query:atom,+FileName:string,-Var:list)
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
+<p>The first write the BDD to a file, the latter returns it as a string. The BDD is represented in the dot format of graphviz. Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the rule index and J the index of the Boolean variable of rule I. The table <code>Var</code> contains the associations between the rule groundings and the multivalued variables: the first column contains the rule index, corresponding to its position in the program, the second column contains the list of constants grounding the rule, each replacing a variable in the order of appearance in the rule, and the last column contains the multivalued variable index.</p>
+<p>The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer.</p>
 <h2 id="condq">Conditional Queries on Discrete Variables</h2>
 <p>The conditional probability of an atom query given another atom evidence can be asked using <code>pita</code> with the predicate</p>
 <pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float).</code></pre>
@@ -430,12 +431,13 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
 <pre><code>:- use_rendering(c3).</code></pre>
 <p>before <code>:- pita.</code> <code>P</code> will be instantiated with a dict for rendering with <code>c3</code>. It will be shown as a bar chart with a bar for the probability of <code>heads(coin)</code> true and a bar for the probability of <code>heads(coin)</code> false.</p>
 <p>You can obtain the BDD for a query with the predicate</p>
-<pre><code>bdd_dot_string(:Query:atom,-DotString:string)</code></pre>
+<pre><code>bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>if you include</p>
 <pre><code>:- use_rendering(graphviz).</code></pre>
-<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. For example (<a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
-<pre><code>?- bdd_dot_string(heads(coin),BDD).</code></pre>
-<p>returns the BDD for the query <code>heads(coin)</code></p>
+<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the rule index and J the index of the Boolean variable of rule I. The table =Var= contains the associations between the rule groundings and the multivalued variables.</p>
+<p>For example (<a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
+<pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
+<p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
 <p>When using <code>mcintyre</code>, you can use</p>
 <pre><code>mc_prob_bar(:Query:atom,-Probability:dict).</code></pre>
 <p>as in</p>
