@@ -253,7 +253,7 @@ s(M:Goal,P):-
   member((Goal,P),L).
 
 /** 
- * bdd_dot_file(:Query:atom,+FileName:string,-LV) is det
+ * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
  *
  * The predicate builds the BDD for Query and writes its dot representation
  * to file FileName and a list in LV with the association of variables to rules.
@@ -515,7 +515,7 @@ msw(M:A,B,Env,BDD):-
   ).
 
 /**
- * msw(:Var:term,?Value:term,++Environment:int,--BDD:int) is det
+ * msw(:Var:term,?Value:term,++Environment:int,--BDD:int,?DB:int) is det
  * 
  * Returns a BDD representing Var=Value when there is a depth bound on
  * derivations.
