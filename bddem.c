@@ -616,6 +616,7 @@ static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
   PL_get_file_name(arg3,&filename,0);
   file = open_file(filename, "w");
   write_dot(env,node,file);
+  fclose(file);
   return TRUE; 
 }
 

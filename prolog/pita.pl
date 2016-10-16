@@ -15,8 +15,8 @@ details.
 
 
 :- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
-  bdd_dot_file/2,
-  bdd_dot_string/2,
+  bdd_dot_file/3,
+  bdd_dot_string/3,
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
@@ -32,8 +32,8 @@ details.
 :-meta_predicate prob_bar(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
-:-meta_predicate bdd_dot_file(:,+).
-:-meta_predicate bdd_dot_string(:,-).
+:-meta_predicate bdd_dot_file(:,+,-).
+:-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-use_module(library(lists)).
@@ -185,6 +185,19 @@ details.
  * NumberOHeads values and probability distribution ProbabilityDistribution
  */
 
+/** 
+ * create_dot_string(++Env:int,++BDD:int,-Dot:string) is det
+ * 
+ * The predicate returns the BDD in dot format.
+ */
+
+/** 
+ * create_dot(++Env:int,++BDD:int,++File:string) is det
+ * 
+ * The predicate writes the BDD in dot format to
+ * to file FileName 
+ */
+
 default_setting_pita(epsilon_parsing, 1e-5).
 /* on, off */
 
@@ -240,28 +253,36 @@ s(M:Goal,P):-
   member((Goal,P),L).
 
 /** 
- * bdd_dot_file(:Query:atom,+FileName:string) is det
+ * bdd_dot_file(:Query:atom,+FileName:string,-LV) is det
  *
- * The predicate builds the BDD for Query and write its dot representation
- * to file FileName
+ * The predicate builds the BDD for Query and writes its dot representation
+ * to file FileName and a list in LV with the association of variables to rules.
+ * LV is a list of list, each sublist has three elements: the rule number, 
+ * the grounding substituion and the mutlivalued variable number.
  */
-bdd_dot_file(M:Goal,File):-
+bdd_dot_file(M:Goal,File,LV):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),
+  setof(R,(S,V)^v(R,S,V),LR),
+  findall([R,S,V],(member(R,LR),v(R,S,V)),LV),
   create_dot(Env,BDD,File),
   end_test(Env).
 
 /** 
- * bdd_dot_string(:Query:atom,-DotString:string) is det
+ * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
  *
  * The predicate builds the BDD for Query and returns its dot representation
- * in DotString
+ * in DotString and a list in LV with the association of variables to rules.
+ * LV is a list of list, each sublist has three elements: the rule number, 
+ * the grounding substituion and the mutlivalued variable number.
  */
-bdd_dot_string(M:Goal,dot(Dot)):-
+bdd_dot_string(M:Goal,dot(Dot),LV):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),
+  setof(R,(S,V)^v(R,S,V),LR),
+  findall([R,S,V],(member(R,LR),v(R,S,V)),LV),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
@@ -351,6 +372,27 @@ load(FileIn,C1,R):-
   read_clauses_dir(SI,C),
   close(SI),
   process_clauses(C,[],C1,[],R).
+
+get_node(Goal,Env,B):-
+  pita_input_mod(M),
+  M:local_pita_setting(depth_bound,true),!,
+  M:local_pita_setting(depth,DB),
+  retractall(v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,Env,B):- %with DB=false
+  retractall(v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  (bagof(BDD,Goal1,L)*->
+    or_list(L,Env,B)
+  ;  
+    zero(Env,B)
+  ).
 
 get_node(Goal,Env,B):-
   pita_input_mod(M),
@@ -1229,8 +1271,8 @@ sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_,_), []).
-sandbox:safe_meta(pita:bdd_dot_file(_,_), []).
-sandbox:safe_meta(pita:bdd_dot_string(_,_), []).
+sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
+sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 
