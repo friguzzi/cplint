@@ -116,6 +116,19 @@ An example of use of the above predicate is
 of \href{http://cplint.lamping.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
 that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
+\subsubsection{Drawing BDDs}
+
+With \verb|pita|, you can obtain the BDD for a query with the predicates
+\begin{verbatim}
+bdd_dot_file(:Query:atom,+FileName:string)
+bdd_dot_string(:Query:atom,-DotString:string)
+\end{verbatim}
+The first write the BDD to a file, the latter returns it as a string.
+The BDD is represented in the dot format of graphviz.
+Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
+edges indicate 0-children with negation applied to the sub BDD.
+The BDD can be drawn in \verb|cplint| on SWISH by using the \verb|graphviz| renderer.
+
 \subsection{Conditional Queries on Discrete Variables}
 \label{condq}
 The conditional probability of an atom query given another atom evidence can be asked using \verb|pita| with the predicate 

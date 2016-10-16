@@ -19,6 +19,22 @@ before \verb|:- pita.| \verb|P| will be instantiated with a
 dict for rendering with \verb|c3|. It will be shown as a bar chart with
 a bar for the probability of \verb|heads(coin)| true and a bar for the probability of \verb|heads(coin)| false.
 
+You can obtain the BDD for a query with the predicate
+\begin{verbatim}
+bdd_dot_string(:Query:atom,-DotString:string)
+\end{verbatim}
+if you include
+\begin{verbatim}
+:- use_rendering(graphviz).
+\end{verbatim}
+before \verb|:- pita.| 
+Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
+edges indicate 0-children with negation applied to the sub BDD.
+For example (\href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}})
+\begin{verbatim}
+?- bdd_dot_string(heads(coin),BDD).
+\end{verbatim}
+returns the BDD for the query \verb|heads(coin)|
 
 When using \verb|mcintyre|, you can use
 \begin{verbatim}
