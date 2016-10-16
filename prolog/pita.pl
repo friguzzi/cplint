@@ -264,7 +264,7 @@ s(M:Goal,P):-
 bdd_dot_file(M:Goal,File,LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),
+  get_node(M:Goal,Env,BDD),!,
   findall([V,R,S],v(R,S,V),LV),
   create_dot(Env,BDD,File),
   end_test(Env).
@@ -281,7 +281,7 @@ bdd_dot_file(M:Goal,File,LV):-
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),
+  get_node(M:Goal,Env,BDD),!,
   findall([V,R,S],v(R,S,V),LV),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
