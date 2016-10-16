@@ -258,7 +258,7 @@ bdd_dot_file(M:Goal,File):-
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString
  */
-bdd_dot_string(M:Goal,Dot):-
+bdd_dot_string(M:Goal,dot(Dot)):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),

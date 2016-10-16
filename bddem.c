@@ -641,60 +641,10 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
   write_dot(env,node,file);
   fprintf(file,"?");
   fseek(file,0,SEEK_SET);
-    bytes_read = getdelim( &buffer, &len, '?', file);
-/*  buffer[0]=0;
-  while(fgets(line, MAXLINE, file) != NULL)
-  {
-    printf("%s\n",line);
-    strcat(buffer,line);
-  }
-*/
-  //bytes_read = getdelim( &buffer, &len, '\0', file);
+  bytes_read = getdelim( &buffer, &len, '?', file);
+  buffer[len-2]=0;
   fclose(file);
   PL_put_string_chars(out,buffer);
- 
-// from http://c.happycodings.com/gnu-linux/code25.html
-/*
-  FILE *fpin  = {0};
-  FILE *fpout = {0};
-  pid_t child = -1;
-  int fd[2] = {0};
-
-  pipe(fd);
-
-  if((child = fork()) == -1) {
-    perror("fork");
-    return 1;
-  }
-
-  if(child == 0) {
-    // child
-    close(fd[0]);
-
-    fpout = fdopen(fd[1], "w");
-    if(fpout == NULL) {
-      fprintf(stderr, "Error - fdopen(child)\n");
-      return 1;
-    }
-  
-    write_dot(env,node,fpout);
-    fclose(fpout);
-    return 0;
-  } else {
-    close(fd[1]);
-
-    fpin = fdopen(fd[0], "r");
-    if(fpin == NULL) {
-      fprintf(stderr, "Error - fdopen(parent)\n");
-      return 1;
-    }
-    bytes_read = getdelim( &buffer, &len, '\0', fpin);
-    fclose(fpin);
-    printf("buff %s",buffer);
-    PL_put_string_chars(out,buffer);
-    free(buffer);
-  }
-*/
   return(PL_unify(out,arg3));
 }
 
