@@ -434,7 +434,7 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
 <pre><code>bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>if you include</p>
 <pre><code>:- use_rendering(graphviz).</code></pre>
-<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the rule index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table =Var= contains the associations between the rule groundings and the multivalued variables.</p>
+<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table =Var= contains the associations between the rule groundings and the multivalued variables.</p>
 <p>For example (<a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
 <pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
 <p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
