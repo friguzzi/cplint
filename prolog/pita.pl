@@ -257,15 +257,15 @@ s(M:Goal,P):-
  *
  * The predicate builds the BDD for Query and writes its dot representation
  * to file FileName and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements: the rule number, 
- * the grounding substituion and the mutlivalued variable number.
+ * LV is a list of list, each sublist has three elements: 
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
  */
 bdd_dot_file(M:Goal,File,LV):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),
-  setof(R,(S,V)^v(R,S,V),LR),
-  findall([R,S,V],(member(R,LR),v(R,S,V)),LV),
+  findall([V,R,S],v(R,S,V),LV),
   create_dot(Env,BDD,File),
   end_test(Env).
 
@@ -274,15 +274,15 @@ bdd_dot_file(M:Goal,File,LV):-
  *
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements: the rule number, 
- * the grounding substituion and the mutlivalued variable number.
+ * LV is a list of list, each sublist has three elements: 
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),
-  setof(R,(S,V)^v(R,S,V),LR),
-  findall([R,S,V],(member(R,LR),v(R,S,V)),LV),
+  findall([V,R,S],v(R,S,V),LV),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
