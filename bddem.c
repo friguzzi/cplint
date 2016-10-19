@@ -20,7 +20,6 @@ for the relative license.
 
 
 #define BUFSIZE 200000
-#define MAXLINE 2000
 #define LOGZERO log(0.01)
 #define CACHE_SLOTS 1 
 #define UNIQUE_SLOTS 1
@@ -632,7 +631,6 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
   size_t bytes_read;
   char *buffer=NULL;
   char * mem=NULL;
-  char line[MAXLINE];
   PL_get_long(arg1,&env_l);
   env=(environment *)env_l;
   PL_get_long(arg2,&node_l);
@@ -643,7 +641,7 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
   fprintf(file,"?");
   fseek(file,0,SEEK_SET);
   bytes_read = getdelim( &buffer, &len, '?', file);
-  buffer[len-2]=0;
+  buffer[bytes_read-1]=0;
   fclose(file);
   PL_put_string_chars(out,buffer);
   return(PL_unify(out,arg3));
