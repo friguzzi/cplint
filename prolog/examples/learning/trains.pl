@@ -7,7 +7,7 @@
 
 :-sc.
 
-:- set_sc(megaex_bottom,20).
+:- set_sc(megaex_bottom,2).
 :- set_sc(max_iter,3).
 :- set_sc(max_iter_structure,10).
 :- set_sc(maxdepth_var,4).

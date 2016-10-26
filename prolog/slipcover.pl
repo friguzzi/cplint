@@ -161,6 +161,7 @@ test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2('Testing\n'),
   input_mod(M),
   make_dynamic(M),
+  %gtrace,
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
@@ -202,6 +203,16 @@ induce_rules(Folds,R):-
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
   append(L,DB),
   assert(M:database(DB)),
+  %gtrace,
+  find_ex(DB,_LG,NPos,_Neg),
+  M:local_setting(megaex_bottom, NumMB),
+  (NPos >= NumMB ->
+      true
+    ;
+      format2("~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
+      set_sc(megaex_bottom, NPos)
+  ),
+  
   statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
   (M:bg(RBG0)->
@@ -1268,6 +1279,7 @@ deduct(NM,Mod,DB,InTheory0,InTheory):-
   sample(1,DB,Sampled,DB1),
   (Sampled=[M]->
     generate_head(O,M,Mod,[],HL),
+    %gtrace,
     ( HL \== [] ->
        (generate_body(HL,Mod,InTheory1),
     	append(InTheory0,InTheory1,InTheory2),
