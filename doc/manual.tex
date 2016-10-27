@@ -52,7 +52,7 @@ Moreover, in order to make sure you have a foreign library that matches your arc
 \input{inference}
 
 
-Then you can simply load \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} as
+To run a query, you can simply load the Prolog file, for example \href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}}, as
 \begin{verbatim}
 ?- [coin].
 \end{verbatim}
@@ -68,18 +68,6 @@ The program is loaded correctly anyway but it is recommended to load it from the
 
 
 \input{learning}
-
-\subsection{Commands}
-\subsubsection{Parameter Learning}
-To execute EMBLEM, prepare an input file as indicated above,
- load it into SWI-Prolog and execute
-\begin{verbatim}
-?- induce_par(<list of folds>,P).
-\end{verbatim}
-where \verb|<list of folds>| is a list of the folds for training and
-\verb|P| will contain the input program with updated parameters.
-
-
 
 \input{learning_par}
 

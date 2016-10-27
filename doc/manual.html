@@ -50,9 +50,6 @@ fabrizio.riguzzi@unife.it</h2>
 <li><a href="#parameter-learning">Parameter Learning</a></li>
 <li><a href="#structure-learning">Structure Learning</a></li>
 </ul></li>
-<li><a href="#commands-1">Commands</a><ul>
-<li><a href="#parameter-learning-1">Parameter Learning</a></li>
-</ul></li>
 <li><a href="#parameters-1">Parameters</a></li>
 <li><a href="#files">Files</a></li>
 </ul></li>
@@ -79,7 +76,7 @@ fabrizio.riguzzi@unife.it</h2>
 <pre><code>h1 :- Body.</code></pre>
 <p>stands for</p>
 <pre><code>h1:1 :- Body.</code></pre>
-<p>The coin example of <span class="citation">[<a href="#ref-VenVer04-ICLP04-IC">22</a>]</span> is represented as (file <a href="http://cplint.lamping.unife.it/example/inference/coin.cpl"><code>coin.cpl</code></a>)</p>
+<p>The coin example of <span class="citation">[<a href="#ref-VenVer04-ICLP04-IC">22</a>]</span> is represented as (file <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
 <pre><code>heads(Coin):1/2 ; tails(Coin):1/2 :- 
   toss(Coin),\+biased(Coin).
 
@@ -299,7 +296,7 @@ female(elen).
 female(cathy).</code></pre>
 <p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline">\(n\)</span> atoms, the values of the aggregation are potentially <span class="math inline">\(2^n\)</span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see <a href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html" class="uri">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
-<p>Then you can simply load <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a> as</p>
+<p>To run a query, you can simply load the Prolog file, for example <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>, as</p>
 <pre><code>?- [coin].</code></pre>
 <p>Note that supplying <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a> as an argument to the <code>swipl</code> command currently returns errors due to bad interaction between <code>pita</code> and the top-level. The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.</p>
 <h2 id="uncondq">Unconditional Queries</h2>
@@ -763,11 +760,6 @@ fold(test,[490,491,...]).</code></pre>
 <p>For example <a href="http://cplint.lamping.unife.it/example/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> as described above.</p>
-<h2 id="commands-1">Commands</h2>
-<h3 id="parameter-learning-1">Parameter Learning</h3>
-<p>To execute EMBLEM, prepare an input file as indicated above, load it into SWI-Prolog and execute</p>
-<pre><code>?- induce_par(&lt;list of folds&gt;,P).</code></pre>
-<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
