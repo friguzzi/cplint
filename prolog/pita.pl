@@ -394,8 +394,6 @@ get_node(Goal,Env,B):- %with DB=false
     zero(Env,B)
   ).
 
-  ).
-
 get_cond_node(Goal,Ev,Env,BGE,BE):-
   pita_input_mod(M),
   M:local_pita_setting(depth_bound,true),!,
