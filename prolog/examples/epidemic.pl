@@ -9,6 +9,8 @@ diagrams for probabilistic logic programs. Intelligent Data Analysis,
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
+:- use_rendering(graphviz).
+:- use_rendering(table,[header(['Multivalued variable index','Rule index','Grounding substitution'])]).
 :- endif.
 
 :- pita.
@@ -39,6 +41,9 @@ flu(robert).
 % expected result 0.588
 ?- prob_bar(pandemic,Prob).  % what is the probability that a pandemic arises?
 % expected result 0.357
+?- bdd_dot_string(epidemic,BDD,Var).
+
+?- bdd_dot_string(pandemic,BDD,Var).
 
 
 */

@@ -2,10 +2,9 @@
 A three-sided die is repeatedly thrown until the outcome is three.
 on(T,F) means that on the Tth throw the face F came out.
 From
-Riguzzi and Terrance Swift. The PITA system: Tabling and answer subsumption for 
-reasoning under uncertainty. Theory and Practice of Logic Programming, 
-27th International Conference on Logic Programming (ICLP'11) Special Issue, 
-Lexington, Kentucky 6-10 July 2011, 11(4-5):433-449, 2011
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
+volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(mcintyre)).
 
@@ -17,7 +16,8 @@ Lexington, Kentucky 6-10 July 2011, 11(4-5):433-449, 2011
 
 :- begin_lpad.
 
-% on(T,F) means that the dice landed on face F at time T
+% on(T,F) means that the die landed on face F at time T
+
 on(0,1):1/3;on(0,2):1/3;on(0,3):1/3.
 % at time 0 the dice lands on one of its faces with equal probability
 
@@ -25,33 +25,36 @@ on(X,1):1/3;on(X,2):1/3;on(X,3):1/3:-
   X1 is X-1,X1>=0,
   on(X1,_),
   \+ on(X1,3).
-% at time T the dice lands on one of its faces with equal probability if
-% at the previous time point it was thrown and it did not landed on face 3
+% at time T the die lands on one of its faces with equal probability if
+% at the previous time point it was thrown and it did not land on face 6
+
+evidence:-
+  on(0,1),
+  on(1,1).
+
+int(0).
+
+int(X1):-int(X),X1 is X+1.
+
+at_least_once_1:- int(X),((on(X,3),!,fail);on(X,1)).
+
+never_1:- \+ at_least_once_1.
 
 :- end_lpad.
 
 /** <examples>
 
-?- prob(on(0,1),Prob). % what is the probability that the dice lands on face 1 at time 0?
-% expected result 0.3333333333333333
-?- prob(on(1,1),Prob). % what is the probability that the dice lands on face 1 at time 1?
-% expected result 0.2222222222222222
-?- prob(on(2,1),Prob). % what is the probability that the dice lands on face 1 at time 2?
-% expected result 0.14814814814814814
-?- prob(on(3,1),Prob). % what is the probability that the dice lands on face 1 at time 3?
-% expected result 0.09876543209876543
-?- prob_bar(on(0,1),Prob). % what is the probability that the dice lands on face 1 at time 0?
-% expected result 0.3333333333333333
-?- prob_bar(on(1,1),Prob). % what is the probability that the dice lands on face 1 at time 1?
-% expected result 0.2222222222222222
-?- prob_bar(on(2,1),Prob). % what is the probability that the dice lands on face 1 at time 2?
-% expected result 0.14814814814814814
-?- prob_bar(on(3,1),Prob). % what is the probability that the dice lands on face 1 at time 3?
-% expected result 0.09876543209876543
+?- mc_sample(at_least_once_1,1000,S,F,Prob). % what is the probability that the die lands on face 1 at least once?
+% expected result 0.5
+?- mc_sample(never_1,1000,S,F,Prob). % what is the probability that the die never lands on face 1?
+% expected result 0.5
+?- mc_prob_bar(on(0,1),Prob). % what is the probability that the die lands on face 1 at time 0?
+% expected result 0.16666666666666666
+?- mc_prob_bar(on(1,1),Prob). % what is the probability that the die lands on face 1 at time 1?
+% expected result 0.13888888888888887
+?- mc_prob_bar(on(2,1),Prob). % what is the probability that the die lands on face 1 at time 2?
+% expected result 0.11574074074074071
 
-?- prob(on(2,1),on(0,1),p). % what is the probability that the dice lands on face 1 at time 2 given that it landed on face 1 at time 0?
-% expected result 0.222222222222222
-?- prob(on(2,1),on(1,1),p). % what is the probability that the dice lands on face 1 at time 2 given that it landed on face 1 at time 1?
-% expected result 0.333333333333333
+
 */
  

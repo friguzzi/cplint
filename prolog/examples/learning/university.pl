@@ -569,8 +569,8 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_6,rating_2).
 rating(course_id_9,rating_2).
-neg(rating(_G153023,rating_1)).
-neg(rating(_G153082,rating_1)).
+neg(rating(course_id_6,rating_1)).
+neg(rating(course_id_9,rating_1)).
 end(model(f1)).
 begin(model(f2)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -1024,7 +1024,7 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_8,rating_2).
 rating(course_id_12,rating_1).
-neg(rating(_G160027,rating_1)).
+neg(rating(course_id_8,rating_1)).
 neg(rating(course_id_12,rating_2)).
 end(model(f2)).
 begin(model(f3)).
@@ -1480,7 +1480,7 @@ b_ra(prof_id_5,student_id_28).
 rating(course_id_11,rating_1).
 rating(course_id_4,rating_2).
 neg(rating(course_id_11,rating_2)).
-neg(rating(_G167082,rating_1)).
+neg(rating(course_id_4,rating_1)).
 end(model(f3)).
 begin(model(f4)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -1935,7 +1935,7 @@ b_ra(prof_id_5,student_id_28).
 rating(course_id_13,rating_1).
 rating(course_id_7,rating_2).
 neg(rating(course_id_13,rating_2)).
-neg(rating(_G174078,rating_1)).
+neg(rating(course_id_7,rating_1)).
 end(model(f4)).
 begin(model(f5)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -2389,6 +2389,6 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_10,rating_2).
 rating(course_id_5,rating_2).
-neg(rating(_G181009,rating_1)).
-neg(rating(_G181068,rating_1)).
+neg(rating(course_id_10,rating_1)).
+neg(rating(course_id_5,rating_1)).
 end(model(f5)).

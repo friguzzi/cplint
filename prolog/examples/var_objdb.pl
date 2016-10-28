@@ -2,7 +2,7 @@
 Existence uncertainty/unknown objects.
 This programs models a domain where the number of objects is uncertain.
 In particular, the number of objects follows a geometric distribution 
-with parameter 0.3.
+with parameter 0.7.
 We can ask what is the probability that the object number n exists.
 From
 Poole, David. "The independent choice logic and beyond." Probabilistic 

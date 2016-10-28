@@ -11,6 +11,7 @@ Artificial Intelligence, pages 2462-2467, 2007.
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- use_rendering(graphviz).
+:- use_rendering(table,[header(['Multivalued variable index','Rule index','Grounding substitution'])]).
 :- endif.
 
 :- pita.
@@ -18,7 +19,7 @@ Artificial Intelligence, pages 2462-2467, 2007.
 :- begin_lpad.
 
 % path(X,Y) is true if there is a path between nodes X and Y
-% edge(a,b) indicates that there is an edge between a nad b
+% edge(a,b) indicates that there is an edge between a and b
 
 path(X,X).
 % there is surely a path between a node and itself
@@ -51,5 +52,13 @@ graph(digraph(G)):-
 ?- prob_bar(path(a,e),Prob). % what is the probability that a and e are connected?
 % expected result 0.22888
 ?- graph(G). % shows the probabilistic graph
+
+?- bdd_dot_string(path(a,e),BDD,Var).  
+% What is the BDD for query path(a,e)?
+% A solid edge indicates a 1-child, a dashed edge indicates a 0-child and 
+% a dotted 
+% edge indicates a negated 0-child.
+% The table Var contains the associations between the rule groundings and the
+% multivalued variables.
 
 */

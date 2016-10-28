@@ -31,18 +31,24 @@ PRISM syntax.
 :- mc.
 :- begin_lpad.
 
-kf(N,O, T) :-
+kf_fin(N,O, T) :-
   msw(init,S),
-  kf_part(0, N, S,O,T).
+  kf_part(0, N, S,O,_LS,T).
 
-kf_part(I, N, S,[V|RO], T) :-
+
+kf(N,O,LS) :-
+  msw(init,S),
+  kf_part(0, N, S,O,LS,_T).
+
+
+kf_part(I, N, S, [V|RO], [S|LS], T) :-
   I < N, 
   NextI is I+1,
   trans(S,I,NextS),
   emit(NextS,I,V),
-  kf_part(NextI, N, NextS,RO, T).
+  kf_part(NextI, N, NextS, RO, LS, T).
 
-kf_part(N, N, S, [],S).
+kf_part(N, N, S, [], [], S).
 
 trans(S,_I,NextS) :-
   {NextS =:= E + S},
@@ -69,7 +75,7 @@ values(obs_err,real).
 
 
 hist(Samples,NBins,Chart):-
-  mc_sample_arg(kf(1,_O1,Y),Samples,Y,L0),
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
   histogram(L0,NBins,Chart).
 % plot the density of the state at time 1 in case of no observation (prior)
 % and in case of observing 2.5.

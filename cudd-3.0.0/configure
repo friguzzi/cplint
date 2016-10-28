@@ -3333,7 +3333,6 @@ END
 fi
 
 
-
 # Check whether --enable-dddmp was given.
 if test "${enable_dddmp+set}" = set; then :
   enableval=$enable_dddmp;
