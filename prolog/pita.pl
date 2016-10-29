@@ -21,7 +21,7 @@ details.
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
   ret_prob/3,get_var_n/5,equality/4,or_list/3, 
-  em/9,randomize/1,
+  em/8,randomize/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
   msw/4,
@@ -157,13 +157,12 @@ details.
  */
 
 /** 
- * em(++Context:int,++ListOfBDDs:list,++EA:float,++ER:float,++NumberOfBDDs:int,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
+ * em(++Context:int,++ListOfBDDs:list,++EA:float,++ER:float,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
  *
  * Performs EM learning.
  * Takes as input the Context, a list of BDDs each representing one example,
  * the minimum absolute difference EA and relative difference ER between the 
- * log likelihood of examples in two different iterations, the number of BDDs
- * NumberOfBDDs (=length(ListOfBDDs)), and the maximum number of iterations
+ * log likelihood of examples in two different iterations and the maximum number of iterations
  * Iterations.
  * Returns the final log likelihood of examples LL, the list of new Parameters
  * and a list with the final probabilities of each example.
