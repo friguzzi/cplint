@@ -28,11 +28,11 @@ LDFLAGS= $(LDSOFLAGS) -shared -Lcudd-3.0.0/cudd/.libs/ -lcudd
 #
 
 
-all:  bddem.so
+all:  bddem.$(SOEXT)
 
-bddem.so: bddem.o
-	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.so  
-	$(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.so  
+bddem.$(SOEXT): bddem.o
+	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
+	$(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
 
 #-Wl,-R,$(YAPLIBDIR) -Wl,-R,$(LIBDIR)
 
@@ -42,13 +42,13 @@ bddem.o : bddem.c
 
 
 distclean: 
-	rm -f *.o bddem.so
+	rm -f *.o bddem.$(SOEXT)
 	cd cudd-3.0.0 && make distclean && cd ..
 
 check:
 	@echo "no check"
 
 install: all
-	cp bddem.so $(LIBDIR)
+	cp bddem.$(SOEXT) $(LIBDIR)
 
 	
