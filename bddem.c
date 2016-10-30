@@ -642,7 +642,6 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
   ret=PL_get_pointer(arg2,(void **)&node);
   RETURN_IF_FAIL
   out=PL_new_term_ref();
-  printf("ciao\n");
   
 #ifndef _WIN32
   file=tmpfile();
@@ -1122,10 +1121,8 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     RETURN_IF_FAIL
     ret=PL_get_list(pair,head,pair);
     RETURN_IF_FAIL
-    //printf("qui\n");
     ret=PL_get_pointer(head,(void **)&node1);
     RETURN_IF_FAIL
-    //printf("qua\n");
     nodes_ex[i]=node1;
     ret=PL_get_list(pair,head,pair);
     RETURN_IF_FAIL
