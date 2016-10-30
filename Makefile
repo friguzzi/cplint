@@ -33,7 +33,7 @@ all:  bddem.$(SOEXT)
 bddem.$(SOEXT): bddem.o
 	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
 	if test $(SWIARCH) == x64-win64; then  \
-  $(CC) -export-dynamic bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
+  $(CC) --export-all-symbols bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
   else  \
   $(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT) ;\
   fi 
