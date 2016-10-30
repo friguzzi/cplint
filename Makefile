@@ -1,6 +1,5 @@
 SHELL := /bin/bash
 #LIBDIR=lib/$(SWIARCH)/
-SWIARCH=$(shell swipl --arch)
 LIBDIR=lib/$(SWIARCH)/
 #
 #
