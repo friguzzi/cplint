@@ -33,7 +33,7 @@ all:  bddem.$(SOEXT)
 bddem.$(SOEXT): bddem.o
 	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
 	if test $(SWIARCH) == x64-win64; then  \
-  $(CC) --export-all-symbols bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
+  $(CC) bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
   else  \
   $(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT) ;\
   fi 
@@ -44,9 +44,11 @@ bddem.o : bddem.c
 	$(CC) -c $(CFLAGSBDDEM) bddem.c -o bddem.o
 
 
-distclean: 
-	rm -f *.o bddem.$(SOEXT)
+distclean: clean
 	cd cudd-3.0.0 && make distclean && cd ..
+
+clean:
+	rm -f *.o bddem.$(SOEXT)
 
 check:
 	@echo "no check"
