@@ -44,6 +44,7 @@ bddem.o : bddem.c
 
 
 distclean: clean
+	rm Makefile
 	cd cudd-3.0.0 && make distclean && cd ..
 
 clean:
