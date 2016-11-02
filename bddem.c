@@ -338,11 +338,15 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   else
   {
     if (node==Cudd_ReadOne(env->mgr))
+    {
       ret=PL_put_float(out,1.0);
       RETURN_IF_FAIL
-    else  
+    }
+    else
+    {  
       ret=PL_put_float(out,0.0);
       RETURN_IF_FAIL
+    }
   }
 
   return(PL_unify(out,arg3));
