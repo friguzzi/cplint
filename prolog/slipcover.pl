@@ -24,7 +24,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
   sample/4,
   op(500,fx,#),op(500,fx,'-#'),
-  test_prob/6]).
+  test_prob/6,rules2terms/2]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
@@ -4129,14 +4129,14 @@ user:term_expansion((:- end_in), []) :-
 
 
 %
-user:term_expansion(begin(model(I)), []) :-!,
-  input_mod(M),
+user:term_expansion(begin(model(I)), []) :-
+  input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
-user:term_expansion(end(model(_I)), []) :-!,
-  input_mod(M),
+user:term_expansion(end(model(_I)), []) :-
+  input_mod(M),!,
   retractall(M:model(_)).
 
 user:term_expansion(At, A) :-
