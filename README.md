@@ -11,6 +11,7 @@ You can try it online at http://cplint.lamping.unife.it/
 Installation
 ------------
 It can be installed with `pack_install/1`
+
     $ swipl
     ?- pack_install(cplint).
 
@@ -23,6 +24,7 @@ First run `pack_rebuild(cplint)`. This typically fails but produces the file
 `buildenv.sh` in the root folder. You can modify this file looking at the
 example files
 `buildenvmingw32.sh` and `buildenvmingw64.sh`. Then you can run
+
     $ source buildenv.sh
     $ source configure
     $ make install
