@@ -14,7 +14,7 @@ CURRDIR=$(shell pwd)
 
 INC2=${SWIHOME}/include
 #INC2=`echo /usr/lib/swi*`/include/
-INCDIRS= -I$(INC1) -I$(INC2)
+INCDIRS= -I$(INC1) 
 CFLAGSBDDEM= $(CFLAGS) -fPIC -DBP_FREE -O3 -fomit-frame-pointer -Wall -g -O2 ${INCDIRS}
 
 #
@@ -31,8 +31,8 @@ all:  bddem.$(SOEXT)
 
 bddem.$(SOEXT): bddem.o
 	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
-	if test $(SWIARCH) == x64-win64; then  \
-  $(CC) bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
+	if test $(SWIARCH) == x64-win64 -o $(SWIARCH) == i386-win32; then  \
+  $(CC) bddem.o -static-libgcc -static-libstdc++  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
   else  \
   $(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT) ;\
   fi 
