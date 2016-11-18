@@ -24,6 +24,7 @@ details.
   em/8,randomize/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
+  op(1150,fx,actions),
   msw/4,
   msw/5
     ]).
@@ -327,12 +328,24 @@ prob_bar(M:Goal,Chart):-
  * ground instantiations of
  * Query/Evidence together with their probabilities
  */
+prob(M:Goal,M:do(Do),P):-!,
+  functor(Do,F,A),
+  A1 is A+2,
+  functor(Act,F,A1),
+  retractall(M:Act),
+  Do=..L,
+  append(L,[En,B],L1),
+  Do1=..L1,
+  assert((Do1:-one(En,B))),
+  s(M:Goal,P).
+
 prob(M:Goal,M:Evidence,P):-
   M:rule_n(NR),
   init_test(NR,Env),
   findall((Goal,P),get_cond_p(M:Goal,M:Evidence,Env,P),L),
   end_test(Env),
   member((Goal,P),L).
+
 
 /** 
  * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
@@ -861,6 +874,11 @@ user:term_expansion((:- begin_lpad), []) :-
 user:term_expansion((:- end_lpad), []) :-
   pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
+
+user:term_expansion((:- actions A/B), []) :-
+  prolog_load_context(module, M),pita_module(M),!,
+  B1 is B + 2,
+  M:(dynamic A/B1).
 
 user:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),pita_module(M),!.
