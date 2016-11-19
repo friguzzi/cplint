@@ -24,7 +24,7 @@ details.
   em/8,randomize/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
-  op(1150,fx,actions),
+  op(1150,fx,action),
   msw/4,
   msw/5
     ]).
@@ -40,6 +40,7 @@ details.
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
+:-use_module(library(assoc)).
 :-use_foreign_library(foreign(bddem),install).
 
 :- style_check(-discontiguous).
@@ -328,7 +329,7 @@ prob_bar(M:Goal,Chart):-
  * ground instantiations of
  * Query/Evidence together with their probabilities
  */
-prob(M:Goal,M:do(Do),P):-!,
+/*prob(M:Goal,M:do(Do),P):-!,
   functor(Do,F,A),
   A1 is A+2,
   functor(Act,F,A1),
@@ -338,14 +339,101 @@ prob(M:Goal,M:do(Do),P):-!,
   Do1=..L1,
   assert((Do1:-one(En,B))),
   s(M:Goal,P).
-
+*/
 prob(M:Goal,M:Evidence,P):-
+  deal_with_ev(Evidence,M,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
   M:rule_n(NR),
   init_test(NR,Env),
-  findall((Goal,P),get_cond_p(M:Goal,M:Evidence,Env,P),L),
+  (EvNoAct=true->
+    findall((Goal,P),get_p(M:Goal,Env,P),L)
+  ;
+    findall((Goal,P),get_cond_p(M:Goal,M:EvNoAct,Env,P),L)
+  ),
   end_test(Env),
+  retractall('$ev'(_,_)),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd),
   member((Goal,P),L).
 
+deal_with_ev(Ev,M,EvGoal,UC,CA):-
+  list2and(EvL,Ev),
+  partition(ac,EvL,ActL,EvNoActL),
+  deal_with_actions(ActL,M,UC0,CA),
+  (EvNoActL=[]->
+    EvGoal=true,
+    UC=UC0
+  ;
+    process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+    append([one(Env,BDD)],BodyList2,BodyList3),
+    list2and(BodyList3,Body2),
+    add_bdd_arg('$ev',Env,BDDAnd,Module,Head1),
+    M:(asserta((Head1 :- Body2),Ref)),
+    UC=[Ref|UC0],
+    EvGoal='$ev'
+  ).
+
+deal_with_actions(ActL,M,UC,CA):-
+  empty_assoc(AP0),
+  foldl(get_pred_const,ActL,AP0,AP),
+  assoc_to_list(AP,LP),
+  maplist(update_clauses(M),LP,UCL,CAL),
+  partition(nac,ActL,_NActL,PActL),
+  maplist(assert_actions(M),PActL,ActRefs),
+  append([ActRefs|UCL],UC),
+  append(CAL,CA).
+
+assert_actions(M,do(A),Ref):-
+  A=..[P|Args],
+  append(Args,[Env,BDD],Args1),
+  A1=..[P|Args1],
+  M:assertz((A1:-one(Env,BDD)),Ref).
+
+update_clauses(_M,P/0- _,[],LCA):-!,
+  functor(G1,P,2),
+  findall(Ref,clause(G1,_B,Ref),UC),
+  findall((G1:-B),clause(G1,B),LCA),
+  maplist(erase,UC).
+
+update_clauses(M,P/A-Constants,UC,CA):-
+  functor(G,P,A),
+  A1 is A+2,
+  functor(G1,P,A1),
+  G=..[_|Args],
+  findall((G1,B,Ref),M:clause(G1,B,Ref),LC),
+  maplist(get_const(Args),Constants,ConstraintsL),
+  list2and(ConstraintsL,Constraints),
+  maplist(add_cons(G1,Constraints,M),LC,UC,CA).
+
+add_cons(G,C,M,(H,B,Ref),Ref1,(H:-B)):-
+  copy_term((G,C),(G1,C1)),
+  G1=H,
+  erase(Ref),
+  M:assertz((H:-(C1,B)),Ref1).
+  
+
+get_const(Args,Constants,Constraint):-
+  maplist(constr,Args,Constants,ConstraintL),
+  list2and(ConstraintL,Constraint).
+
+constr(V,C,V\== C).
+
+get_pred_const(do(Do0),AP0,AP):-
+  (Do0= (\+ Do)->
+    true
+  ;
+    Do=Do0
+  ),
+  functor(Do,F,A),
+  Do=..[_|Args],
+  (get_assoc(F/A,AP0,V)->
+    put_assoc(F/A,AP0,[Args|V],AP)
+  ;
+    put_assoc(F/A,AP0,[Args],AP)
+  ).
+
+
+ac(do(_)).
+nac(do(\+ _)).
 
 /** 
  * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
@@ -849,6 +937,14 @@ set_sw(A,B):-
   pita_module(M),
   assert(M:sw(R,A,B)).
 
+act(M,A/B):-
+  B1 is B + 2,
+  M:(dynamic A/B1).
+
+user:term_expansion((:- action Conj), []) :-!,
+  prolog_load_context(module, M),
+  list2and(L,Conj),
+  maplist(act(M),L).
 
 user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
@@ -874,11 +970,6 @@ user:term_expansion((:- begin_lpad), []) :-
 user:term_expansion((:- end_lpad), []) :-
   pita_input_mod(_M0),!,
   retractall(pita_module(_M)).
-
-user:term_expansion((:- actions A/B), []) :-
-  prolog_load_context(module, M),pita_module(M),!,
-  B1 is B + 2,
-  M:(dynamic A/B1).
 
 user:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),pita_module(M),!.
