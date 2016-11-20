@@ -388,10 +388,10 @@ assert_actions(M,do(A),Ref):-
   A1=..[P|Args1],
   M:assertz((A1:-one(Env,BDD)),Ref).
 
-update_clauses(_M,P/0- _,[],LCA):-!,
+update_clauses(M,P/0- _,[],LCA):-!,
   functor(G1,P,2),
-  findall(Ref,clause(G1,_B,Ref),UC),
-  findall((G1:-B),clause(G1,B),LCA),
+  findall(Ref,M:clause(G1,_B,Ref),UC),
+  findall((G1:-B),M:clause(G1,B),LCA),
   maplist(erase,UC).
 
 update_clauses(M,P/A-Constants,UC,CA):-
