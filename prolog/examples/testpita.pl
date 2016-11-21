@@ -37,8 +37,12 @@ test_all([H|T],F):-
 
 
 test((prob(heads(coin),P),close_to(P,0.51)),coin).
+test((prob((heads(coin),biased(coin)),P),close_to(P,0.06)),coin).
 test((prob(tails(coin),P),close_to(P,0.49)),coin).
 test((prob(heads(coin),biased(coin),P),close_to(P,0.6)),coin).
+test((prob((heads(coin), biased(coin)),P),close_to(P,0.06)),coin).
+test((prob((heads(coin),\+ biased(coin)),P),close_to(P,0.45)),coin).
+test((prob(\+ heads(coin),P),close_to(P,0.49)),coin).
 
 test((prob(res(coin,heads),P),close_to(P,0.51)),coinmsw).
 test((prob(res(coin,tails),P),close_to(P,0.49)),coinmsw).
@@ -89,6 +93,18 @@ test((prob(heads(coin2),P),close_to(P,0.51)),coin2).
 test((prob(tails(coin1),P),close_to(P,0.49)),coin2).
 test((prob(tails(coin2),P),close_to(P,0.49)),coin2).
 
+test((prob(recovery,drug,P),close_to(P,0.5)),simpson).
+test((prob(recovery,\+ drug,P),close_to(P,0.4)),simpson).
+test((prob(recovery,(drug,female),P),close_to(P,0.2)),simpson).
+test((prob(recovery,(\+drug,female),P),close_to(P,0.3)),simpson).
+test((prob(recovery,(drug,\+female),P),close_to(P,0.6)),simpson).
+test((prob(recovery,(\+ drug,\+female),P),close_to(P,0.7)),simpson).
+test((prob(recovery,do(drug),P),close_to(P,0.4)),simpson).
+test((prob(recovery,do(\+ drug),P),close_to(P,0.5)),simpson).
+test((prob(recovery,(do(drug),female),P),close_to(P,0.2)),simpson).
+test((prob(recovery,(do(\+drug),female),P),close_to(P,0.3)),simpson).
+test((prob(recovery,(do(drug),\+ female),P),close_to(P,0.6)),simpson).
+test((prob(recovery,(do(\+ drug),\+ female),P),close_to(P,0.7)),simpson).
 
 epsilon(0.001).
 

@@ -247,10 +247,19 @@ load_file(File):-
  * Query together with their probabilities
  */
 s(M:Goal,P):-
+  term_variables(Goal,VG),
+  Goal1=..['$goal'|VG],
+  list2and(GoalL,Goal),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  append([one(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
-  findall((Goal,P),get_p(M:Goal,Env,P),L),
+  findall((Goal,P),get_p(M:Goal1,Env,P),L),
   end_test(Env),
+  erase(Ref),
   member((Goal,P),L).
 
 /** 
@@ -329,29 +338,27 @@ prob_bar(M:Goal,Chart):-
  * ground instantiations of
  * Query/Evidence together with their probabilities
  */
-/*prob(M:Goal,M:do(Do),P):-!,
-  functor(Do,F,A),
-  A1 is A+2,
-  functor(Act,F,A1),
-  retractall(M:Act),
-  Do=..L,
-  append(L,[En,B],L1),
-  Do1=..L1,
-  assert((Do1:-one(En,B))),
-  s(M:Goal,P).
-*/
 prob(M:Goal,M:Evidence,P):-
   deal_with_ev(Evidence,M,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
+  term_variables(Goal,VG),
+  Goal1=..['$goal'|VG],
+  list2and(GoalL,Goal),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  append([one(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
   (EvNoAct=true->
-    findall((Goal,P),get_p(M:Goal,Env,P),L)
+    findall((Goal,P),get_p(M:Goal1,Env,P),L)
   ;
-    findall((Goal,P),get_cond_p(M:Goal,M:EvNoAct,Env,P),L)
+    findall((Goal,P),get_cond_p(M:Goal1,M:EvNoAct,Env,P),L)
   ),
   end_test(Env),
   retractall('$ev'(_,_)),
   maplist(erase,UpdatedClausesRefs),
+  erase(Ref),
   maplist(M:assertz,ClausesToReAdd),
   member((Goal,P),L).
 
@@ -728,7 +735,7 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
+[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
   and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -757,7 +764,7 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
+[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
   and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -765,7 +772,7 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
+[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
   and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
