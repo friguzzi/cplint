@@ -45,3 +45,9 @@ Example of use
     $ swipl
     ?- [coin].
     ?- prob(heads(coin),P).
+
+Datasets
+--------
+
+Other machine learning datasets are available in pack cplint_datasets 
+(https://github.com/friguzzi/cplint_datasets)
