@@ -10,6 +10,8 @@ You can try it online at http://cplint.lamping.unife.it/
 
 Installation
 ------------
+This is a SWI-Prolog (http://www.swi-prolog.org/) pack.
+
 It can be installed with `pack_install/1`
 
     $ swipl
