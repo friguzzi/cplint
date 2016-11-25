@@ -1,5 +1,7 @@
 name(cplint).
 title('A suite of programs for reasoning with probabilistic logic programs').
-version('3.0').
+version('3.1.0').
 author('Fabrizio Riguzzi','fabrizio.riguzzi@unife.it').
-
+download('https://github.com/friguzzi/cplint/releases/*.zip').
+requires(auc).
+requires(matrix).
