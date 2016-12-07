@@ -66,7 +66,11 @@ details.
   ~= /2,
   swap/2,
   msw/2,
-  set_sw/2
+  set_sw/2,
+  to_pair/2,
+  key/2,
+  y/2,
+  bin/5
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
