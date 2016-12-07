@@ -43,7 +43,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 
 
-:- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
+:- thread_local v/3, input_module/1, local_setting/2, rule_sc_n/1.
 
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
@@ -159,7 +159,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
  */
 test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2('Testing\n'),
-  input_mod(M),
+  input_module(M),
   make_dynamic(M),
   %gtrace,
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
@@ -194,7 +194,7 @@ test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
  
 induce_rules(Folds,R):-
 %tell(ciao),
-  input_mod(M),
+  input_module(M),
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -458,7 +458,7 @@ induce_par(Folds,ROut):-
   rules2terms(R,ROut).
 
 induce_parameters(Folds,R):-
-  input_mod(M),
+  input_module(M),
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -509,7 +509,7 @@ induce_par(TrainFolds,TestFolds,ROut,CLL,AUCROC,ROC,AUCPR,PR):-
   induce_parameters(TrainFolds,R),
   rules2terms(R,ROut),
   write2('Testing\n'),
-  input_mod(M),
+  input_module(M),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
@@ -759,23 +759,23 @@ scan_head([H:_P|T],O0,O):-
 
 store_clause_refinement(Ref,RefP,Score):-
   elab_clause_ref(Ref,Ref1),
-  input_mod(M),
+  input_module(M),
   assert(M:ref_clause(r(Ref1,RefP,Score))).
 
 store_refinement(Ref,RefP,Score):-
   elab_ref(Ref,Ref1),
-  input_mod(M),
+  input_module(M),
   assert(M:ref(r(Ref1,RefP,Score))).
 
 already_scored_clause(R,R1,Score):-
   elab_ref([R],[rule(H,B)]),
-  input_mod(M),
+  input_module(M),
   M:ref_clause(r(rule(H,B1),R1,Score)),
   permutation(B,B1).
 
 already_scored(R,R1,Score):-
   elab_ref(R,RR),
-  input_mod(M),
+  input_module(M),
   M:ref(r(RR,R1,Score)).
 
 
@@ -936,7 +936,7 @@ get_bdd_group([H|T],M,Env,T1,Gmax,G1,BDD0,BDD,CE,[H|LE0],LE):-
 random_restarts(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
 random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(random_restarts_number,NMax),
   Num is NMax-N+1,
   format3("Restart number ~d~n~n",[Num]),
@@ -957,7 +957,7 @@ random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
 random_restarts_ref(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
 random_restarts_ref(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(random_restarts_REFnumber,NMax),
   Num is NMax-N+1,
   format3("Restart number ~d~n~n",[Num]),
@@ -976,7 +976,7 @@ random_restarts_ref(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
 
 
 score(_LE,_ExP,CLL,CLL):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(score,ll),!.
 
 score(LE,ExP,_CLL,Score):-
@@ -1911,7 +1911,7 @@ update_head1([H:_P|T],N,[H:P|T1]):-
 
 
 banned_clause(H,B):-
-  input_mod(M),
+  input_module(M),
   numbervars((H,B),0,_N),
   M:banned(H2,B2),
   mysublist(H2,H),
@@ -1962,7 +1962,7 @@ specialize_rule_la([],_LH1,BL1,BL1).
 
 specialize_rule_la([Lit1|T],LH1,BL1,BL3):-
   copy_term(Lit1,Lit2),
-  input_mod(M),
+  input_module(M),
   M:modeb(_,Lit2),
   append(LH1,BL1,ALL1),
   specialize_rule1(Lit2,ALL1,SLit1),
@@ -2093,15 +2093,15 @@ exctract_type_vars([Lit|RestLit],TypeVars):-
 
 
 take_mode(Lit):-
-  input_mod(M),
+  input_module(M),
   M:modeh(_,Lit),!.
 
 take_mode(Lit):-
-  input_mod(M),
+  input_module(M),
   M:modeb(_,Lit),!.
 
 take_mode(Lit):-
-  input_mod(M),
+  input_module(M),
   M:mode(_,Lit),!.
 
 
@@ -2401,7 +2401,7 @@ process_clauses([H|T],C0,C1,R0,R1):-
 
 
 get_next_rule_number(R):-
-  input_mod(M),
+  input_module(M),
   retract(M:rule_sc_n(R)),
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
@@ -2864,13 +2864,13 @@ process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
 
 
 given(H):-
-  input_mod(M),
+  input_module(M),
   functor(H,P,Ar),
   (M:input(P/Ar)).
 
 
 given_cw(H):-
-  input_mod(M),
+  input_module(M),
   functor(H,P,Ar),
   (M:input_cw(P/Ar)).
 
@@ -2904,7 +2904,7 @@ or_list1([H|T],Env,B0,B1):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_sc(Parameter,Value):-
-  input_mod(M),
+  input_module(M),
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
@@ -2917,7 +2917,7 @@ set_sc(Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_sc(P,V):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -3000,7 +3000,7 @@ process_head(HeadList, HeadList).
 process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
-  input_mod(M),
+  input_module(M),
   M:local_setting(epsilon_parsing, Eps), 
   EpsNeg is - Eps, 
   ProbLast > EpsNeg, 
@@ -3048,7 +3048,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
-  input_mod(M),
+  input_module(M),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module)
   ;
@@ -3077,7 +3077,7 @@ gen_clause((H :- Body),N,N,(H :- Body),[(H :- Body)]):-!.
   
 gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(depth_bound,true),!,
 % disjunctive clause with more than one head atom e depth_bound
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module),
@@ -3095,7 +3095,7 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
   
 gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
-  input_mod(M),
+  input_module(M),
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module),
   append([pita:one(Env,BDD)],BodyList1,BodyList2),
@@ -3112,7 +3112,7 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
 
 gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- 
 % disjunctive clause with a single head atom e depth_bound
-  input_mod(M),
+  input_module(M),
   M:local_setting(depth_bound,true),!,
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
@@ -3182,7 +3182,7 @@ term_expansion_int((Head :- Body), ((H :- Body),[])):-
   Head=db(H),!.
   
 term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
@@ -3204,7 +3204,7 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
    ).
   
 term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !, 
@@ -3226,14 +3226,14 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
 
 term_expansion_int((Head :- Body), ([],[])) :- 
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (_H:P),P=:=0.0, !. 
 
 term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :- 
 % disjunctive clause with a single head atom e depth_bound
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3249,7 +3249,7 @@ term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
 
 term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :- 
 % disjunctive clause with a single head atom senza depth_bound con prob =1
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
@@ -3264,7 +3264,7 @@ term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
 
 term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :- 
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3287,7 +3287,7 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :
 
 term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :- 
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !, 
@@ -3309,7 +3309,7 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :
   
 term_expansion_int((Head :- Body),(Clauses,[])) :- 
 % definite clause for db facts
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),  
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
@@ -3317,7 +3317,7 @@ term_expansion_int((Head :- Body),(Clauses,[])) :-
 
 term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :- 
 % definite clause with depth_bound
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),  
   M:local_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
@@ -3330,7 +3330,7 @@ term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
   
 term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :- 
 % definite clause senza DB
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),  
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body), 
@@ -3341,7 +3341,7 @@ term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
   Clauses=(Head1 :- Body2).
 
 term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
@@ -3358,7 +3358,7 @@ term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
   ).
 
 term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !, 
@@ -3374,14 +3374,14 @@ term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
   ).
 
 term_expansion_int(Head,([],[])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_H:P),P=:=0.0, !.
   
 term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -3392,7 +3392,7 @@ term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
   Clause=(Head1 :- Body1).
 
 term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3402,7 +3402,7 @@ term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
   Clause=(Head1 :- Body1).
 
 term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
@@ -3421,7 +3421,7 @@ term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
   ).
 
 term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3439,7 +3439,7 @@ term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
   ).
 
 term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % definite fact with db
@@ -3448,7 +3448,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
   add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
 
 term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :- 
-  input_mod(M),
+  input_module(M),
   M:local_setting(compiling,on),
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
@@ -3686,13 +3686,13 @@ interpolate(I,N,Pos,R0,P0,TPA,FPA,TPB,FPB,A0,A,PR0,[R-P|PR]):-
 */
 
 find_ex(DB,LG,Pos,Neg):-
-  input_mod(M),
+  input_module(M),
   findall(P/A,M:output(P/A),LP),
   M:local_setting(neg_ex,given),!,
   find_ex_pred(LP,DB,[],LG,0,Pos,0,Neg).
 
 find_ex(DB,LG,Pos,Neg):-
-  input_mod(M),
+  input_module(M),
   findall(P/A,M:output(P/A),LP),
   M:local_setting(neg_ex,cw),
   find_ex_pred_cw(LP,DB,[],LG,0,Pos,0,Neg).
@@ -3710,7 +3710,7 @@ find_ex_db([],_At,LG,LG,Pos,Pos,Neg,Neg).
 find_ex_db([H|T],At,LG0,LG,Pos0,Pos,Neg0,Neg):-
   At=..[P|L],
   At1=..[P,H|L],
-  input_mod(M),
+  input_module(M),
   findall(At1,M:At1,LP),
   findall(\+ At1,M:neg(At1),LN),
   length(LP,NP),
@@ -3735,13 +3735,13 @@ get_types(At,[]):-
   At=..[_],!.
 
 get_types(At,Types):-
-  input_mod(M),
+  input_module(M),
   M:modeh(_,At),
   At=..[_|Args],
   get_args(Args,Types).
 
 get_types(At,Types):-
-  input_mod(M),
+  input_module(M),
   M:modeh(_,HT,_,_),
   member(At,HT),
   At=..[_|Args],
@@ -3783,14 +3783,14 @@ find_pred_using_type(T,L):-
   ).
 
 pred_type(T,P,Ar,A):-
-  input_mod(M),
+  input_module(M),
   M:modeh(_,S),
   S=..[P|Args],
   length(Args,Ar),
   scan_args(Args,T,1,A).
 
 pred_type(T,P,Ar,A):-
-  input_mod(M),
+  input_module(M),
   M:modeb(_,S),
   S=..[P|Args],
   length(Args,Ar),
@@ -3811,7 +3811,7 @@ scan_args([_|Tail],T,A0,A):-
 find_constants([],_M,C,C).
 
 find_constants([(P,Ar,A)|T],M,C0,C):-
-  input_mod(Mod),
+  input_module(Mod),
   gen_goal(1,Ar,A,Args,ArgsNoV,V),
   G=..[P,M|Args],
   (setof(V,ArgsNoV^call_goal(Mod,G),LC)->
@@ -3842,7 +3842,7 @@ gen_goal(Arg,Ar,A,[ArgV|Args],[ArgV|ArgsNoV],V):-
 find_ex_db_cw([],_At,_Ty,LG,LG,Pos,Pos,Neg,Neg).
 
 find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
-  input_mod(M),
+  input_module(M),
   get_constants(Types,H,C),
   At=..[P|L],
   get_types(At,TypesA),!,
@@ -3859,7 +3859,7 @@ find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   find_ex_db_cw(T,At,Types,LG1,LG,Pos1,Pos,Neg1,Neg).
 
 neg_ex([],[],At1,_C):-
-  input_mod(M),
+  input_module(M),
   \+ M:At1.
 
 neg_ex([H|T],[HT|TT],At1,C):-
@@ -3871,7 +3871,7 @@ compute_CLL_atoms([],_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
 %  write(\+ H),nl,
-  input_mod(M),
+  input_module(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3890,7 +3890,7 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
 
 compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
 %  write(H),nl,
-  input_mod(M),
+  input_module(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3966,7 +3966,7 @@ plot(rec,prec,'--*k')
   []).
 
 write2(A):-
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>1->
     write(A)
@@ -3975,7 +3975,7 @@ write2(A):-
   ).
 
 write3(A):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>2->
     write(A)
@@ -3984,7 +3984,7 @@ write3(A):-
   ).
 
 format2(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>1->
     format(A,B)
@@ -3993,7 +3993,7 @@ format2(A,B):-
   ).
 
 format3(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>2->
     format(A,B)
@@ -4002,7 +4002,7 @@ format3(A,B):-
   ).
 
 write_rules2(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>1->
     write_rules(A,B)
@@ -4011,7 +4011,7 @@ write_rules2(A,B):-
   ).
 
 write_rules3(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>2->
     write_rules(A,B)
@@ -4021,7 +4021,7 @@ write_rules3(A,B):-
 
 
 write_disj_clause2(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>1->
     write_disj_clause(A,B)
@@ -4030,7 +4030,7 @@ write_disj_clause2(A,B):-
   ).
 
 write_disj_clause3(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>2->
     write_disj_clause(A,B)
@@ -4039,7 +4039,7 @@ write_disj_clause3(A,B):-
   ).
 
 write_body2(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>1->
     write_body(A,B)
@@ -4048,7 +4048,7 @@ write_body2(A,B):-
   ).
 
 write_body3(A,B):-	
-  input_mod(M),
+  input_module(M),
   M:local_setting(verbosity,Ver),
   (Ver>2->
     write_body(A,B)
@@ -4056,13 +4056,16 @@ write_body3(A,B):-
     true
   ).
 
+input_module(M):-
+  prolog_load_context(module, M).
+
 
 %:-style_check(-discontiguous).
 :- dynamic input_mod/1.
 
-/* input_mod(0).
+/* input_module(0).
 :-prolog_load_context(module, M),
-  retract(input_mod(_)),
+  retract(input_module(_)),
   write(M),
   assert(input_mod(M)).
 */
