@@ -25,7 +25,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- set_lm(megaex_bottom,15).
 :- set_lm(max_iter,10).
 :- set_lm(max_iter_structure,50).
-:- set_lm(verbosity,2).
+:- set_lm(verbosity,1).
 
 
 :- begin_in.
@@ -74,7 +74,9 @@ fold(all,F):-
    assert(fold(rand_train,FTr)),
    assert(fold(rand_test,FTe)).
 
-output(class/1).
+output(class_fix/0).
+output(class_sendback/0).
+output(class_ok/0).
 
 input_cw(replaceable/1).
 input_cw(not_replaceable/1).
@@ -89,9 +91,27 @@ determination(class/1,worn/1).
 determination(class/1,not_worn/1).
 determination(class/1,none_worn/0).
 
-modeh(*,class(fix)).
-modeh(*,class(ok)).
-modeh(*,class(sendback)).
+class_fix(M):-
+  class(M,fix).
+
+class_sendback(M):-
+  class(M,sendback).
+
+class_ok(M):-
+  class(M,ok).
+
+neg(class_fix(M)):-
+  neg(class(M,fix)).
+
+neg(class_sendback(M)):-
+  neg(class(M,sendback)).
+
+neg(class_ok(M)):-
+  neg(class(M,ok)).
+
+modeh(*,class_fix).
+modeh(*,class_ok).
+modeh(*,class_sendback).
 
 
 /*modeh(*,[class(fix),class(ok),class(sendback)],

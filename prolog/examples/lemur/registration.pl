@@ -13,7 +13,7 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_lm([rand_train],P).
+?- induce_lm([all],P).
 */
 
 %:-use_module(lemur).
