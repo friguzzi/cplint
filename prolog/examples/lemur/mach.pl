@@ -8,11 +8,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_par([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
-?- induce_par([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
-?- in(P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
-?- induce([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
-?- induce([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
+?- induce_lm([train],P).
 */
 %:-use_module(lemur).
 :-use_module(library(lemur)).
