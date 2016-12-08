@@ -13,7 +13,6 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 :-use_module(library(lemur)).
-:-use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).

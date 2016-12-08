@@ -26,7 +26,7 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,
+  induce_lm/2, sample/4,test/7,test_prob/6,induce_par/2,
   op(500,fx,#),op(500,fx,'-#')]).
 
 /*slipcover_lemur.pl declarations start*/
@@ -116,7 +116,7 @@ default_setting_lm(depth_bound,false).  %if true, it limits the derivation of th
 default_setting_lm(depth,2).
 default_setting_lm(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-:- thread_local database/1, mcts_modeb/1, mcts_restart/1, mcts_best_score/1, mcts_best_theory/1, mcts_theories/1, mcts_best_theories_iteration/1, node/7, lastid/1, mcts_iteration/1, v/3, rule_sc_n/1, input_module/1, local_setting/2, in_on/0, in/1, model/1, int/1.
+:- thread_local database/1, mcts_modeb/1, mcts_restart/1, mcts_best_score/1, mcts_best_theory/1, mcts_theories/1, mcts_best_theories_iteration/1, node/7, lastid/1, mcts_iteration/1, v/3, rule_sc_n/1, input_mod/1, local_setting/2, in_on/0, in/1, model/1, int/1.
 
 /** 
  * induce(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
@@ -126,6 +126,8 @@ default_setting_lm(single_var,false). %false:1 variable for every grounding of a
  * It returns in P the learned probabilistic program.
  */
 induce_lm(TrainFolds,P):-
+  input_mod(M),
+  assert(slipcover:input_mod(M)),
   induce_rules(TrainFolds,P0),
   rules2terms(P0,P).
   %generate_clauses(P0,P,0,[],_Th).
@@ -304,40 +306,6 @@ learn_struct_mcts(DB,R1,R,CLL1):-
     R = RNew
   ).
 
-
-learn_params(DB,M,R0,R,Score):-  %Parameter Learning
-  generate_clauses(R0,R1,0,[],Th0), 
-  input_module(M),
-  format3("Initial theory~n",[]),
-  write_rules3(R1,user_output),
-  assert_all(Th0,M,Th0Ref),
-  assert_all(R1,M,R1Ref),!,
-  findall(R-HN,(M:rule(R,HL,_BL,_Lit),length(HL,HN)),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH,ExData),
-  retractall(pita:v(_,_,_)),
-  length(DB,NEx),
-  (M:local_setting(examples,atoms)->
-    M:local_setting(group,G),  
-    derive_bdd_nodes_groupatoms(DB,M,ExData,NEx,G,[],Nodes,0,CLL0,LE,[]),!   
-  ; 
-   derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!      
-  ),
-  format3("Initial score ~f~n",[CLL0]),
-  M:local_setting(random_restarts_number,N),
-  random_restarts(N,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
-  end(ExData),
-  retract_all(Th0Ref),
-  retract_all(R1Ref),!,
-  update_theory_par(R1,Par,R). %replaces in R1 the probabilities Par and outputs R 				 
-
-  /*
-  retract(mcts_best_by_cll(CLL1)),
-  retract(mcts_best_theory_by_visits(_)),
-  retract(mcts_best_theory_by_cll(R)).
-  */
 
 
 mcts(InitialTheory,InitialScore,DB):-
@@ -994,39 +962,9 @@ score_theory(Theory0,DB,Score,Theory,R3):-
   ),
   input_module(M),
   learn_params(DB, M, Theory, R3, CLL),
-  /*
-  format("   Scoring....",[]),flush_output,
-  write_rules2(R3,user_output),   flush_output,  
-  generate_clauses(Theory,R2,0,[],Th1),
-  format("\n ~w\n ~w\n ~w",[Theory,R2,Th1]),
-  assert_all(Th1),
-  assert_all(R2),!,
-  findall(RN-HN,(rule(RN,HL,_BL,_Lit),length(HL,HN)),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH),
-  retractall(v(_,_,_)),
-  length(DB,NEx),
-  (setting(examples,atoms)->
-    setting(group,G),  
-    derive_bdd_nodes_groupatoms(DB,NEx,G,[],Nodes,0,CLL0,LE,[]),!
-  ; 
-    derive_bdd_nodes(DB,NEx,[],Nodes,0,CLL0),!
-  ),
-  setting(random_restarts_REFnumber,N),
-  random_restarts(N,Nodes,-1e20,CLL,initial,Par,LE),  
-  end,
-
-  format("\n Score ~w ~w",[CLL0,CLL]),
-  update_theory_par(R2,Par,R3),
-  */
-	
   write3('Updated refinement'),write3('\n'),
   write_rules3(R3,user_output), 
   Score = CLL,  
-  %nl,write('Score (CLL) '),write(Score),nl,nl,nl,
-  %format(" End",[]),flush_output,
   !.
 
 
@@ -1061,76 +999,6 @@ backup(NodeID,Reward,[Parent|R]):-
 
 
 /* slipcover_lemur.pl START*/
-/*
-  learn_params(DB,R0,R,Score):-  %Parameter Learning
-  generate_clauses(R0,R1,0,[],Th0), 
-  assert_all(Th0),
-  assert_all(R1),!,
-  findall(R-HN,(rule(R,HL,_BL,_Lit),length(HL,HN)),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH),
-  retractall(v(_,_,_)),
-  length(DB,NEx),
-  (setting(examples,atoms)->
-    setting(group,G),  
-    derive_bdd_nodes_groupatoms(DB,NEx,G,[],Nodes,0,_CLL0,LE,[]),!   
-  ; 
-   derive_bdd_nodes(DB,NEx,[],Nodes,0,_CLL0),!      
-  ),
-  setting(random_restarts_number,N),
-  random_restarts(N,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
-  end,
-  retract_all(Th0),
-  retract_all(R1),!,
-  update_theory_par(R1,Par,R).  %replaces in R1 the probabilities Par and outputs R
-*/
-
-
-update_theory_par([],_Par,[]).
-
-update_theory_par([def_rule(H,B,L)|T0],Par,[def_rule(H,B,L)|T]):-!,
-  update_theory_par(T0,Par,T).
-
-update_theory_par([(H:-B)|T0],Par,[(H:-B)|T]):-!,
-  update_theory_par(T0,Par,T).
-
-update_theory_par([rule(N,H,_B,_L)|T0],Par,T):-
-  member([N,[1.0|_T]],Par),
-  last(H,'':_P),!,  
-  update_theory_par(T0,Par,T).
-
-update_theory_par([rule(N,H,B,L)|T0],Par,[rule(N,H1,B,L)|T]):-
-  member([N,P],Par),!, 
-  reverse(P,P1),
-  update_head_par(H,P1,H1),  
-  update_theory_par(T0,Par,T).
-
-
-update_theory(R,initial,R):-!.
-
-update_theory([],_Par,[]).
-
-update_theory([def_rule(H,B,L)|T0],Par,[def_rule(H,B,L)|T]):-!,
-  update_theory(T0,Par,T).
-
-update_theory([(H:-B)|T0],Par,[(H:-B)|T]):-!,
-  update_theory(T0,Par,T).
-
-update_theory([rule(N,H,B,L)|T0],Par,[rule(N,H1,B,L)|T]):-
-  member([N,P],Par),!, 
-  reverse(P,P1),
-  update_head_par(H,P1,H1),  
-  update_theory(T0,Par,T).
-
-
-update_head_par([],[],[]).
-
-update_head_par([H:_P|T0],[HP|TP],[H:HP|T]):-
-  update_head_par(T0,TP,T).
-
-
 range_restricted(rule(_N,HL,BL,_Lit)):-
   term_variables(HL,VH),
   term_variables(BL,VB),
@@ -4020,7 +3888,7 @@ setting_lm(P,V):-
   M:local_setting(P,V).
 
 input_module(M):-
-  prolog_load_context(module, M).
+  input_mod(M).
 
 
 %:-style_check(-discontiguous).
@@ -4039,7 +3907,7 @@ user:term_expansion((:- lemur), []) :-!,
   assert(M:rule_sc_n(0)),
 
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
-    lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
+    lookahead_cons/2,lookahead_cons_var/2,prob/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1)),
   style_check(-discontiguous).

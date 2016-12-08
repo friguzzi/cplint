@@ -22,7 +22,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 */
 :-module(slipcover,[set_sc/2,setting_sc/2,
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
-  sample/4,
+  sample/4,learn_params/5,
   op(500,fx,#),op(500,fx,'-#'),
   test_prob/6,rules2terms/2]).
 %:- meta_predicate get_node(:,-).
@@ -43,7 +43,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 
 
-:- thread_local v/3, input_module/1, local_setting/2, rule_sc_n/1.
+:- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
 
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
@@ -4057,7 +4057,7 @@ write_body3(A,B):-
   ).
 
 input_module(M):-
-  prolog_load_context(module, M).
+  input_mod(M).
 
 
 %:-style_check(-discontiguous).
@@ -4081,7 +4081,7 @@ user:term_expansion((:- sc), []) :-!,
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
-    lookahead_cons/2,lookahead_cons_var/2,prob/2,input/1,input_cw/1,
+    lookahead_cons/2,lookahead_cons_var/2,prob/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1)),
   style_check(-discontiguous).
