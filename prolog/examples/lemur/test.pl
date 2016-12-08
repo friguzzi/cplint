@@ -1,7 +1,7 @@
 
 
 main:-
-	format("~nTesting slipcover~n",[]),
+	format("~nTesting lemur~n",[]),
 	setof(File,A^test(A,File),F),
 	statistics(runtime,[_,_]),
 	test_files(F),

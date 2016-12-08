@@ -10,10 +10,11 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_lm([train],P).
+?- induce_lm([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 */
 %:-use_module(lemur).
 :-use_module(library(lemur)).
+:-use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -24,6 +25,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :- set_lm(megaex_bottom,20).
 :- set_lm(max_iter,3).
+:- set_lm(mcts_iter,10).
 :- set_lm(max_iter_structure,10).
 :- set_lm(maxdepth_var,4).
 :- set_lm(verbosity,1).

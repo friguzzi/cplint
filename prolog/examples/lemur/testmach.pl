@@ -1,7 +1,9 @@
 
 :- style_check(-singleton).
 
-test((induce_lm([train],P),
-P = [(class_sendback:1.0;'':0.0:-not_replaceable(_312), worn(_312)),  (class_fix:0.15757391354020836;'':0.8424260864597917:-not_replaceable(_350), not_worn(_350), replaceable(_370), worn(_370), not_worn(_390)),  (class_ok:0.9563221177023854;'':0.0436778822976146:-none_worn, not_replaceable(_442), not_worn(_452), replaceable(_452)),  (class_ok:0.9998483020027683;'':0.0001516979972316923:-none_worn)]),mach).
 
-
+test((induce_lm([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
+P = [(class_sendback:1.0;'':0.0:-not_replaceable(_92), worn(_92)),  (class_fix:0.07541910269950489;'':0.9245808973004951:-replaceable(_100), worn(_100), replaceable(_108), not_worn(_112)),  (class_ok:1.0;'':0.0:-none_worn),  (class_ok:1.2980416325929554e-8;'':0.9999999870195837:-not_worn(_116))],
+LL = -1.2645940192432141,
+AUCROC = AUCPR, AUCPR = 1.0),
+mach).

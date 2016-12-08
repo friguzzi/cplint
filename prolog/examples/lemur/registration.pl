@@ -13,11 +13,12 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_lm([all],P).
+?- induce_lm([all],P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
 */
 
 %:-use_module(lemur).
 :-use_module(library(lemur)).
+:-use_module(library(slipcover)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
