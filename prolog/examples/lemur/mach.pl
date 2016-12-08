@@ -11,7 +11,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 ?- induce_lm([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 ?- induce_lm([train],P).
 */
-%:-use_module(lemur).
+
 :-use_module(library(lemur)).
 :-use_module(library(slipcover)).
 
@@ -24,10 +24,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :- set_lm(depth_bound,false).
 :- set_lm(neg_ex,given).
-:- set_lm(megaex_bottom,15).
-:- set_lm(max_iter,10).
 :- set_lm(mcts_iter,20).
-:- set_lm(max_iter_structure,50).
 :- set_lm(verbosity,1).
 
 
