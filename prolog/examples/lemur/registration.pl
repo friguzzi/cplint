@@ -13,7 +13,7 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_lm([all],P),test(P,[all],LL,AUCROC,ROC,AUCPR,PR).
+?- induce_lm([all],P),test_lm(P,[all],LL,AUCROC,ROC,AUCPR,PR).
 */
 
 

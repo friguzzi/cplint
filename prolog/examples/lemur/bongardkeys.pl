@@ -10,7 +10,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
-?- induce_lm([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+?- induce_lm([train],P),test_lm(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 */
 
 :-use_module(library(lemur)).

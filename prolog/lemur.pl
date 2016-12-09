@@ -168,8 +168,8 @@ test_lm(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   retract((slipcover:input_mod(M))).
 
 /**
- * test_prob_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:i
-nt,-LL:float,-Results:list) is det
+ * test_prob_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,
+ * -NNeg:int,-LL:float,-Results:list) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns
