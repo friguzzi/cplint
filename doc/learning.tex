@@ -4,6 +4,9 @@ The following learning algorithms are available:
 \begin{itemize}
 \item EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs \cite{BelRig11-IDA-IJ}, \cite{BelRig11-CILC11-NC}, \cite{BelRig11-TR}
 \item SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately \cite{BelRig13-TPLP-IJ}
+\item LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm 
+for learning the structure of programs by searching the clase space using 
+Monte-Carlo tree search \cite{DiMBelRig15-ML-IJ}
 \end{itemize}
 
 \subsection{Input}
@@ -19,11 +22,12 @@ The preamble must come first, the order of the other parts can be changed.
 
 For example, consider the Bongard problems of \cite{RaeLae95-ALT95}. 
 %The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example learning files. 
-\href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.lamping.unife.it/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem.
-Let us consider \href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}}.
+\href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.lamping.unife.it/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for SLIPCOVER.
+\href{http://cplint.lamping.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.lamping.unife.it/example/lemur/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for LEMUR.
+
 
 \subsubsection{Preamble}
-In the preamble, the SLIPCOVER library is loaded with
+In the preamble, the SLIPCOVER library is loaded with (see \href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}}):
 \begin{verbatim}
 :- use_module(library(slipcover)).
 \end{verbatim}
@@ -47,9 +51,33 @@ At this point you can start setting parameters for SLIPCOVER such as for example
 :- set_sc(verbosity,1).
 \end{verbatim}
 We will see later the list of available parameters.
-A particularly important parameter is \verb|verbosity|: if set
+
+
+In the preamble, the LEMUR library is loaded with (see \href{http://cplint.lamping.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}}):
+\begin{verbatim}
+:- use_module(library(lemur)).
+\end{verbatim}
+%Then, if you are using your file in cplint on SWISH, you could add
+%\begin{verbatim}
+%:- if(current_predicate(use_rendering/1)).
+%:- use_rendering(c3).
+%:- use_rendering(lpad).
+%:- endif.
+%\end{verbatim}
+%if you want a nice representation of the output (in particular, if you want graphs of the ROC and PR curves).
+Now you can initialize LEMUR with
+\begin{verbatim}
+:- lemur.
+\end{verbatim}
+At this point you can start setting parameters for LEMUR such as for example
+\begin{verbatim}
+:- set_lm(verbosity,1).
+\end{verbatim}
+A parameter that is particularly important for both SLIPCOVER and LEMUR is \verb|verbosity|: if set
 to 1, nothing is printed and learning is  fastest, if set to 3 much information is printed and learning is slowest, 2 is in between.
 This ends the preamble.
+
+
 
 \subsubsection{Background and Initial LPAD/CPL-program}
 %
@@ -155,11 +183,12 @@ specifies the atoms that can appear in the body of clauses.
 \texttt{<recall>} indicates how many atoms for the predicate specification are
 retained in the bottom clause during a saturation step. \texttt{*} stands for all those that are found. Otherwise the indicated number is randomly chosen.
 
-Two specialization modes are available: \verb|bottom| and \verb|mode|.
+For SLIPCOVER, two specialization modes are available: \verb|bottom| and \verb|mode|.
 In the first, a bottom clause is built and the literals to be added during 
 refinement are taken from it. In the latter, no bottom clause is built and
 the literals to be added during refinement are generated 
 directly from the mode declarations. 
+LEMUR has only specialization \verb|mode|.
 
 Arguments of the form
 \begin{verbatim}
@@ -215,7 +244,7 @@ modeb(*,in(+obj,-obj)).
 modeb(*,in(-obj,+obj)).
 modeb(*,config(+obj,-#dir)).
 \end{verbatim}
-SLIPCOVER also requires facts for the \verb|determination/2| predicate  Aleph-style that indicate which predicates can appear in the body of clauses. 
+SLIPCOVER and LEMUR also require facts for the \verb|determination/2| Aleph-style predicate that indicate which predicates can appear in the body of clauses. 
 For example
 \begin{verbatim}
 determination(pos/0,triangle/1).
@@ -226,7 +255,7 @@ determination(pos/0,config/2).
 \end{verbatim}
 state that \verb|triangle/1| can appear in the body of clauses for \verb|pos/0|.
 
-SLIPCOVER also allows mode declarations of the form
+SLIPCOVER and LEMUR also allow mode declarations of the form
 \begin{verbatim}
 modeh(<r>,[<s1>,...,<sn>],[<a1>,...,<an>],[<P1/Ar1>,...,<Pk/Ark>]). 
 \end{verbatim}
@@ -471,9 +500,26 @@ and call
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
-For example \href{http://cplint.lamping.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
+For example \href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce([train],P).
 \end{verbatim}
-A program can also be tested on a test set with \verb|test/7| as
+A program can also be tested on a test set with \verb|test/7| or \verb|test_prob/6| as
+described above.
+
+To execute LEMUR,
+prepare an input file in the editor panel as indicated above 
+and call
+\begin{verbatim}
+?- induce_lm(<list of folds>,P).
+\end{verbatim}
+where \verb|<list of folds>| is a list of the folds for training and
+\verb|P| will contain the learned program.
+
+For example \href{http://cplint.lamping.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
+\begin{verbatim}
+?- induce_lm([train],P).
+\end{verbatim}
+A program can also be tested on a test set with \verb|test_lm/7| or \verb|test_prob_lm/6| that are LEMUR versions of the SLIPCOVER test 
+predicates
 described above.
