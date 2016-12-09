@@ -104,7 +104,7 @@ default_setting_lm(mcts_visits,1e20).
 default_setting_lm(max_var,4).
 default_setting_lm(mcts_max_depth,8).
 default_setting_lm(mcts_c,0.7).
-default_setting_lm(mcts_iter,200).
+default_setting_lm(mcts_iter,20).
 default_setting_lm(mcts_maxrestarts,20).
 default_setting_lm(mcts_covering,true).
 default_setting_lm(max_rules,1).
