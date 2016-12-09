@@ -151,8 +151,7 @@ induce_lm(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   test(ROut,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
 
 /**
- * test_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:floa
-t,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * test_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns the
