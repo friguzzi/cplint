@@ -26,7 +26,7 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,test/7,test_prob/6,induce_par/2,
+  induce_lm/2, sample/4,test_lm/7,test_prob_lm/6,induce_par/2,
   op(500,fx,#),op(500,fx,'-#')]).
 
 /*slipcover_lemur.pl declarations start*/
@@ -119,7 +119,7 @@ default_setting_lm(single_var,false). %false:1 variable for every grounding of a
 :- thread_local database/1, mcts_modeb/1, mcts_restart/1, mcts_best_score/1, mcts_best_theory/1, mcts_theories/1, mcts_best_theories_iteration/1, node/7, lastid/1, mcts_iteration/1, v/3, rule_sc_n/1, input_mod/1, local_setting/2, in_on/0, in/1, model/1, int/1.
 
 /** 
- * induce(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
+ * induce_lm(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
  *
  * The predicate performs structure learning using the folds indicated in 
  * TrainFolds for training. 
@@ -129,12 +129,12 @@ induce_lm(TrainFolds,P):-
   input_mod(M),
   assert(slipcover:input_mod(M)),
   induce_rules(TrainFolds,P0),
-  rules2terms(P0,P).
+  rules2terms(P0,P),
+  retract((slipcover:input_mod(M))).
   %generate_clauses(P0,P,0,[],_Th).
 
-
 /** 
- * induce(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * induce_lm(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate performs structure learning using the folds indicated in 
  * TrainFolds for training. 
@@ -150,6 +150,39 @@ induce_lm(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
   rules2terms(R,ROut),
   test(ROut,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
 
+/**
+ * test_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:floa
+t,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, a dict containing the points
+ * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
+ * and a dict containing the points of the PR curve in PR
+ */
+test_lm(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
+  input_mod(M),
+  assert(slipcover:input_mod(M)),
+  test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR),
+  retract((slipcover:input_mod(M))).
+
+/**
+ * test_prob_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:i
+nt,-LL:float,-Results:list) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns
+ * the number of positive examples in NPos, the number of negative examples
+ * in NNeg, the log likelihood in LL
+ * and in Results a list containing the probabilistic result for each query cont
+ained in TestFolds.
+ */
+test_prob_lm(P,TestFolds,NPos,NNeg,CLL,Results) :- 
+  input_mod(M),
+  assert(slipcover:input_mod(M)),
+  test_prob(P,TestFolds,NPos,NNeg,CLL,Results),
+  retract((slipcover:input_mod(M))).
 
 induce_rules(Folds,R):-
   %tell(ciao),
