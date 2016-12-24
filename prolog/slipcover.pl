@@ -1491,7 +1491,7 @@ variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
   variabilize_args(T,TT,TV,A0,A).
 
 variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
-  (Ty = +Ty1;Ty = -Ty1),
+  (Ty = +Ty1;Ty = -Ty1),!,
   variabilize_args(T,TT,TV,[C/Ty1/V|A0],A).
 
 
