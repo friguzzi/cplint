@@ -204,16 +204,6 @@ induce_rules(Folds,R):-
   append(L,DB),
   assert(M:database(DB)),
   %gtrace,
-  find_ex(DB,_LG,NPos,_Neg),
-  M:local_setting(megaex_bottom, NumMB),
-  (NPos >= NumMB ->
-      true
-    ;
-      format2("~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
-      set_sc(megaex_bottom, NPos)
-  ),
-  
-  statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
@@ -224,6 +214,16 @@ induce_rules(Folds,R):-
   ;
     true
   ),
+  find_ex(DB,_LG,NPos,_Neg),
+  M:local_setting(megaex_bottom, NumMB),
+  (NPos >= NumMB ->
+      true
+    ;
+      format2("~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
+      set_sc(megaex_bottom, NPos)
+  ),
+  
+  statistics(walltime,[_,_]),
   (M:local_setting(specialization,bottom)->
     M:local_setting(megaex_bottom,MB),
     deduct(MB,M,DB,[],InitialTheory),   
