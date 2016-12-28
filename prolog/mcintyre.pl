@@ -70,7 +70,8 @@ details.
   to_pair/2,
   key/2,
   y/2,
-  bin/5
+  bin/5,
+  to_atom/2
   ]).
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
