@@ -1348,7 +1348,10 @@ keep_const([+ _|T],[_|T1]):-!,
 keep_const([-# _|T],[_|T1]):-!,
   keep_const(T,T1).
 
-keep_const([H|T],[H|T1]):-
+keep_const([H|T],[H1|T1]):-
+  H=..[F|Args],
+  keep_const(Args,Args1),
+  H1=..[F|Args1],
   keep_const(T,T1).
 
 
@@ -1494,6 +1497,14 @@ variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
   (Ty = +Ty1;Ty = -Ty1),!,
   variabilize_args(T,TT,TV,[C/Ty1/V|A0],A).
 
+variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
+  compound(C),
+  C=..[F|Args],
+  Ty=..[F|ArgsT],
+  variabilize_args(Args,ArgsT,ArgsV,A0,A1),
+  V=..[F|ArgsV],
+  variabilize_args(T,TT,TV,A1,A).
+
 
 cycle_modeb(ArgsTypes,Args,ArgsTypes,Args,_Mod,_BL,L,L,L,_,_M):-!.
 
@@ -1574,7 +1585,14 @@ add_const([_A|T],[# _|TT],ArgsTypes0,Args0,ArgsTypes,Args):-!,
   add_const(T,TT,ArgsTypes0,Args0,ArgsTypes,Args).
 
 add_const([A|T],[A|TT],ArgsTypes0,Args0,ArgsTypes,Args):-
+  atomic(A),!,
   add_const(T,TT,ArgsTypes0,Args0,ArgsTypes,Args).
+
+add_const([A|T],[AT|TT],ArgsTypes0,Args0,ArgsTypes,Args):-
+  A=..[F|Ar],
+  AT=..[F|ArT],
+  add_const(Ar,ArT,ArgsTypes0,Args0,ArgsTypes1,Args1),
+  add_const(T,TT,ArgsTypes1,Args1,ArgsTypes,Args).
 
 
 already_present([+T|_TT],[C|_TC],C,T):-!.
@@ -1609,12 +1627,19 @@ instantiate_input([# Type|T],AT,A,[H|TA]):-!,
 instantiate_input([-# _Type|T],AT,A,[_V|TA]):-!,
   instantiate_input(T,AT,A,TA).
 
-
-instantiate_input([C|T],AT,A,[C|TA]):-
+instantiate_input([C|T],AT,A,[C1|TA]):-
+  C=..[F|Args],
+  instantiate_input(Args,AT,A,Args1),
+  C1=..[F|Args1],
   instantiate_input(T,AT,A,TA).
 
 
 find_val([T|_TT],[A|_TA],T,A).
+
+find_val([HT|_TT],[HA|_TA],T,A):-
+  HT=..[F|ArgsT],
+  HA=..[F|Args],
+  find_val(ArgsT,Args,T,A).
 
 find_val([_T|TT],[_A|TA],T,A):-
   find_val(TT,TA,T,A).
