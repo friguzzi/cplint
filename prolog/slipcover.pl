@@ -1419,7 +1419,7 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
   get_args(A,H,Pairs,[],Args,[],ArgsTypes,M),
   Mod:local_setting(d,D),
   cycle_modeb(ArgsTypes,Args,[],[],Mod,BL,a,[],BLout0,D,M),
-    variabilize((Pairs:-BLout0),CLV),  %+(Head):-Bodylist;  -CLV:(Head):-Bodylist with variables _num in place of constants
+  variabilize((Pairs:-BLout0),CLV),  %+(Head):-Bodylist;  -CLV:(Head):-Bodylist with variables _num in place of constants
   CLV=(Head1:-BodyList1),
   remove_int_atom_list(Head1,Head),
   remove_int_atom_list(BodyList1,BodyList2),
@@ -1637,6 +1637,7 @@ instantiate_input([C|T],AT,A,[C1|TA]):-
 find_val([T|_TT],[A|_TA],T,A).
 
 find_val([HT|_TT],[HA|_TA],T,A):-
+  nonvar(HA),
   HT=..[F|ArgsT],
   HA=..[F|Args],
   find_val(ArgsT,Args,T,A).
