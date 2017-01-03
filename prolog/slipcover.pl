@@ -75,6 +75,7 @@ default_setting_sc(max_var,4).
 default_setting_sc(max_rules,10).
 default_setting_sc(maxdepth_var,2).
 default_setting_sc(beamsize,100).
+default_setting_sc(max_body_length,100).
 default_setting_sc(background_clauses,50).
 
 default_setting_sc(specialization,bottom).
@@ -1846,6 +1847,13 @@ specialize_theory(Theory,Ref):-
   specialize_rule(Rule,SpecRule,Lit),
   Ref = add_body(Rule,SpecRule,Lit).
 
+specialize_rule(Rule,M,_SpecRule,_Lit):-
+  M:local_setting(max_body_length,ML),
+  Rule = rule(_ID,_LH,BL,_Lits),
+  length(BL,L),
+  L=ML,!,
+  fail.
+ 
 %used by cycle_clauses in slipcover.pl
 specialize_rule(Rule,M,SpecRule,Lit):-
   M:local_setting(specialization,bottom),
