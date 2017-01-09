@@ -58,6 +58,7 @@ check:
 	@echo "no check"
 
 install: all
+	mkdir -p $(LIBDIR)
 	cp bddem.$(SOEXT) $(LIBDIR)
 
 	
