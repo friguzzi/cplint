@@ -104,7 +104,8 @@ default_setting_sc(depth_bound,true).  %if true, it limits the derivation of the
 default_setting_sc(depth,2).
 default_setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-
+default_setting_sc(prob_approx,false). %if true, it limits the number of different solutions found when computing the probability
+default_setting_sc(approx_value,100).
 
 
 /** 
@@ -2522,6 +2523,19 @@ get_next_rule_number(R):-
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
 
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
 
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
@@ -2529,6 +2543,18 @@ get_node(\+ Goal,M,Env,BDD):-
   retractall(pita:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
   (bagof(BDD,M:Goal1,L)->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
+
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
     or_list(L,Env,B)
   ;
     zero(Env,B)
@@ -2546,6 +2572,19 @@ get_node(\+ Goal,M,Env,BDD):-!,
   bdd_not(Env,B,BDD).
 
 get_node(Goal,M,Env,B):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
   retractall(pita:v(_,_,_)),
@@ -2553,6 +2592,17 @@ get_node(Goal,M,Env,B):-
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,B)
   ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):- %with DB=false
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;  
     zero(Env,B)
   ).
 
@@ -4211,7 +4261,6 @@ user:term_expansion(At, A) :-
       A=Atom1
     )
   ).
-
 
 
 
