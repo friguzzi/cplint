@@ -6,7 +6,7 @@
   <meta name="generator" content="pandoc" />
   <title>cplint on SWISH Manual</title>
   <style type="text/css">code{white-space: pre;}</style>
-  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
 </head>
 <body>
 <div id="header">
@@ -752,12 +752,14 @@ fold(test,[490,491,...]).</code></pre>
 <p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described above.</p>
+<p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <p>To execute LEMUR, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce_lm(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
 <p>For example <a href="http://cplint.lamping.unife.it/example/lemur/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_lm([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test_lm/7</code> or <code>test_prob_lm/6</code> that are LEMUR versions of the SLIPCOVER test predicates described above.</p>
+<p>Between two executions of <code>induce_lm/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
@@ -839,7 +841,7 @@ Prob = 0.51.
 <p>5. William W. Cohen. 1995. Pac-learning non-recursive prolog clauses. <em>Artif. Intell.</em> 79, 1: 1–38.</p>
 </div>
 <div id="ref-RaeLae95-ALT95">
-<p>6. L. De Raedt and W. Van Laer. 1995. Inductive constraint logic. <em>Proceedings of the 6th conference on algorithmic learning theory (aLT 1995)</em>, Springer, 80–94.</p>
+<p>6. L. De Raedt and W. Van Laer. 1995. Inductive constraint logic. <em>Proceedings of the 6th conference on algorithmic learning theory (alt 1995)</em>, Springer, 80–94.</p>
 </div>
 <div id="ref-DBLP:conf/ijcai/RaedtKT07">
 <p>7. L. De Raedt, A. Kimmig, and H. Toivonen. 2007. ProbLog: A probabilistic Prolog and its application in link discovery. <em>International joint conference on artificial intelligence</em>, 2462–2467.</p>
@@ -857,7 +859,7 @@ Prob = 0.51.
 <p>11. D. Koller and N. Friedman. 2009. <em>Probabilistic graphical models: Principles and techniques</em>. MIT Press, Cambridge, MA.</p>
 </div>
 <div id="ref-nampally2014adaptive">
-<p>12. Arun Nampally and CR Ramakrishnan. 2014. Adaptive mCMC-based inference in probabilistic logic programs. <em>arXiv preprint arXiv:1403.6036</em>. Retrieved from <a href="http://arxiv.org/pdf/1403.6036.pdf" class="uri">http://arxiv.org/pdf/1403.6036.pdf</a></p>
+<p>12. Arun Nampally and CR Ramakrishnan. 2014. Adaptive mcmc-based inference in probabilistic logic programs. <em>arXiv preprint arXiv:1403.6036</em>. Retrieved from <a href="http://arxiv.org/pdf/1403.6036.pdf" class="uri">http://arxiv.org/pdf/1403.6036.pdf</a></p>
 </div>
 <div id="ref-Nitti2016">
 <p>13. Davide Nitti, Tinne De Laet, and Luc De Raedt. 2016. Probabilistic logic programming for hybrid relational domains. <em>Mach. Learn.</em> 103, 3: 407–449. <a href="http://doi.org/10.1007/s10994-016-5558-8" class="uri">http://doi.org/10.1007/s10994-016-5558-8</a></p>
@@ -872,7 +874,7 @@ Prob = 0.51.
 <p>16. Fabrizio Riguzzi. 2013. MCINTYRE: A Monte Carlo system for probabilistic logic programming. <em>Fundamenta Informaticae</em> 124, 4: 521–541. Retrieved from <a href="http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf" class="uri">http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf</a></p>
 </div>
 <div id="ref-Rig15-PLP-IW">
-<p>17. Fabrizio Riguzzi. 2015. The distribution semantics is well-defined for all normal programs. <em>Proceedings of the 2nd international workshop on probabilistic logic programming (pLP)</em>, Sun SITE Central Europe, 69–84. Retrieved from <a href="http://ceur-ws.org/Vol-1413/#paper-06" class="uri">http://ceur-ws.org/Vol-1413/#paper-06</a></p>
+<p>17. Fabrizio Riguzzi. 2015. The distribution semantics is well-defined for all normal programs. <em>Proceedings of the 2nd international workshop on probabilistic logic programming (plp)</em>, Sun SITE Central Europe, 69–84. Retrieved from <a href="http://ceur-ws.org/Vol-1413/#paper-06" class="uri">http://ceur-ws.org/Vol-1413/#paper-06</a></p>
 </div>
 <div id="ref-DBLP:conf/ijcai/SatoK97">
 <p>18. Taisuke Sato and Yoshitaka Kameya. 1997. PRISM: A language for symbolic-statistical modeling. <em>International joint conference on artificial intelligence</em>, 1330–1339.</p>

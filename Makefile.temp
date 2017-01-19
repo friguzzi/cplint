@@ -31,10 +31,14 @@ all:  bddem.$(SOEXT)
 
 bddem.$(SOEXT): bddem.o
 	#swipl-ld -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT)  
-	if test $(SWIARCH) == x64-win64 -o $(SWIARCH) == i386-win32; then  \
+	if test $(SWIARCH) == x64-win64 -o $(SWIARCH) == i386-win32 ; then \
   $(CC) bddem.o -static-libgcc -static-libstdc++  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
+   else  \
+     if test $(SWIARCH) ==  x86_64-darwin16.0.0 ; then \
+  $(CC) bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
   else  \
   $(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT) ;\
+  fi \
   fi 
 #-Wl,-R,$(YAPLIBDIR) -Wl,-R,$(LIBDIR)
 
@@ -54,6 +58,7 @@ check:
 	@echo "no check"
 
 install: all
+	mkdir -p $(LIBDIR)
 	cp bddem.$(SOEXT) $(LIBDIR)
 
 	

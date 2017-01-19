@@ -75,6 +75,8 @@ default_setting_sc(max_var,4).
 default_setting_sc(max_rules,10).
 default_setting_sc(maxdepth_var,2).
 default_setting_sc(beamsize,100).
+default_setting_sc(max_body_length,100).
+default_setting_sc(neg_literals,false).
 default_setting_sc(background_clauses,50).
 
 default_setting_sc(specialization,bottom).
@@ -102,7 +104,8 @@ default_setting_sc(depth_bound,true).  %if true, it limits the derivation of the
 default_setting_sc(depth,2).
 default_setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-
+default_setting_sc(prob_approx,false). %if true, it limits the number of different solutions found when computing the probability
+default_setting_sc(approx_value,100).
 
 
 /** 
@@ -204,16 +207,6 @@ induce_rules(Folds,R):-
   append(L,DB),
   assert(M:database(DB)),
   %gtrace,
-  find_ex(DB,_LG,NPos,_Neg),
-  M:local_setting(megaex_bottom, NumMB),
-  (NPos >= NumMB ->
-      true
-    ;
-      format2("~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
-      set_sc(megaex_bottom, NPos)
-  ),
-  
-  statistics(walltime,[_,_]),
 %  findall(C,M:bg(C),RBG),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
@@ -224,6 +217,16 @@ induce_rules(Folds,R):-
   ;
     true
   ),
+  find_ex(DB,_LG,NPos,_Neg),
+  M:local_setting(megaex_bottom, NumMB),
+  (NPos >= NumMB ->
+      true
+    ;
+      format2("~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
+      set_sc(megaex_bottom, NPos)
+  ),
+  
+  statistics(walltime,[_,_]),
   (M:local_setting(specialization,bottom)->
     M:local_setting(megaex_bottom,MB),
     deduct(MB,M,DB,[],InitialTheory),   
@@ -821,12 +824,21 @@ insert_in_order([(Th1,Heuristic1)|RestBeamIn],(Th,Heuristic),BeamSize,
 
 remove_int_atom_list([],[]).
 
+remove_int_atom_list([\+ A|T],[\+ A1|T1]):-!,
+  A=..[F,_|Arg],
+  A1=..[F|Arg],
+  remove_int_atom_list(T,T1).
+
 remove_int_atom_list([A|T],[A1|T1]):-
   A=..[F,_|Arg],
   A1=..[F|Arg],
   remove_int_atom_list(T,T1).
 
 
+
+remove_int_atom(\+ A,\+ A1):-!,
+  A=..[F,_|T],
+  A1=..[F|T].
 
 remove_int_atom(A,A1):-
   A=..[F,_|T],
@@ -1348,7 +1360,10 @@ keep_const([+ _|T],[_|T1]):-!,
 keep_const([-# _|T],[_|T1]):-!,
   keep_const(T,T1).
 
-keep_const([H|T],[H|T1]):-
+keep_const([H|T],[H1|T1]):-
+  H=..[F|Args],
+  keep_const(Args,Args1),
+  H1=..[F|Args1],
   keep_const(T,T1).
 
 
@@ -1406,8 +1421,30 @@ get_modeb([],_Mod,B,B).
 
 get_modeb([F/AA|T],Mod,B0,B):-
   findall((R,B),(Mod:modeb(R,B),functor(B,F,AA)),BL),
-  append(B0,BL,B1),
+  (setting_sc(neg_literals,true)->
+    findall((R,(\+ B)),(Mod:modeb(R,B),functor(B,F,AA),all_plus(B)),BNL)
+  ;
+    BNL=[]
+  ),
+  append([B0,BL,BNL],B1),
   get_modeb(T,Mod,B1,B).
+
+all_plus(B):-
+  B=..[_|Args],
+  all_plus_args(Args).
+
+all_plus_args([]).
+
+all_plus_args([+ _ |T]):-!,
+  all_plus_args(T).
+
+all_plus_args([H|T]):-
+  H \= - _,
+  H \= # _,
+  H \= -# _,
+  H=..[_|Args],
+  all_plus_args(Args),
+  all_plus_args(T).
 
 generate_body([],_Mod,[]):-!.
 
@@ -1416,7 +1453,7 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
   get_args(A,H,Pairs,[],Args,[],ArgsTypes,M),
   Mod:local_setting(d,D),
   cycle_modeb(ArgsTypes,Args,[],[],Mod,BL,a,[],BLout0,D,M),
-    variabilize((Pairs:-BLout0),CLV),  %+(Head):-Bodylist;  -CLV:(Head):-Bodylist with variables _num in place of constants
+  variabilize((Pairs:-BLout0),CLV),  %+(Head):-Bodylist;  -CLV:(Head):-Bodylist with variables _num in place of constants
   CLV=(Head1:-BodyList1),
   remove_int_atom_list(Head1,Head),
   remove_int_atom_list(BodyList1,BodyList2),
@@ -1433,7 +1470,9 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
 
 generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0]):-
   functor(A,F,AA),
-  findall((R,B),(Mod:modeb(R,B),functor(B,FB,AB),Mod:determination(F/AA,FB/AB)),BL),
+%  findall((R,B),(Mod:modeb(R,B),functor(B,FB,AB),Mod:determination(F/AA,FB/AB)),BL),
+  findall(FB/AB,Mod:determination(F/AA,FB/AB),Det),
+  get_modeb(Det,Mod,[],BL),
   A=..[F|ArgsTypes],
   H=..[F,M|Args],
   Mod:local_setting(d,D),
@@ -1457,6 +1496,21 @@ variabilize((H:-B),(H1:-B1)):-
 
 
 variabilize_list([],[],A,A,_M).
+
+variabilize_list([(\+ H,Mode)|T],[\+ H1|T1],A0,A,M):-
+  builtin(H),!,
+  H=..[F|Args],
+  Mode=..[F|ArgTypes],
+  variabilize_args(Args,ArgTypes, Args1,A0,A1),
+  H1=..[F,M|Args1],
+  variabilize_list(T,T1,A1,A,M).
+
+variabilize_list([(\+ H,Mode)|T],[\+ H1|T1],A0,A,M):-!,
+  H=..[F,_M|Args],
+  Mode=..[F|ArgTypes],
+  variabilize_args(Args,ArgTypes, Args1,A0,A1),
+  H1=..[F,M|Args1],
+  variabilize_list(T,T1,A1,A,M).
 
 variabilize_list([(H,Mode)|T],[H1|T1],A0,A,M):-
   builtin(H),!,
@@ -1491,8 +1545,16 @@ variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
   variabilize_args(T,TT,TV,A0,A).
 
 variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
-  (Ty = +Ty1;Ty = -Ty1),
+  (Ty = +Ty1;Ty = -Ty1),!,
   variabilize_args(T,TT,TV,[C/Ty1/V|A0],A).
+
+variabilize_args([C|T],[Ty|TT],[V|TV],A0,A):-
+  compound(C),
+  C=..[F|Args],
+  Ty=..[F|ArgsT],
+  variabilize_args(Args,ArgsT,ArgsV,A0,A1),
+  V=..[F|ArgsV],
+  variabilize_args(T,TT,TV,A1,A).
 
 
 cycle_modeb(ArgsTypes,Args,ArgsTypes,Args,_Mod,_BL,L,L,L,_,_M):-!.
@@ -1506,6 +1568,20 @@ cycle_modeb(ArgsTypes,Args,_ArgsTypes0,_Args0,Mod,BL,_L0,L1,L,D,M):-
 
 
 find_atoms([],_Mod,ArgsTypes,Args,ArgsTypes,Args,L,L,_M).
+
+find_atoms([(R,\+ H)|T],Mod,ArgsTypes0,Args0,ArgsTypes,Args,L0,L1,M):-!,
+  H=..[F|ArgsT],
+  findall((A,H),instantiate_query_neg(ArgsT,ArgsTypes0,Args0,F,M,A),L),
+  call_atoms(L,Mod,[],At),
+  remove_duplicates(At,At1),
+  ((R = '*' ) ->
+    R1= +1e20
+  ;
+    R1=R
+  ),
+  sample(R1,At1,At2),
+  append(L0,At2,L2),
+  find_atoms(T,Mod,ArgsTypes0,Args0,ArgsTypes,Args,L2,L1,M).
 
 find_atoms([(R,H)|T],Mod,ArgsTypes0,Args0,ArgsTypes,Args,L0,L1,M):-
   H=..[F|ArgsT],
@@ -1574,7 +1650,14 @@ add_const([_A|T],[# _|TT],ArgsTypes0,Args0,ArgsTypes,Args):-!,
   add_const(T,TT,ArgsTypes0,Args0,ArgsTypes,Args).
 
 add_const([A|T],[A|TT],ArgsTypes0,Args0,ArgsTypes,Args):-
+  atomic(A),!,
   add_const(T,TT,ArgsTypes0,Args0,ArgsTypes,Args).
+
+add_const([A|T],[AT|TT],ArgsTypes0,Args0,ArgsTypes,Args):-
+  A=..[F|Ar],
+  AT=..[F|ArT],
+  add_const(Ar,ArT,ArgsTypes0,Args0,ArgsTypes1,Args1),
+  add_const(T,TT,ArgsTypes1,Args1,ArgsTypes,Args).
 
 
 already_present([+T|_TT],[C|_TC],C,T):-!.
@@ -1582,6 +1665,16 @@ already_present([+T|_TT],[C|_TC],C,T):-!.
 already_present([_|TT],[_|TC],C,T):-
   already_present(TT,TC,C,T).
 
+
+instantiate_query_neg(ArgsT,ArgsTypes,Args,F,M,A):-
+  instantiate_input(ArgsT,ArgsTypes,Args,ArgsB),
+  A1=..[F|ArgsB],
+  (builtin(A1)->
+    A= (\+ A1)
+  ;
+    A0=..[F,M|ArgsB],
+    A = (\+ A0)
+  ).
 
 instantiate_query(ArgsT,ArgsTypes,Args,F,M,A):-
   instantiate_input(ArgsT,ArgsTypes,Args,ArgsB),
@@ -1609,12 +1702,20 @@ instantiate_input([# Type|T],AT,A,[H|TA]):-!,
 instantiate_input([-# _Type|T],AT,A,[_V|TA]):-!,
   instantiate_input(T,AT,A,TA).
 
-
-instantiate_input([C|T],AT,A,[C|TA]):-
+instantiate_input([C|T],AT,A,[C1|TA]):-
+  C=..[F|Args],
+  instantiate_input(Args,AT,A,Args1),
+  C1=..[F|Args1],
   instantiate_input(T,AT,A,TA).
 
 
 find_val([T|_TT],[A|_TA],T,A).
+
+find_val([HT|_TT],[HA|_TA],T,A):-
+  nonvar(HA),
+  HT=..[F|ArgsT],
+  HA=..[F|Args],
+  find_val(ArgsT,Args,T,A).
 
 find_val([_T|TT],[_A|TA],T,A):-
   find_val(TT,TA,T,A).
@@ -1820,6 +1921,13 @@ specialize_theory(Theory,Ref):-
   specialize_rule(Rule,SpecRule,Lit),
   Ref = add_body(Rule,SpecRule,Lit).
 
+specialize_rule(Rule,M,_SpecRule,_Lit):-
+  M:local_setting(max_body_length,ML),
+  Rule = rule(_ID,_LH,BL,_Lits),
+  length(BL,L),
+  L=ML,!,
+  fail.
+ 
 %used by cycle_clauses in slipcover.pl
 specialize_rule(Rule,M,SpecRule,Lit):-
   M:local_setting(specialization,bottom),
@@ -2039,12 +2147,12 @@ input_variables(\+ LitM,M,InputVars):-
   length(Args,LA),
   length(Args1,LA),
   Lit1=..[P|Args1],
-  copy_term(LitM,Lit0),
+%  copy_term(LitM,Lit0),
   M:modeb(_,Lit1),
   Lit1 =.. [P|Args1],
   convert_to_input_vars(Args1,Args2),
   Lit2 =.. [P|Args2],
-  input_vars(Lit0,Lit2,InputVars).
+  input_vars(LitM,Lit2,InputVars).
 
 input_variables(LitM,M,InputVars):-
   LitM=..[P|Args],
@@ -2217,6 +2325,15 @@ dv(H,B,M,DV1):-			%DV1: returns a list of couples (Variable, Max depth)
 	findall((MD-DV),var_depth(B,M,DV0,DV,0,MD),LDs), 
         get_max(LDs,-1,-,DV1).
 	
+
+input_variables_b(\+ LitM,M,InputVars):-!,
+	  LitM=..[P|Args],
+	  length(Args,LA),
+	  length(Args1,LA),
+	  Lit1=..[P|Args1],
+	  M:modeb(_,Lit1),
+	  all_plus(Lit1),
+	  input_vars(LitM,Lit1,InputVars).
 
 input_variables_b(LitM,M,InputVars):-
 	  LitM=..[P|Args],
@@ -2406,6 +2523,19 @@ get_next_rule_number(R):-
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
 
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
 
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
@@ -2413,6 +2543,18 @@ get_node(\+ Goal,M,Env,BDD):-
   retractall(pita:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
   (bagof(BDD,M:Goal1,L)->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
+
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
     or_list(L,Env,B)
   ;
     zero(Env,B)
@@ -2430,6 +2572,19 @@ get_node(\+ Goal,M,Env,BDD):-!,
   bdd_not(Env,B,BDD).
 
 get_node(Goal,M,Env,B):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
   retractall(pita:v(_,_,_)),
@@ -2437,6 +2592,17 @@ get_node(Goal,M,Env,B):-
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,B)
   ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):- %with DB=false
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;  
     zero(Env,B)
   ).
 
@@ -2606,7 +2772,7 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-  neg(H1)|Rest],Env,Module):-
+  \+(H1)|Rest],Env,Module):-
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -2779,7 +2945,7 @@ process_body_cw([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   process_body_cw(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body_cw([\+ H|T],BDD,BDD1,Vars,Vars1,[
-  neg(H1)|Rest],Module):-
+  \+(H1)|Rest],Module):-
   add_mod_arg(H,Module,H1),
   process_body_cw(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
@@ -2795,72 +2961,6 @@ process_body_cw([H|T],BDD,BDD1,Vars,Vars1,
 [H1|Rest],Module):-
   add_mod_arg(H,Module,H1),
   process_body_cw(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-
-
-
-process_body([],BDD,BDD,Vars,Vars,[],_Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
-  builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-  
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
-  db(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:one(BDDN));(bagof(BDDH,H2,L)->pita:or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);
-  pita:one(BDDN))),
-  pita:and(BDD,BDDN,BDD2)
-  |Rest],Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg(H,BDDH,Module,H2),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-  neg(H1)|Rest],Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->pita:or_list(L,BDDL),pita:bdd_not(BDDL,BDDN);pita:one(BDDN)),
-  pita:and(BDD,BDDN,BDD2)|Rest],Module):-!,
-  add_bdd_arg(H,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Module):-
-  builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Module):-
-  db(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,
-[((H1,pita:one(BDDH));H2),pita:and(BDD,BDDH,BDD2)|Rest],Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg(H,BDDH,Module,H2),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,
-[H1|Rest],Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H1|Rest],Module):-
-  add_mod_arg(H,Module,H1),
-  db(H1),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
-
-process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-[H1,pita:and(BDD,BDDH,BDD2)|Rest],Module):-
-  add_bdd_arg(H,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
 
 
 given(H):-
@@ -4161,7 +4261,6 @@ user:term_expansion(At, A) :-
       A=Atom1
     )
   ).
-
 
 
 
