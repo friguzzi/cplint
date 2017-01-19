@@ -2762,6 +2762,20 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+  pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg(H,Env,BDDH,Module,H2),
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
+
+process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
   (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
   pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2776,6 +2790,15 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg(H,Env,BDDH,Module,H1),
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
@@ -2826,6 +2849,20 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   (((neg(H1);\+ H1),pita:one(Env,BDDN));
+    (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+      pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
+  (((neg(H1);\+ H1),pita:one(Env,BDDN));
     (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
       pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2840,6 +2877,15 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
@@ -2859,6 +2905,20 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+    pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
   (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
     pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2873,6 +2933,15 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
