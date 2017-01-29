@@ -422,7 +422,7 @@ get_const(Args,Constants,Constraint):-
   maplist(constr,Args,Constants,ConstraintL),
   list2and(ConstraintL,Constraint).
 
-constr(V,C,V\== C).
+constr(V,C,dif(V,C)).
 
 get_pred_const(do(Do0),AP0,AP):-
   (Do0= (\+ Do)->

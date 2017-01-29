@@ -104,7 +104,8 @@ default_setting_sc(depth_bound,true).  %if true, it limits the derivation of the
 default_setting_sc(depth,2).
 default_setting_sc(single_var,true). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-
+default_setting_sc(prob_approx,false). %if true, it limits the number of different solutions found when computing the probability
+default_setting_sc(approx_value,100).
 
 
 /** 
@@ -2522,6 +2523,19 @@ get_next_rule_number(R):-
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
 
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
 
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
@@ -2529,6 +2543,18 @@ get_node(\+ Goal,M,Env,BDD):-
   retractall(pita:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
   (bagof(BDD,M:Goal1,L)->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ),
+  bdd_not(Env,B,BDD).
+
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
     or_list(L,Env,B)
   ;
     zero(Env,B)
@@ -2546,6 +2572,19 @@ get_node(\+ Goal,M,Env,BDD):-!,
   bdd_not(Env,B,BDD).
 
 get_node(Goal,M,Env,B):-
+  M:local_setting(prob_approx,true),
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(approx_value,Approx),
+  M:local_setting(depth,DB),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
   retractall(pita:v(_,_,_)),
@@ -2553,6 +2592,17 @@ get_node(Goal,M,Env,B):-
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,B)
   ;
+    zero(Env,B)
+  ).
+
+get_node(Goal,M,Env,B):- %with DB=false
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  retractall(pita:v(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,Goal1),
+  ((findnsols(Approx,BDD,M:Goal1,L),dif(L,[]))->
+    or_list(L,Env,B)
+  ;  
     zero(Env,B)
   ).
 
@@ -2712,6 +2762,20 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+  pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg(H,Env,BDDH,Module,H2),
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
+
+process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
   (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
   pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2726,6 +2790,15 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg(H,Env,BDDH,Module,H1),
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
@@ -2776,6 +2849,20 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   (((neg(H1);\+ H1),pita:one(Env,BDDN));
+    (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+      pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
+  (((neg(H1);\+ H1),pita:one(Env,BDDN));
     (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
       pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2790,6 +2877,15 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
@@ -2809,6 +2905,20 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
 (((neg(H1);\+ H1),pita:one(Env,BDDN));
+  (findnsols(Approx,BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
+    pita:one(Env,BDDN))),
+  pita:and(Env,BDD,BDDN,BDD2)
+  |Rest],Env,Module):-
+  given(H),
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_mod_arg(H,Module,H1),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
+(((neg(H1);\+ H1),pita:one(Env,BDDN));
   (bagof(BDDH,H2,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);
     pita:one(Env,BDDN))),
   pita:and(Env,BDD,BDDN,BDD2)
@@ -2823,6 +2933,15 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   given_cw(H),!,
   add_mod_arg(H,Module,H1),
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findnsols(Approx,BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
+  pita:and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-
+  input_module(M),
+  M:local_setting(prob_approx,true),!,
+  M:local_setting(approx_value,Approx),
+  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
 [(bagof(BDDH,H1,L)->pita:or_list(L,Env,BDDL),pita:bdd_not(Env,BDDL,BDDN);pita:one(Env,BDDN)),
@@ -4211,7 +4330,6 @@ user:term_expansion(At, A) :-
       A=Atom1
     )
   ).
-
 
 
 
