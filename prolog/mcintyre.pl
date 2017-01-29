@@ -114,6 +114,11 @@ details.
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
 :-meta_predicate mc_particle_sample_arg(:,:,+,+,-).
+:-meta_predicate particle_sample_arg(:,:,+,+,-).
+:-meta_predicate particle_sample_first(+,+,:,:,-).
+:-meta_predicate particle_sample_arg_gl(:,:,+,+,+,-).
+:-meta_predicate particle_sample_first_gl(+,+,:,:,-,-).
+:-meta_predicate particle_sample(+,+,:,-).
 :-meta_predicate lw_sample_cycle(:).
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
@@ -1047,7 +1052,7 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
 mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   Evidence=[Ev1|EvR],
   particle_sample_first(0,S,M:Goal,M:Ev1,Arg),
-  particle_sample_arg(EvR,M:Goal,1,S,ValList0),
+  particle_sample_arg(M:EvR,M:Goal,1,S,ValList0),
   foldl(agg_val,ValList0,0,Sum),
   Norm is S/Sum,
   mc_input_mod(MI),
@@ -1056,7 +1061,7 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   retractall(MI:weight_particle(_,_,_)),
   maplist(norm(Norm),ValList0,ValList).
 
-particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]).
+particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]):- !.
 
 particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
   I1 is I+1,
@@ -1123,14 +1128,14 @@ particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
   particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
 
 
-particle_sample_arg([],_Goal,I,_S,L):-
+particle_sample_arg(M:[],_Goal,I,_S,L):-!,
   get_values(I,L).
 
-particle_sample_arg([HE|TE],M:Goal,I,S,L):-
+particle_sample_arg(M:[HE|TE],M:Goal,I,S,L):-
   I1 is I+1,
   resample(I,I1,S),
   particle_sample(0,S, M:HE, I1),
-  particle_sample_arg(TE,M:Goal,I1,S,L).
+  particle_sample_arg(M:TE,M:Goal,I1,S,L).
 
 resample(I,I1,S):-
   get_values(I,V0),
@@ -2360,7 +2365,7 @@ sample_discrete(R,VC,D,S0):-
  * of couples Val:Prob) and returns it in S
  */
 discrete(D,S0):-
-  append(D0,[LastS:_P],D),
+  append(D0,[LastS:_P],D),!,
   foldl(pick_val,D0,(1,_),(_,S)),
   (var(S)->  
     S0=LastS
