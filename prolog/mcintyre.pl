@@ -1128,7 +1128,7 @@ particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
   particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
 
 
-particle_sample_arg(M:[],_Goal,I,_S,L):-!,
+particle_sample_arg(_M:[],_Goal,I,_S,L):-!,
   get_values(I,L).
 
 particle_sample_arg(M:[HE|TE],M:Goal,I,S,L):-
