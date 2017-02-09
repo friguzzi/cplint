@@ -1,4 +1,5 @@
 
+setting(check,true).
 
 main:-
 	format("~nTesting pita~n",[]),
@@ -30,11 +31,26 @@ test_all([],_F).
 
 test_all([H|T],F):-
 	copy_term(H,NH),
-	NH=(_Query,close_to('P',_Prob)),
+	numbervars(NH),
 	format("~a ~p.~n",[F,NH]),
-	call(H),!,
+	(H=(G,R)),
+	call(G),!,
+	format("\t~p.~n",[G]),
+	(setting(check,true)->
+	  call(R),!
+        ;
+          true),
 	test_all(T,F).
 
+
+epsilon(0.001).
+
+close_to(V,T):-
+	epsilon(E),
+	TLow is T-E,
+	THigh is T+E,
+	TLow<V,
+	V<THigh.
 
 test((prob(heads(coin),P),close_to(P,0.51)),coin).
 test((prob((heads(coin),biased(coin)),P),close_to(P,0.06)),coin).
@@ -106,12 +122,7 @@ test((prob(recovery,(do(\+drug),female),P),close_to(P,0.3)),simpson).
 test((prob(recovery,(do(drug),\+ female),P),close_to(P,0.6)),simpson).
 test((prob(recovery,(do(\+ drug),\+ female),P),close_to(P,0.7)),simpson).
 
-epsilon(0.001).
+test((prob(has(2),has(3),P),close_to(P,0.4065135474609725)),viral).
+test((prob(has(2),do(has(3)),P),close_to(P,0.136)),viral).
 
-close_to(V,T):-
-	epsilon(E),
-	TLow is T-E,
-	THigh is T+E,
-	TLow<V,
-	V<THigh.
 

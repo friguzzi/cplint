@@ -63,6 +63,7 @@ details.
   op(600,xfy,'~'),
   op(500,xfx,'~='),
   op(1200,xfy,':='),
+  op(1150,fx,action),
   ~= /2,
   swap/2,
   msw/2,
@@ -495,11 +496,77 @@ mc_rejection_sample(M:Goal,M:Evidence,S,P):-
  * sample is discarded.
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
-mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
+mc_rejection_sample(M:Goal,M:Evidence0,S,T,F,P):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   rejection_montecarlo(S,0, 0, M:Goal,M:Evidence, N, T),
   P is T / N,
   F is N - T,
-  erase_samples.
+  erase_samples,
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
+
+deal_with_ev(Ev,M,EvGoal,UC,CA):-
+  list2and(EvL,Ev),
+  partition(ac,EvL,ActL,EvNoActL),
+  deal_with_actions(ActL,M,UC,CA),
+  list2and(EvNoActL,EvGoal).
+
+deal_with_actions(ActL,M,UC,CA):-
+  empty_assoc(AP0),
+  foldl(get_pred_const,ActL,AP0,AP),
+  assoc_to_list(AP,LP),
+  maplist(update_clauses(M),LP,UCL,CAL),
+  partition(nac,ActL,_NActL,PActL),
+  maplist(assert_actions(M),PActL,ActRefs),
+  append([ActRefs|UCL],UC),
+  append(CAL,CA).
+
+assert_actions(M,do(A),Ref):-
+  M:assertz(A,Ref).
+
+update_clauses(M,P/0- _,[],LCA):-!,
+  findall(Ref,M:clause(P,_B,Ref),UC),
+  findall((P:-B),M:clause(P,B),LCA),
+  maplist(erase,UC).
+
+update_clauses(M,P/A-Constants,UC,CA):-
+  functor(G,P,A),
+  G=..[_|Args],
+  findall((G,B,Ref),M:clause(G,B,Ref),LC),
+  maplist(get_const(Args),Constants,ConstraintsL),
+  list2and(ConstraintsL,Constraints),
+  maplist(add_cons(G,Constraints,M),LC,UC,CA).
+
+add_cons(G,C,M,(H,B,Ref),Ref1,(H:-B)):-
+  copy_term((G,C),(G1,C1)),
+  G1=H,
+  erase(Ref),
+  M:assertz((H:-(C1,B)),Ref1).
+
+
+get_const(Args,Constants,Constraint):-
+  maplist(constr,Args,Constants,ConstraintL),
+  list2and(ConstraintL,Constraint).
+
+constr(V,C,dif(V,C)).
+
+get_pred_const(do(Do0),AP0,AP):-
+  (Do0= (\+ Do)->
+    true
+  ;
+    Do=Do0
+  ),
+  functor(Do,F,A),
+  Do=..[_|Args],
+  (get_assoc(F/A,AP0,V)->
+    put_assoc(F/A,AP0,[Args|V],AP)
+  ;
+    put_assoc(F/A,AP0,[Args],AP)
+  ).
+
+
+ac(do(_)).
+nac(do(\+ _)).
 /** 
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -513,7 +580,8 @@ mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P):-
  * choices are forgotten and each sample is accepted with a certain probability. 
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
-mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P):-
+mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
@@ -528,7 +596,9 @@ mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P):-
   mh_montecarlo(L,S,NC1,0, 0,Succ1,_Succ1, M:Goal, M:Evidence, _N, T),
   P is T / S,
   F is S - T,
-  erase_samples.
+  erase_samples,
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 
 /** 
@@ -568,7 +638,8 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
  * choices are forgotten and each sample is accepted with a certain probability. 
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
-mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
+mc_mh_sample(M:Goal,M:Evidence0,S,L,T,F,P):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
@@ -581,7 +652,9 @@ mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P):-
   mh_montecarlo(L,S1,NC,0, Succ,Succ, _SuccNew,M:Goal, M:Evidence, _N, T),
   P is T / S,
   F is S - T,
-  erase_samples.
+  erase_samples,
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 initial_sample_cycle(M:G):-
   copy_term(G,G1),
@@ -779,12 +852,15 @@ mc_sample_arg_bar(M:Goal,S,Arg,Chart):-
  * returning that list of values.
  * Rejection sampling is performed.
  */
-mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList):-
+mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   empty_assoc(Values0),
-  rejection_sample_arg(S,M:Goal,M:Ev,Arg, Values0,Values),
+  rejection_sample_arg(S,M:Goal,M:Evidence,Arg, Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
+  sort(2, @>=,ValList0,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 /** 
  * mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Chart:dict) is det
@@ -820,7 +896,8 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  */
-mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList):-
+mc_mh_sample_arg(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   empty_assoc(Values0),
   findall(Arg,M:Goal,La),
@@ -833,7 +910,9 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList):-
   mh_sample_arg(L,S,NC1,M:Goal,M:Evidence,Arg, La1,_La,Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
+  sort(2, @>=,ValList0,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 /** 
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
@@ -848,7 +927,8 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList):-
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  */
-mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList):-
+mc_mh_sample_arg(M:Goal,M:Evidence0,S,L,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   empty_assoc(Values0),
   findall(Arg,M:Goal,La),
@@ -859,7 +939,9 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList):-
   mh_sample_arg(L,S1,NC,M:Goal,M:Evidence,Arg,La,_La, Values1,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
+  sort(2, @>=,ValList0,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 /** 
  * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
@@ -1004,14 +1086,17 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  * is considered.
  */
 mc_particle_sample(M:Goal,M:Evidence,S,P):-
-  erase_samples,
-  lw_sample_bool(S,M:Goal,M:Evidence,ValList),
+  M:asserta(('$goal'(1):-Goal,!),Ref1),
+  M:asserta('$goal'(0),Ref0),
+  mc_particle_sample_arg(M:'$goal'(A),M:Evidence,S,A,ValList),
   foldl(agg_val,ValList,0,Sum),
   foldl(value_cont_single,ValList,0,SumTrue),
-  P is SumTrue/Sum.
+  P is SumTrue/Sum,
+  erase(Ref1),
+  erase(Ref0).
 
 /** 
- * mc_particle_sample_arg(:Query:atom,+Evidence:term,+Samples:int,?Arg:term,-Values:list) is det
+ * mc_particle_sample_arg(:Query:atom,+Evidence:list,+Samples:int,?Arg:term,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1198,12 +1283,15 @@ get_values(I,V):-
  * It performs likelihood weighting: each sample is weighted by the
  * likelihood of evidence in the sample.
  */
-mc_lw_sample(M:Goal,M:Evidence,S,P):-
+mc_lw_sample(M:Goal,M:Evidence0,S,P):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   erase_samples,
   lw_sample_bool(S,M:Goal,M:Evidence,ValList),
   foldl(agg_val,ValList,0,Sum),
   foldl(value_cont_single,ValList,0,SumTrue),
-  P is SumTrue/Sum.
+  P is SumTrue/Sum,
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 
 value_cont_single(H-W,S,S+H*W).
@@ -1221,11 +1309,14 @@ value_cont_single(H-W,S,S+H*W).
  * It performs likelihood weighting: each sample is weighted by the
  * likelihood of evidence in the sample.
  */
-mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
+mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
   foldl(agg_val,ValList0,0,Sum),
   Norm is S/Sum,
-  maplist(norm(Norm),ValList0,ValList).
+  maplist(norm(Norm),ValList0,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 /** 
  * mc_lw_sample_arg_log(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
@@ -1242,8 +1333,11 @@ mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
  * It differs from mc_lw_sample_arg/5 because the natural logarithm of the
  * weight is returned, useful when the evidence is very unlikely.
  */
-mc_lw_sample_arg_log(M:Goal,M:Evidence,S,Arg,ValList):-
-  lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList).
+mc_lw_sample_arg_log(M:Goal,M:Evidence0,S,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
+  lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
 
 /** 
  * mc_lw_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
@@ -2818,6 +2912,14 @@ msw_weight(real,norm(Mean,Variance),V,W):-!,
 msw_weight(Values,Dist,V,W):-
   maplist(combine,Values,Dist,VD),
   member(V:W,VD).
+
+act(M,A/B):-
+  M:(dynamic A/B).
+
+user:term_expansion((:- action Conj), []) :-!,
+  prolog_load_context(module, M),
+  list2and(L,Conj),
+  maplist(act(M),L).
 
 user:term_expansion((:- mc), []) :-!,
   prolog_load_context(module, M),
