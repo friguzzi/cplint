@@ -5,7 +5,7 @@ Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries
 using sampling.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
 http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
 details.
 
@@ -15,10 +15,10 @@ details.
 */
 
 
-:- module(mcintyre,[mc_prob/2, mc_prob_bar/2, 
-  mc_sample/5,  
-  mc_rejection_sample/6,  
-  mc_rejection_sample/4,  
+:- module(mcintyre,[mc_prob/2, mc_prob_bar/2,
+  mc_sample/5,
+  mc_rejection_sample/6,
+  mc_rejection_sample/4,
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/8,
@@ -178,7 +178,7 @@ default_setting_mc(depth_bound,false).  %if true, it limits the derivation of th
 default_setting_mc(depth,2).
 default_setting_mc(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-/** 
+/**
  * mc_load(++File:atom) is det
  *
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
@@ -194,7 +194,7 @@ mc_load(File):-
     )
   ).
 
-/** 
+/**
  * mc_load_file(++FileWithExtension:atom) is det
  *
  * Loads FileWithExtension.
@@ -204,7 +204,7 @@ mc_load_file(File):-
   user:consult(File),
   end_lpad_pred.
 
-/** 
+/**
  * s(:Query:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query.
@@ -413,7 +413,7 @@ accept(NC1,NC2):-
   random(P0),
   P>P0.
 
-/** 
+/**
  * mc_prob(:Query:atom,-Probability:float) is det
  *
  * The predicate computes the probability of the query Query
@@ -424,12 +424,12 @@ accept(NC1,NC2):-
 mc_prob(M:Goal,P):-
   s(M:Goal,P).
 
-/** 
+/**
  * mc_prob_bar(:Query:atom,-Probability:dict) is det
  *
  * The predicate computes the probability of the ground query Query
- * and returns it as a dict for rendering with c3 as a bar chart with 
- * a bar for the probability of Query true and a bar for the probability of 
+ * and returns it as a dict for rendering with c3 as a bar chart with
+ * a bar for the probability of Query true and a bar for the probability of
  * Query false.
  * If Query is not ground, it considers it as an existential query
  * and returns the probability that there is a satisfying assignment to
@@ -445,7 +445,7 @@ mc_prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
-/** 
+/**
  * mc_sample(:Query:atom,+Samples:int,-Probability:float) is det
  *
  * The predicate samples Query a number of Samples times and returns
@@ -455,11 +455,11 @@ mc_prob_bar(M:Goal,Chart):-
 mc_sample(M:Goal,S,P):-
   mc_sample(M:Goal,S,_T,_F,P).
 
-/** 
+/**
  * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times and returns
- * the number of Successes, of Failures and the 
+ * the number of Successes, of Failures and the
  * Probability (Successes/Samples)
  * If Query is not ground, it considers it as an existential query
  */
@@ -473,26 +473,26 @@ mc_sample(M:Goal,S,T,F,P):-
   erase_samples,
   restore_samples(Goal1).
 
-/** 
+/**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
  * the Probability of Query.
- * It performs rejection sampling: if in a sample Evidence is false, the 
+ * It performs rejection sampling: if in a sample Evidence is false, the
  * sample is discarded.
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P):-
   mc_rejection_sample(M:Goal,M:Evidence,S,_T,_F,P).
- /** 
+ /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
- * the number of Successes, of Failures and the 
+ * the number of Successes, of Failures and the
  * Probability (Successes/Samples).
- * It performs rejection sampling: if in a sample Evidence is false, the 
+ * It performs rejection sampling: if in a sample Evidence is false, the
  * sample is discarded.
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
@@ -567,17 +567,17 @@ get_pred_const(do(Do0),AP0,AP):-
 
 ac(do(_)).
 nac(do(\+ _)).
-/** 
+/**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
- * The predicate samples Query  a number of Mix+Samples times given that 
+ * The predicate samples Query  a number of Mix+Samples times given that
  * Evidence
  * is true and returns
- * the number of Successes, of Failures and the 
- * Probability (Successes/Samples). 
+ * the number of Successes, of Failures and the
+ * Probability (Successes/Samples).
  * The first Mix samples are discarded (mixing time).
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability. 
+ * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
@@ -601,41 +601,41 @@ mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
   maplist(M:assertz,ClausesToReAdd).
 
 
-/** 
+/**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Mix+Samples times given that Evidence
  * is true and returns the
  * Probability of the query. The first Mix samples are discarded (mixing time).
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability. 
+ * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,P):-
   mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,_T,_F,P).
 
-/** 
+/**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns the
  * Probability of the query.
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability. 
+ * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
   mc_mh_sample(M:Goal,M:Evidence,S,L,_T,_F,P).
 
-/** 
+/**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
- * the number of Successes, of Failures and the 
+ * the number of Successes, of Failures and the
  * Probability (Successes/Samples).
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability. 
+ * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence0,S,L,T,F,P):-
@@ -763,7 +763,7 @@ check(R,VC,N):-
 check(R,VC,N):-
   \+ recorded(R,sampled(VC,_N)),
   recorda(R,sampled(VC,N)).
- 
+
 check_neg(R,VC,_LN,N):-
   recorded(R,sampled(VC,N1)),!,
   N\=N1.
@@ -785,11 +785,11 @@ listN(N,[N1|T]):-
   N1 is N-1,
   listN(N1,T).
 
-/** 
+/**
  * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
  *
  * The predicate samples Query a number of Samples times and returns
- * a dict for rendering with c3 as a bar chart with 
+ * a dict for rendering with c3 as a bar chart with
  * a bar for the number of successes and a bar for the number
  * of failures.
  * If Query is not ground, it considers it as an existential query
@@ -802,13 +802,13 @@ mc_sample_bar(M:Goal,S,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
-/** 
+/**
  * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * The predicate samples Query a number of Samples times. 
+ * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples L-N where 
- * L is the list of values of Arg for which Query succeeds in 
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
  */
@@ -819,15 +819,15 @@ mc_sample_arg(M:Goal,S,Arg,ValList):-
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList).
 
-/** 
+/**
  * mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate samples Query Samples times. Arg should be a variable
  * in Query.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in 
- * a world sampled at random. 
+ * the list of values of Arg for which Query succeeds in
+ * a world sampled at random.
  * The size of the bar is the number of samples
  * returning that list of values.
  */
@@ -840,14 +840,14 @@ mc_sample_arg_bar(M:Goal,S,Arg,Chart):-
 	         %  size:_{height: 100},
 	          legend:_{show: false}}.
 
-/** 
+/**
  * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query a number of Samples times given that
  * Evidence is true.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples L-N where 
- * L is the list of values of Arg for which Query succeeds in 
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
  * Rejection sampling is performed.
@@ -862,7 +862,7 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-/** 
+/**
  * mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate call mc_rejection_sample_arg/5 and build a c3 graph
@@ -883,7 +883,7 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
 	         %  size:_{height: 100},
 	          legend:_{show: false}}.
 
-/** 
+/**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -914,7 +914,7 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-/** 
+/**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -943,15 +943,15 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,L,Arg,ValList):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-/** 
+/**
  * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate call mc_mh_sample_arg/7 and build a c3 graph
  * of the results.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in 
- * a world sampled at random. 
+ * the list of values of Arg for which Query succeeds in
+ * a world sampled at random.
  * The size of the bar is the number of samples
  * returning that list of values.
  */
@@ -965,15 +965,15 @@ mc_mh_sample_arg_bar(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
 	          legend:_{show: false}}.
 
 
-/** 
+/**
  * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate call mc_mh_sample_arg/6 and build a c3 graph
  * of the results.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in 
- * a world sampled at random. 
+ * the list of values of Arg for which Query succeeds in
+ * a world sampled at random.
  * The size of the bar is the number of samples
  * returning that list of values.
  */
@@ -1073,15 +1073,15 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   K2 is K1-1,
   sample_arg(K2,M:Goals,Arg,V1,V).
 
-/** 
+/**
  * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true. Evidence is a list of goals.
  * The predicate returns in Prob the probability that the query is true.
- * It performs particle filtering with likelihood weighting: 
+ * It performs particle filtering with likelihood weighting:
  * each sample is weighted by the
- * likelihood of an element of the Evidence list and constitutes a particle. 
+ * likelihood of an element of the Evidence list and constitutes a particle.
  * After weighting, particles are resampled and the next element of Evidence
  * is considered.
  */
@@ -1095,14 +1095,14 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
   erase(Ref1),
   erase(Ref0).
 
-/** 
+/**
  * mc_particle_sample_arg(:Query:atom,+Evidence:list,+Samples:int,?Arg:term,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
- * It performs particle filtering with likelihood weighting: 
+ * It performs particle filtering with likelihood weighting:
  * each sample is weighted by the
- * likelihood of an element of the Evidence list and constitutes a particle. 
+ * likelihood of an element of the Evidence list and constitutes a particle.
  * After weighting, particles are resampled and the next element of Evidence
  * is considered.
  * Arg should be a variable in Query. Evidence is a list of goals.
@@ -1111,16 +1111,16 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
  * a list of couples V-W where V is a value of Arg for which Query succeeds in
  * a particle in the last set of particles and W is the weight of the particle.
  * For each element of Evidence, the particles are obtained by sampling Query
- * in each current particle and weighting the particle by the likelihood 
+ * in each current particle and weighting the particle by the likelihood
  * of the evidence element.
- * When Query is a list of goals, Arg is a list of variables, one for 
+ * When Query is a list of goals, Arg is a list of variables, one for
  * each query of Query and Arg and Query must have the same length of Evidence.
  * Values is then list of the same length of Evidence and each of its
  * elements is a list of couples V-W where
- * V is a value of the corresponding element of Arg for which the corresponding 
+ * V is a value of the corresponding element of Arg for which the corresponding
  * element of Query succeeds in a particle and W is the weight of the particle.
- * For each element of Evidence, the particles are obtained by sampling the 
- * corresponding element of Query in each current particle and weighting 
+ * For each element of Evidence, the particles are obtained by sampling the
+ * corresponding element of Query in each current particle and weighting
  * the particle by the likelihood of the evidence element.
  */
 mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
@@ -1274,7 +1274,7 @@ get_values(I,V):-
   mc_input_mod(M),
   findall(A-W,(M:value_particle(I,S,A),M:weight_particle(I,S,W)),V).
 
-/** 
+/**
  * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:floar) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -1297,7 +1297,7 @@ mc_lw_sample(M:Goal,M:Evidence0,S,P):-
 value_cont_single(H-W,S,S+H*W).
 
 
-/** 
+/**
  * mc_lw_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -1318,7 +1318,7 @@ mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-/** 
+/**
  * mc_lw_sample_arg_log(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
@@ -1339,7 +1339,7 @@ mc_lw_sample_arg_log(M:Goal,M:Evidence0,S,Arg,ValList):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-/** 
+/**
  * mc_lw_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query given Evidence by
@@ -1731,13 +1731,13 @@ lw_sample_logweight(M:G,W0,W):-
 
 
 
-/** 
+/**
  * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * The predicate samples Query a number of Samples times. 
+ * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples V-N where 
- * V is the value of Arg returned as the first answer by Query in 
+ * The predicate returns in Values a list of couples V-N where
+ * V is the value of Arg returned as the first answer by Query in
  * a world sampled at random and N is the number of samples
  * returning that value.
  * V is failure if the query fails.
@@ -1749,13 +1749,13 @@ mc_sample_arg_first(M:Goal,S,Arg,ValList):-
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList).
 
-/** 
+/**
  * mc_sample_arg_first_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate samples Query Samples times. Arg should be a variable
  * in Query.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each value of Arg returned as a first answer by Query in 
+ * with a bar for each value of Arg returned as a first answer by Query in
  * a world sampled at random.
  * The size of the bar is the number of samples that returned that value.
  * The value is failure if the query fails.
@@ -1790,13 +1790,13 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
   K2 is K1-1,
   sample_arg_first(K2,M:Goals,Arg,V1,V).
 
-/** 
+/**
  * mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * The predicate samples Query a number of Samples times. 
+ * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples V-N where 
- * V is a value of Arg sampled with uniform probability from those returned 
+ * The predicate returns in Values a list of couples V-N where
+ * V is a value of Arg sampled with uniform probability from those returned
  * by Query in a world sampled at random and N is the number of samples
  * returning that value.
  * V is failure if the query fails.
@@ -1808,15 +1808,15 @@ mc_sample_arg_one(M:Goal,S,Arg,ValList):-
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList).
 
-/** 
+/**
  * mc_sample_arg_one_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
  *
  * The predicate samples Query Samples times. Arg should be a variable
  * in Query.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each value of Arg returned by sampling with uniform 
- * probabability one answer from those returned by Query in a world sampled 
- * at random. 
+ * with a bar for each value of Arg returned by sampling with uniform
+ * probabability one answer from those returned by Query in a world sampled
+ * at random.
  * The size of the bar is the number of samples.
  * The value is failure if the query fails.
  */
@@ -1869,13 +1869,13 @@ sample_backtracking(_,El,El).
 
 sample_backtracking(L,_El,El):-
   sample_one_back(L,El).
-/** 
+/**
  * mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * The predicate samples Query a number of Samples times. 
+ * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples V-N where 
- * V is the value of Arg returned as the first answer by Query in 
+ * The predicate returns in Values a list of couples V-N where
+ * V is the value of Arg returned as the first answer by Query in
  * a world sampled at random and N is the number of samples
  * returning that value.
  * V is failure if the query fails.
@@ -1899,7 +1899,7 @@ sample_arg_raw(K1, M:Goals,Arg,[Val|V]):-
   sample_arg_raw(K2,M:Goals,Arg,V).
 
 
-/** 
+/**
  * mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query by
@@ -1913,7 +1913,7 @@ mc_expectation(M:Goal,S,Arg,E):-
   erase_samples,
   E is Sum/S.
 
-/** 
+/**
  * mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query by
@@ -1928,7 +1928,7 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
   erase_samples,
   E is Sum/S.
 
-/** 
+/**
  * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,+Lag:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query by
@@ -1943,7 +1943,7 @@ mc_mh_expectation(M:Goal,M:Evidence,S,Mix,L,Arg,E):-
   erase_samples,
   E is Sum/S.
 
-/** 
+/**
  * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Lag:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query by
@@ -1999,7 +1999,7 @@ get_node(Goal,Env,B):- %with DB=false
   add_bdd_arg(Goal,Env,BDD,Goal1),
   (bagof(BDD,Goal1,L)*->
     or_list(L,Env,B)
-  ;  
+  ;
     zero(Env,B)
   ).
 
@@ -2024,11 +2024,11 @@ retract_all([H|T]):-
   erase(H),
   retract_all(T).
 
-/** 
+/**
  * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
- * Returns the index Variable of the random variable associated to rule with 
- * index Rule, grouding substitution Substitution and head distribution 
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule, grouding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_var_n(Env,R,S,Probs0,V):-
@@ -2038,7 +2038,7 @@ get_var_n(Env,R,S,Probs0,V):-
       true
     ;
       length(Probs,L),
-      add_var(Env,L,Probs,R,V),    
+      add_var(Env,L,Probs,R,V),
       assert(v(R,S,V))
     )
   ;
@@ -2071,7 +2071,7 @@ add_bdd_arg_db(A,Env,BDD,DB,_Module,A1):-
 add_mod_arg(A,_Module,A1):-
   A=..[P|Args],
   A1=..[P|Args].
-/** 
+/**
  * sample_head(+R:int,+Variables:list,+HeadList:list,-HeadNumber:int) is det
  *
  * samples a head from rule R instantiated as indicated by Variables (list of
@@ -2089,7 +2089,7 @@ sample_head(R,VC,HeadList,N):-
   N=NH.
 
 sample(HeadList, HeadId) :-
-  random(Prob), 
+  random(Prob),
   sample(HeadList, 0, 0, Prob, HeadId), !.
 
 sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
@@ -2118,7 +2118,7 @@ sample_uniform(R,VC,L,U,S):-
 uniform_density(L,U,D):-
   D is 1/(U-L).
 
-/** 
+/**
  * sample_gauss(+R:int,+VC:list,+Mean:float,+Variance:float,-S:float) is det
  *
  * Returns in S a sample for a Gaussian variable with mean Mean and variance
@@ -2132,7 +2132,7 @@ sample_gauss(R,VC,_Mean,_Variance,S):-
 sample_gauss(R,VC,Mean,Variance,S):-
   gauss(Mean,Variance,S),
   recorda(R,sampled(VC,S)).
-/** 
+/**
  * gauss(+Mean:float,+Variance:float,-S:float) is det
  *
  * samples a value from a Gaussian with mean Mean and variance
@@ -2276,7 +2276,7 @@ getv(C,X,V):-
 
 gamma_density(K,Scale,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
-    
+
 /**
  * sample_beta(+R:int,+VC:list,+Alpha:float,+Beta:float,-S:float) is det
  *
@@ -2402,7 +2402,7 @@ prod(X,A,P0,P0*X^(A-1)).
 /**
  * sample_geometric(+R:int,+VC:list,+P:float,-S:int) is det
  *
- * Returns in S a sample for a geometrically distributed variable with 
+ * Returns in S a sample for a geometrically distributed variable with
  * parameter P associated to rule R with substitution VC. If the variable
  * has already been sampled, it retrieves the sampled value, otherwise
  * it takes a new sample and records it for rule R with substitution VC.
@@ -2439,9 +2439,9 @@ geometric_density(P,I,D):-
  * sample_discrete(+R:int,+VC:list,+Distribution:list,-S:float) is det
  *
  * Returns in S a sample from a discrete distribution Distribution (a list
- * of couples Val:Prob) associated to rule R with substitution VC. 
- * If the variable has already been sampled, it retrieves the sampled 
- * value, otherwise it takes a new sample and records it for rule R with 
+ * of couples Val:Prob) associated to rule R with substitution VC.
+ * If the variable has already been sampled, it retrieves the sampled
+ * value, otherwise it takes a new sample and records it for rule R with
  * substitution VC.
  */
 sample_discrete(R,VC,_D,S):-
@@ -2461,7 +2461,7 @@ sample_discrete(R,VC,D,S0):-
 discrete(D,S0):-
   append(D0,[LastS:_P],D),!,
   foldl(pick_val,D0,(1,_),(_,S)),
-  (var(S)->  
+  (var(S)->
     S0=LastS
   ;
     S0=S
@@ -2550,7 +2550,7 @@ process_body([],BDD,BDD,Vars,Vars,[],_Env,_Module).
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-  
+
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   db(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -2612,7 +2612,7 @@ process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-  
+
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   db(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -2643,7 +2643,7 @@ process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-  
+
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   db(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -2722,10 +2722,10 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 
-process_head(HeadList, GroundHeadList) :- 
+process_head(HeadList, GroundHeadList) :-
   ground_prob(HeadList), !,
   process_head_ground(HeadList, 0, GroundHeadList).
-   
+
 process_head(HeadList0, HeadList):-
   get_probs(HeadList0,PL),
   foldl(minus,PL,1,PNull),
@@ -2738,7 +2738,7 @@ prob_ann(P::_,P).
 
 /**
  * add_prob(?Prob:float,:Goal:atom,?AnnGoal:atom) is det
- * 
+ *
  * From Prob and Goal builds the annotated atom AnnGoal=Goal:Prob.
  */
 add_prob(P,A,A:P).
@@ -2751,25 +2751,25 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
   mc_input_mod(M),
-  M:local_mc_setting(epsilon_parsing, Eps), 
-  EpsNeg is - Eps, 
-  ProbLast > EpsNeg, 
+  M:local_mc_setting(epsilon_parsing, Eps),
+  EpsNeg is - Eps,
+  ProbLast > EpsNeg,
   (ProbLast > Eps ->
     Null = ['':ProbLast]
   ;
     Null = []
-  ). 
+  ).
 
-process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :- 
+process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
   (H=Head:ProbHead;H=ProbHead::Head),
   ProbHead1 is ProbHead,
-  ProbNext is Prob + ProbHead1, 
+  ProbNext is Prob + ProbHead1,
   process_head_ground(Tail, ProbNext, Next).
 
 
 ground_prob([]).
 
-ground_prob([_Head:ProbHead|Tail]) :-!, 
+ground_prob([_Head:ProbHead|Tail]) :-!,
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
@@ -2782,15 +2782,15 @@ get_probs(Head, PL):-
 
 /*get_probs([], []).
 
-get_probs([_H:P|T], [P1|T1]) :- 
-  P1 is P, 
+get_probs([_H:P|T], [P1|T1]) :-
+  P1 is P,
   get_probs(T, T1).
 */
 
-/** 
+/**
  * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
  *
- * Returns in BDD a pointer to a BDD belonging to environment Environment 
+ * Returns in BDD a pointer to a BDD belonging to environment Environment
  * representing the disjunction of all the BDDs in ListOfBDDs
  */
 or_list([H],_Env,H):-!.
@@ -2810,8 +2810,8 @@ or_list1([H|T],Env,B0,B1):-
  * set_mc(++Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
- * For a list of parameters see 
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_mc(Parameter,Value):-
@@ -2823,8 +2823,8 @@ set_mc(Parameter,Value):-
  * setting_mc(?Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
- * For a list of parameters see 
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_mc(P,V):-
@@ -2836,24 +2836,24 @@ extract_vars_list(L,[],V):-
   extract_vars_term(L,T,T1),
   rb_keys(T1,V).
 
-extract_vars_term(Variable, Var0, Var1) :- 
-  var(Variable), !, 
+extract_vars_term(Variable, Var0, Var1) :-
+  var(Variable), !,
   (rb_lookup(Variable, Var0,_) ->
     Var1 = Var0
   ;
     rb_insert(Var0,Variable,1,Var1)
   ).
 
-extract_vars_term(Term, Var0, Var1) :- 
-  Term=..[_F|Args], 
+extract_vars_term(Term, Var0, Var1) :-
+  Term=..[_F|Args],
   extract_vars_tree(Args, Var0, Var1).
 
 
 
 extract_vars_tree([], Var, Var).
 
-extract_vars_tree([Term|Tail], Var0, Var1) :- 
-  extract_vars_term(Term, Var0, Var), 
+extract_vars_tree([Term|Tail], Var0, Var1) :-
+  extract_vars_term(Term, Var0, Var),
   extract_vars_tree(Tail, Var, Var1).
 
 delete_equal([],_,[]).
@@ -2871,7 +2871,7 @@ add_arg(A,Arg,A1):-
 
 /**
  * set_sw(+Var:term,+List:lit) is det
- * 
+ *
  * Sets the domain of the random variable Var to List.
  * This is a predicate for programs in the PRISM syntax
  */
@@ -2881,7 +2881,7 @@ set_sw(A,B):-
 
 /**
  * msw(:Var:term,?Value:term) is det
- * 
+ *
  * Gets or tests the Value of the random variable Var.
  * This is a predicate for programs in the PRISM syntax
  */
@@ -2940,11 +2940,11 @@ user:term_expansion((:- end_lpad), []) :-
   mc_input_mod(_M0),!,
   retractall(mc_module(_M)).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(L,U)), !, 
+  Head=(H~uniform(L,U)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -2954,11 +2954,11 @@ user:term_expansion((Head:=Body),Clause) :-
     generate_clause_uniform(H1,Body,VC,R,Var,L,U,Clause)
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~gamma(Shape,Scale)), !, 
+  Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -2968,11 +2968,11 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,sample_gamma(R,VC,Shape,Scale,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~beta(Alpha,Beta)), !, 
+  Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -2983,11 +2983,11 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~poisson(Lambda)), !, 
+  Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -2997,11 +2997,11 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,sample_poisson(R,VC,Lambda,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(D0)),!, 
+  Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3013,11 +3013,11 @@ user:term_expansion((Head:=Body),Clause) :-
       maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~finite(D0)),!, 
+  Head=(H~finite(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list([Head],[],VC),
   get_next_rule_number(R),
@@ -3027,11 +3027,11 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,maplist(swap,D0,D),sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~geometric(Par)), !, 
+  Head=(H~geometric(Par)), !,
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
   get_next_rule_number(R),
@@ -3041,11 +3041,11 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,sample_geometric(R,VC,Par,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :- 
+user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~dirichlet(Par)), !, 
+  Head=(H~dirichlet(Par)), !,
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
   get_next_rule_number(R),
@@ -3055,23 +3055,23 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,sample_dirichlet(R,VC,Par,Var))
   ).
 
-user:term_expansion((Head:=Body),(H1:-Body)) :- 
+user:term_expansion((Head:=Body),(H1:-Body)) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~val(Var)), !, 
+  Head=(H~val(Var)), !,
   add_arg(H,Var,H1).
 
-user:term_expansion((Head:=Body),(Head:- Body)) :- 
+user:term_expansion((Head:=Body),(Head:- Body)) :-
   prolog_load_context(module, M),mc_module(M),!.
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:gaussian(Mean,Variance)), !, 
+  Head=(H:gaussian(Mean,Variance)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3082,13 +3082,13 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:uniform(Var,L,U)), !, 
+  Head=(H:uniform(Var,L,U)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3098,13 +3098,13 @@ user:term_expansion((Head:-Body),Clause) :-
     generate_clause_uniform(H,Body,VC,R,Var,L,U,Clause)
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:gamma(Var,Shape,Scale)), !, 
+  Head=(H:gamma(Var,Shape,Scale)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3114,13 +3114,13 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_gamma(R,VC,Shape,Scale,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:beta(Var,Alpha,Beta)), !, 
+  Head=(H:beta(Var,Alpha,Beta)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3131,13 +3131,13 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:poisson(Var,Lambda)), !, 
+  Head=(H:poisson(Var,Lambda)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3147,13 +3147,13 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_poisson(R,VC,Lambda,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:uniform(Var,D0)),!, 
+  Head=(H:uniform(Var,D0)),!,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3165,13 +3165,13 @@ user:term_expansion((Head:-Body),Clause) :-
       maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3181,13 +3181,13 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !, 
+  Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3197,13 +3197,13 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_dirichlet(R,VC,Par,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:geometric(Var,Par)), !, 
+  Head=(H:geometric(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3213,13 +3213,13 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_geometric(R,VC,Par,Var))
   ).
 
-user:term_expansion((Head:-Body),Clause) :- 
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !, 
+  Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3234,10 +3234,10 @@ user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
-  Head = (_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  Head = (_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
@@ -3250,13 +3250,13 @@ user:term_expansion((Head :- Body), Clauses):-
   ;
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
    ).
-  
+
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list((Head :- Body),[],VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -3265,15 +3265,15 @@ user:term_expansion((Head :- Body), Clauses):-
     generate_rules(HeadList,Body,HeadList,VC,R,0,Clauses)
   ).
 
-user:term_expansion((Head :- Body), []) :- 
+user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   (Head = (_:P);Head=(P::_)),
   ground(P),
-  P=:=0.0, !. 
+  P=:=0.0, !.
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
@@ -3281,36 +3281,36 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg_db(H,Env,BDDAnd,DB,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   prolog_load_context(module, M),mc_module(M),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  (Head = (H:_);Head=(_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  (Head = (H:_);Head=(_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
@@ -3324,13 +3324,13 @@ user:term_expansion((Head :- Body), Clauses) :-
     generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
   ).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),mc_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  (Head = (H:_);Head = (_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  (Head = (H:_);Head = (_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list((Head :- Body),[],VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -3338,26 +3338,26 @@ user:term_expansion((Head :- Body), Clauses) :-
   ;
     generate_clause(H,Body,HeadList,VC,R,0,Clauses)
   ).
-  
-user:term_expansion((Head :- Body),Clauses) :- 
+
+user:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
-  prolog_load_context(module, M),mc_module(M),  
+  prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg_db(Head,Env,BDDAnd,DB,Module,Head1),
   Clauses=(Head1 :- Body1).
-  
-user:term_expansion(Head,Clauses) :- 
+
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
-  Head=(_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  Head=(_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
@@ -3367,12 +3367,12 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
   ).
 
-user:term_expansion(Head,Clauses) :- 
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with more than one head atom senza db
-  Head=(_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  Head=(_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -3381,11 +3381,11 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,HeadList,VC,R,0,Clauses)
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(L,U)), !, 
+  Head=(H~uniform(L,U)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3395,11 +3395,11 @@ user:term_expansion(Head,Clause) :-
     generate_clause_uniform(H1,true,VC,R,Var,L,U,Clause)
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~gamma(Shape,Scale)), !, 
+  Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3409,11 +3409,11 @@ user:term_expansion(Head,Clause) :-
     Clause=(H1:-sample_gamma(R,VC,Shape,Scale,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~beta(Alpha,Beta)), !, 
+  Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3424,11 +3424,11 @@ user:term_expansion(Head,Clause) :-
   ).
 
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~poisson(Lambda)), !, 
+  Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
@@ -3438,11 +3438,11 @@ user:term_expansion(Head,Clause) :-
     Clause=(H1:-sample_poisson(R,VC,Lambda,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(D0)),!, 
+  Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
   length(D0,Len),
   Prob is 1.0/Len,
@@ -3457,11 +3457,11 @@ user:term_expansion(Head,Clause) :-
        maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  Head=(H~finite(D0)),!, 
+  Head=(H~finite(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list([Head],[],VC),
   get_next_rule_number(R),
@@ -3471,13 +3471,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H1:-maplist(swap,D0,D),sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !, 
+  Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3487,13 +3487,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_dirichlet(R,VC,Par,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:geometric(Var,Par)), !, 
+  Head=(H:geometric(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3503,13 +3503,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_geometric(R,VC,Par,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !, 
+  Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3519,13 +3519,13 @@ user:term_expansion(Head,Clause) :-
     generate_clause_gauss(H,true,VC,R,Var,Mean,Variance,Clause)
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:uniform(Var,L,U)), !, 
+  Head=(H:uniform(Var,L,U)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3535,13 +3535,13 @@ user:term_expansion(Head,Clause) :-
     generate_clause_uniform(H,true,VC,R,Var,L,U,Clause)
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:gamma(Var,Shape,Scale)), !, 
+  Head=(H:gamma(Var,Shape,Scale)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3551,13 +3551,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_gamma(R,VC,Shape,Scale,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:beta(Var,Alpha,Beta)), !, 
+  Head=(H:beta(Var,Alpha,Beta)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3568,13 +3568,13 @@ user:term_expansion(Head,Clause) :-
   ).
 
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:poisson(Var,Lambda)), !, 
+  Head=(H:poisson(Var,Lambda)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3584,13 +3584,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_poisson(R,VC,Lambda,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:uniform(Var,D0)),!, 
+  Head=(H:uniform(Var,D0)),!,
   length(D0,Len),
   Prob is 1.0/Len,
   maplist(add_prob(Prob),D0,D),
@@ -3603,13 +3603,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!, 
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3619,13 +3619,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !, 
+  Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3635,13 +3635,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_dirichlet(R,VC,Par,Var))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !, 
+  Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
@@ -3651,15 +3651,15 @@ user:term_expansion(Head,Clause) :-
     generate_clause_gauss(H,true,VC,R,Var,Mean,Variance,Clause)
   ).
 
-user:term_expansion(Head,[]) :- 
+user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
-  
-user:term_expansion(Head,H) :- 
+
+user:term_expansion(Head,H) :-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -3668,7 +3668,7 @@ user:term_expansion(Head,H) :-
   ground(P),
   P=:=1.0, !.
 
-user:term_expansion(Head,H) :- 
+user:term_expansion(Head,H) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3676,14 +3676,14 @@ user:term_expansion(Head,H) :-
   ground(P),
   P=:=1.0, !.
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:_);Head=(_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  (Head=(H:_);Head=(_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -3692,13 +3692,13 @@ user:term_expansion(Head,Clause) :-
     generate_clause(H,true,HeadList,VC,R,0,Clause)
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:_);Head=(_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  (Head=(H:_);Head=(_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
@@ -3712,7 +3712,7 @@ user:term_expansion((:- set_pita(P,V)), []) :-!,
   set_pita(P,V).
 
 
-/** 
+/**
  * begin_lpad_pred is det
  *
  * Initializes LPAD loading.
@@ -3722,7 +3722,7 @@ begin_lpad_pred:-
   mc_input_mod(M),
   assert(mc_module(M)).
 
-/** 
+/**
  * end_lpad_pred is det
  *
  * Terminates the cplint inference module.
@@ -3746,11 +3746,11 @@ list2and([X],X):-
 
 list2and([H|T],(H,Ta)):-!,
     list2and(T,Ta).
- 
-/** 
+
+/**
  * builtin(+Goal:atom) is det
  *
- * Succeeds if Goal is an atom whose predicate is defined in Prolog 
+ * Succeeds if Goal is an atom whose predicate is defined in Prolog
  * (either builtin or defined in a standard library).
  */
 builtin(G):-
@@ -3809,7 +3809,7 @@ histogram(L0,NBins,Min,Max,Chart):-
   bin(NBins,L,Min,BinWidth,LB),
   maplist(key,LB,X),
   maplist(y,LB,Y),
-  Chart = c3{data:_{x:x, 
+  Chart = c3{data:_{x:x,
     columns:[[x|X],[freq|Y]], type:bar},
     axis:_{ x:_{ tick:_{fit:false}}},
      bar:_{
@@ -3821,10 +3821,10 @@ histogram(L0,NBins,Min,Max,Chart):-
  *
  * Draws a line chart of the density of two sets of samples, usually
  * prior and post observations. The samples from the prior are in PriorList
- * while the samples from the posterior are in PostList 
+ * while the samples from the posterior are in PostList
  * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
- * NBins bins. 
+ * NBins bins.
  */
 densities(Pri0,Post0,NBins,Chart):-
   maplist(to_pair,Pri0,Pri1),
@@ -3837,7 +3837,7 @@ densities(Pri0,Post0,NBins,Chart):-
   D is Max-Min,
   BinWidth is D/NBins,
   keysort(Pri1,Pr),
-  keysort(Post0,Po),
+  keysort(Post1,Po),
   bin(NBins,Pr,Min,BinWidth,LPr),
   bin(NBins,Po,Min,BinWidth,LPo),
   maplist(key,LPr,X),
@@ -3856,7 +3856,7 @@ densities(Pri0,Post0,NBins,Chart):-
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
- * NBins bins. 
+ * NBins bins.
  */
 density(Post0,NBins,Min,Max,Chart):-
   maplist(to_pair,Post0,Post),
@@ -3879,7 +3879,7 @@ density(Post0,NBins,Min,Max,Chart):-
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
- * NBins bins. 
+ * NBins bins.
  */
 
 density(Post0,NBins,Chart):-
@@ -3989,4 +3989,3 @@ sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
-
