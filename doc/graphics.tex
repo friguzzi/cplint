@@ -89,18 +89,30 @@ histogram(+List:list,+NBins:int,-Chart:dict)
 \end{verbatim}
 draws a histogram of the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
-\verb|List| must be a list of couples of the form \verb|[V]-W|
-where \verb|V| is a sampled value and \verb|W| is its weight. This is the format of the list of samples returned by argument sampling predicates
-except \verb|mc_lw_sample_arg/5| that returns a list of couples \verb|V-W|. 
-In this case you can
-use
+\verb|List| must be a list of couples of the form \verb|[V]-W| or  \verb|V-W|
+where \verb|V| is a sampled value and \verb|W| is its weight. This is the format of the list of samples returned by argument sampling predicates.
+
+The predicate
+\begin{verbatim}
+density(+List:list,+NBins:int,-Chart:dict) 
+\end{verbatim}
+draws a line chart of the density the samples in \verb|List| dividing the domain in
+ \verb|NBins| bins.
+\verb|List| must be as for \verb|histogram/3|.
+
+The predicate
+\begin{verbatim}
+density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) 
+\end{verbatim}
+is similar to \verb|density/3| except that you can specify the limits of the $X$ axis.
+
+The predicate
 \begin{verbatim}
 densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict)
 \end{verbatim}
-that draws a line chart of the density of two sets of samples, usually
- prior and post observations. The samples from the prior are in \verb|PriorList|
-as couples \verb|[V]-W|, while the samples from the posterior are in \verb|PostList|
-as couples \verb|V-W| where \verb|V| is a value and \verb|W| its weigth.
+draws a line chart of the density of two sets of samples, usually
+ prior and post observations. The samples in \verb|PriorList| and \verb|PostList|
+can be either couples \verb|[V]-W| or \verb|V-W| where \verb|V| is a value and \verb|W| its weight.
  The lines are drawn dividing the domain in
  \verb|NBins| bins.
  

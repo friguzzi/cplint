@@ -152,12 +152,7 @@ as in
 \end{verbatim}
 If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability.
 
-If the evidence is composed of more than one atom, a clause of the form
-\begin{verbatim}
-evidence:- e1,...,en.
-\end{verbatim}
-should be added to the program, where \verb|e1,...,en| are the evidence atoms, and the query \verb|prob(goal,evidence,P).| should be asked.
-
+The query and the evidence can be conjunctions of literals (positive or negative).
 
 When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
 In rejection sampling \cite{von195113}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
@@ -204,7 +199,7 @@ that takes 1000 samples where \verb|biased(coin)| is true and returns in \verb|S
 \verb|heads(coin)| is true, in \verb|F| the number of samples where \verb|heads(coin)| is false and in \verb|P| the
 estimated probability (\verb|S/1000|).
 
-Differently from exact inference, in approximate inference the evidence can be a conjunction of atoms.
+The query and the evidence can be conjunctions of literals.
 
 You can take a given number of sample with Metropolis-Hastings MCMC using
 \begin{verbatim}
@@ -421,3 +416,26 @@ from \href{http://cplint.lamping.unife.it/example/inference/kalman_filter.pl}{\t
 particle filtering for a Kalman filter with four observations. For each observation, the value of the state 
 at the same time point is sampled. The list of samples is returned in \verb|[F1,F2,F3,F4]|, with each element
 being the sample for a time point. 
+
+\subsection{Causal Inference}
+\label{causal}
+
+\verb|pita| and |mcintyre| support causal reasoning, i.e., computing the effect of actions using the
+do-calculus \cite{Pea00-book}.
+
+Actions in this setting are represented as literals of action predicates, that must be declared as such
+with the directive \verb|:- action predicate1/arity1,...,predicaten/arityn.|
+
+When performing causal reasoning, action literals must be enclosed in the \verb|do/1| functor and included in the evidence conjunction. More than one action can be included (each with in a separate
+do term) and actions and observations can be freely mixed.
+All conditional inference goals can be used except those for particle filtering.
+
+For example
+\begin{verbatim} 
+?- prob(recovery,do(drug),P).
+\end{verbatim}
+from \href{http://cplint.lamping.unife.it/example/inference/simpson.swinb}{\texttt{simpson.swinb}} 
+computes the probability of recovery of a patient given that the action of administering a drug has
+been performed.
+
+
