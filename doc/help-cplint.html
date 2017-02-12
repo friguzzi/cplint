@@ -418,9 +418,10 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
   [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],100,[T1,T2,T3,T4],[F1,F2,F3,F4]).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a> performs particle filtering for a Kalman filter with four observations. For each observation, the value of the state at the same time point is sampled. The list of samples is returned in <code>[F1,F2,F3,F4]</code>, with each element being the sample for a time point.</p>
 <h2 id="causal">Causal Inference</h2>
-<p><code>pita</code> and |mcintyre| support causal reasoning, i.e., computing the effect of actions using the do-calculus <span class="citation">[<a href="#ref-Pea00-book">14</a>]</span>.</p>
-<p>Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive <code>:- action predicate1/arity1,...,predicaten/arityn.</code></p>
-<p>When performing causal reasoning, action literals must be enclosed in the <code>do/1</code> functor and included in the evidence conjunction. More than one action can be included (each with in a separate do term) and actions and observations can be freely mixed. All conditional inference goals can be used except those for particle filtering.</p>
+<p><code>pita</code> and <code>mcintyre</code> support causal reasoning, i.e., computing the effect of actions using the do-calculus <span class="citation">[<a href="#ref-Pea00-book">14</a>]</span>.</p>
+<p>Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive</p>
+<pre><code>:- action predicate1/arity1,...,predicaten/arityn.</code></pre>
+<p>When performing causal reasoning, action literals must be enclosed in the <code>do/1</code> functor and included in the evidence conjunction. More than one action can be included (each with in a separate <code>do/1</code> term) and actions and observations can be freely mixed. All conditional inference goals can be used except those for particle filtering.</p>
 <p>For example</p>
 <pre><code>?- prob(recovery,do(drug),P).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/simpson.swinb"><code>simpson.swinb</code></a> computes the probability of recovery of a patient given that the action of administering a drug has been performed.</p>

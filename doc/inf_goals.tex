@@ -420,14 +420,16 @@ being the sample for a time point.
 \subsection{Causal Inference}
 \label{causal}
 
-\verb|pita| and |mcintyre| support causal reasoning, i.e., computing the effect of actions using the
+\verb|pita| and \verb|mcintyre| support causal reasoning, i.e., computing the effect of actions using the
 do-calculus \cite{Pea00-book}.
 
 Actions in this setting are represented as literals of action predicates, that must be declared as such
-with the directive \verb|:- action predicate1/arity1,...,predicaten/arityn.|
-
+with the directive 
+\begin{verbatim}
+:- action predicate1/arity1,...,predicaten/arityn.
+\end{verbatim}
 When performing causal reasoning, action literals must be enclosed in the \verb|do/1| functor and included in the evidence conjunction. More than one action can be included (each with in a separate
-do term) and actions and observations can be freely mixed.
+\verb|do/1| term) and actions and observations can be freely mixed.
 All conditional inference goals can be used except those for particle filtering.
 
 For example
