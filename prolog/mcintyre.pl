@@ -3856,7 +3856,7 @@ densities(Pri0,Post0,NBins,Chart):-
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
- * NBins bins.
+ * NBins bins. The X axis goes from Min to Max.
  */
 density(Post0,NBins,Min,Max,Chart):-
   maplist(to_pair,Post0,Post),
