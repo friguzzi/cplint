@@ -3312,35 +3312,28 @@ gen_clause_bg(def_rule(H,BodyList,_Lit),Clauses) :-
   Clauses=(Head1 :- Body1).
 
 
+/**
+ * builtin(+Goal:atom) is det
+ *
+ * Succeeds if Goal is an atom whose predicate is defined in Prolog
+ * (either builtin or defined in a standard library).
+ */
+builtin(G):-
+  builtin_int(G),!.
 
-builtin(_A is _B).
-builtin(_A > _B).
-builtin(_A < _B).
-builtin(_A >= _B).
-builtin(_A =< _B).
-builtin(_A =:= _B).
-builtin(_A =\= _B).
-builtin(true).
-builtin(false).
-builtin(_A = _B).
-builtin(_A==_B).
-builtin(_A\=_B).
-builtin(_A\==_B).
-builtin('!').
-builtin(length(_L,_N)).
-builtin(member(_El,_L)).
-builtin(average(_L,_Av)).
-builtin(max_list(_L,_Max)).
-builtin(min_list(_L,_Max)).
-builtin(nth0(_,_,_)).
-builtin(nth(_,_,_)).
-builtin(name(_,_)).
-builtin(float(_)).
-builtin(integer(_)).
-builtin(var(_)).
-builtin(_ @> _).
-builtin(memberchk(_,_)).
-
+builtin_int(average(_L,_Av)).
+builtin_int(G):-
+  predicate_property(G,built_in).
+builtin_int(G):-
+  predicate_property(G,imported_from(lists)).
+builtin_int(G):-
+  predicate_property(G,imported_from(apply)).
+builtin_int(G):-
+  predicate_property(G,imported_from(nf_r)).
+builtin_int(G):-
+  predicate_property(G,imported_from(matrix)).
+builtin_int(G):-
+  predicate_property(G,imported_from(clpfd)).
 
 average(L,Av):-
         sum_list(L,Sum),
