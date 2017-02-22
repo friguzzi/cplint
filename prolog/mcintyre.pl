@@ -733,7 +733,8 @@ initial_sample_neg(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
 
 
 initial_sample_neg(M:(G1,G2)):-!,
-  (initial_sample_neg(M:G1);
+  (initial_sample_neg(M:G1),!;
+  initial_sample(M:G1),
   initial_sample_neg(M:G2)).
 
 initial_sample_neg(M:(G1;G2)):-!,
