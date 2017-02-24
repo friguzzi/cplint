@@ -151,20 +151,20 @@ details.
  * -
  * This parameter shows the amount of items of the same type to consider at once.
  *
- * Default value:	64
+ * Default value:	500
  * Applies to:		bestfirst, bestk, montecarlo
  */
-default_setting_mc(k, 1000).
+default_setting_mc(k, 500).
 /* min_error
  * ---------
  * This parameter shows the threshold for the probability interval.
  *
- * Default value:	0.01
+ * Default value:	0.02
  * Applies to:		bestfirst, montecarlo
  */
-default_setting_mc(min_error, 0.01).
+default_setting_mc(min_error, 0.02).
 
-default_setting_mc(max_samples,10e4).
+default_setting_mc(max_samples,5e4).
 
 
 default_setting_mc(epsilon_parsing, 1e-5).
@@ -710,7 +710,11 @@ initial_sample(M:(G1;G2)):-!,
   initial_sample(M:G2).
 
 initial_sample(M:(\+ G)):-!,
-  initial_sample_neg(M:G).
+  \+ initial_sample(M:G).
+%  initial_sample_neg(M:G).
+
+initial_sample(M:findall(A,G,L)):-!,
+  findall(A,initial_sample(M:G),L).
 
 initial_sample(_M:G):-
   builtin(G),!,
