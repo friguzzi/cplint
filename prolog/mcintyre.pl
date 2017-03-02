@@ -716,9 +716,9 @@ initial_sample(M:(\+ G)):-!,
 initial_sample(M:findall(A,G,L)):-!,
   findall(A,initial_sample(M:G),L).
 
-initial_sample(_M:G):-
+initial_sample(M:G):-
   builtin(G),!,
-  call(G).
+  M:call(G).
 
 initial_sample(M:G):-
   findall((G,B),M:clause(G,B),L),
@@ -748,9 +748,9 @@ initial_sample_neg(M:(G1;G2)):-!,
 initial_sample_neg(M:(\+ G)):-!,
   initial_sample(M:G).
 
-initial_sample_neg(_M:G):-
+initial_sample_neg(M:G):-
   builtin(G),!,
-  \+ call(G).
+  \+ M:call(G).
 
 initial_sample_neg(M:G):-
   findall(B,M:clause(G,B),L),
@@ -1490,9 +1490,9 @@ lw_sample(M:(G1;G2)):-!,
 lw_sample(M:(\+ G)):-!,
   \+ lw_sample(M:G).
 
-lw_sample(_M:G):-
+lw_sample(M:G):-
   builtin(G),!,
-  call(G).
+  M:call(G).
 
 lw_sample(M:G):-
   findall((G,B),M:clause(G,B),L),
@@ -1614,9 +1614,9 @@ lw_sample_weight(M:(\+ G),W0,W):-!,
   lw_sample(M:G,1,W1),
   W is W0*(1-W1).
 
-lw_sample_weight(_M:G,W,W):-
+lw_sample_weight(M:G,W,W):-
   builtin(G),!,
-  call(G).
+  M:call(G).
 
 lw_sample_weight(M:G,W0,W):-
   findall((G,B),M:clause(G,B),L),
@@ -1725,9 +1725,9 @@ lw_sample_logweight(M:(\+ G),W0,W):-!,
   W is W0-log(W1).
 
 
-lw_sample_logweight(_M:G,W,W):-
+lw_sample_logweight(M:G,W,W):-
   builtin(G),!,
-  call(G).
+  M:call(G).
 
 lw_sample_logweight(M:G,W0,W):-
   findall((G,B),M:clause(G,B),L),
@@ -2450,7 +2450,8 @@ geometric_density(P,I,D):-
  * substitution VC.
  */
 sample_discrete(R,VC,_D,S):-
-  recorded(R,sampled(VC,S)),!.
+  recorded(R,sampled(VC,S1)),!,
+  S=S1.
 
 sample_discrete(R,VC,D,S0):-
   discrete(D,S),
@@ -3186,6 +3187,24 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_discrete(R,VC,D,Var))
   ).
 
+user:term_expansion((Head:=Body),Clause) :-
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with uniform discrete distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
+  Head=(H:uniform(Var,D0)),!,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
+  ;
+    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
+  ).
+
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
@@ -3596,16 +3615,21 @@ user:term_expansion(Head,Clause) :-
   Head=(H:P),
   nonvar(P),
   Head=(H:uniform(Var,D0)),!,
-  length(D0,Len),
-  Prob is 1.0/Len,
-  maplist(add_prob(Prob),D0,D),
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_discrete(R,[],D,Var))
+    Clause=(H:-
+      length(D0,Len),
+      Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),
+      sample_discrete(R,[],D,Var))
   ;
-    Clause=(H:-sample_discrete(R,VC,D,Var))
+    Clause=(H:-
+      length(D0,Len),
+      Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),
+      sample_discrete(R,VC,D,Var))
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3764,6 +3788,7 @@ builtin(G):-
 builtin_int(average(_L,_Av)).
 builtin_int(mc_prob(_,_)).
 builtin_int(mc_sample(_,_,_)).
+builtin_int(db(_)).
 builtin_int(G):-
   predicate_property(G,built_in).
 builtin_int(G):-
