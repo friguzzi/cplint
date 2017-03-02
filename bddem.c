@@ -23,11 +23,11 @@ for the relative license.
 
 #define BUFSIZE 200000
 #define LOGZERO log(0.01)
-#define CACHE_SLOTS 1 
+#define CACHE_SLOTS 1
 #define UNIQUE_SLOTS 1
 #define RETURN_IF_FAIL if (ret!=TRUE) return ret;
 
-  
+
 typedef struct
 {
   int nVal,nRule;
@@ -35,20 +35,20 @@ typedef struct
 } variable;
 
 
-typedef struct 
+typedef struct
 {
   DdNode *key;
   double value;
 } rowel;
 
-typedef struct  
+typedef struct
 {
   int cnt;
   rowel *row;
 } tablerow;
 
 tablerow * table;
-typedef struct 
+typedef struct
 {
   DdManager * mgr; //Cudd manager
   int * bVar2mVar; //array that maps Boolena vars to multi-valued vars
@@ -60,7 +60,7 @@ typedef struct
   int * rules; // array with the number of head atoms for each rule
 } environment;
 
-typedef struct 
+typedef struct
 {
   environment * env; // one evnironment for each example
   int ex;  // number of examples
@@ -69,7 +69,7 @@ typedef struct
   double ***eta_temp; // eta arrau storing the contribution of the current example
   int * rules; // array with the number of head atoms for each rule
   int nRules; // number of rules
-  double * nodes_probs; 
+  double * nodes_probs;
   tablerow * nodesB; // tables of probabilities for nodes in Backward step
   tablerow * nodesF; // tables of probabilities for nodes in Forward step
   double * example_prob; // probability (frequency) of examples in the data
@@ -105,14 +105,14 @@ void write_dot(environment * env, DdNode * bdd, FILE * file);
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
   int j,i,ret;
-  example_data * ex_d; 
+  example_data * ex_d;
   double ***eta;
   double ***eta_temp;
   int nRules, *rules;
   term_t ex_d_t=PL_new_term_ref();
   term_t list=PL_copy_term_ref(arg2);
   term_t head=PL_new_term_ref();
-  
+
   ex_d=(example_data *)malloc(sizeof(example_data));
 
   ex_d->ex=0;
@@ -127,7 +127,7 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
   ex_d->rules= (int *) malloc(nRules * sizeof(int));
   rules=ex_d->rules;
   ex_d->nodes_probs=NULL;
-  for (j=0;j<nRules;j++)  
+  for (j=0;j<nRules;j++)
   {
     ret=PL_get_list(list,head,list);
     RETURN_IF_FAIL
@@ -147,7 +147,7 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 
 }
 
-static foreign_t init_bdd(term_t arg1, term_t arg2)  
+static foreign_t init_bdd(term_t arg1, term_t arg2)
 {
   example_data * ex_d;
   DdManager * mgr;
@@ -169,11 +169,11 @@ static foreign_t init_bdd(term_t arg1, term_t arg2)
   ex_d->env[ex].bVar2mVar=NULL;
 
   ex_d->env[ex].vars=NULL;
-  
+
   ex_d->env[ex].nVars=0;
 
   ex_d->env[ex].probs=NULL;
-  
+
   ex_d->env[ex].boolVars=0;
 
   ex_d->env[ex].nRules=ex_d->nRules;
@@ -183,7 +183,7 @@ static foreign_t init_bdd(term_t arg1, term_t arg2)
   ret=PL_put_pointer(env_t,(void *) (ex_d->env+ex));
   RETURN_IF_FAIL
   return(PL_unify(env_t,arg2));
- 
+
 }
 
 static foreign_t end_bdd(term_t arg1)
@@ -205,7 +205,7 @@ static foreign_t init_test(term_t arg1,term_t arg2)
   ret=PL_get_integer(arg1,&nRules);
   RETURN_IF_FAIL
   env_t=PL_new_term_ref();
-  
+
   env=(environment *)malloc(sizeof(environment));
   env->mgr=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
   Cudd_AutodynEnable(env->mgr, CUDD_REORDER_GROUP_SIFT);
@@ -249,13 +249,13 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
   int i;
   double rootProb,CLL=0;
 
-  for(i=0;i<lenNodes;i++)  
+  for(i=0;i<lenNodes;i++)
   {
     if (!Cudd_IsConstant(nodes_ex[i]))
     {
       ex_d->nodesB=init_table(ex_d->env[i].boolVars);
       ex_d->nodesF=init_table(ex_d->env[i].boolVars);
-      
+
       Forward(ex_d,nodes_ex[i],i);
       rootProb=GetOutsideExpe(ex_d,nodes_ex[i],ex_d->example_prob[i],i);
 
@@ -263,7 +263,7 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
         CLL = CLL + LOGZERO*ex_d->example_prob[i];
       else
         CLL = CLL + log(rootProb)*ex_d->example_prob[i];
-      
+
       ex_d->nodes_probs[i]=rootProb;
       destroy_table(ex_d->nodesB,ex_d->env[i].boolVars);
       destroy_table(ex_d->nodesF,ex_d->env[i].boolVars);
@@ -286,7 +286,7 @@ static foreign_t end(term_t arg1)
   example_data * ex_d;
   ret=PL_get_pointer(arg1,(void **)&ex_d);
   RETURN_IF_FAIL
- 
+
   for (i=0;i<ex_d->ex;i++)
   {
     Cudd_Quit(ex_d->env[i].mgr);
@@ -294,7 +294,7 @@ static foreign_t end(term_t arg1)
     free(ex_d->env[i].vars);
     free(ex_d->env[i].probs);
   }
-  
+
   free(ex_d->env);
   for (r=0;r<ex_d->nRules;r++)
   {
@@ -327,7 +327,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   ret=PL_get_pointer(arg2,(void **)&node);
   RETURN_IF_FAIL
   out=PL_new_term_ref();
- 
+
   if (!Cudd_IsConstant(node))
   {
     table=init_table(env->boolVars);
@@ -343,7 +343,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
       RETURN_IF_FAIL
     }
     else
-    {  
+    {
       ret=PL_put_float(out,0.0);
       RETURN_IF_FAIL
     }
@@ -364,7 +364,7 @@ so that it is not recomputed
   double * value_p;
   DdNode *nodekey,*T,*F;
 
-  comp=Cudd_IsComplement(node);   
+  comp=Cudd_IsComplement(node);
   comp=(comp && !comp_par) ||(!comp && comp_par);
   if (Cudd_IsConstant(node))
   {
@@ -423,7 +423,7 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   v->firstBoolVar=env->boolVars;
   env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
   env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
-  probTerm=PL_copy_term_ref(arg3); 
+  probTerm=PL_copy_term_ref(arg3);
   p0=1;
   for (i=0;i<v->nVal-1;i++)
   {
@@ -436,7 +436,7 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
     p0=p0*(1-p/p0);
   }
   env->boolVars=env->boolVars+v->nVal-1;
-  env->rules[v->nRule]= v->nVal; 
+  env->rules[v->nRule]= v->nVal;
 
   ret=PL_put_integer(out,env->nVars-1);
   RETURN_IF_FAIL
@@ -629,7 +629,7 @@ static foreign_t create_dot(term_t arg1, term_t arg2, term_t arg3)
   file = open_file(filename, "w");
   write_dot(env,node,file);
   fclose(file);
-  return TRUE; 
+  return TRUE;
 }
 
 static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
@@ -646,7 +646,7 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
   ret=PL_get_pointer(arg2,(void **)&node);
   RETURN_IF_FAIL
   out=PL_new_term_ref();
-  
+
 #ifndef _WIN32
   file=tmpfile();
 #else
@@ -656,7 +656,7 @@ static foreign_t create_dot_string(term_t arg1, term_t arg2, term_t arg3)
 #endif
   if (file==NULL) {perror("Error in temporary file opening");}
   write_dot(env,node,file);
-  
+
   if (fseek(file, 0L, SEEK_END) == 0) {
     /* Get the size of the file. */
     long bufsize = ftell(file);
@@ -695,7 +695,7 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
   {
     v=env->vars[i];
     for (b=0;b<v.nVal-1;b++)
-    {  
+    {
       inames[b+index]=(char *) malloc(sizeof(char)*20);
       strcpy(inames[b+index],"X");
       sprintf(numberVar,"%d",i);
@@ -712,7 +712,7 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
   {
     v=env->vars[i];
     for (b=0;b<v.nVal-1;b++)
-    {  
+    {
       free(inames[b+index]);
     }
     index=index+v.nVal-1;
@@ -775,8 +775,8 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
       BChild0=pf*(1-p);
       BChild1=pt*p;
       value_p=get_value(ex_d->nodesF,nodekey);
-      e0 = (*value_p)*BChild0; 
-      e1 = (*value_p)*BChild1; 
+      e0 = (*value_p)*BChild0;
+      e1 = (*value_p)*BChild1;
       mVarIndex=ex_d->env[nex].bVar2mVar[index];
       v=ex_d->env[nex].vars[mVarIndex];
       pos=index-v.firstBoolVar;
@@ -787,25 +787,25 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
       add_node(ex_d->nodesB,nodekey,res);
       position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
       position=position+1;
-//      boolVarIndex=Cudd_ReadInvPerm(ex_d->env[nex].mgr,position);//Returns the index of the variable currently in the i-th position of the order. 
+//      boolVarIndex=Cudd_ReadInvPerm(ex_d->env[nex].mgr,position);//Returns the index of the variable currently in the i-th position of the order.
       if (position<ex_d->env[nex].boolVars)
       {
         ex_d->sigma[position]=ex_d->sigma[position]+e0+e1;
       }
       if(!Cudd_IsConstant(T))
       {
-        index=Cudd_NodeReadIndex(T);  
+        index=Cudd_NodeReadIndex(T);
         position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
         ex_d->sigma[position]=ex_d->sigma[position]-e1;
       }
-      
+
       if(!Cudd_IsConstant(F))
       {
         index=Cudd_NodeReadIndex(F);
         position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
         ex_d->sigma[position]=ex_d->sigma[position]-e0;
       }
-    
+
       return res;
     }
   }
@@ -860,7 +860,7 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
   DdNode *T,*E,*nodereg;
   double *value_p,*value_p_T,*value_p_F,p;
 
-  if (Cudd_IsConstant(node)) 
+  if (Cudd_IsConstant(node))
   {
     return;
   }
@@ -879,7 +879,7 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
     {
       T = Cudd_T(node);
       E = Cudd_E(node);
-      if (!Cudd_IsConstant(T)) 
+      if (!Cudd_IsConstant(T))
       {
         value_p_T=get_value(ex_d->nodesF,T);
         if (value_p_T!= NULL)
@@ -897,7 +897,7 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
           NnodesToVisit[position]=NnodesToVisit[position]+1;
         }
       }
-      if (!Cudd_IsConstant(E)) 
+      if (!Cudd_IsConstant(E))
       {
         value_p_F=get_value(ex_d->nodesF,Cudd_Regular(E));
 
@@ -952,7 +952,7 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
     {
       T += ex_d->sigma[j];
       bVarIndex=Cudd_ReadInvPerm(ex_d->env[nex].mgr,j);
-      if (bVarIndex==-1)  
+      if (bVarIndex==-1)
       {
         bVarIndex=j;
       }
@@ -998,7 +998,7 @@ void Maximization(example_data * ex_d, double ** arrayprob)
       {
         arrayprob[r][i]=0;
       }
-      else 
+      else
         arrayprob[r][i]=eta_rule[i][1]/sum;
     }
   }
@@ -1010,7 +1010,7 @@ void Maximization(example_data * ex_d, double ** arrayprob)
       r=ex_d->env[e].vars[j].nRule;
       probs_rule=arrayprob[r];
       for(i=0;i<ex_d->rules[r]-1;i++)
-      {    
+      {
         ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=probs_rule[i];
       }
     }
@@ -1028,7 +1028,7 @@ static foreign_t randomize(term_t arg1)
   ret=PL_get_pointer(arg1,(void **)&ex_d);
   RETURN_IF_FAIL
 
-   
+
   Theta_rules=(double **)malloc(ex_d->nRules *sizeof(double *));
 
   for (j=0;j<ex_d->nRules;j++)
@@ -1056,7 +1056,7 @@ static foreign_t randomize(term_t arg1)
       theta=Theta_rules[rule];
       p0=1;
       for (i=0; i<ex_d->env[e].vars[j].nVal-1;i++)
-      {    
+      {
         ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=theta[i]/p0;
         p0=p0*(1-theta[i]/p0);
       }
@@ -1069,6 +1069,18 @@ static foreign_t randomize(term_t arg1)
   free(Theta_rules);
   PL_succeed;
 }
+static foreign_t rand_seed(term_t arg1)
+{
+  int seed;
+  int ret;
+
+  ret=PL_get_integer(arg1,&seed);
+  RETURN_IF_FAIL
+
+  srand((unsigned)seed);
+
+  PL_succeed;
+}
 
 static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,term_t arg6,term_t arg7,term_t arg8)
 {
@@ -1076,11 +1088,11 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   DdNode * node1,**nodes_ex;
   int r,i,j,iter,cycle,ret;
   long iter1;
-  size_t lenNodes; 
+  size_t lenNodes;
   example_data * ex_d;
   double CLL0= -2.2*pow(10,10); //-inf
-  double CLL1= -1.7*pow(10,8);  //+inf   
-  double p,p0,**eta_rule,ea,er; 
+  double CLL1= -1.7*pow(10,8);  //+inf
+  double p,p0,**eta_rule,ea,er;
   double ratio,diff;
   double **arrayprob; //new value of paramters after an iteration. One value ofr each rule and Bool var
 
@@ -1089,7 +1101,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   pair=PL_new_term_ref();
   head=PL_new_term_ref();
   nodesTerm=PL_copy_term_ref(arg2);
-  
+
   ret=PL_skip_list(nodesTerm,0,&lenNodes);
   if (ret!=PL_LIST) return FALSE;
 
@@ -1100,21 +1112,21 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   tail=PL_new_term_ref();
   pterm=PL_new_term_ref();
   nil=PL_new_term_ref();
-  compoundTerm=PL_new_term_ref();  
+  compoundTerm=PL_new_term_ref();
 
   ret=PL_get_float(arg3,&ea);
   RETURN_IF_FAIL
-  
+
   ret=PL_get_float(arg4,&er);
   RETURN_IF_FAIL
   ret=PL_get_integer(arg5,&iter);
   RETURN_IF_FAIL
   arrayprob=(double **) malloc(ex_d->nRules * sizeof(double *));
-  for (j=0;j<ex_d->nRules;j++)  
+  for (j=0;j<ex_d->nRules;j++)
   {
     arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
   }
- 
+
   nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
   ex_d->nodes_probs=(double *)malloc(lenNodes*sizeof(double));
   ex_d->example_prob=(double *)malloc(lenNodes*sizeof(double));
@@ -1138,7 +1150,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   if (iter==-1)
     iter1= 2147000000;
   else iter1=iter;
-  
+
   cycle=0;
   while  ( (diff>ea) && (ratio>er) && (cycle<iter1) )
   {
@@ -1280,6 +1292,7 @@ install_t install()
   PL_register_foreign("ret_prob",3,ret_prob,0);
   PL_register_foreign("em",8,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
+  PL_register_foreign("rand_seed",1,rand_seed,0);
 //  PL_register_foreign("deref",1,rec_deref,0);
 //  PL_register_foreign("garbage_collect",2,garbage_collect,0);
 //  PL_register_foreign("bdd_to_add",2,bdd_to_add,0);
@@ -1292,7 +1305,7 @@ FILE * open_file(char *filename, const char *mode)
 {
   FILE *fp;
 
-  if ((fp = fopen(filename, mode)) == NULL) 
+  if ((fp = fopen(filename, mode)) == NULL)
   {
     perror(filename);
     exit(1);
@@ -1306,7 +1319,7 @@ tablerow* init_table(int varcnt) {
   tablerow *tab;
 
   tab = (tablerow *) malloc(sizeof(rowel) * varcnt);
-  for (i = 0; i < varcnt; i++) 
+  for (i = 0; i < varcnt; i++)
   {
     tab[i].row = NULL;
     tab[i].cnt = 0;
@@ -1317,8 +1330,8 @@ tablerow* init_table(int varcnt) {
 
 void add_node(tablerow *tab, DdNode *node, double value) {
   int index = Cudd_NodeReadIndex(node);
-  
-  tab[index].row = (rowel *) realloc(tab[index].row, 
+
+  tab[index].row = (rowel *) realloc(tab[index].row,
     (tab[index].cnt + 1) * sizeof(rowel));
   tab[index].row[tab[index].cnt].key = node;
   tab[index].row[tab[index].cnt].value = value;
@@ -1329,15 +1342,15 @@ void add_or_replace_node(tablerow *tab, DdNode *node, double value)
 {
   int i;
   int index = Cudd_NodeReadIndex(node);
-  for(i = 0; i < tab[index].cnt; i++) 
+  for(i = 0; i < tab[index].cnt; i++)
   {
-    if (tab[index].row[i].key == node) 
+    if (tab[index].row[i].key == node)
     {
       tab[index].row[i].value=value;
       return;
     }
   }
-  tab[index].row = (rowel *) realloc(tab[index].row, 
+  tab[index].row = (rowel *) realloc(tab[index].row,
     (tab[index].cnt + 1) * sizeof(rowel));
   tab[index].row[tab[index].cnt].key = node;
   tab[index].row[tab[index].cnt].value = value;
@@ -1348,7 +1361,7 @@ double * get_value(tablerow *tab,  DdNode *node) {
   int i;
   int index = Cudd_NodeReadIndex(node);
 
-  for(i = 0; i < tab[index].cnt; i++) 
+  for(i = 0; i < tab[index].cnt; i++)
   {
     if (tab[index].row[i].key == node)
     {
@@ -1362,7 +1375,7 @@ void destroy_table(tablerow *tab,int varcnt)
 {
   int i;
 
-  for (i = 0; i < varcnt; i++) 
+  for (i = 0; i < varcnt; i++)
   {
     free(tab[i].row);
   }

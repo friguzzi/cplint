@@ -85,6 +85,7 @@ default_setting_sc(specialization,bottom).
 default_setting_sc(specialize_head,false).
 
 default_setting_sc(seed,rand(10,1231,3032)).
+default_setting_sc(c_seed,21344).
 default_setting_sc(score,ll).
 /* allowed values: ll aucpr */
 default_setting_sc(neg_ex,cw).
@@ -202,6 +203,8 @@ induce_rules(Folds,R):-
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   setrand(Seed),
+  M:local_setting(c_seed,CSeed),
+  rand_seed(CSeed),
   %set_prolog_flag(unknown,warning),
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
   append(L,DB),
@@ -466,6 +469,8 @@ induce_parameters(Folds,R):-
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   setrand(Seed),
+  M:local_setting(c_seed,CSeed),
+  rand_seed(CSeed),
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
   append(L,DB),
   assert(M:database(DB)),

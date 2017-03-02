@@ -32,6 +32,7 @@ test_all([H|T],F):-
 	copy_term(H,NH),
 	format("~a ~q.~n",[F,NH]),
 	call(H),!,
+	format("Result: ~a ~q.~n",[F,NH]),
 	test_all(T,F).
 
 

@@ -4,7 +4,7 @@ This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It reads probabilistic program andcomputes the probability of queries.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
 http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
 details.
 
@@ -20,8 +20,8 @@ details.
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
-  ret_prob/3,get_var_n/5,equality/4,or_list/3, 
-  em/8,randomize/1,
+  ret_prob/3,get_var_n/5,equality/4,or_list/3,
+  em/8,randomize/1,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
   op(1150,fx,action),
@@ -53,150 +53,150 @@ details.
 %  remove/3.
 
 
-/** 
+/**
  * init(++NumberOfRules:int,++NumberOfHeads:list,--Context:int) is det
  *
  * Initializes a data structure for performing parameter learning.
- * NumberOfRules is the number of rules of the model, 
+ * NumberOfRules is the number of rules of the model,
  * NumberOfHeads is a list of integers, one for each rule, indicating the number
  * of head atoms in each rule.
  * It returns an integer in Context that is a pointer to a
  * context data structure for performing the EM algorithm.
  */
 
-/** 
+/**
  * end(++Context:int) is det
  *
  * Terminates the context data structure for performing parameter learning.
- * Context is a pointer to a context data structure for performing 
- * the EM algorithm  
- * Context must have been returned by a call to init/3. 
+ * Context is a pointer to a context data structure for performing
+ * the EM algorithm
+ * Context must have been returned by a call to init/3.
  * It frees the memory occupied by Context.
  */
 
-/** 
+/**
  * init_bdd(++Context:int,--Environment:int) is det
  *
  * Initializes an enviroment data structure for storing a BDD.
- * Context is an integer that is a pointer to a context data structure 
- * created using init/3. 
- * Returns an integer Environment that is a pointer to a data structure for 
+ * Context is an integer that is a pointer to a context data structure
+ * created using init/3.
+ * Returns an integer Environment that is a pointer to a data structure for
  * storing a single BDD to be used for the EM algorithm.
  */
 
-/** 
+/**
  * end_bdd(++Environment:int) is det
  *
  * Terminates the evnironment data structure for storing a BDD.
- * Environment is a pointer to a data structure returned by init_bdd/2. 
+ * Environment is a pointer to a data structure returned by init_bdd/2.
  * It frees the memory occupied by the BDD.
  */
 
 
-/** 
+/**
  * init_test(++NumberOfRules:int,--Environment:int) is det
  *
  * Initializes a data structure for storing a single BDD.
- * NumberOfRules is the number of rules of the model, 
- * Returns an integer Environment that is a pointer to a data structure for 
+ * NumberOfRules is the number of rules of the model,
+ * Returns an integer Environment that is a pointer to a data structure for
  * storing a single BDD to be used for inference only (no learning).
  */
 
-/** 
+/**
  * end_test(++Environment:int) is det
  *
  * Terminates the environment data structure for storing a single BDD.
- * Environment is a pointer to a data structure returned by a call 
- * to init_test/2. 
+ * Environment is a pointer to a data structure returned by a call
+ * to init_test/2.
  */
 
-/** 
+/**
  * one(++Environment:int,--One:int) is det
  *
- * Returns in One a pointer to a BDD belonging to environment Environment 
- * representing the one Boolean function 
+ * Returns in One a pointer to a BDD belonging to environment Environment
+ * representing the one Boolean function
  */
 
-/** 
+/**
  * zero(++Environment:int,--Zero:int) is det
  *
- * Returns in Zero a pointer to a BDD belonging to environment Environment 
- * representing the zero Boolean function 
+ * Returns in Zero a pointer to a BDD belonging to environment Environment
+ * representing the zero Boolean function
  */
 
-/** 
+/**
  * and(++Environment:int,++A:int,++B:int,--AandB:int) is det
  *
- * Returns in AandB a pointer to a BDD belonging to environment Environment 
+ * Returns in AandB a pointer to a BDD belonging to environment Environment
  * representing the conjunction of BDDs A and B
  */
 
-/** 
+/**
  * or(++Environment:int,++A:int,++B:int,--AorB:int) is det
  *
- * Returns in AorB a pointer to a BDD belonging to environment Environment 
+ * Returns in AorB a pointer to a BDD belonging to environment Environment
  * representing the disjunction of BDDs A and B
  */
 
-/** 
+/**
  * ret_prob(++Environment:int,++BDD:int,-Probability:float) is det
  *
- * Returns the Probability of BDD belonging to environment Environment 
+ * Returns the Probability of BDD belonging to environment Environment
  */
 
-/** 
+/**
  * bdd_not(++Environment:int,++A:int,--NotA:int) is det
  *
- * Returns in NotA a pointer to a BDD belonging to environment Environment 
- * representing the negation of BDD A 
+ * Returns in NotA a pointer to a BDD belonging to environment Environment
+ * representing the negation of BDD A
  */
 
-/** 
+/**
  * equality(++Environment:int,++Variable:int,++Value:int,--BDD:int) is det
  *
- * Returns in BDD the BDD belonging to environment Environment 
+ * Returns in BDD the BDD belonging to environment Environment
  * that represents the equation Variable=Value.
  */
 
-/** 
+/**
  * em(++Context:int,++ListOfBDDs:list,++EA:float,++ER:float,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
  *
  * Performs EM learning.
  * Takes as input the Context, a list of BDDs each representing one example,
- * the minimum absolute difference EA and relative difference ER between the 
+ * the minimum absolute difference EA and relative difference ER between the
  * log likelihood of examples in two different iterations and the maximum number of iterations
  * Iterations.
  * Returns the final log likelihood of examples LL, the list of new Parameters
  * and a list with the final probabilities of each example.
  * Parameters is a list whose elements are of the form [N,P] where N is the rule
- * number and P is a list of probabilities, one for each head atom of rule N, 
+ * number and P is a list of probabilities, one for each head atom of rule N,
  * in reverse order.
  */
 
-/** 
+/**
  * randomize(++Context:int) is det
  *
  * Randomizes the parameters of random variables associated to Context.
  */
 
-/** 
+/**
  * add_var(++Environment:int,++NumberOfHeads:int,++ProbabilityDistribution:list, ++Rule:int,-Variable:int) is det.
  *
- * Returns in Variable the index of a new random variable in Environment with 
+ * Returns in Variable the index of a new random variable in Environment with
  * NumberOHeads values and probability distribution ProbabilityDistribution
  */
 
-/** 
+/**
  * create_dot_string(++Env:int,++BDD:int,-Dot:string) is det
- * 
+ *
  * The predicate returns the BDD in dot format.
  */
 
-/** 
+/**
  * create_dot(++Env:int,++BDD:int,++File:string) is det
- * 
+ *
  * The predicate writes the BDD in dot format to
- * to file FileName 
+ * to file FileName
  */
 
 default_setting_pita(epsilon_parsing, 1e-5).
@@ -213,7 +213,7 @@ default_setting_pita(depth_bound,false).  %if true, it limits the derivation of 
 default_setting_pita(depth,5).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-/** 
+/**
  * load(++File:atom) is det
  *
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
@@ -229,7 +229,7 @@ load(File):-
     )
   ).
 
-/** 
+/**
  * load_file(++FileWithExtension:atom) is det
  *
  * Loads FileWithExtension.
@@ -239,7 +239,7 @@ load_file(File):-
   user:consult(File),
   end_lpad_pred.
 
-/** 
+/**
  * s(:Query:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query.
@@ -262,12 +262,12 @@ s(M:Goal,P):-
   erase(Ref),
   member((Goal,P),L).
 
-/** 
+/**
  * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
  *
  * The predicate builds the BDD for Query and writes its dot representation
  * to file FileName and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements: 
+ * LV is a list of list, each sublist has three elements:
  * the mutlivalued variable number,
  * the rule number and the grounding substituion.
  */
@@ -279,12 +279,12 @@ bdd_dot_file(M:Goal,File,LV):-
   create_dot(Env,BDD,File),
   end_test(Env).
 
-/** 
+/**
  * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
  *
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements: 
+ * LV is a list of list, each sublist has three elements:
  * the mutlivalued variable number,
  * the rule number and the grounding substituion.
  */
@@ -297,7 +297,7 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
   end_test(Env).
 
 
-/** 
+/**
  * prob(:Query:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of Query
@@ -308,14 +308,14 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
 prob(M:Goal,P):-
   s(M:Goal,P).
 
-/** 
+/**
  * prob_bar(:Query:atom,-Probability:dict) is nondet
  *
  * The predicate computes the probability of Query
- * and returns it as a dict for rendering with c3 as a bar chart with 
- * a bar for the probability of Query true and a bar for the probability of 
+ * and returns it as a dict for rendering with c3 as a bar chart with
+ * a bar for the probability of Query true and a bar for the probability of
  * Query false.
- * If Query is not ground, it returns in backtracking all ground 
+ * If Query is not ground, it returns in backtracking all ground
  * instantiations of
  * Query together with their probabilities
  */
@@ -329,12 +329,12 @@ prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
-/** 
+/**
  * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
  *
  * The predicate computes the probability of Query given
  * Evidence
- * If Query/Evidence are not ground, it returns in backtracking all 
+ * If Query/Evidence are not ground, it returns in backtracking all
  * ground instantiations of
  * Query/Evidence together with their probabilities
  */
@@ -416,7 +416,7 @@ add_cons(G,C,M,(H,B,Ref),Ref1,(H:-B)):-
   G1=H,
   erase(Ref),
   M:assertz((H:-(C1,B)),Ref1).
-  
+
 
 get_const(Args,Constants,Constraint):-
   maplist(constr,Args,Constants,ConstraintL),
@@ -442,14 +442,14 @@ get_pred_const(do(Do0),AP0,AP):-
 ac(do(_)).
 nac(do(\+ _)).
 
-/** 
+/**
  * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
  *
  * The predicate computes the probability of the Query given Evidence
- * and returns it as a dict for rendering with c3 as a bar chart with 
- * a bar for the probability of Query true and a bar for the probability of 
+ * and returns it as a dict for rendering with c3 as a bar chart with
+ * a bar for the probability of Query true and a bar for the probability of
  * Query false given Evidence.
- * If Query /Evidence are not ground, it returns in backtracking all 
+ * If Query /Evidence are not ground, it returns in backtracking all
  * ground instantiations of
  * Query/Evidence together with their probabilities
  */
@@ -497,7 +497,7 @@ get_node(Goal,Env,B):- %with DB=false
   add_bdd_arg(Goal,Env,BDD,Goal1),
   (bagof(BDD,Goal1,L)*->
     or_list(L,Env,B)
-  ;  
+  ;
     zero(Env,B)
   ).
 
@@ -527,13 +527,13 @@ get_cond_node(Goal,Ev,Env,BGE,BE):- %with DB=false
   add_bdd_arg(Goal,Env,BDD,Goal1),
   (bagof(BDD,Goal1,L)*->
     or_list(L,Env,BG)
-  ;  
+  ;
     zero(Env,BG)
   ),
   add_bdd_arg(Ev,Env,BDDE,Ev1),
   (bagof(BDDE,Ev1,LE)*->
     or_list(LE,Env,BE)
-  ;  
+  ;
     zero(Env,BE)
   ),
   and(Env,BG,BE,BGE).
@@ -563,8 +563,8 @@ retract_all([H|T]):-
 /**
  * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
- * Returns the index Variable of the random variable associated to rule with 
- * index Rule, grouding substitution Substitution and head distribution 
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule, grouding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_var_n(Env,R,S,Probs0,V):-
@@ -574,7 +574,7 @@ get_var_n(Env,R,S,Probs0,V):-
       true
     ;
       length(Probs,L),
-      add_var(Env,L,Probs,R,V),    
+      add_var(Env,L,Probs,R,V),
       assert(v(R,S,V))
     )
   ;
@@ -583,7 +583,7 @@ get_var_n(Env,R,S,Probs0,V):-
 
 /**
  * msw(:Var:term,?Value:term,++Environment:int,--BDD:int) is det
- * 
+ *
  * Returns a BDD representing Var=Value.
  * This is a predicate for programs in the PRISM syntax
  */
@@ -602,7 +602,7 @@ msw(M:A,B,Env,BDD):-
 
 /**
  * msw(:Var:term,?Value:term,++Environment:int,--BDD:int,?DB:int) is det
- * 
+ *
  * Returns a BDD representing Var=Value when there is a depth bound on
  * derivations.
  * This is a predicate for programs in the PRISM syntax
@@ -729,7 +729,7 @@ process_body([],BDD,BDD,Vars,Vars,[],_Env,_Module).
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-  
+
 process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -758,7 +758,7 @@ process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-  
+
 process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -796,10 +796,10 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 
-process_head(HeadList, GroundHeadList) :- 
+process_head(HeadList, GroundHeadList) :-
   ground_prob(HeadList), !,
   process_head_ground(HeadList, 0, GroundHeadList).
-   
+
 process_head(HeadList0, HeadList):-
   get_probs(HeadList0,PL),
   foldl(minus,PL,1,PNull),
@@ -823,25 +823,25 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
   pita_input_mod(M),
-  M:local_pita_setting(epsilon_parsing, Eps), 
-  EpsNeg is - Eps, 
-  ProbLast > EpsNeg, 
+  M:local_pita_setting(epsilon_parsing, Eps),
+  EpsNeg is - Eps,
+  ProbLast > EpsNeg,
   (ProbLast > Eps ->
     Null = ['':ProbLast]
   ;
     Null = []
-  ). 
+  ).
 
-process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :- 
+process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
   (H=Head:ProbHead;H=ProbHead::Head),
   ProbHead1 is ProbHead,
-  ProbNext is Prob + ProbHead1, 
+  ProbNext is Prob + ProbHead1,
   process_head_ground(Tail, ProbNext, Next).
 
 
 ground_prob([]).
 
-ground_prob([_Head:ProbHead|Tail]) :-!, 
+ground_prob([_Head:ProbHead|Tail]) :-!,
   ground(ProbHead), % Succeeds if there are no free variables in the term ProbHead.
   ground_prob(Tail).
 
@@ -855,15 +855,15 @@ get_probs(Head, PL):-
 
 /*get_probs([], []).
 
-get_probs([_H:P|T], [P1|T1]) :- 
-  P1 is P, 
+get_probs([_H:P|T], [P1|T1]) :-
+  P1 is P,
   get_probs(T, T1).
 */
 
-/** 
+/**
  * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
  *
- * Returns in BDD a pointer to a BDD belonging to environment Environment 
+ * Returns in BDD a pointer to a BDD belonging to environment Environment
  * representing the disjunction of all the BDDs in ListOfBDDs
  */
 or_list([H],_Env,H):-!.
@@ -879,12 +879,12 @@ or_list1([H|T],Env,B0,B1):-
   or_list1(T,Env,B2,B1).
 
 
-/** 
+/**
  * set_pita(++Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
- * For a list of parameters see 
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  *
  */
@@ -893,12 +893,12 @@ set_pita(Parameter,Value):-
   retract(M:local_pita_setting(Parameter,_)),
   assert(M:local_pita_setting(Parameter,Value)).
 
-/** 
+/**
  * setting_pita(?Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
- * For a list of parameters see 
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or 
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_pita(P,V):-
@@ -910,24 +910,24 @@ extract_vars_list(L,[],V):-
   extract_vars_tree(L,T,T1),
   rb_keys(T1,V).
 
-extract_vars_term(Variable, Var0, Var1) :- 
-  var(Variable), !, 
+extract_vars_term(Variable, Var0, Var1) :-
+  var(Variable), !,
   (rb_lookup(Variable, Var0,_) ->
     Var1 = Var0
   ;
     rb_insert(Var0,Variable,1,Var1)
   ).
 
-extract_vars_term(Term, Var0, Var1) :- 
-  Term=..[_F|Args], 
+extract_vars_term(Term, Var0, Var1) :-
+  Term=..[_F|Args],
   extract_vars_tree(Args, Var0, Var1).
 
 
 
 extract_vars_tree([], Var, Var).
 
-extract_vars_tree([Term|Tail], Var0, Var1) :- 
-  extract_vars_term(Term, Var0, Var), 
+extract_vars_tree([Term|Tail], Var0, Var1) :-
+  extract_vars_term(Term, Var0, Var),
   extract_vars_tree(Tail, Var, Var1).
 
 
@@ -985,10 +985,10 @@ user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
-  Head = (_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  Head = (_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
@@ -1001,14 +1001,14 @@ user:term_expansion((Head :- Body), Clauses):-
   ;
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
    ).
-  
+
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive clause with more than one head atom senza depth_bound
-  Head = (_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  Head = (_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
@@ -1022,15 +1022,15 @@ user:term_expansion((Head :- Body), Clauses):-
     generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module)
   ).
 
-user:term_expansion((Head :- Body), []) :- 
+user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   (Head = (_:P);Head=(P::_)),
   ground(P),
-  P=:=0.0, !. 
+  P=:=0.0, !.
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
@@ -1038,36 +1038,36 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH -1|BodyList3],Body1),
   add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   prolog_load_context(module, M),pita_module(M),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  (Head = (H:_);Head=(_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  (Head = (H:_);Head=(_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
@@ -1081,14 +1081,14 @@ user:term_expansion((Head :- Body), Clauses) :-
     generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
   ).
 
-user:term_expansion((Head :- Body), Clauses) :- 
+user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  (Head = (H:_);Head = (_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
-  list2and(BodyList, Body), 
+  (Head = (H:_);Head = (_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
@@ -1101,44 +1101,44 @@ user:term_expansion((Head :- Body), Clauses) :-
   ;
     generate_clause(H,Env,Body2,VC,R,Probs,BDDAnd,0,Clauses,Module)
   ).
-  
-/*user:term_expansion((Head :- Body),Clauses) :- 
+
+/*user:term_expansion((Head :- Body),Clauses) :-
 % definite clause for db facts
-  prolog_load_context(module, M),pita_module(M),  
+  prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
   Clauses=(Head1 :- Body).
 */
-user:term_expansion((Head :- Body),Clauses) :- 
+user:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
-  prolog_load_context(module, M),pita_module(M),  
+  prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH-1|BodyList3],Body1),
   add_bdd_arg_db(Head,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- Body1).
- 
-user:term_expansion((Head :- Body),Clauses) :- 
+
+user:term_expansion((Head :- Body),Clauses) :-
 % definite clause senza DB
-  prolog_load_context(module, M),pita_module(M),  
+  prolog_load_context(module, M),pita_module(M),
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  list2and(BodyList, Body), 
+  list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
 
-user:term_expansion(Head,Clauses) :- 
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
-  Head=(_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  Head=(_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
 extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
@@ -1148,12 +1148,12 @@ extract_vars_list(HeadList,[],VC),
     generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
   ).
 
-user:term_expansion(Head,Clauses) :- 
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with more than one head atom senza db
-  Head=(_;_), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  Head=(_;_), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs), %**** test single_var
@@ -1163,13 +1163,13 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
   ).
 
-user:term_expansion(Head,Clauses) :- 
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
-  Head=(H:uniform(Var,D0)),!, 
+  Head=(H:uniform(Var,D0)),!,
   length(D0,Len),
   Prob is 1.0/Len,
   maplist(gen_head(H,Prob,Var),D0,HeadList),
@@ -1182,7 +1182,7 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 
-user:term_expansion(Head,Clauses) :- 
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -1198,15 +1198,15 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
   ).
 
-user:term_expansion(Head,[]) :- 
+user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
-  
-user:term_expansion(Head,Clause) :- 
+
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -1218,7 +1218,7 @@ user:term_expansion(Head,Clause) :-
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   Clause=(Head1 :- Body1).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -1229,14 +1229,14 @@ user:term_expansion(Head,Clause) :-
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:_);Head=(_::H)), !, 
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  (Head=(H:_);Head=(_::H)), !,
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
@@ -1247,13 +1247,13 @@ user:term_expansion(Head,Clause) :-
     Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
   ).
 
-user:term_expansion(Head,Clause) :- 
+user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pita_module(M),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head=(H:_);Head=(_::H)), !,
-  list2or(HeadListOr, Head), 
-  process_head(HeadListOr, HeadList), 
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(R),
   get_probs(HeadList,Probs),
@@ -1273,7 +1273,7 @@ user:term_expansion((:- set_sw(A,B)), []) :-!,
   set_sw(A,B).
 
 
-user:term_expansion(Head, (Head1:-one(Env,One))) :- 
+user:term_expansion(Head, (Head1:-one(Env,One))) :-
   prolog_load_context(module, M),pita_module(M),
   M:local_pita_setting(depth_bound,true),
 % definite fact with db
@@ -1281,7 +1281,7 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
   (Head\= end_of_file),!,
   add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
 
-user:term_expansion(Head, (Head1:-one(Env,One))) :- 
+user:term_expansion(Head, (Head1:-one(Env,One))) :-
   prolog_load_context(module, M),pita_module(M),
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
@@ -1289,7 +1289,7 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
   add_bdd_arg(Head,Env,One,_Module,Head1).
 
 
-/** 
+/**
  * begin_lpad_pred is det
  *
  * Initializes LPAD loading.
@@ -1299,7 +1299,7 @@ begin_lpad_pred:-
   pita_input_mod(M),
   assert(pita_module(M)).
 
-/** 
+/**
  * end_lpad_pred is det
  *
  * Terminates the cplint inference module.
@@ -1331,7 +1331,7 @@ builtin(G):-
   predicate_property(G,built_in).
 builtin(G):-
   predicate_property(G,imported_from(lists)).
- 
+
 average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
@@ -1369,4 +1369,3 @@ sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
-
