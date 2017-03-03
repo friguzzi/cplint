@@ -19,7 +19,8 @@ than \verb|epsilon_em_fraction|*(-current log likelihood), then EM stops
  maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.
 \item \verb|random_restarts_number| (values: integer, default value: 1, valid for EMBLEM, SLIPCOVER and LEMUR): number of random restarts of parameter EM learning
 \item \verb|random_restarts_REFnumber| (values: integer, default value: 1, valid for  SLIPCOVER and LEMUR): number of random restarts of parameter EM learning for refinements
-\item \verb|setrand| (values: rand(integer,integer,integer)): seed for the random functions, see SWI-Prolog manual for the allowed values
+\item \verb|seed| (values: seed(integer) or seed(random), default value \verb|seed(3032)|): seed for the Prolog random functions, see \href{http://www.swi-prolog.org/pldoc/man?predicate=set_random/1}{SWI-Prolog manual}
+\item \verb|c_seed| (values: unsigned integer, default value 21344)): seed for the C random functions
 \item \verb|logzero| (values: negative real, default value $\log(0.000001)$): value assigned to $\log 0$
 \item \verb|max_iter| (values: integer, default value: 10, valid for  SLIPCOVER): number of interations of beam search
 \item \verb|max_var| (values: integer, default value: 4, valid for 

@@ -84,7 +84,7 @@ default_setting_sc(specialization,bottom).
 /* allowed values: mode,bottom */
 default_setting_sc(specialize_head,false).
 
-default_setting_sc(seed,rand(10,1231,3032)).
+default_setting_sc(seed,seed(3032)).
 default_setting_sc(c_seed,21344).
 default_setting_sc(score,ll).
 /* allowed values: ll aucpr */
@@ -202,7 +202,7 @@ induce_rules(Folds,R):-
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
-  setrand(Seed),
+  set_random(Seed),
   M:local_setting(c_seed,CSeed),
   rand_seed(CSeed),
   %set_prolog_flag(unknown,warning),
@@ -289,7 +289,7 @@ to_dyn(M,P/A):-
  */
 sl(File):-
   setting_sc(seed,Seed),
-  setrand(Seed),
+  set_random(Seed),
   generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL),
   reconsult(FileL),
   load_models(FileKB,DB),
@@ -468,7 +468,7 @@ induce_parameters(Folds,R):-
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
-  setrand(Seed),
+  set_random(Seed),
   M:local_setting(c_seed,CSeed),
   rand_seed(CSeed),
   findall(Exs,(member(F,Folds),M:fold(F,Exs)),L),
