@@ -2922,6 +2922,9 @@ msw_weight(Values,Dist,V,W):-
 act(M,A/B):-
   M:(dynamic A/B).
 
+tab(A/B,A/B1):-
+  B1 is B + 2.
+
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
   list2and(L,Conj),
@@ -2937,6 +2940,12 @@ user:term_expansion((:- mc), []) :-!,
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
+
+user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+  mc_input_mod(_M),!,
+  list2and(L,Conj),
+  maplist(tab,L,L1),
+  list2and(L1,Conj1).
 
 user:term_expansion((:- begin_lpad), []) :-
   mc_input_mod(M),!,

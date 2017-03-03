@@ -948,6 +948,9 @@ act(M,A/B):-
   B1 is B + 2,
   M:(dynamic A/B1).
 
+tab(A/B,A/B1):-
+  B1 is B + 2.
+
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
   list2and(L,Conj),
@@ -961,6 +964,12 @@ user:term_expansion((:- pita), []) :-!,
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
+
+user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+  pita_input_mod(_M),!,
+  list2and(L,Conj),
+  maplist(tab,L,L1),
+  list2and(L1,Conj1).
 
 user:term_expansion((:- begin_plp), []) :-
   pita_input_mod(M),!,

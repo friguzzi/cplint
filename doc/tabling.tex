@@ -1,0 +1,35 @@
+\subsection{Tabling}
+You can also use tabling in inference to speed up the computation and/or avoid loops, see
+the \href{http://www.swi-prolog.org/pldoc/man?section=tabling}{SWI-Prolog manual}.
+
+To do so you have to use the \verb|tabling| library module and declare some of the predicates
+as tabled. The tabling declarations go after the \verb|:-pita.| or \verb|:- mc.| directives.
+
+For example, to compute the probability of paths in undirected graphs you can use
+the program (\href{http://cplint.lamping.unife.it/example/inference/path_tabling.pl}{\texttt{path\_tabling.pl}})
+\begin{verbatim}
+:- use_module(library(pita)).
+:- use_module(library(tabling)).
+:- pita.
+:- table path/2.
+:- begin_lpad.
+path(X,X).
+  path(X,Z),edge(Z,Y).
+edge(X,Y):-arc(X,Y).
+edge(X,Y):-arc(Y,X).
+arc(a,b):0.2.
+arc(b,e):0.5.
+arc(a,c):0.3.
+arc(c,d):0.4.
+arc(d,e):0.4.
+arc(a,e):0.1.
+:- end_lpad.
+\end{verbatim}
+Then you can compute the probability that \verb|a| and \verb|e| are connected with
+\begin{verbatim}
+prob(path(a,e),Prob).
+\end{verbatim}
+This programs has loops so if you run the above query without tabling \verb|pita| would loop forever.
+
+You can use tabling with both \verb|pita| and \verb|mcintyre|.
+
