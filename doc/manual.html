@@ -39,6 +39,7 @@ fabrizio.riguzzi@unife.it</h2>
 <li><a href="#causal">Causal Inference</a></li>
 <li><a href="#graphing">Graphing the Results</a></li>
 <li><a href="#parameters">Parameters</a></li>
+<li><a href="#tabling">Tabling</a></li>
 </ul></li>
 <li><a href="#learning">Learning</a><ul>
 <li><a href="#input">Input</a><ul>
@@ -525,6 +526,30 @@ mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
 </ul>
 <p>The example <a href="http://cplint.lamping.unife.it/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> shows that <code>mcintyre</code> can perform inference in presence of an infinite number of explanations for the goal. Differently from <code>pita</code>, no depth bound is necessary, as the probability of selecting the infinite computation branch is 0. However, also <code>mcintyre</code> may not terminate if loops not involving probabilistic predicates are present.</p>
 <p>If you want to set the seed of the random number generator, you can use SWI-Prolog predicates <code>setrand/1</code> and <code>getrand/1</code>, see <a href="http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1">SWI-Prolog manual</a>.</p>
+<h2 id="tabling">Tabling</h2>
+<p>You can also use tabling in inference to speed up the computation and/or avoid loops, see the <a href="http://www.swi-prolog.org/pldoc/man?section=tabling">SWI-Prolog manual</a>.</p>
+<p>To do so you have to use the <code>tabling</code> library module and declare some of the predicates as tabled. The tabling declarations go after the <code>:-pita.</code> or <code>:- mc.</code> directives.</p>
+<p>For example, to compute the probability of paths in undirected graphs you can use the program (<a href="http://cplint.lamping.unife.it/example/inference/path_tabling.pl"><code>path_tabling.pl</code></a>)</p>
+<pre><code>:- use_module(library(pita)).
+:- use_module(library(tabling)).
+:- pita.
+:- table path/2.
+:- begin_lpad.
+path(X,X).
+  path(X,Z),edge(Z,Y).
+edge(X,Y):-arc(X,Y).
+edge(X,Y):-arc(Y,X).
+arc(a,b):0.2.
+arc(b,e):0.5.
+arc(a,c):0.3.
+arc(c,d):0.4.
+arc(d,e):0.4.
+arc(a,e):0.1.
+:- end_lpad.</code></pre>
+<p>Then you can compute the probability that <code>a</code> and <code>e</code> are connected with</p>
+<pre><code>prob(path(a,e),Prob).</code></pre>
+<p>This programs has loops so if you run the above query without tabling <code>pita</code> would loop forever.</p>
+<p>You can use tabling with both <code>pita</code> and <code>mcintyre</code>.</p>
 <h1 id="learning">Learning</h1>
 <p>The following learning algorithms are available:</p>
 <ul>
@@ -805,7 +830,8 @@ fold(test,[490,491,...]).</code></pre>
 <li><p><code>iterREF</code> (values: integer, defualt value: 1, valid for SLIPCOVER and LEMUR): maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.</p></li>
 <li><p><code>random_restarts_number</code> (values: integer, default value: 1, valid for EMBLEM, SLIPCOVER and LEMUR): number of random restarts of parameter EM learning</p></li>
 <li><p><code>random_restarts_REFnumber</code> (values: integer, default value: 1, valid for SLIPCOVER and LEMUR): number of random restarts of parameter EM learning for refinements</p></li>
-<li><p><code>setrand</code> (values: rand(integer,integer,integer)): seed for the random functions, see SWI-Prolog manual for the allowed values</p></li>
+<li><p><code>seed</code> (values: seed(integer) or seed(random), default value <code>seed(3032)</code>): seed for the Prolog random functions, see <a href="http://www.swi-prolog.org/pldoc/man?predicate=set_random/1">SWI-Prolog manual</a></p></li>
+<li><p><code>c_seed</code> (values: unsigned integer, default value 21344)): seed for the C random functions</p></li>
 <li><p><code>logzero</code> (values: negative real, default value <span class="math inline">\(\log(0.000001)\)</span>): value assigned to <span class="math inline">\(\log 0\)</span></p></li>
 <li><p><code>max_iter</code> (values: integer, default value: 10, valid for SLIPCOVER): number of interations of beam search</p></li>
 <li><p><code>max_var</code> (values: integer, default value: 4, valid for SLIPCOVER and LEMUR): maximum number of distinct variables in a clause</p></li>
