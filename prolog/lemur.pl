@@ -26,7 +26,7 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,test_lm/7,test_prob_lm/6,induce_par/2,
+  induce_lm/2, sample/4,test_lm/7,test_prob_lm/6,
   op(500,fx,#),op(500,fx,'-#')]).
 
 /*slipcover_lemur.pl declarations start*/
@@ -4025,7 +4025,7 @@ user:term_expansion(At, A) :-
 :- multifile sandbox:safe_primitive/1.
 
 sandbox:safe_primitive(lemur:induce_lm(_,_)).
-%sandbox:safe_primitive(slipcover:induce(_,_)).
-%sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
-%sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_,_)).
+sandbox:safe_primitive(lemur:test_lm(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(lemur:test_prob_lm(_,_,_,_,_,_)).
 sandbox:safe_primitive(lemur:set_lm(_,_)).
+sandbox:safe_primitive(lemur:setting_lm(_,_)).
