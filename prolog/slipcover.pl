@@ -21,7 +21,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
 :-module(slipcover,[set_sc/2,setting_sc/2,
-  induce/2,induce_par/2,test/7,list2or/2,list2and/2,
+  induce/2,induce_par/2,test/7,test_r/5,list2or/2,list2and/2,
   sample/4,learn_params/5,
   op(500,fx,#),op(500,fx,'-#'),
   test_prob/6,rules2terms/2]).
@@ -151,6 +151,19 @@ induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
 test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   test_prob(P,TestFolds,_NPos,_NNeg,LL,LG),
   compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
+
+/**
+ * test_r(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-AUCPR:float) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, the area under the Precision Recall
+ * curve in AUCPR and draws R diagrams of the curves.
+ */
+test_r(P,TestFolds,LL,AUCROC,AUCPR):-
+  test_prob(P,TestFolds,_NPos,_NNeg,LL,LG),
+  compute_areas_diagrams_r(LG,AUCROC,AUCPR).
 
 /**
  * test_prob(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-LL:float,-Results:list) is det
@@ -3629,6 +3642,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
 sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(slipcover:test_r(_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 sandbox:safe_primitive(slipcover:setting_sc(_,_)).
