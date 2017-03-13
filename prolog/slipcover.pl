@@ -27,6 +27,9 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   test_prob/6,rules2terms/2]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
+:- if((absolute_file_name(library(cplint_r),F,[solutions(all),extensions([pl])]),exists_file(F))).
+:- use_module(library(cplint_r)).
+:- endif.
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).

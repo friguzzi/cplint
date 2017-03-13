@@ -26,7 +26,7 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,test_lm/7,test_prob_lm/6,
+  induce_lm/2, sample/4,test_lm/7,test_lm_r/5,test_prob_lm/6,
   op(500,fx,#),op(500,fx,'-#')]).
 
 /*slipcover_lemur.pl declarations start*/
@@ -165,6 +165,21 @@ test_lm(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   input_mod(M),
   assert(slipcover:input_mod(M)),
   test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR),
+  retract((slipcover:input_mod(M))).
+
+/**
+ * test_lm_r(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-AUCPR:float) is det
+ *
+ * The predicate takes as input in P a probabilistic program,
+ * tests P on the folds indicated in TestFolds and returns the
+ * log likelihood of the test examples in LL, the area under the Receiver
+ * Operating Characteristic curve in AUCROC, the area under the Precision Recall
+ * curve in AUCPR and draws R diagrams of the curves.
+ */
+test_lm_r(P,TestFolds,LL,AUCROC,AUCPR):-
+  input_mod(M),
+  assert(slipcover:input_mod(M)),
+  test_r(P,TestFolds,LL,AUCROC,AUCPR),
   retract((slipcover:input_mod(M))).
 
 /**
@@ -4026,6 +4041,7 @@ user:term_expansion(At, A) :-
 
 sandbox:safe_primitive(lemur:induce_lm(_,_)).
 sandbox:safe_primitive(lemur:test_lm(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(lemur:test_lm_r(_,_,_,_,_)).
 sandbox:safe_primitive(lemur:test_prob_lm(_,_,_,_,_,_)).
 sandbox:safe_primitive(lemur:set_lm(_,_)).
 sandbox:safe_primitive(lemur:setting_lm(_,_)).
