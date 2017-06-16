@@ -515,6 +515,13 @@ the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of
 \verb|ExampleList| containing couples \verb|Prob-Ex| where \verb|Ex| is \verb|a| for \verb|a| a positive example and \verb|\+(a)| for \verb|a| a negative example
 and \verb|Prob| is the probability of example \verb|a|.
 
+Then you can draw the curves in \texttt{cplint}  on SWISH using C3.js using
+\begin{verbatim}
+compute_areas_diagrams(+ExampleList:list,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+\end{verbatim}
+(from pack \href{http://www.swi-prolog.org/pack/list?p=auc}{\texttt{auc}})
+that takes as input a list \verb|ExampleList| of pairs probability-literal of the form that is returned by
+\verb|test_prob/6|.
 
 For example, to test on fold \verb|test| the program learned on fold \verb|train| you can run the query
 \begin{verbatim}
@@ -538,7 +545,11 @@ You can also draw the curves in \texttt{cplint}  on SWISH using R by loading lib
 \begin{verbatim}
 :- use_module(library(cplint_r)).
 \end{verbatim}
-and using the predicate
+and using 
+\begin{verbatim}
+?- test_r(<program>,<list of folds>,LL,AUCROC,AUCPR).
+\end{verbatim}
+or predicate
 \begin{verbatim}
 compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det
 \end{verbatim}

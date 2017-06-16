@@ -817,6 +817,9 @@ fold(test,[490,491,...]).</code></pre>
 <p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds.</p>
 <p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
 <p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
+<p>Then you can draw the curves in <code>cplint</code> on SWISH using C3.js using</p>
+<pre><code>compute_areas_diagrams(+ExampleList:list,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det</code></pre>
+<p>(from pack <a href="http://www.swi-prolog.org/pack/list?p=auc"><code>auc</code></a>) that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
 <p>For example, to test on fold <code>test</code> the program learned on fold <code>train</code> you can run the query</p>
 <pre><code>?- induce_par([train],P),
    test(P,[test],LL,AUCROC,ROC,AUCPR,PR).</code></pre>
@@ -829,7 +832,9 @@ fold(test,[490,491,...]).</code></pre>
 <p>in the code before <code>:- sc.</code> the curves will be shown as graphs using C3.js and the output program will be pretty printed.</p>
 <p>You can also draw the curves in <code>cplint</code> on SWISH using R by loading library <code>cplint_r</code> with</p>
 <pre><code>:- use_module(library(cplint_r)).</code></pre>
-<p>and using the predicate</p>
+<p>and using</p>
+<pre><code>?- test_r(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,AUCPR).</code></pre>
+<p>or predicate</p>
 <pre><code>compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
 <h2 id="parameters-1">Parameters</h2>
