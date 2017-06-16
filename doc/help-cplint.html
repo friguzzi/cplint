@@ -31,7 +31,10 @@
 <li><a href="#condq">Conditional Queries on Discrete Variables</a></li>
 <li><a href="#condqcont">Conditional Queries on Continuous Variables</a></li>
 <li><a href="#causal">Causal Inference</a></li>
-<li><a href="#graphing">Graphing the Results</a></li>
+<li><a href="#graphing">Graphing the Results</a><ul>
+<li><a href="#using-c3.js">Using C3.js</a></li>
+<li><a href="#using-r">Using R</a></li>
+</ul></li>
 <li><a href="#parameters">Parameters</a></li>
 <li><a href="#tabling">Tabling</a></li>
 </ul></li>
@@ -45,6 +48,7 @@
 <li><a href="#commands">Commands</a><ul>
 <li><a href="#parameter-learning">Parameter Learning</a></li>
 <li><a href="#structure-learning">Structure Learning</a></li>
+<li><a href="#testing">Testing</a></li>
 </ul></li>
 <li><a href="#parameters-1">Parameters</a></li>
 </ul></li>
@@ -427,7 +431,8 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
 <pre><code>?- prob(recovery,do(drug),P).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/simpson.swinb"><code>simpson.swinb</code></a> computes the probability of recovery of a patient given that the action of administering a drug has been performed.</p>
 <h2 id="graphing">Graphing the Results</h2>
-<p>In <code>cplint</code> on SWISH you can draw graphs for visualizing the results. There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.</p>
+<p>In <code>cplint</code> on SWISH you can draw graphs for visualizing the results either with <a href="http://www.c3js.org/">C3.js</a> or with <a href="https://www.r-project.org/">R</a>. Similar predicates are avaiiable for the two methods. There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.</p>
+<h3 id="using-c3.js">Using C3.js</h3>
 <p>You can draw the probability of a query being true and being false as a bar chart with <code>prob_bar(:Query:atom,-Probability:dict)</code> as in</p>
 <pre><code>?- prob_bar(heads(coin),P).</code></pre>
 <p>if you include</p>
@@ -482,7 +487,29 @@ mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
    mc_lw_sample_arg(value(0,X),
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,NBins,Chart).</code></pre>
-<p>from <a href="http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 samples of argument <code>X</code> of <code>value(0,X)</code> before and after observing <code>(value(1,9),value(2,8)</code> and draws the prior and posterior densities of the samples using a line chart.</p>
+<p>from <a href="http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 amples of argument <code>X</code> of <code>value(0,X)</code> before and after observing <code>(value(1,9),value(2,8)</code> and draws the prior and posterior densities of the samples using a line chart.</p>
+<h3 id="using-r">Using R</h3>
+<p>You have to load library <code>cplint_r</code> (a SWI-Prolog pack) with</p>
+<pre><code>:- use_module(library(cplint_r)).</code></pre>
+<p>Then you can use predicates</p>
+<pre><code>prob_bar_r/1, prob_bar_r/2,
+mc_prob_bar_r/2,
+mc_sample_bar_r/2,
+mc_sample_arg_bar_r/3,
+mc_sample_arg_first_bar_r/3,
+mc_rejection_sample_arg_bar_r/4,
+mc_mh_sample_arg_bar_r/5,
+mc_mh_sample_arg_bar_r/6</code></pre>
+<p>as direct analogues of those for C3.js.</p>
+<p>You also have</p>
+<pre><code>histogram_r(+List:list,+NBins:int) is det</code></pre>
+<p>that works as <code>histogram/3</code> but does not return the graph as an argument as the graph is printed with a different mechanism.</p>
+<pre><code>density_r(+List:list) is det</code></pre>
+<p>is like <code>density/3</code> but does not require the number of bins in input, they are determined by R.</p>
+<pre><code>densities_r(+PriorList:list,+PostList:list) is det</code></pre>
+<p>is like <code>densities/4</code> but does not require the number of bins in input.</p>
+<p>See <a href="https://frnmst.github.io/cplint_r/cplint_r.html" class="uri">https://frnmst.github.io/cplint_r/cplint_r.html</a> for a more detailed manual.</p>
+<p>See <a href="http://cplint.ml.unife.it/example/inference/gauss_mean_est_R.pl"><code>gauss_mean_est_R.pl</code></a> for an example of use of these predicates.</p>
 <h2 id="parameters">Parameters</h2>
 <p>The inference modules have a number of parameters in order to control their behavior. They can be set with the directive</p>
 <pre><code>:- set_pita(&lt;parameter&gt;,&lt;value&gt;).</code></pre>
@@ -767,6 +794,22 @@ fold(test,[490,491,...]).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the input program with updated parameters.</p>
 <p>For example <a href="http://cplint.lamping.unife.it/example/bongard.pl"><code>bongard.pl</code></a>, you can perform parameter learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_par([train],P).</code></pre>
+<h3 id="structure-learning">Structure Learning</h3>
+<p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
+<pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
+<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
+<p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
+<pre><code>?- induce([train],P).</code></pre>
+<p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described above.</p>
+<p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
+<p>To execute LEMUR, prepare an input file in the editor panel as indicated above and call</p>
+<pre><code>?- induce_lm(&lt;list of folds&gt;,P).</code></pre>
+<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
+<p>For example <a href="http://cplint.lamping.unife.it/example/lemur/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
+<pre><code>?- induce_lm([train],P).</code></pre>
+<p>A program can also be tested on a test set with <code>test_lm/7</code> or <code>test_prob_lm/6</code> that are LEMUR versions of the SLIPCOVER test predicates described above.</p>
+<p>Between two executions of <code>induce_lm/2</code> you should exit SWI-Prolog to have a clean database.</p>
+<h3 id="testing">Testing</h3>
 <p>A program can also be tested on a test set with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>or</p>
@@ -783,22 +826,12 @@ fold(test,[490,491,...]).</code></pre>
 <p>In <code>cplint</code> on SWISH, by including</p>
 <pre><code>:- use_rendering(c3).
 :- use_rendering(lpad).</code></pre>
-<p>in the code before <code>:- sc.</code> the curves will be shown as graphs and the output program will be pretty printed.</p>
-<h3 id="structure-learning">Structure Learning</h3>
-<p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
-<pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
-<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
-<p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
-<pre><code>?- induce([train],P).</code></pre>
-<p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described above.</p>
-<p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
-<p>To execute LEMUR, prepare an input file in the editor panel as indicated above and call</p>
-<pre><code>?- induce_lm(&lt;list of folds&gt;,P).</code></pre>
-<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
-<p>For example <a href="http://cplint.lamping.unife.it/example/lemur/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
-<pre><code>?- induce_lm([train],P).</code></pre>
-<p>A program can also be tested on a test set with <code>test_lm/7</code> or <code>test_prob_lm/6</code> that are LEMUR versions of the SLIPCOVER test predicates described above.</p>
-<p>Between two executions of <code>induce_lm/2</code> you should exit SWI-Prolog to have a clean database.</p>
+<p>in the code before <code>:- sc.</code> the curves will be shown as graphs using C3.js and the output program will be pretty printed.</p>
+<p>You can also draw the curves in <code>cplint</code> on SWISH using R by loading library <code>cplint_r</code> with</p>
+<pre><code>:- use_module(library(cplint_r)).</code></pre>
+<p>and using the predicate</p>
+<pre><code>compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det</code></pre>
+<p>that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>

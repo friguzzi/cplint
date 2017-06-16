@@ -2,10 +2,12 @@
 \label{graphing}
 
 In \texttt{cplint} on SWISH you can draw graphs
-for visualizing the results. There are two types 
+for visualizing the results either with \href{http://www.c3js.org/}{C3.js} or with \href{https://www.r-project.org/}{R}. Similar predicates are avaiiable for the two methods.
+ There are two types  
 of graphs: those that represent individual probability values with a bar chart and those that 
 visualize the results of sampling arguments.
 
+\subsubsection{Using C3.js}
 You can draw the probability of a query being true and 
 being false as a bar chart with \verb|prob_bar(:Query:atom,-Probability:dict)| as in
 \begin{verbatim}
@@ -132,5 +134,43 @@ Instead
    densities(L0,L,NBins,Chart).
 \end{verbatim}
 from \href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
-takes 1000 samples of argument \verb|X| of \verb|value(0,X)| before and after observing
+takes 1000 amples of argument \verb|X| of \verb|value(0,X)| before and after observing
 \verb|(value(1,9),value(2,8)| and draws the prior and posterior densities of the samples using a line chart.
+
+\subsubsection{Using R}
+You have to load library \texttt{cplint\_r}  (a SWI-Prolog pack) with
+\begin{verbatim}
+:- use_module(library(cplint_r)).
+\end{verbatim}
+Then you can use predicates 
+\begin{verbatim}
+prob_bar_r/1, prob_bar_r/2,
+mc_prob_bar_r/2,
+mc_sample_bar_r/2,
+mc_sample_arg_bar_r/3,
+mc_sample_arg_first_bar_r/3,
+mc_rejection_sample_arg_bar_r/4,
+mc_mh_sample_arg_bar_r/5,
+mc_mh_sample_arg_bar_r/6
+\end{verbatim}
+as direct analogues of those for C3.js.
+
+You also have 
+\begin{verbatim}
+histogram_r(+List:list,+NBins:int) is det
+\end{verbatim}
+that works as \texttt{histogram/3} but does not return the graph as an argument as the graph is
+printed with a different mechanism.
+\begin{verbatim}
+density_r(+List:list) is det
+\end{verbatim}
+is like \texttt{density/3} but does not require the number of bins in input, they are determined
+by R.
+\begin{verbatim}
+densities_r(+PriorList:list,+PostList:list) is det
+\end{verbatim}
+is like \texttt{densities/4} but does not require the number of bins in input.
+
+See \url{https://frnmst.github.io/cplint_r/cplint_r.html} for a more detailed manual.
+
+See \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est_R.pl}{\texttt{gauss\_mean\_est\_R.pl}} for an example of use of these predicates.

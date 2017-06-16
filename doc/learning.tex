@@ -452,42 +452,6 @@ perform parameter learning on the \verb|train| fold with
 \begin{verbatim}
 ?- induce_par([train],P).
 \end{verbatim}
-A program can also be tested on a test set with
-\begin{verbatim}
-?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
-\end{verbatim}
-or
-\begin{verbatim}
-?- test_prob(<program>,<list of folds>,LL,NPos,NNeg,ExampleList).
-\end{verbatim}
-where \verb|<program>| is a list of terms representing clauses and
-\verb|<list of folds>| is a list of folds.
-
-\verb|test/7| returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
-the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
-
-\verb|test_prob/6| returns the log likelihood of the test examples in \verb|LL|, the numbers of positive and negative examples in \verb|NPos| and \verb|NNeg| and the list 
-\verb|ExampleList| containing couples \verb|Prob-Ex| where \verb|Ex| is \verb|a| for \verb|a| a positive example and \verb|\+(a)| for \verb|a| a negative example
-and \verb|Prob| is the probability of example \verb|a|.
-
-
-For example, to test on fold \verb|test| the program learned on fold \verb|train| you can run the query
-\begin{verbatim}
-?- induce_par([train],P),
-   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
-\end{verbatim}
-Or you can test the input program on the fold \verb|test| with
-\begin{verbatim}
-?- in(P),
-   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
-\end{verbatim}
-In \verb|cplint| on SWISH, by including
-\begin{verbatim}
-:- use_rendering(c3).
-:- use_rendering(lpad).
-\end{verbatim}
-in the code before \verb|:- sc.| the curves will be shown as graphs and the output program will be pretty printed.
-
 
 
 \subsubsection{Structure Learning}
@@ -530,4 +494,53 @@ described above.
 Between two executions of \verb|induce_lm/2| you should exit SWI-Prolog to have a 
 clean database.
 
+\subsubsection{Testing}
 
+
+A program can also be tested on a test set with
+\begin{verbatim}
+?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+or
+\begin{verbatim}
+?- test_prob(<program>,<list of folds>,LL,NPos,NNeg,ExampleList).
+\end{verbatim}
+where \verb|<program>| is a list of terms representing clauses and
+\verb|<list of folds>| is a list of folds.
+
+\verb|test/7| returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
+the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
+
+\verb|test_prob/6| returns the log likelihood of the test examples in \verb|LL|, the numbers of positive and negative examples in \verb|NPos| and \verb|NNeg| and the list 
+\verb|ExampleList| containing couples \verb|Prob-Ex| where \verb|Ex| is \verb|a| for \verb|a| a positive example and \verb|\+(a)| for \verb|a| a negative example
+and \verb|Prob| is the probability of example \verb|a|.
+
+
+For example, to test on fold \verb|test| the program learned on fold \verb|train| you can run the query
+\begin{verbatim}
+?- induce_par([train],P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+Or you can test the input program on the fold \verb|test| with
+\begin{verbatim}
+?- in(P),
+   test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
+\end{verbatim}
+In \verb|cplint| on SWISH, by including
+\begin{verbatim}
+:- use_rendering(c3).
+:- use_rendering(lpad).
+\end{verbatim}
+in the code before \verb|:- sc.| the curves will be shown as graphs using C3.js and the output program will be pretty printed.
+
+You can also draw the curves in \texttt{cplint}  on SWISH using R by loading library
+\texttt{cplint\_r}  with
+\begin{verbatim}
+:- use_module(library(cplint_r)).
+\end{verbatim}
+and using the predicate
+\begin{verbatim}
+compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det
+\end{verbatim}
+that takes as input a list \verb|ExampleList| of pairs probability-literal of the form that is returned by
+\verb|test_prob/6|.
