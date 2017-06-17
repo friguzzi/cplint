@@ -800,17 +800,17 @@ fold(test,[490,491,...]).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
 <p>For example <a href="http://cplint.lamping.unife.it/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
-<p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described above.</p>
+<p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described below.</p>
 <p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <p>To execute LEMUR, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>?- induce_lm(&lt;list of folds&gt;,P).</code></pre>
 <p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
 <p>For example <a href="http://cplint.lamping.unife.it/example/lemur/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_lm([train],P).</code></pre>
-<p>A program can also be tested on a test set with <code>test_lm/7</code> or <code>test_prob_lm/6</code> that are LEMUR versions of the SLIPCOVER test predicates described above.</p>
+<p>A program can also be tested on a test set with <code>test_lm/7</code> or <code>test_prob_lm/6</code> that are LEMUR versions of the SLIPCOVER test predicates described below.</p>
 <p>Between two executions of <code>induce_lm/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <h3 id="testing">Testing</h3>
-<p>A program can also be tested on a test set with</p>
+<p>A program can also be tested on a test set in SLIPCOVER with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>or</p>
 <pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,LL,NPos,NNeg,ExampleList).</code></pre>
@@ -837,6 +837,11 @@ fold(test,[490,491,...]).</code></pre>
 <p>or predicate</p>
 <pre><code>compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
+<p>In LEMUR you can use</p>
+<pre><code>test_lm/7
+test_prob_lm/6
+test_lm_r/5</code></pre>
+<p>that are the direct analogues of those for SLIPCOVER.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
 <pre><code>:- set_sc(&lt;parameter&gt;,&lt;value&gt;).</code></pre>

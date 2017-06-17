@@ -469,7 +469,7 @@ For example \href{http://cplint.lamping.unife.it/example/learning/bongard.pl}{\t
 ?- induce([train],P).
 \end{verbatim}
 A program can also be tested on a test set with \verb|test/7| or \verb|test_prob/6| as
-described above.
+described below.
 
 Between two executions of \verb|induce/2| you should exit SWI-Prolog to have a 
 clean database.
@@ -489,7 +489,7 @@ For example \href{http://cplint.lamping.unife.it/example/lemur/bongard.pl}{\text
 \end{verbatim}
 A program can also be tested on a test set with \verb|test_lm/7| or \verb|test_prob_lm/6| that are LEMUR versions of the SLIPCOVER test 
 predicates
-described above.
+described below.
 
 Between two executions of \verb|induce_lm/2| you should exit SWI-Prolog to have a 
 clean database.
@@ -497,7 +497,7 @@ clean database.
 \subsubsection{Testing}
 
 
-A program can also be tested on a test set with
+A program can also be tested on a test set in SLIPCOVER with
 \begin{verbatim}
 ?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
 \end{verbatim}
@@ -555,3 +555,12 @@ compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det
 \end{verbatim}
 that takes as input a list \verb|ExampleList| of pairs probability-literal of the form that is returned by
 \verb|test_prob/6|.
+
+In LEMUR you can use
+\begin{verbatim}
+test_lm/7
+test_prob_lm/6
+test_lm_r/5
+\end{verbatim}
+that are the direct analogues of those for SLIPCOVER.
+
