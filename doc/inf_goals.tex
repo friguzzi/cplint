@@ -78,6 +78,16 @@ that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
 
 You can sample arguments of queries also with
 \begin{verbatim}
+mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+\end{verbatim}
+that samples \verb|Query| a number of \verb|Samples| times 
+The predicate returns in \verb|Values| a list of values
+of verb|Arg|  returned as the first answer by \verb|Query|  in
+a world sampled at random.
+The value is \verb|failure| if the query fails.
+
+The predicate
+\begin{verbatim}
 mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list).
 \end{verbatim}
 samples \verb|Query| a number of \verb|Samples| times 
@@ -89,16 +99,16 @@ returning that value.
 \verb|mc_sample_arg_first/4| differs from \verb|mc_sample_arg/4| because the first just computes the first
 answer of the query for each sampled world.
 
-%Alternatively, you can use
-%\begin{verbatim}
-%mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list)
-%\end{verbatim}
-%that samples \verb|Query| a number of \verb|Samples| times 
-%and returns in \verb|Values| a list of couples \verb|V-N| where 
-%\verb|V| is a value sampled with uniform probability from those returned 
-%by \verb|Query| in a world sampled at random and \verb|N| is the number of samples
-%returning that value.
-%\verb|V| is failure if the query fails.
+The predicate
+\begin{verbatim}
+mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list)
+\end{verbatim}
+ samples \verb|Query| a number of \verb|Samples| times 
+and returns in \verb|Values| a list of couples \verb|V-N| where 
+\verb|V| is a value sampled with uniform probability from those returned 
+by \verb|Query| in a world sampled at random and \verb|N| is the number of samples
+returning that value.
+\verb|V| is failure if the query fails.
 
 Finally, you can compute expectations with 
 \begin{verbatim}

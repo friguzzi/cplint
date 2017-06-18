@@ -1879,11 +1879,10 @@ sample_backtracking(L,_El,El):-
  *
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
- * The predicate returns in Values a list of couples V-N where
- * V is the value of Arg returned as the first answer by Query in
- * a world sampled at random and N is the number of samples
- * returning that value.
- * V is failure if the query fails.
+ * The predicate returns in Values a list of values
+ * of Arg returned as the first answer by Query in
+ * a world sampled at random.
+ * The value is failure if the query fails.
  */
 mc_sample_arg_raw(M:Goal,S,Arg,Values):-
   sample_arg_raw(S,M:Goal,Arg,Values),
