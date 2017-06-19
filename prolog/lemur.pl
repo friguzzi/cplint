@@ -44,6 +44,7 @@
 :- set_prolog_flag(single_var_warnings,on).
 :- set_prolog_flag(unknown,warning).
 
+:- dynamic db/1.
 /* :- [dv_lemur].
 	declarations start
 define the depth of a variable appearing in a clause A B ^ : : : ^ Br as follows.

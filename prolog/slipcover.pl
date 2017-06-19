@@ -27,7 +27,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   test_prob/6,rules2terms/2]).
 %:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
-:- if((absolute_file_name(library(cplint_r),F,[solutions(all),extensions([pl])]),exists_file(F))).
+%:- if((absolute_file_name(library(cplint_r),F,[solutions(all),extensions([pl])]),exists_file(F))).
+:- if(current_predicate(swish_config:config/2)).
 :- use_module(library(cplint_r)).
 :- endif.
 :-use_module(library(lists)).
@@ -43,7 +44,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 %:-multifile setting_sc/2.
 %:-use_module(library(sandbox)).
 
-
+:- dynamic db/1.
 
 
 :- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
