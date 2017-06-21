@@ -44,6 +44,7 @@ details.
   sample_geometric/4,
   sample_gamma/5,
   sample_poisson/4,
+  sample_binomial/5,
   sample_beta/5,
   sample_discrete/4,
   sample_head/4,
@@ -691,6 +692,9 @@ initial_sample(_M:sample_discrete(R,VC,D,S)):-!,
 
 initial_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
   sample_poisson(R,VC,Lambda,S).
+
+initial_sample(_M:sample_binomial(R,VC,N,P,S)):-!,
+  sample_poisson(R,VC,N,P,S).
 
 initial_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
   sample_beta(R,VC,Alpha,Beta,S).
@@ -1457,6 +1461,9 @@ lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
 lw_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
   sample_poisson(R,VC,Lambda,S).
 
+lw_sample(_M:sample_binomial(R,VC,N,P,S)):-!,
+  sample_binomial(R,VC,N,P,S).
+
 lw_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
   sample_beta(R,VC,Alpha,Beta,S).
 
@@ -1563,6 +1570,15 @@ lw_sample_weight(_M:sample_poisson(R,VC,Lambda,S),W0,W):-!,
     W=W0
   ;
     poisson_prob(Lambda,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_binomial(R,VC,N,P,S),W0,W):-!,
+  (var(S)->
+    sample_binomial(R,VC,N,P,S),
+    W=W0
+  ;
+    binomial_prob(N,P,S,D),
     W is W0*D
    ).
 
@@ -2364,6 +2380,49 @@ fact(N,F0,F):-
   F1 is F0*N,
   N1 is N-1,
   fact(N1,F1,F).
+
+/**
+ * sample_binomial(+R:int,+VC:list,+N:int,+P:float,-S:int) is det
+ *
+ * Returns in S a sample for a binomial distributed variable with parameters
+ * N and P associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_binomial(R,VC,_N,_P,S):-
+  recorded(R,sampled(VC,S)),!.
+
+sample_binomial(R,VC,N,P,S):-
+  binomial(N,P,S),
+  recorda(R,sampled(VC,S)).
+
+/**
+ * binomial(+N:int,+P:float,-S:int) is det
+ *
+ * samples a value from a binomial probability distribution with parameters
+ * N and P and returns it in S.
+ */
+binomial(N,P,X):-
+  Pr0 is (1-P)^N,
+  random(U),
+  binomial_cycle(0,X,N,P,Pr0,Pr0,U).
+
+binomial_cycle(X,X,_N,_P,_Pr,CPr,U):-
+  U=<CPr,!.
+
+binomial_cycle(X0,X,N,P,Pr0,CPr0,U):-
+  X1 is X0+1,
+  Pr is Pr0*P*(N-X0)/(X1*(1-P)),
+  CPr is CPr0+Pr,
+  binomial_cycle(X1,X,N,P,Pr,CPr,U).
+
+binomial_prob(N,P,X,Pr):-
+  fact(N,1,FN),
+  fact(X,1,FX),
+  N_X is N-X,
+  fact(N_X,1,FN_X),
+  Pr is P^X*(1-P)^N_X*FN/(FX*FN_X).
+
 /**
  * sample_dirichlet(+R:int,+VC:list,+Par:list,-S:float) is det
  *
@@ -3015,6 +3074,20 @@ user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~binomial(N,P)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-Body,sample_binomial(R,[],N,P,Var))
+  ;
+    Clause=(H1:-Body,sample_binomial(R,VC,N,P,Var))
+  ).
+
+user:term_expansion((Head:=Body),Clause) :-
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
@@ -3159,6 +3232,22 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_poisson(R,[],Lambda,Var))
   ;
     Clause=(H:-Body,sample_poisson(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion((Head:-Body),Clause) :-
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:A),
+  nonvar(A),
+  Head=(H:binomial(Var,N,P)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_binomial(R,[],N,P,Var))
+  ;
+    Clause=(H:-Body,sample_binomial(R,VC,N,P,Var))
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3474,6 +3563,20 @@ user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_module(M),
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~binomial(N,P)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-sample_binomial(R,[],N,P,Var))
+  ;
+    Clause=(H1:-sample_binomial(R,VC,N,P,Var))
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
   length(D0,Len),
@@ -3614,6 +3717,22 @@ user:term_expansion(Head,Clause) :-
     Clause=(H:-sample_poisson(R,[],Lambda,Var))
   ;
     Clause=(H:-sample_poisson(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_module(M),
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:A),
+  nonvar(A),
+  Head=(H:binomial(Var,N,P)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_binomial(R,[],N,P,Var))
+  ;
+    Clause=(H:-sample_binomial(R,VC,N,P,Var))
   ).
 
 user:term_expansion(Head,Clause) :-
