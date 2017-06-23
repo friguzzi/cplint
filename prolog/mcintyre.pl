@@ -2402,6 +2402,8 @@ sample_binomial(R,VC,N,P,S):-
  * samples a value from a binomial probability distribution with parameters
  * N and P and returns it in S.
  */
+binomial(N,1.0,N):-!.
+
 binomial(N,P,X):-
   Pr0 is (1-P)^N,
   random(U),
