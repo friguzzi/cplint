@@ -34,7 +34,7 @@ bddem.$(SOEXT): bddem.o
 	if test $(SWIARCH) == x64-win64 -o $(SWIARCH) == i386-win32 ; then \
   $(CC) bddem.o -static-libgcc -static-libstdc++  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
    else  \
-     if test $(SWIARCH) ==  x86_64-darwin16.0.0 ; then \
+     if [[ $(SWIARCH) ==  *darwin* ]] ;  then \
   $(CC) bddem.o  $(LDFLAGS) -lswipl -o bddem.$(SOEXT) ;\
   else  \
   $(CC) -export-dynamic bddem.o  $(LDFLAGS) -o bddem.$(SOEXT) ;\
