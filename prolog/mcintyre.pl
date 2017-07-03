@@ -1193,7 +1193,7 @@ particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
   particle_sample_gl(K1,S,M:Goal,M:Evidence,Arg,I,L).
 
 particle_sample_first_gl(K,K,M:_Goals,_Ev,_Arg,L):-!,
-  get_values(M:1,L0),
+  get_values(M,1,L0),
   foldl(agg_val,L0,0,Sum),
   Norm is K/Sum,
   maplist(norm(Norm),L0,L).
