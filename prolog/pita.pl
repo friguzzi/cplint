@@ -1353,8 +1353,6 @@ average(L,Av):-
 
 :- multifile sandbox:safe_primitive/1.
 
-sandbox:safe_primitive(pita:set_pita(_,_)).
-sandbox:safe_primitive(pita:setting_pita(_,_)).
 sandbox:safe_primitive(pita:set_sw(_,_)).
 /*sandbox:safe_primitive(pita:init(_,_,_)).
 sandbox:safe_primitive(pita:init_bdd(_,_)).
@@ -1383,3 +1381,5 @@ sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
+sandbox:safe_meta(pita:set_pita(_,_),[]).
+sandbox:safe_meta(pita:setting_pita(_,_),[]).
