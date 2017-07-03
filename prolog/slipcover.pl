@@ -52,6 +52,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate induce(:,-).
 :- meta_predicate induce_rules(:,-).
 :- meta_predicate induce_par(:,-).
+:- meta_predicate test(:,+,-,-,-,-,-).
+:- meta_predicate test_prob(:,+,-,-,-,-).
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
@@ -181,9 +183,9 @@ test_r(P,TestFolds,LL,AUCROC,AUCPR):-
  * in NNeg, the log likelihood in LL
  * and in Results a list containing the probabilistic result for each query contained in TestFolds.
  */
-test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
+test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2('Testing\n'),
-  input_module(M),
+%  input_module(M),
   make_dynamic(M),
   %gtrace,
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
@@ -3635,9 +3637,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 
 sandbox:safe_primitive(slipcover:induce_par(_,_)).
 sandbox:safe_primitive(slipcover:induce(_,_)).
-sandbox:safe_primitive(slipcover:test(_,_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:test_r(_,_,_,_,_)).
-sandbox:safe_primitive(slipcover:test_prob(_,_,_,_,_,_)).
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 sandbox:safe_primitive(slipcover:setting_sc(_,_)).
 
@@ -3664,6 +3664,9 @@ sandbox:safe_primitive(slipcover:equality(_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(slipcover:get_node(_,_), []).
+sandbox:safe_meta(slipcover:test_prob(_,_,_,_,_,_), []).
+sandbox:safe_meta(slipcover:test(_,_,_,_,_,_,_), []).
+
 
 */
 test_no_area(TestSet,NPos,NNeg,CLL,Results):-
