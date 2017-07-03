@@ -49,6 +49,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate induce(:,-).
 :- meta_predicate induce_rules(:,-).
 :- meta_predicate induce_par(:,-).
+:- meta_predicate induce_parameters(:,-).
 :- meta_predicate test(:,+,-,-,-,-,-).
 :- meta_predicate test_prob(:,+,-,-,-,-).
 
@@ -170,7 +171,6 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
 test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2('Testing\n'),
 %  input_module(M),
-  make_dynamic(M),
   %gtrace,
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
@@ -205,7 +205,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
 induce_rules(M:Folds,R):-
 %tell(ciao),
 %  input_module(M),
-  make_dynamic(M),
+%  make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -471,7 +471,7 @@ induce_par(Folds,ROut):-
 
 induce_parameters(M:Folds,R):-
   %input_module(M),
-  make_dynamic(M),
+%  make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -3619,8 +3619,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
 :- multifile sandbox:safe_primitive/1.
 
 
-sandbox:safe_primitive(slipcover:induce_par(_,_)).
-sandbox:safe_primitive(slipcover:induce(_,_)).
+
 sandbox:safe_primitive(slipcover:set_sc(_,_)).
 sandbox:safe_primitive(slipcover:setting_sc(_,_)).
 
@@ -3643,15 +3642,17 @@ sandbox:safe_primitive(slipcover:or(_,_,_)).
 sandbox:safe_primitive(slipcover:bdd_not(_,_)).
 sandbox:safe_primitive(slipcover:add_var(_,_,_,_)).
 sandbox:safe_primitive(slipcover:equality(_,_,_)).
-
+*/
 :- multifile sandbox:safe_meta/2.
 
+sandbox:safe_meta(slipcover:induce_par(_,_) ,[]).
+sandbox:safe_meta(slipcover:induce(_,_), []).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 sandbox:safe_meta(slipcover:test_prob(_,_,_,_,_,_), []).
 sandbox:safe_meta(slipcover:test(_,_,_,_,_,_,_), []).
 
 
-*/
+
 test_no_area(TestSet,NPos,NNeg,CLL,Results):-
 %  S= user_output,
 %  SA= user_output,
@@ -4244,12 +4245,13 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3)),
   style_check(-discontiguous).
 
-/*
+
 user:term_expansion(end_of_file, end_of_file) :-!,
   prolog_load_context(module, M),
-  retractall(input_mod(M)),
+  make_dynamic(M),
+%  retractall(input_mod(M)),
   style_check(+discontiguous).
-*/
+
 
 user:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
