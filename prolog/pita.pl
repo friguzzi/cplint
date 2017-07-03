@@ -20,7 +20,7 @@ details.
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
-  ret_prob/3,get_var_n/5,equality/4,or_list/3,
+  ret_prob/3,get_var_n/6,equality/4,or_list/3,
   em/8,randomize/1,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
@@ -53,11 +53,11 @@ details.
 
 :- style_check(-discontiguous).
 
-:- thread_local v/3,rule_n/1,pita_input_mod/1,local_pita_setting/2.
+:- thread_local rule_n/1,pita_input_mod/1,local_pita_setting/2.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
-  get_var_n/5,add_var/5,equality/4.*/
+  get_var_n/6,add_var/5,equality/4.*/
 %  remove/3.
 
 
@@ -364,7 +364,7 @@ prob(M:Goal,M:Evidence,P):-
     findall((Goal,P),get_cond_p(M:Goal1,M:EvNoAct,Env,P),L)
   ),
   end_test(Env),
-  retractall('$ev'(_,_)),
+  retractall(M:'$ev'),
   maplist(erase,UpdatedClausesRefs),
   erase(Ref),
   maplist(M:assertz,ClausesToReAdd),
@@ -491,7 +491,7 @@ load(FileIn,C1,R):-
 get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
-  retractall(v(_,_,_)),
+  retractall(M:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
@@ -500,7 +500,7 @@ get_node(M:Goal,Env,B):-
   ).
 
 get_node(M:Goal,Env,B):- %with DB=false
-  retractall(v(_,_,_)),
+  retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
@@ -511,7 +511,7 @@ get_node(M:Goal,Env,B):- %with DB=false
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
-  retractall(v(_,_,_)),
+  retractall(M:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,BG)
@@ -529,7 +529,7 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
 
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
-  retractall(v(_,_,_)),
+  retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,BG)
@@ -566,21 +566,21 @@ retract_all([H|T]):-
   retract_all(T).
 
 /**
- * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
+ * get_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
  * index Rule, grouding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
-get_var_n(Env,R,S,Probs0,V):-
+get_var_n(M,Env,R,S,Probs0,V):-
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    (v(R,S,V)->
+    (M:v(R,S,V)->
       true
     ;
       length(Probs,L),
       add_var(Env,L,Probs,R,V),
-      assert(v(R,S,V))
+      assert(M:v(R,S,V))
     )
   ;
     trhow(error('Non ground probailities not instantiated by the body'))
@@ -659,11 +659,11 @@ generate_rules_fact([],_Env,_VC,_R,_Probs,_N,[],_Module).
 
 generate_rules_fact([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module):-!,
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
 
 generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact(T,Env,VC,R,Probs,N1,Clauses,Module).
 
@@ -673,12 +673,12 @@ generate_rules_fact_vars([],_Env,_R,_Probs,_N,[],_Module).
 generate_rules_fact_vars([Head:_P1,'':_P2],Env,R,Probs,N,[Clause],Module):-!,
   extract_vars_list([Head],[],VC),
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
 
 generate_rules_fact_vars([Head:_P|T],Env,R,Probs,N,[Clause|Clauses],Module):-
   extract_vars_list([Head],[],VC),
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact_vars(T,Env,R,Probs,N1,Clauses,Module).
 
@@ -687,23 +687,23 @@ generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module).
 
 generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module):-!,
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
 
 generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact_db(T,Env,VC,R,Probs,N1,Clauses,Module).
 
 
 generate_clause(Head,Env,Body,VC,R,Probs,BDDAnd,N,Clause,Module):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(Body,get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(Body,get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
   add_bdd_arg_db(Head,Env,BDD,DBH,Module,Head1),
-  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
 
 
 generate_rules([],_Env,_Body,_VC,_R,_Probs,_BDDAnd,_N,[],_Module).
@@ -971,6 +971,7 @@ user:term_expansion((:- pita), []) :-!,
   assert(pita_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
+  M:(dynamic v/3),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
@@ -1012,7 +1013,7 @@ user:term_expansion((Head :- Body), Clauses):-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,M),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
@@ -1020,9 +1021,9 @@ user:term_expansion((Head :- Body), Clauses):-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
-    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,M)
   ;
-    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
    ).
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -1032,7 +1033,7 @@ user:term_expansion((Head :- Body), Clauses):-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
@@ -1040,9 +1041,9 @@ user:term_expansion((Head :- Body), Clauses):-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
-    generate_rules(HeadList,Env,Body1,[],R,Probs,BDDAnd,0,Clauses,Module)
+    generate_rules(HeadList,Env,Body1,[],R,Probs,BDDAnd,0,Clauses,M)
   ;
-    generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module)
+    generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,M)
   ).
 
 user:term_expansion((Head :- Body), []) :-
@@ -1062,10 +1063,10 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH -1|BodyList3],Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
+  add_bdd_arg_db(H,Env,BDDAnd,DBH,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -1076,10 +1077,10 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg(H,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(H,Env,BDDAnd,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -1091,7 +1092,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
@@ -1099,9 +1100,9 @@ user:term_expansion((Head :- Body), Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_pita_setting(single_var,true)->
-    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,M)
   ;
-    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
   ).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -1112,7 +1113,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
@@ -1120,9 +1121,9 @@ user:term_expansion((Head :- Body), Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_pita_setting(single_var,true)->
-    generate_clause(H,Env,Body2,[],R,Probs,BDDAnd,0,Clauses,Module)
+    generate_clause(H,Env,Body2,[],R,Probs,BDDAnd,0,Clauses,M)
   ;
-    generate_clause(H,Env,Body2,VC,R,Probs,BDDAnd,0,Clauses,Module)
+    generate_clause(H,Env,Body2,VC,R,Probs,BDDAnd,0,Clauses,M)
   ).
 
 /*user:term_expansion((Head :- Body),Clauses) :-
@@ -1138,10 +1139,10 @@ user:term_expansion((Head :- Body),Clauses) :-
   M:local_pita_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH-1|BodyList3],Body1),
-  add_bdd_arg_db(Head,Env,BDDAnd,DBH,Module,Head1),
+  add_bdd_arg_db(Head,Env,BDDAnd,DBH,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion((Head :- Body),Clauses) :-
@@ -1149,10 +1150,10 @@ user:term_expansion((Head :- Body),Clauses) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
-  add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(Head,Env,BDDAnd,M,Head1),
   Clauses=(Head1 :- Body2).
 
 user:term_expansion(Head,Clauses) :-
@@ -1166,9 +1167,9 @@ extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,M)
   ;
-    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
+    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,M)
   ).
 
 user:term_expansion(Head,Clauses) :-
@@ -1181,9 +1182,9 @@ user:term_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,M)
   ;
-    generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
+    generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,M)
   ).
 
 user:term_expansion(Head,Clauses) :-
@@ -1199,9 +1200,9 @@ user:term_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,M)
   ;
-    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
   ).
 
 
@@ -1216,9 +1217,9 @@ user:term_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,M)
   ;
-    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,_Module)
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
   ).
 
 user:term_expansion(Head,[]) :-
@@ -1238,7 +1239,7 @@ user:term_expansion(Head,Clause) :-
   ground(P),
   P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
-  add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
+  add_bdd_arg_db(H,Env,BDD,_DB,M,Head1),
   Clause=(Head1 :- Body1).
 
 user:term_expansion(Head,Clause) :-
@@ -1249,7 +1250,7 @@ user:term_expansion(Head,Clause) :-
   ground(P),
   P=:=1.0, !,
   list2and([one(Env,BDD)],Body1),
-  add_bdd_arg(H,Env,BDD,_Module,Head1),
+  add_bdd_arg(H,Env,BDD,M,Head1),
   Clause=(Head1 :- Body1).
 
 user:term_expansion(Head,Clause) :-
@@ -1263,11 +1264,11 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
-  add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
+  add_bdd_arg_db(H,Env,BDD,_DB,M,Head1),
   (M:local_pita_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(Env,R,[],Probs,V),equality(Env,V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,Env,R,[],Probs,V),equality(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -1280,11 +1281,11 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
-  add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
+  add_bdd_arg(H,Env,BDD,M,Head1),%***test single_var
   (M:local_pita_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(Env,R,[],Probs,V),equality(Env,V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,Env,R,[],Probs,V),equality(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,Env,R,VC,Probs,V),equality(Env,V,0,BDD)))
   ).
 
 user:term_expansion((:- set_pita(P,V)), []) :-!,
@@ -1302,14 +1303,14 @@ user:term_expansion(Head, (Head1:-one(Env,One))) :-
 % definite fact with db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
-  add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
+  add_bdd_arg_db(Head,Env,One,_DB,M,Head1).
 
 user:term_expansion(Head, (Head1:-one(Env,One))) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),
-  add_bdd_arg(Head,Env,One,_Module,Head1).
+  add_bdd_arg(Head,Env,One,M,Head1).
 
 
 /**
@@ -1374,7 +1375,7 @@ sandbox:safe_primitive(pita:zero(_,_)).
 sandbox:safe_primitive(pita:and(_,_,_,_)).
 sandbox:safe_primitive(pita:or(_,_,_,_)).
 sandbox:safe_primitive(pita:bdd_not(_,_,_)).
-sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_)).
+sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_,_)).
 sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
 sandbox:safe_primitive(pita:equality(_,_,_,_)).
 */
