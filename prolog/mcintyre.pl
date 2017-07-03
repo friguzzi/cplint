@@ -125,6 +125,7 @@ details.
 :-meta_predicate lw_sample_weight_cycle(:,-).
 :-meta_predicate ~=(:,-).
 :-meta_predicate msw(:,-).
+:-meta_predicate set_sw(:,+).
 
 :-meta_predicate mh_sample_arg(+,+,+,:,:,-,+,-,+,-).
 :-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
@@ -4065,7 +4066,6 @@ sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_)).
-sandbox:safe_primitive(mcintyre:set_sw(_,_)).
 
 :- multifile sandbox:safe_meta/2.
 
@@ -4108,3 +4108,4 @@ sandbox:safe_meta(mcintyre:msw(_,_), []).
 
 sandbox:safe_meta(mcintyre:set_mc(_,_), []).
 sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
+sandbox:safe_meta(mcintyre:set_sw(_,_) ,[]).
