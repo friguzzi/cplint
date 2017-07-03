@@ -41,7 +41,8 @@ details.
 :-meta_predicate get_cond_p(:,:,+,-).
 :-meta_predicate get_node(:,+,-).
 :-meta_predicate get_cond_node(:,:,+,-,-).
-
+:-meta_predicate set_pita(:,+).
+:-meta_predicate setting_pita(:,-).
 
 
 :-use_module(library(lists)).
@@ -885,7 +886,7 @@ or_list1([H|T],Env,B0,B1):-
 
 
 /**
- * set_pita(++Parameter:atom,+Value:term) is det
+ * set_pita(:Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
@@ -893,21 +894,19 @@ or_list1([H|T],Env,B0,B1):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  *
  */
-set_pita(Parameter,Value):-
-  pita_input_mod(M),
+set_pita(M:Parameter,Value):-
   retract(M:local_pita_setting(Parameter,_)),
   assert(M:local_pita_setting(Parameter,Value)).
 
 /**
- * setting_pita(?Parameter:atom,?Value:term) is det
+ * setting_pita(:Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
-setting_pita(P,V):-
-  pita_input_mod(M),
+setting_pita(M:P,V):-
   M:local_pita_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -963,6 +962,7 @@ user:term_expansion((:- action Conj), []) :-!,
 
 user:term_expansion((:- pita), []) :-!,
   prolog_load_context(module, M),
+  retractall(M:local_pita_setting(_,_)),
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
   assert_all(L,M,_),
   assert(pita_input_mod(M)),
