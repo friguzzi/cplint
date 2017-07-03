@@ -140,7 +140,7 @@ details.
 
 :- style_check(-discontiguous).
 
-:- thread_local v/3,rule_n/1,mc_module/1,mc_input_mod/1,local_mc_setting/2,mem/3.
+:- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,mem/3.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -212,68 +212,61 @@ mc_load_file(File):-
  * If Query is not ground, it returns in backtracking all instantiations of
  * Query together with their probabilities
  */
-s(M:Goal,P):-
-  mc_input_mod(Mo),
+s(Mo:Goal,P):-
   Mo:local_mc_setting(min_error, MinError),
   Mo:local_mc_setting(k, K),
 % Resetting the clocks...
 % Performing resolution...
   copy_term(Goal,Goal1),
   numbervars(Goal1),
-  save_samples(Goal1),
-  montecarlo_cycle(0, 0, M:Goal, K, MinError, _Samples, _Lower, P, _Upper),
+  save_samples(Mo,Goal1),
+  montecarlo_cycle(0, 0, Mo:Goal, K, MinError, _Samples, _Lower, P, _Upper),
   !,
   erase_samples,
-  restore_samples(Goal1).
+  restore_samples(Mo,Goal1).
 
-save_samples(I,S):-
-  mc_input_mod(M),
+save_samples(M,I,S):-
   recorded(R,Val,Ref),
   assert(M:mem(I,S,R,Val)),
   erase(Ref),
   fail.
 
-save_samples(_I,_S).
+save_samples(_M,_I,_S).
 
-save_samples(G):-
-  mc_input_mod(M),
+save_samples(M,G):-
   recorded(R,Val,Ref),
   assert(M:mem(G,R,Val)),
   erase(Ref),
   fail.
 
-save_samples(_G).
+save_samples(_M,_G).
 
-restore_samples(I,S):-
-  mc_input_mod(M),
+restore_samples(M,I,S):-
   M:mem(I,S,R,Val),
   recorda(R,Val),
   fail.
 
-restore_samples(_I,_S).
+restore_samples(_M,_I,_S).
 
-restore_samples(G):-
-  mc_input_mod(M),
+restore_samples(M,G):-
   retract(M:mem(G,R,Val)),
   recorda(R,Val),
   fail.
 
-restore_samples(_G).
+restore_samples(_M,_G).
 
-save_samples_copy(G):-
-  mc_input_mod(M),
+save_samples_copy(M,G):-
   recorded(R,Val,_Ref),
   assert(M:mem(G,R,Val)),
   fail.
 
-save_samples_copy(_G).
+save_samples_copy(_M,_G).
 
-delete_samples_copy(G):-
-  mc_input_mod(M),
+delete_samples_copy(M,G):-
   retract(M:mem(G,_R,_Val)),
   fail.
 
-delete_samples_copy(_G).
+delete_samples_copy(_M,_G).
 
 count_samples(N):-
   findall(Ref,recorded(_Key,_Val,Ref),L),
@@ -311,8 +304,7 @@ montecarlo_cycle(N0, S0, M:Goals, K, MinError, Samples, Lower, Prob, Upper):-!,
   D is N - S,
   Semi is 1.95996 * sqrt(P * (1 - P) / N),
   Int is 2 * Semi,
-  mc_input_mod(Mo),
-  Mo:local_mc_setting(max_samples,MaxSamples),
+  M:local_mc_setting(max_samples,MaxSamples),
   /*   N * P > 5;   N * S / N > 5;   S > 5
   *   N (1 - P) > 5;   N (1 - S / N) > 5;   N (N - S) / N > 5;   N - S > 5
   */
@@ -374,7 +366,7 @@ rejection_montecarlo(K1,Count, Success, M:Goals,M:Ev,N1,S1):-
 mh_montecarlo(_L,0,_NC0,N,S,Succ0,Succ0, _Goals,_Ev,N,S):-!.
 
 mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
-  save_samples_copy(Goal),
+  save_samples_copy(M,Goal),
   resample(L),
   copy_term(Evidence,Ev1),
   (M:Ev1->
@@ -387,11 +379,11 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     count_samples(NC1),
     (accept(NC0,NC1)->
       Succ = Succ1,
-      delete_samples_copy(Goal)
+      delete_samples_copy(M,Goal)
     ;
       Succ = Succ0,
       erase_samples,
-      restore_samples(Goal)
+      restore_samples(M,Goal)
     ),
     N1 is N0 + 1,
     S1 is S0 + Succ,
@@ -405,7 +397,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     NC1 = NC0,
     Succ = Succ0,
     erase_samples,
-    restore_samples(Goal)
+    restore_samples(M,Goal)
   ),
   mh_montecarlo(L,K1,NC1,N1, S1,Succ, SuccNew,M:Goal,M:Evidence, N,S).
 
@@ -467,12 +459,12 @@ mc_sample(M:Goal,S,P):-
 mc_sample(M:Goal,S,T,F,P):-
   copy_term(Goal,Goal1),
   numbervars(Goal1),
-  save_samples(Goal1),
+  save_samples(M,Goal1),
   montecarlo(S,0, 0, M:Goal, N, T),
   P is T / N,
   F is N - T,
   erase_samples,
-  restore_samples(Goal1).
+  restore_samples(M,Goal1).
 
 /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
@@ -1004,7 +996,7 @@ to_atom(A0-N,A-N):-
 mh_sample_arg(_L,0,_NC0,_Goals,_Ev,_Arg,AP,AP,V,V):-!.
 
 mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
-  save_samples_copy(Goal),
+  save_samples_copy(M,Goal),
   resample(L),
   copy_term(Evidence,Ev1),
   (M:Ev1->
@@ -1018,7 +1010,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
       ;
         put_assoc(La,V0,1,V1)
       ),
-      delete_samples_copy(Goal),
+      delete_samples_copy(M,Goal),
       K1 is K0-1,
       AP1 = La
     ;
@@ -1031,7 +1023,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
       K1 is K0-1,
       AP1=AP0,
       erase_samples,
-      restore_samples(Goal)
+      restore_samples(M,Goal)
     )
   ;
     K1 = K0,
@@ -1039,7 +1031,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
     V1 = V0,
     AP1=AP0,
     erase_samples,
-    restore_samples(Goal)
+    restore_samples(M,Goal)
   ),
   mh_sample_arg(L,K1,NC1,M:Goal,M:Evidence,Arg,AP1,AP,V1,V).
 
@@ -1138,10 +1130,9 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
   Arg=[A1|AR],
   particle_sample_first_gl(0,S,M:G1,M:Ev1,A1,V0),
   particle_sample_arg_gl(M:GR,M:EvR,AR,1,S,ValList),
-  mc_input_mod(MI),
-  retractall(MI:mem(_,_,_,_)),
-  retractall(MI:value_particle(_,_,_)),
-  retractall(MI:weight_particle(_,_,_)).
+  retractall(M:mem(_,_,_,_)),
+  retractall(M:value_particle(_,_,_)),
+  retractall(M:weight_particle(_,_,_)).
 
 mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   Evidence=[Ev1|EvR],
@@ -1149,41 +1140,40 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   particle_sample_arg(M:EvR,M:Goal,1,S,ValList0),
   foldl(agg_val,ValList0,0,Sum),
   Norm is S/Sum,
-  mc_input_mod(MI),
-  retractall(MI:mem(_,_,_,_)),
-  retractall(MI:value_particle(_,_,_)),
-  retractall(MI:weight_particle(_,_,_)),
+  retractall(M:mem(_,_,_,_)),
+  retractall(M:value_particle(_,_,_)),
+  retractall(M:weight_particle(_,_,_)),
   maplist(norm(Norm),ValList0,ValList).
 
 particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]):- !.
 
 particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
   I1 is I+1,
-  resample_gl(I,I1,S),
+  resample_gl(M,I,I1,S),
   particle_sample_gl(0,S,M:HG,M:HE,HA,I1,HV),
   particle_sample_arg_gl(M:TG,M:TE,TA,I1,S,TV).
 
-resample_gl(I,I1,S):-
-  get_values(I,V0),
+resample_gl(M,I,I1,S):-
+  get_values(M,I,V0),
   foldl(agg_val,V0,0,Sum),
   Norm is 1.0/Sum,
   maplist(norm(Norm),V0,V1),
   numlist(1,S,L),
   maplist(weight_to_prob,L,V1,V2),
   W is 1.0/S,
-  take_samples_gl(0,S,I,I1,W,V2).
+  take_samples_gl(M,0,S,I,I1,W,V2).
 
-take_samples_gl(S,S,_I,_I1,_W,_V):-!.
+take_samples_gl(_M,S,S,_I,_I1,_W,_V):-!.
 
-take_samples_gl(S0,S,I,I1,W,V):-
+take_samples_gl(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
   discrete(V,SInd),
-  restore_samples(I,SInd),
-  save_samples(I1,S1),
-  take_samples_gl(S1,S,I,I1,W,V).
+  restore_samples(M,I,SInd),
+  save_samples(M,I1,S1),
+  take_samples_gl(M,S1,S,I,I1,W,V).
 
-particle_sample_gl(K,K,_G,_Ev,_A,I,L):-!,
-  get_values(I,L0),
+particle_sample_gl(K,K,M:_G,_Ev,_A,I,L):-!,
+  get_values(M,I,L0),
   foldl(agg_val,L0,0,Sum),
   Norm is K/Sum,
   maplist(norm(Norm),L0,L).
@@ -1191,19 +1181,18 @@ particle_sample_gl(K,K,_G,_Ev,_A,I,L):-!,
 
 particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
   K1 is K0+1,
-  restore_samples(K1,I),
+  restore_samples(M,K1,I),
   copy_term((Goal,Arg),(Goal1,Arg1)),
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(I,K1),
-  mc_input_mod(MI),
-  assert(MI:weight_particle(I,K1,W)),
-  assert(MI:value_particle(I,K1,Arg1)),
+  save_samples(M,I,K1),
+  assert(M:weight_particle(I,K1,W)),
+  assert(M:value_particle(I,K1,Arg1)),
   particle_sample_gl(K1,S,M:Goal,M:Evidence,Arg,I,L).
 
-particle_sample_first_gl(K,K,_Goals,_Ev,_Arg,L):-!,
-  get_values(1,L0),
+particle_sample_first_gl(K,K,M:_Goals,_Ev,_Arg,L):-!,
+  get_values(M:1,L0),
   foldl(agg_val,L0,0,Sum),
   Norm is K/Sum,
   maplist(norm(Norm),L0,L).
@@ -1215,54 +1204,51 @@ particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(1,K1),
-  mc_input_mod(MI),
-  assert(MI:weight_particle(1,K1,W)),
-  assert(MI:value_particle(1,K1,Arg1)),
+  save_samples(M,1,K1),
+  assert(M:weight_particle(1,K1,W)),
+  assert(M:value_particle(1,K1,Arg1)),
   particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
 
 
-particle_sample_arg(_M:[],_Goal,I,_S,L):-!,
-  get_values(I,L).
+particle_sample_arg(M:[],_Goal,I,_S,L):-!,
+  get_values(M,I,L).
 
 particle_sample_arg(M:[HE|TE],M:Goal,I,S,L):-
   I1 is I+1,
-  resample(I,I1,S),
+  resample(M,I,I1,S),
   particle_sample(0,S, M:HE, I1),
   particle_sample_arg(M:TE,M:Goal,I1,S,L).
 
-resample(I,I1,S):-
-  get_values(I,V0),
+resample(M,I,I1,S):-
+  get_values(M,I,V0),
   foldl(agg_val,V0,0,Sum),
   Norm is 1.0/Sum,
   maplist(norm(Norm),V0,V1),
   numlist(1,S,L),
   maplist(weight_to_prob,L,V1,V2),
   W is 1.0/S,
-  take_samples(0,S,I,I1,W,V2).
+  take_samples(M,0,S,I,I1,W,V2).
 
-take_samples(S,S,_I,_I1,_W,_V):-!.
+take_samples(_M,S,S,_I,_I1,_W,_V):-!.
 
-take_samples(S0,S,I,I1,W,V):-
+take_samples(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
   discrete(V,SInd),
-  restore_samples(I,SInd),
-  save_samples(I1,S1),
-  mc_input_mod(M),
+  restore_samples(M,I,SInd),
+  save_samples(M,I1,S1),
   M:value_particle(I,S1,Arg),!,
   assert(M:value_particle(I1,S1,Arg)),
-  take_samples(S1,S,I,I1,W,V).
+  take_samples(M,S1,S,I,I1,W,V).
 
 particle_sample(K,K,_Ev,_I):-!.
 
 particle_sample(K0,S,M:Evidence,I):-
   K1 is K0+1,
-  restore_samples(K1,I),
+  restore_samples(M,K1,I),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(I,K1),
-  mc_input_mod(MI),
-  assert(MI:weight_particle(I,K1,W)),
+  save_samples(M,I,K1),
+  assert(M:weight_particle(I,K1,W)),
   particle_sample(K1,S,M:Evidence,I).
 
 particle_sample_first(K,K,_Goals,_Ev,_Arg):-!.
@@ -1273,14 +1259,12 @@ particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(1,K1),
-  mc_input_mod(MI),
-  assert(MI:weight_particle(1,K1,W)),
-  assert(MI:value_particle(1,K1,Arg1)),
+  save_samples(M,1,K1),
+  assert(M:weight_particle(1,K1,W)),
+  assert(M:value_particle(1,K1,Arg1)),
   particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
 
-get_values(I,V):-
-  mc_input_mod(M),
+get_values(M,I,V):-
   findall(A-W,(M:value_particle(I,S,A),M:weight_particle(I,S,W)),V).
 
 /**
@@ -2002,30 +1986,8 @@ load(FileIn,C1,R):-
   close(SI),
   process_clauses(C,[],C1,[],R).
 
-get_node(Goal,Env,B):-
-  mc_input_mod(M),
-  M:local_mc_setting(depth_bound,true),!,
-  M:local_mc_setting(depth,DB),
-  retractall(v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
-  (bagof(BDD,Goal1,L)*->
-    or_list(L,Env,B)
-  ;
-    zero(Env,B)
-  ).
 
-get_node(Goal,Env,B):- %with DB=false
-  retractall(v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,Goal1),
-  (bagof(BDD,Goal1,L)*->
-    or_list(L,Env,B)
-  ;
-    zero(Env,B)
-  ).
-
-
-get_next_rule_number(R):-
-  mc_input_mod(PName),
+get_next_rule_number(PName,R):-
   retract(PName:rule_n(R)),
   R1 is R+1,
   assert(PName:rule_n(R1)).
@@ -2816,7 +2778,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   (H=Head:ProbHead;H=ProbHead::Head),!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
-  mc_input_mod(M),
+  prolog_load_context(module, M),mc_input_mod(M),
   M:local_mc_setting(epsilon_parsing, Eps),
   EpsNeg is - Eps,
   ProbLast > EpsNeg,
@@ -2873,28 +2835,26 @@ or_list1([H|T],Env,B0,B1):-
 
 
 /**
- * set_mc(++Parameter:atom,+Value:term) is det
+ * set_mc(:Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
-set_mc(Parameter,Value):-
-  mc_input_mod(M),
+set_mc(M:Parameter,Value):-
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
 /**
- * setting_mc(?Parameter:atom,?Value:term) is det
+ * setting_mc(:Parameter:atom,?Value:term) is det
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
-setting_mc(P,V):-
-  mc_input_mod(M),
+setting_mc(M:P,V):-
   M:local_mc_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -2936,13 +2896,12 @@ add_arg(A,Arg,A1):-
   A1=..L1.
 
 /**
- * set_sw(+Var:term,+List:lit) is det
+ * set_sw(:Var:term,+List:lit) is det
  *
  * Sets the domain of the random variable Var to List.
  * This is a predicate for programs in the PRISM syntax
  */
-set_sw(A,B):-
-  mc_module(M),
+set_sw(M:A,B):-
   assert(M:sw(A,B)).
 
 /**
@@ -2995,34 +2954,36 @@ user:term_expansion((:- mc), []) :-!,
   retractall(local_mc_setting(_,_)),
   findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
   assert_all(L,M,_),
-  retractall(mc_input_mod(_)),
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
-  mc_input_mod(_M),!,
+  prolog_load_context(module, M),
+  mc_input_mod(M),!,
   list2and(L,Conj),
   maplist(tab,L,L1),
   list2and(L1,Conj1).
 
 user:term_expansion((:- begin_lpad), []) :-
+  prolog_load_context(module, M),
   mc_input_mod(M),!,
-  assert(mc_module(M)).
+  assert(M:mc_on).
 
 user:term_expansion((:- end_lpad), []) :-
-  mc_input_mod(_M0),!,
-  retractall(mc_module(_M)).
+  prolog_load_context(module, M),
+  mc_input_mod(M),!,
+  retractall(M:mc_on).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(L,U)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H1,Body,[],R,Var,L,U,Clause)
   ;
@@ -3030,13 +2991,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_gamma(R,[],Shape,Scale,Var))
   ;
@@ -3044,13 +3005,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_beta(R,[],Alpha,Beta,Var))
   ;
@@ -3059,13 +3020,13 @@ user:term_expansion((Head:=Body),Clause) :-
 
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_poisson(R,[],Lambda,Var))
   ;
@@ -3073,13 +3034,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~binomial(N,P)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_binomial(R,[],N,P,Var))
   ;
@@ -3087,13 +3048,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,length(D0,Len),Prob is 1.0/Len,
       maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
@@ -3103,13 +3064,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~finite(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list([Head],[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,maplist(swap,D0,D),sample_discrete(R,[],D,Var))
   ;
@@ -3117,13 +3078,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~geometric(Par)), !,
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_geometric(R,[],Par,Var))
   ;
@@ -3131,13 +3092,13 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~dirichlet(Par)), !,
   add_arg(H,Var,H1),
   extract_vars_list([H],[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_dirichlet(R,[],Par,Var))
   ;
@@ -3145,17 +3106,17 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),(H1:-Body)) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~val(Var)), !,
   add_arg(H,Var,H1).
 
 user:term_expansion((Head:=Body),(Head:- Body)) :-
-  prolog_load_context(module, M),mc_module(M),!.
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,!.
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3163,7 +3124,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:gaussian(Mean,Variance)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H1,Body,[],R,Var,Mean,Variance,Clause)
   ;
@@ -3172,7 +3133,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3180,7 +3141,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:uniform(Var,L,U)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H,Body,[],R,Var,L,U,Clause)
   ;
@@ -3188,7 +3149,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3196,7 +3157,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:gamma(Var,Shape,Scale)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_gamma(R,[],Shape,Scale,Var))
   ;
@@ -3204,7 +3165,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3212,7 +3173,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:beta(Var,Alpha,Beta)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_beta(R,[],Alpha,Beta,Var))
   ;
@@ -3221,7 +3182,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3229,7 +3190,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:poisson(Var,Lambda)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_poisson(R,[],Lambda,Var))
   ;
@@ -3237,7 +3198,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:A),
@@ -3245,7 +3206,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:binomial(Var,N,P)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_binomial(R,[],N,P,Var))
   ;
@@ -3253,7 +3214,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3261,7 +3222,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:uniform(Var,D0)),!,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
       maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
@@ -3271,7 +3232,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3279,7 +3240,7 @@ user:term_expansion((Head:-Body),Clause) :-
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_discrete(R,[],D,Var))
   ;
@@ -3287,7 +3248,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with uniform discrete distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3295,7 +3256,7 @@ user:term_expansion((Head:=Body),Clause) :-
   Head=(H:uniform(Var,D0)),!,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
       maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
@@ -3305,7 +3266,7 @@ user:term_expansion((Head:=Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3313,7 +3274,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_dirichlet(R,[],Par,Var))
   ;
@@ -3321,7 +3282,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3329,7 +3290,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:geometric(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-Body,sample_geometric(R,[],Par,Var))
   ;
@@ -3337,7 +3298,7 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
@@ -3345,7 +3306,7 @@ user:term_expansion((Head:-Body),Clause) :-
   Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H,Body,[],R,Var,Mean,Variance,Clause)
   ;
@@ -3354,7 +3315,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 
 user:term_expansion((Head :- Body), Clauses):-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
   Head = (_;_), !,
@@ -3366,7 +3327,7 @@ user:term_expansion((Head :- Body), Clauses):-
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_mc_setting(single_var,true)->
     generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
@@ -3375,13 +3336,13 @@ user:term_expansion((Head :- Body), Clauses):-
    ).
 
 user:term_expansion((Head :- Body), Clauses):-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list((Head :- Body),[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_rules(HeadList,Body,HeadList,[],R,0,Clauses)
   ;
@@ -3390,7 +3351,7 @@ user:term_expansion((Head :- Body), Clauses):-
 
 user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   (Head = (_:P);Head=(P::_)),
   ground(P),
@@ -3398,7 +3359,7 @@ user:term_expansion((Head :- Body), []) :-
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
@@ -3413,7 +3374,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -3427,7 +3388,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   (Head = (H:_);Head=(_::H)), !,
@@ -3439,7 +3400,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_mc_setting(single_var,true)->
     generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
@@ -3449,13 +3410,13 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   (Head = (H:_);Head = (_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list((Head :- Body),[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause(H,Body,HeadList,[],R,0,Clauses)
   ;
@@ -3464,7 +3425,7 @@ user:term_expansion((Head :- Body), Clauses) :-
 
 user:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
@@ -3475,14 +3436,14 @@ user:term_expansion((Head :- Body),Clauses) :-
   Clauses=(Head1 :- Body1).
 
 user:term_expansion(Head,Clauses) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_mc_setting(single_var,true)->
     generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
@@ -3491,13 +3452,13 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 user:term_expansion(Head,Clauses) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_rules_fact(HeadList,HeadList,[],R,0,Clauses)
   ;
@@ -3505,13 +3466,13 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(L,U)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H1,true,[],R,Var,L,U,Clause)
   ;
@@ -3519,13 +3480,13 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-sample_gamma(R,[],Shape,Scale,Var))
   ;
@@ -3533,13 +3494,13 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-sample_beta(R,[],Alpha,Beta,Var))
   ;
@@ -3548,13 +3509,13 @@ user:term_expansion(Head,Clause) :-
 
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-sample_poisson(R,[],Lambda,Var))
   ;
@@ -3562,13 +3523,13 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~binomial(N,P)), !,
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-sample_binomial(R,[],N,P,Var))
   ;
@@ -3576,7 +3537,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
@@ -3585,7 +3546,7 @@ user:term_expansion(Head,Clause) :-
   Prob is 1.0/Len,
   maplist(add_prob(Prob),D0,D),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-length(D0,Len),Prob is 1.0/Len,
        maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
@@ -3595,13 +3556,13 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~finite(D0)),!,
   add_arg(H,Var,H1),
   extract_vars_list([Head],[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-maplist(swap,D0,D),sample_discrete(R,[],D,Var))
   ;
@@ -3609,7 +3570,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3617,7 +3578,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_dirichlet(R,[],Par,Var))
   ;
@@ -3625,7 +3586,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3633,7 +3594,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:geometric(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_geometric(R,[],Par,Var))
   ;
@@ -3641,7 +3602,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3649,7 +3610,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H,true,[],R,Var,Mean,Variance,Clause)
   ;
@@ -3657,7 +3618,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3665,7 +3626,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:uniform(Var,L,U)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H,true,[],R,Var,L,U,Clause)
   ;
@@ -3673,7 +3634,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3681,7 +3642,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:gamma(Var,Shape,Scale)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_gamma(R,[],Shape,Scale,Var))
   ;
@@ -3689,7 +3650,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3697,7 +3658,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:beta(Var,Alpha,Beta)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_beta(R,[],Alpha,Beta,Var))
   ;
@@ -3706,7 +3667,7 @@ user:term_expansion(Head,Clause) :-
 
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3714,7 +3675,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:poisson(Var,Lambda)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_poisson(R,[],Lambda,Var))
   ;
@@ -3722,7 +3683,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:A),
@@ -3730,7 +3691,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:binomial(Var,N,P)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_binomial(R,[],N,P,Var))
   ;
@@ -3738,7 +3699,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3746,7 +3707,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:uniform(Var,D0)),!,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-
       length(D0,Len),
@@ -3762,7 +3723,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3770,7 +3731,7 @@ user:term_expansion(Head,Clause) :-
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_discrete(R,[],D,Var))
   ;
@@ -3778,7 +3739,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3786,7 +3747,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:dirichlet(Var,Par)), !,
   extract_vars_list([H],[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H:-sample_dirichlet(R,[],Par,Var))
   ;
@@ -3794,7 +3755,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
@@ -3802,7 +3763,7 @@ user:term_expansion(Head,Clause) :-
   Head=(H:gaussian(Var,Mean,Variance)), !,
   extract_vars_list(Head,[],VC0),
   delete_equal(VC0,Var,VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H,true,[],R,Var,Mean,Variance,Clause)
   ;
@@ -3810,7 +3771,7 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,[]) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head = (_:P); Head = (P::_)),
@@ -3818,7 +3779,7 @@ user:term_expansion(Head,[]) :-
   P=:=0.0, !.
 
 user:term_expansion(Head,H) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3827,7 +3788,7 @@ user:term_expansion(Head,H) :-
   P=:=1.0, !.
 
 user:term_expansion(Head,H) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head = (H:P);Head =(P::H)),
@@ -3835,7 +3796,7 @@ user:term_expansion(Head,H) :-
   P=:=1.0, !.
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
   M:local_mc_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3843,7 +3804,7 @@ user:term_expansion(Head,Clause) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list(Head,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause(H,true,HeadList,[],R,0,Clause)
   ;
@@ -3851,23 +3812,20 @@ user:term_expansion(Head,Clause) :-
   ).
 
 user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_module(M),
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   extract_vars_list(HeadList,[],VC),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause(H,true,HeadList,[],R,0,Clause)
   ;
     generate_clause(H,true,HeadList,VC,R,0,Clause)
   ).
 
-user:term_expansion((:- set_pita(P,V)), []) :-!,
-  prolog_load_context(module, M),mc_module(M),
-  set_pita(P,V).
 
 
 /**
@@ -3876,9 +3834,8 @@ user:term_expansion((:- set_pita(P,V)), []) :-!,
  * Initializes LPAD loading.
  */
 begin_lpad_pred:-
-  M=user,
-  mc_input_mod(M),
-  assert(mc_module(M)).
+  assert(mc_input_mod(user)),
+  assert(user:mc_on).
 
 /**
  * end_lpad_pred is det
@@ -3886,7 +3843,8 @@ begin_lpad_pred:-
  * Terminates the cplint inference module.
  */
 end_lpad_pred:-
-  retractall(mc_module(_M)).
+  retractall(mc_input_mod(_)),
+  retractall(user:mc_on).
 
 list2or([],true):-!.
 
@@ -4101,8 +4059,7 @@ swap(A:B,B:A).
 
 :- multifile sandbox:safe_primitive/1.
 
-sandbox:safe_primitive(mcintyre:set_mc(_,_)).
-sandbox:safe_primitive(mcintyre:setting_mc(_,_)).
+
 sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
@@ -4148,3 +4105,6 @@ sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
+
+sandbox:safe_meta(mcintyre:set_mc(_,_), []).
+sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
