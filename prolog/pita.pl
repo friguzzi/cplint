@@ -53,7 +53,7 @@ details.
 
 :- style_check(-discontiguous).
 
-:- thread_local rule_n/1,pita_input_mod/1,local_pita_setting/2.
+:- thread_local rule_n/1,goal_n/1,pita_input_mod/1,local_pita_setting/2.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -256,7 +256,9 @@ load_file(File):-
  */
 s(M:Goal,P):-
   term_variables(Goal,VG),
-  Goal1=..['$goal'|VG],
+  get_next_goal_number(M,GN),
+  atomic_concat('$goal',GN,NewGoal),
+  Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
@@ -347,9 +349,12 @@ prob_bar(M:Goal,Chart):-
  * Query/Evidence together with their probabilities
  */
 prob(M:Goal,M:Evidence,P):-
-  deal_with_ev(Evidence,M,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
+  get_next_goal_number(M,GN),
+  atomic_concat('$goal',GN,NewGoal),
+  Goal1=..[NewGoal|VG],
+  atomic_concat('$ev',GN,NewEv),
+  deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
   term_variables(Goal,VG),
-  Goal1=..['$goal'|VG],
   list2and(GoalL,Goal),
   process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
@@ -364,13 +369,13 @@ prob(M:Goal,M:Evidence,P):-
     findall((Goal,P),get_cond_p(M:Goal1,M:EvNoAct,Env,P),L)
   ),
   end_test(Env),
-  retractall(M:'$ev'),
+  retractall(M:NewEv),
   maplist(erase,UpdatedClausesRefs),
   erase(Ref),
   maplist(M:assertz,ClausesToReAdd),
   member((Goal,P),L).
 
-deal_with_ev(Ev,M,EvGoal,UC,CA):-
+deal_with_ev(Ev,M,NewEv,EvGoal,UC,CA):-
   list2and(EvL,Ev),
   partition(ac,EvL,ActL,EvNoActL),
   deal_with_actions(ActL,M,UC0,CA),
@@ -381,10 +386,10 @@ deal_with_ev(Ev,M,EvGoal,UC,CA):-
     process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
     append([one(Env,BDD)],BodyList2,BodyList3),
     list2and(BodyList3,Body2),
-    add_bdd_arg('$ev',Env,BDDAnd,Module,Head1),
+    add_bdd_arg(NewEv,Env,BDDAnd,Module,Head1),
     M:(asserta((Head1 :- Body2),Ref)),
     UC=[Ref|UC0],
-    EvGoal='$ev'
+    EvGoal=NewEv
   ).
 
 deal_with_actions(ActL,M,UC,CA):-
@@ -544,6 +549,11 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   ),
   and(Env,BG,BE,BGE).
 
+
+get_next_goal_number(PName,R):-
+  retract(PName:goal_n(R)),
+  R1 is R+1,
+  assert(PName:goal_n(R1)).
 
 
 get_next_rule_number(PName,R):-
@@ -970,7 +980,9 @@ user:term_expansion((:- pita), []) :-!,
   assert_all(L,M,_),
   assert(pita_input_mod(M)),
   retractall(M:rule_n(_)),
+  retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
+  assert(M:goal_n(0)),
   M:(dynamic v/3),
   style_check(-discontiguous).
 
