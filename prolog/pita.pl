@@ -37,6 +37,13 @@ details.
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
+:-meta_predicate get_p(:,+,-).
+:-meta_predicate get_cond_p(:,:,+,-).
+:-meta_predicate get_node(:,+,-).
+:-meta_predicate get_cond_node(:,:,+,-,-).
+
+
+
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -480,40 +487,38 @@ load(FileIn,C1,R):-
   close(SI),
   process_clauses(C,[],C1,[],R).
 
-get_node(Goal,Env,B):-
-  pita_input_mod(M),
+get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
-  (bagof(BDD,Goal1,L)*->
+  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
+  (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
   ;
     zero(Env,B)
   ).
 
-get_node(Goal,Env,B):- %with DB=false
+get_node(M:Goal,Env,B):- %with DB=false
   retractall(v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,Goal1),
-  (bagof(BDD,Goal1,L)*->
+  add_bdd_arg(Goal,Env,BDD,M,Goal1),
+  (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
   ;
     zero(Env,B)
   ).
 
-get_cond_node(Goal,Ev,Env,BGE,BE):-
-  pita_input_mod(M),
+get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
-  (bagof(BDD,Goal1,L)*->
+  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
+  (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,BG)
   ;
     zero(Env,BG)
   ),
-  add_bdd_arg_db(Ev,Env,BDDE,DB,Ev1),%DB=depth bound
-  (bagof(BDDE,Ev1,LE)*->
+  add_bdd_arg_db(Ev,Env,BDDE,DB,M,Ev1),%DB=depth bound
+  (bagof(BDDE,M:Ev1,LE)*->
     or_list(LE,Env,BE)
   ;
     zero(Env,BE)
@@ -522,16 +527,16 @@ get_cond_node(Goal,Ev,Env,BGE,BE):-
 
 
 
-get_cond_node(Goal,Ev,Env,BGE,BE):- %with DB=false
+get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   retractall(v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,Goal1),
-  (bagof(BDD,Goal1,L)*->
+  add_bdd_arg(Goal,Env,BDD,M,Goal1),
+  (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,BG)
   ;
     zero(Env,BG)
   ),
-  add_bdd_arg(Ev,Env,BDDE,Ev1),
-  (bagof(BDDE,Ev1,LE)*->
+  add_bdd_arg(Ev,Env,BDDE,M,Ev1),
+  (bagof(BDDE,M:Ev1,LE)*->
     or_list(LE,Env,BE)
   ;
     zero(Env,BE)
