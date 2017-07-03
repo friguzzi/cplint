@@ -47,8 +47,11 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- dynamic db/1.
 
 
-:- thread_local v/3, input_mod/1, local_setting/2, rule_sc_n/1.
+:- thread_local  input_mod/1,  rule_sc_n/1.
 
+:- meta_predicate induce(:,-).
+:- meta_predicate induce_rules(:,-).
+:- meta_predicate induce_par(:,-).
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
@@ -213,9 +216,9 @@ test_prob(P,TestFolds,NPos,NNeg,CLL,Results) :-
   retract_all(ThRef),
   retract_all(RFRef).
 
-induce_rules(Folds,R):-
+induce_rules(M:Folds,R):-
 %tell(ciao),
-  input_module(M),
+%  input_module(M),
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -408,7 +411,7 @@ cycle_structure([],_Mod,R,S,_SP,_DB,R,S,_I):-!.  %empty beam
 cycle_structure(_CL,_Mod,R,S,_SP,_DB,R,S,0):-!.  %0 iterations
 
 cycle_structure([(RH,_CLL)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
-  already_scored([RH|R0],R3,Score),!,
+  already_scored(Mod,[RH|R0],R3,Score),!,
   format2("Theory iteration ~d~n~n",[M]),
   write3('Already scored, updated refinement\n'),
   write_rules3(R3,user_output),
@@ -465,7 +468,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
     S4=S0,
     SP1=SP0
   ),
-  store_refinement([RH|R0],R3,Score),
+  store_refinement(Mod,[RH|R0],R3,Score),
   M1 is M-1,
   cycle_structure(RT,Mod,R4,S4,SP1,DB,R,S,M1).
 
@@ -480,8 +483,8 @@ induce_par(Folds,ROut):-
   induce_parameters(Folds,R),
   rules2terms(R,ROut).
 
-induce_parameters(Folds,R):-
-  input_module(M),
+induce_parameters(M:Folds,R):-
+  %input_module(M),
   make_dynamic(M),
   set_sc(compiling,on),
   M:local_setting(seed,Seed),
@@ -687,7 +690,7 @@ cycle_clauses([(RH,_ScoreH)|T],M,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
 score_clause_refinements([],_M,_N,_NR,_DB,NB,NB,CL,CL,CLBG,CLBG).
 
 score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-  %scans the list of revised theories
-  already_scored_clause(R1,R3,Score),!,
+  already_scored_clause(M,R1,R3,Score),!,
   format3('Score ref.  ~d of ~d~n',[Nrev,NRef]),
   write3('Already scored, updated refinement\n'),
   write_rules3([R3],user_output),
@@ -746,7 +749,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
       CLBG1=CLBG0
     )
   ),
-  store_clause_refinement(R1,R3,Score),
+  store_clause_refinement(M,R1,R3,Score),
   Nrev1 is Nrev+1,
   score_clause_refinements(T,M,Nrev1,NRef,DB,NB1,NB,CL1,CL,CLBG1,CLBG).
 
@@ -782,25 +785,21 @@ scan_head([H:_P|T],O0,O):-
 
 
 
-store_clause_refinement(Ref,RefP,Score):-
+store_clause_refinement(M,Ref,RefP,Score):-
   elab_clause_ref(Ref,Ref1),
-  input_module(M),
   assert(M:ref_clause(r(Ref1,RefP,Score))).
 
-store_refinement(Ref,RefP,Score):-
+store_refinement(M,Ref,RefP,Score):-
   elab_ref(Ref,Ref1),
-  input_module(M),
   assert(M:ref(r(Ref1,RefP,Score))).
 
-already_scored_clause(R,R1,Score):-
+already_scored_clause(M,R,R1,Score):-
   elab_ref([R],[rule(H,B)]),
-  input_module(M),
   M:ref_clause(r(rule(H,B1),R1,Score)),
   permutation(B,B1).
 
-already_scored(R,R1,Score):-
+already_scored(M,R,R1,Score):-
   elab_ref(R,RR),
-  input_module(M),
   M:ref(r(RR,R1,Score)).
 
 
@@ -4244,6 +4243,7 @@ input_module(M):-
 
 user:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
+  retractall(M:local_setting(_,_)),
 %  retractall(input_mod(_)),
 %  M:dynamic(model/1),
 %  M:set_prolog_flag(unkonw,fail),
@@ -4258,16 +4258,26 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3)),
   style_check(-discontiguous).
 
+/*
+user:term_expansion(end_of_file, end_of_file) :-!,
+  prolog_load_context(module, M),
+  retractall(input_mod(M)),
+  style_check(+discontiguous).
+*/
+
 user:term_expansion((:- begin_bg), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   assert(M:bg_on).
 
 user:term_expansion(C, M:bgc(C)) :-
+  prolog_load_context(module, M),
   C\= (:- end_bg),
   input_mod(M),
   M:bg_on,!.
 
 user:term_expansion((:- end_bg), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:bg_on),
   findall(C,M:bgc(C),L),
@@ -4281,15 +4291,18 @@ user:term_expansion((:- end_bg), []) :-
   ).
 
 user:term_expansion((:- begin_in), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   assert(M:in_on).
 
 user:term_expansion(C, M:inc(C)) :-
+  prolog_load_context(module, M),
   C\= (:- end_in),
   input_mod(M),
   M:in_on,!.
 
 user:term_expansion((:- end_in), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:in_on),
   findall(C,M:inc(C),L),
@@ -4305,16 +4318,19 @@ user:term_expansion((:- end_in), []) :-
 
 %
 user:term_expansion(begin(model(I)), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
 user:term_expansion(end(model(_I)), []) :-
+  prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:model(_)).
 
 user:term_expansion(At, A) :-
+  prolog_load_context(module, M),
 %  write(At),nl,
   input_mod(M),
   M:model(Name),
