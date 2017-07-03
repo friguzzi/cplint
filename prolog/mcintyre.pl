@@ -2007,21 +2007,21 @@ retract_all([H|T]):-
   retract_all(T).
 
 /**
- * get_var_n(++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
+ * get_var_n(++Mod:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
  * index Rule, grouding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
-get_var_n(Env,R,S,Probs0,V):-
+get_var_n(M,Env,R,S,Probs0,V):-
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    (v(R,S,V)->
+    (M:v(R,S,V)->
       true
     ;
       length(Probs,L),
       add_var(Env,L,Probs,R,V),
-      assert(v(R,S,V))
+      assert(M:v(R,S,V))
     )
   ;
     trhow(error('Non ground probailities not instantiated by the body'))
@@ -2525,11 +2525,11 @@ generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module).
 
 generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module):-!,
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
 
 generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
+  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact_db(T,Env,VC,R,Probs,N1,Clauses,Module).
 
@@ -2547,7 +2547,7 @@ generate_clause_uniform(Head,Body,VC,R,Var,L,U,Clause):-
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
   add_bdd_arg_db(Head,Env,BDD,DBH,Module,Head1),
-  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,get_var_n(Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
 
 
 generate_rules([],_Body,_HeadList,_VC,_R,_N,[]).
@@ -3322,7 +3322,7 @@ user:term_expansion((Head :- Body), Clauses):-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,M),
   append([one(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
@@ -3330,9 +3330,9 @@ user:term_expansion((Head :- Body), Clauses):-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_mc_setting(single_var,true)->
-    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,M)
   ;
-    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
    ).
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -3366,10 +3366,10 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DB,Module,Head1),
+  add_bdd_arg_db(H,Env,BDDAnd,DB,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -3380,10 +3380,10 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg(H,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(H,Env,BDDAnd,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -3395,7 +3395,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
@@ -3403,9 +3403,9 @@ user:term_expansion((Head :- Body), Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_mc_setting(single_var,true)->
-    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,M)
   ;
-    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module)
+    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
   ).
 
 user:term_expansion((Head :- Body), Clauses) :-
@@ -3429,10 +3429,10 @@ user:term_expansion((Head :- Body),Clauses) :-
   M:local_mc_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(Head,Env,BDDAnd,DB,Module,Head1),
+  add_bdd_arg_db(Head,Env,BDDAnd,DB,M,Head1),
   Clauses=(Head1 :- Body1).
 
 user:term_expansion(Head,Clauses) :-
@@ -3446,9 +3446,9 @@ user:term_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_mc_setting(single_var,true)->
-    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module)
+    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,M)
   ;
-    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module)
+    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,M)
   ).
 
 user:term_expansion(Head,Clauses) :-
