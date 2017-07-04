@@ -315,6 +315,19 @@ subsume_theory(Theory,TheoryN):-
   subsume_theory1(Theory1,TheoryN1),
   !.
 
+skolemize(Theory,Theory1):-
+  copy_term(Theory,Theory1),
+  term_variables(Theory1,Vars),
+  skolemize1(Vars,1).
+
+
+skolemize1([],_).
+
+skolemize1([Var|R],K):-
+  atomic_list_concat([s,K],Skolem),
+  Var = Skolem,
+  K1 is K + 1,
+  skolemize1(R,K1).
 
 subsume_theory1([],_).
 
@@ -907,30 +920,6 @@ apply_operators([add_body(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]
   %nl,write(NewTheory),
   apply_operators(RestOps,Theory,RestTheory).
 
-apply_operators([remove_body(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-!,
-  delete_matching(Theory,Rule1,Theory1),
-  append(Theory1, [Rule2], NewTheory),
-  %nl,write(NewTheory),
-  apply_operators(RestOps,Theory,RestTheory).
-
-apply_operators([add_head(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-!,
-  delete_matching(Theory,Rule1,Theory1),
-  append(Theory1, [Rule2], NewTheory),
-  %nl,write(NewTheory),
-  apply_operators(RestOps,Theory,RestTheory).
-
-apply_operators([remove_head(Rule1,Rule2,_A)|RestOps],Theory,[NewTheory|RestTheory]) :-!,
-  delete_matching(Theory,Rule1,Theory1),
-  append(Theory1, [Rule2], NewTheory),
-  %nl,write(NewTheory),
-  apply_operators(RestOps,Theory,RestTheory).
-
-apply_operators([remove(Rule)|RestOps],Theory,[NewTheory|RestTheory]) :-
-  delete_matching(Theory,Rule,NewTheory),
-  %nl,write(NewTheory),
-  apply_operators(RestOps,Theory,RestTheory).
-
-
 revise_theory(Theory,M,Ref):-
   specialize_theory(Theory,M,Ref).
 
@@ -945,22 +934,6 @@ generalize_theory(Theory,M,Ref):-
   add_rule(M,Ref).
 
 
-add_rule(Mod,add(rule(ID,Head,[],Lits))):-
-  Mod:local_setting(specialization,bottom),!,
-  Mod:database(DB),
-  sample(1,DB,[M]),
-  get_head_atoms(O,Mod),
-  member(A,O),
-  functor(A,F,N),
-  functor(F1,F,N),
-  F1=..[F|Arg],
-  Pred1=..[F,M|Arg],
-  A=..[F|ArgM],
-  keep_const(ArgM,Arg),
-  findall((A,Pred1),call(Pred1),L),
-  sample(1,L,LH),
-  generate_body(LH,Mod,[rule(ID,Head,[],Lits)]).
-
 add_rule(M,add(SpecRule)):-
   findall(HL , M:modeh(_,HL), HLS),
   length(HLS,L),
@@ -970,30 +943,6 @@ add_rule(M,add(SpecRule)):-
   get_next_rule_number(M,ID),
   Rule0 = rule(ID,Head,[],true),
   specialize_rule(Rule0,M,SpecRule,_Lit).
-
-
-generate_head([],_M,_Mod,HL,HL):-!.
-
-generate_head([(A,G,D)|T],M,Mod,H0,H1):-!,
-  generate_head_goal(G,M,Goals),
-  findall((A,Goals,D),(member(Goal,Goals),call(Mod:Goal),ground(Goals)),L),
-  Mod:local_setting(initial_clauses_per_megaex,IC),   %IC: represents how many samples are extracted from the list L of example
-  sample(IC,L,L1),
-  append(H0,L1,H2),
-  generate_head(T,M,Mod,H2,H1).
-
-generate_head([A|T],M,Mod,H0,H1):-
-  functor(A,F,N),
-  functor(F1,F,N),
-  F1=..[F|Arg],
-  Pred1=..[F,M|Arg],
-  A=..[F|ArgM],
-  keep_const(ArgM,Arg),
-  findall((A,Pred1),call(Mod:Pred1),L),
-  Mod:local_setting(initial_clauses_per_megaex,IC),
-  sample(IC,L,L1),
-  append(H0,L1,H2),
-  generate_head(T,M,Mod,H2,H1).
 
 generate_head([H|_T],_P,[H1:0.5,'':0.5]):-
   H=..[Pred|Args],
@@ -1005,45 +954,6 @@ generate_head([_H|T],P,Head):-
   generate_head(T,P,Head).
 
 
-generalize_head1(LH,LH1,NH):-
-  lm_input_module(M),
-  findall(HL , M:modeh(_,HL), HLS),
-  generalize_head2(HLS,LH,LH1,NH).
-
-
-generalize_head2([X|_R],LH,LH1,PH) :-
-  lm_input_module(M),
-  X =.. [P|A],
-  length(A,LA),
-  length(A1,LA),
-  PH =.. [P|A1],
-  \+ member(PH:_, LH),
-  (M:local_setting(new_head_atoms_zero_prob,true)->
-    delete_matching(LH,'':PNull,LH0),
-    append(LH0,[PH:0.0,'':PNull],LH1)
-  ;
-    length(LH,NH),
-    add_to_head(LH,NH,PH,LH1)
-  ).
-
-generalize_head2([_X|R],LH,LH1) :-
-  generalize_head2(R,LH,LH1).
-
-
-add_to_head(['':PN],NH,At,[At:PA,'':PN1]):-!,
-  PN1 is PN*NH/(NH+1),
-  PA is 1/(NH+1).
-
-add_to_head([H:PH|T],NH,At,[H:PH1|T1]):-
-  PH1 is PH*NH/(NH+1),
-  add_to_head(T,NH,At,T1).
-
-
-get_module_var(LH,Module):-
-  member(H:_,LH),!,
-  H=..[_F,Module|_].
-
-
 specialize_theory(Theory,M,Ref):-
   Theory \== [],
   choose_rule(Theory,M,Rule),
@@ -1053,92 +963,20 @@ specialize_theory(Theory,M,Ref):-
 
 
 specialize_rule(Rule,M,SpecRule,Lit):-
-  M:local_setting(specialization,bottom),
-  Rule = rule(ID,LH,BL,Lits),
-  delete_one(Lits,RLits,Lit),
-  \+ lookahead_cons(Lit,_),
-  append(BL,[Lit],BL1),
-  remove_prob(LH,LH1),
-  %check_ref(LH1,BL1),
-  delete(LH1,'',LH2),
-  append(LH2,BL1,ALL2),
-  extract_fancy_vars(ALL2,Vars1),
-  length(Vars1,NV),
-  M:local_setting(max_var,MV),
-  NV=<MV,
-  linked_clause(BL1,M,LH2),
-  \+ banned_clause(M,LH2,BL1),
-  SpecRule=rule(ID,LH,BL1,RLits).
-
-specialize_rule(Rule,M,SpecRule,Lit):-
-  M:local_setting(specialization,bottom),
-  Rule = rule(ID,LH,BL,Lits),
-  delete_one(Lits,RLits,Lit),
-  append(BL,[Lit],BL0),
-  (lookahead(Lit,LLit1);lookahead_cons(Lit,LLit1)),  % lookahead_cons serve a dire che rating(_A,_B,_C) e aggiunto solo  insieme ai letterali indicati nella lista, mai da solo.
-  copy_term(LLit1,LLit2),
-  specialize_rule_la_bot(LLit2,RLits,RLits1,BL0,BL1),
-  remove_prob(LH,LH1),
-  %check_ref(LH1,BL1),
-  delete(LH1,'',LH2),
-  append(LH2,BL1,ALL2),
-  extract_fancy_vars(ALL2,Vars1),
-  length(Vars1,NV),
-  M:local_setting(max_var,MV),
-  NV=<MV,
-  linked_clause(BL1,M,LH2),
-  \+ banned_clause(M,LH2,BL1),
-  SpecRule=rule(ID,LH,BL1,RLits1).
-
-specialize_rule(Rule,M,SpecRule,Lit):-
-  M:local_setting(specialization,mode),!,
-  %findall(BL , modeb(_,BL), BLS),
-  M:mcts_modeb(BSL0),
-  Rule = rule(_ID,_LH,BL,_),
-  ( BL \= [] ->
-    %last(BL,LastLit),
-    %LastLit =.. [Pred|_],
-    %filter_modeb(BSL0,LastLit,BSL)
-    BSL = BSL0
-  ;
-    BSL = BSL0
-  ),
-  specialize_rule(BSL,M,Rule,SpecRule,Lit).
+  M:mcts_modeb(BSL),
+  specialize_rule_bl(BSL,M,Rule,SpecRule,Lit).
 
 
-filter_modeb([],_Pred,[]).
-
-filter_modeb([Modeb|RestModeb],Pred,[Modeb|RestBSL]):-
-  Modeb =.. [_PredMode|_],
-  Modeb @>= Pred,
-  !,
-  filter_modeb(RestModeb,Pred,RestBSL).
-
-filter_modeb([_|RestModeb],Pred,RestBSL):-
-  filter_modeb(RestModeb,Pred,RestBSL).
 
 
-skolemize(Theory,Theory1):-
-  copy_term(Theory,Theory1),
-  term_variables(Theory1,Vars),
-  skolemize1(Vars,1).
 
-
-skolemize1([],_).
-
-skolemize1([Var|R],K):-
-  atomic_list_concat([s,K],Skolem),
-  Var = Skolem,
-  K1 is K + 1,
-  skolemize1(R,K1).
-
-specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
+specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
   Rule = rule(ID,LH,BL,true),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
-  specialize_rule1(Lit,M,ALL,SLit),
+  specialize_rule_lit(Lit,M,ALL,SLit),
   append(BL,[SLit],BL1),
-  (lookahead(SLit,LLit1);lookahead_cons(SLit,LLit1)),
+  (M:lookahead(SLit,LLit1);M:lookahead_cons(SLit,LLit1)),
   specialize_rule_la(LLit1,M,LH1,BL1,BL2),
   append(LH1,BL2,ALL2),
   extract_fancy_vars(ALL2,Vars1),
@@ -1148,15 +986,13 @@ specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
   \+ banned_clause(M,LH1,BL2),
   SpecRul = rule(ID,LH,BL2,true).
 
-specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
+specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
   Rule = rule(ID,LH,BL,true),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
-  specialize_rule1(Lit,M,ALL,SLit),
+  specialize_rule_lit(Lit,M,ALL,SLit),
 
-  %\+ member(SLit,LH1)
-
-  \+ lookahead_cons(SLit,_),
+  \+ M:lookahead_cons(SLit,_),
 
   append(BL,[SLit],BL1),
   append(LH1,BL1,ALL1),
@@ -1169,8 +1005,8 @@ specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
   SpecRul = rule(ID,LH,BL1,true).
 
 
-specialize_rule([_|RLit],M,Rule,SpecRul,Lit):-
-  specialize_rule(RLit,M,Rule,SpecRul,Lit).
+specialize_rule_bl([_|RLit],M,Rule,SpecRul,Lit):-
+  specialize_rule_bl(RLit,M,Rule,SpecRul,Lit).
 
 
 specialize_rule_la([],_M,_LH1,BL1,BL1).
@@ -1179,17 +1015,10 @@ specialize_rule_la([Lit1|T],M,LH1,BL1,BL3):-
   copy_term(Lit1,Lit2),
   M:modeb(_,Lit2),
   append(LH1,BL1,ALL1),
-  specialize_rule1(Lit2,M,ALL1,SLit1),
+  specialize_rule_lit(Lit2,M,ALL1,SLit1),
   append(BL1,[SLit1],BL2),
   specialize_rule_la(T,M,LH1,BL2,BL3).
 
-
-specialize_rule_la_bot([],Bot,Bot,BL,BL).
-
-specialize_rule_la_bot([Lit|T],Bot0,Bot,BL1,BL3):-
-  delete_one(Bot0,Bot1,Lit),
-  append(BL1,[Lit],BL2),
-  specialize_rule_la_bot(T,Bot1,Bot,BL2,BL3).
 
 
 remove_prob(['':_P],[]):-!.
@@ -1198,80 +1027,13 @@ remove_prob([X:_|R],[X|R1]):-
   remove_prob(R,R1).
 
 
-specialize_rule1(Lit,M,Lits,SpecLit):-
+specialize_rule_lit(Lit,M,Lits,SpecLit):-
   Lit =.. [Pred|Args],
   exctract_type_vars(Lits,M,TypeVars0),
   remove_duplicates(TypeVars0,TypeVars),
   take_var_args(Args,TypeVars,Args1),
   SpecLit =.. [Pred|Args1],
   \+ member_eq(SpecLit,Lits).
-
-
-convert_to_input_vars([],[]):-!.
-
-convert_to_input_vars([+T|RT],[+T|RT1]):-
-  !,
-  convert_to_input_vars(RT,RT1).
-
-convert_to_input_vars([-T|RT],[+T|RT1]):-
-  convert_to_input_vars(RT,RT1).
-
-
-remove_eq(X,[Y|R],R):-
-  X == Y,
-  !.
-
-remove_eq(X,[_|R],R1):-
-  remove_eq(X,R,R1).
-
-
-input_variables(\+ LitM,InputVars):-
-  !,
-  LitM=..[P|Args],
-  length(Args,LA),
-  length(Args1,LA),
-  Lit1=..[P|Args1],
-  copy_term(LitM,Lit0),
-  lm_input_module(M),
-  M:modeb(_,Lit1),
-  Lit1 =.. [P|Args1],
-  convert_to_input_vars(Args1,Args2),
-  Lit2 =.. [P|Args2],
-  input_vars(Lit0,Lit2,InputVars).
-
-input_variables(LitM,InputVars):-
-  LitM=..[P|Args],
-  length(Args,LA),
-  length(Args1,LA),
-  Lit1=..[P|Args1],
-  lm_input_module(M),
-  M:modeb(_,Lit1),
-  input_vars(LitM,Lit1,InputVars).
-
-input_variables(LitM,InputVars):-
-  LitM=..[P|Args],
-  length(Args,LA),
-  length(Args1,LA),
-  Lit1=..[P|Args1],
-  lm_input_module(M),
-  M:modeh(_,Lit1),
-  input_vars(LitM,Lit1,InputVars).
-
-
-input_vars(Lit,Lit1,InputVars):-
-  Lit =.. [_|Vars],
-  Lit1 =.. [_|Types],
-  input_vars1(Vars,Types,InputVars).
-
-
-input_vars1([],_,[]).
-
-input_vars1([V|RV],[+_T|RT],[V|RV1]):-
-  !,
-  input_vars1(RV,RT,RV1).
-
-input_vars1([_V|RV],[_|RT],RV1):-
-  input_vars1(RV,RT,RV1).
 
 choose_rule(Theory,M,Rule):-
   ( M:local_setting(mcts_covering,true)	->
@@ -1284,19 +1046,6 @@ choose_rule(Theory,M,Rule):-
 
 
 
-delete_one([X|R],R,X).
-
-delete_one([X|R],[X|R1],D):-
-  delete_one(R,R1,D).
-
-
-remove_last([_X],[]) :-
-  !.
-
-remove_last([X|R],[X|R1]):-
-  remove_last(R,R1).
-
-
 delete_matching([],_El,[]).
 
 delete_matching([El|T],El,T1):-!,
@@ -1306,128 +1055,26 @@ delete_matching([H|T],El,[H|T1]):-
   delete_matching(T,El,T1).
 
 
-/* dv_lemur.pl START*/
-t(DV):- % dv([advisedby(A,B)],[taughtby(C,B,D),ta(C,A,D)],DV).
-  dv([advisedby(A,B)],[publication(C,B),publication(C,A),professor(B),student(A)],DV).
-
-  %dv([professor(A)],[taughtby(B,A,C),taughtby(D,A,E),taughtby(D,A,E)],DV).  %max_var 5
-
-
-dv(H,B,DV1):-			%-DV1
-  term_variables(H,V),
-  head_depth(V,DV0),
-  findall((MD-DV),var_depth(B,DV0,DV,0,MD),LDs), % cerchiamo tutte le possibili liste di coppie var-prof che si possono generare in base alle scelte del modeb e poi prendiamo la lista che porta al massimo della profondita massima
-  get_max(LDs,-1,-,DV1).
-
-
-input_variables_b(LitM,InputVars):-
-  LitM=..[P|Args],
-  length(Args,LA),
-  length(Args1,LA),
-  Lit1=..[P|Args1],
-  lm_input_module(M),
-  M:modeb(_,Lit1),
-  input_vars(LitM,Lit1,InputVars).
-
-
-depth_var_head(List,VarsD):-   % exit:depth_var_head([professor(_G131537)],[[_G131537,0]]) ?
-  term_variables(List,Vars0),   %List = lista atomi testa, Vars0 = lista variabili estratte dalla testa (term_variables  _710033,_710237,_711016,_710969).
-  head_depth(Vars0,VarsD).	%aggiunge la profondità 0 ad ogni variabile, creando sottoliste
-
-
-head_depth([],[]).
-
-head_depth([V|R],[[V,0]|R1]):-
-  head_depth(R,R1).
-
-
-var_depth([],PrevDs1,PrevDs1,MD,MD):-!.
-
-var_depth([L|R],PrevDs,PrevDs1,_MD,MD):-    		%L=body atom
-  %MD e' la profondita' massima a cui si e' arrivati
-  input_variables_b(L,InputVars),          	%variabili di input nell'atomo L
-
-  %write(L),format("~n variabili di input:",[]),write_list(InputVars),  %L=letterale del body=ta(_710237,_710858,_711331) InputVars = variabili di input nel letterale=_710237,_710858.
-  term_variables(L, BodyAtomVars),   		   %BodyAtomVars: estrae dal letterale Lit del body la lista di variabili
-  output_vars(BodyAtomVars,InputVars,OutputVars),  %OutputVars = BodyAtomVars-InputVars
-  depth_InputVars(InputVars,PrevDs,0,MaxD),   %MaxD: massima profondita delle variabili di input presenti nel letterale
-  D is MaxD+1,
-  compute_depth(OutputVars,D,PrevDs,PrevDs0),  %Ds: lista di liste [v,d] per tutte le  variabili (assegna D a tutte le variabili)
-
-  %term_variables(PrevLits,PrevVars),     	%PrevVars: lista variabili nella testa
-  %write(BodyD),
-  %PrevDs1 = [BodyD|PrevDs].
-  var_depth(R,PrevDs0,PrevDs1,D,MD).
-
-
-get_max([],_,Ds,Ds).
-
-get_max([(MD-DsH)|T],MD0,_Ds0,Ds):-
-  MD>MD0,!,
-  get_max(T,MD,DsH,Ds).
-
-get_max([_H|T],MD,Ds0,Ds):-
-  get_max(T,MD,Ds0,Ds).
-
-
-output_vars(OutVars,[],OutVars):-!.
-
-output_vars(BodyAtomVars,[I|InputVars],OutVars):-	%esclude le variabili di input dalla lista di var del letterale del body
-  delete(BodyAtomVars, I, Residue),   			%cancella I da BodyAtomVars
-  output_vars(Residue,InputVars, OutVars).
-
-
-% restituisce in D la profondita massima delle variabili presenti nella lista passata come primo argomento
-depth_InputVars([],_,D,D).
-
-depth_InputVars([I|Input],PrevDs,D0,D):-
-  member_l(PrevDs,I,MD),
-  ( MD>D0->
-    D1=MD
-  ;
-    D1=D0
-  ),
-  depth_InputVars(Input,PrevDs,D1,D).
-
-
-member_l([[L,D]|_P],I,D):-   %resituisce in output la profondita della variabile I
-  I==L,!.
-
-member_l([_|P],I,D):-
-  member_l(P,I,D).
-
-
-compute_depth([],_,PD,PD):-!.   %LVarD
-
-compute_depth([O|Output],D,PD,RestO):-   %LVarD
-  member_l(PD,O,_),!, % variabile gia presente
-  compute_depth(Output,D,PD,RestO).
-
-compute_depth([O|Output],D,PD,[[O,D]|RestO]):-   %LVarD
-  compute_depth(Output,D,PD,RestO).
-
-
-exceed_depth([],_):-!.
-
-exceed_depth([H|T],MD):-
-  nth1(2,H,Dep),	%estrae la profondità
-  %setting(maxdepth_var,MD),
-  %(Dep>=MD ->
-  %		format("*****************depth exceeded ~n")
-  %	;
-  %		true
-  %	),
-  Dep<MD,
-  exceed_depth(T,MD).
-
-/* dv_lemur END */
-
-
-
+/**
+ * set_lm(:Parameter:atom,+Value:term) is det
+ *
+ * The predicate sets the value of a parameter
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ */
 set_lm(M:Parameter,Value):-
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
+/**
+ * setting_lm(:Parameter:atom,-Value:term) is det
+ *
+ * The predicate returns the value of a parameter
+ * For a list of parameters see
+ * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+ * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ */
 setting_lm(M:P,V):-
   M:local_setting(P,V).
 

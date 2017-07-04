@@ -36,6 +36,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   take_var_args/3,
   remove_duplicates/2,
   exctract_type_vars/3,
+  delete_one/3,
   get_next_rule_number/2,
   member_eq/2,
   retract_all/1,assert_all/3,
@@ -1920,20 +1921,6 @@ delete_one([X|R],[X|R1],D):-
   delete_one(R,R1,D).
 
 
-remove_last([_X],[]) :-
-  !.
-
-remove_last([X|R],[X|R1]):-
-  remove_last(R,R1).
-
-
-delete_matching([],_El,[]).
-
-delete_matching([El|T],El,T1):-!,
-  delete_matching(T,El,T1).
-
-delete_matching([H|T],El,[H|T1]):-
-  delete_matching(T,El,T1).
 
 
 %Computation of the depth of the variables in the clause head/body
