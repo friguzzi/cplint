@@ -126,7 +126,6 @@ default_setting_sc(approx_value,100).
 induce(TrainFolds,P):-
   induce_rules(TrainFolds,P0),
   rules2terms(P0,P).
-%  generate_clauses(P0,P,0,[],_Th).
 
 /**
  * induce(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
@@ -174,12 +173,12 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   append(L,TE),
   set_sc(compiling,on),
   process_clauses(P,[],_,[],PRules),
-  generate_clauses(PRules,RuleFacts,0,[],Th),
+  generate_clauses(PRules,M,RuleFacts,0,[],Th),
   assert_all(Th,M,ThRef),
   assert_all(RuleFacts,M,RFRef),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-    generate_clauses(RBG,_RBGRF,0,[],ThBG),
+    generate_clauses(RBG,M,_RBGRF,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef)
@@ -211,7 +210,7 @@ induce_rules(M:Folds,R):-
   assert(M:database(DB)),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-    generate_clauses(RBG,_RBG1,0,[],ThBG),
+    generate_clauses(RBG,M,_RBG1,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ThBG,M,ThBGRef),
     assert_all(ClBG,M,ClBGRef)
@@ -350,7 +349,7 @@ cycle_structure([(RH,_CLL)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
 
 cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   format2(Mod,"Theory iteration ~d~n~n",[M]),
-  generate_clauses([RH|R0],R2,0,[],Th1),
+  generate_clauses([RH|R0],Mod,R2,0,[],Th1),
   format3(Mod,"Initial theory~n~n",[]),
   write_rules3(Mod,[RH|R0],user_output),
   assert_all(Th1,Mod,Th1Ref),
@@ -415,7 +414,7 @@ induce_parameters(M:Folds,R):-
   statistics(walltime,[_,_]),
   (M:bg(RBG0)->
     process_clauses(RBG0,[],_,[],RBG),
-    generate_clauses(RBG,_RBG1,0,[],ThBG),
+    generate_clauses(RBG,M,_RBG1,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef)
@@ -444,7 +443,7 @@ induce_parameters(M:Folds,R):-
 
 
 learn_params(DB,M,R0,R,Score):-  %Parameter Learning
-  generate_clauses(R0,R1,0,[],Th0),
+  generate_clauses(R0,M,R1,0,[],Th0),
   format2(M,"Initial theory~n",[]),
   write_rules2(M,R1,user_output),
   assert_all(Th0,M,Th0Ref),
@@ -552,7 +551,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-  %sca
 score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   format3(M,'Score ref.  ~d of ~d~n',[Nrev,NRef]),
   write_rules3(M,[R1],user_output),
-  generate_clauses_cw([R1],[R2],0,[],Th1),
+  generate_clauses_cw([R1],M,[R2],0,[],Th1),
   assert_all(Th1,M,Th1Ref),
   assert_all([R2],M,[R2Ref]),!,
   findall(RN-HN,(M:rule(RN,HL,_BL,_Lit),length(HL,HN)),L),
@@ -2840,16 +2839,16 @@ get_probs([_H:P|T], [P1|T1]) :-
   get_probs(T, T1).
 
 
-generate_clauses_cw([],[],_N,C,C):-!.
+generate_clauses_cw([],_M,[],_N,C,C):-!.
 
-generate_clauses_cw([H|T],[H1|T1],N,C0,C):-
-  gen_clause_cw(H,N,N1,H1,CL),!,  %agg.cut
+generate_clauses_cw([H|T],M,[H1|T1],N,C0,C):-
+  gen_clause_cw(H,M,N,N1,H1,CL),!,  %agg.cut
   append(C0,CL,C1),
-  generate_clauses_cw(T,T1,N1,C1,C).
+  generate_clauses_cw(T,M,T1,N1,C1,C).
 
-gen_clause_cw((H :- Body),N,N,(H :- Body),[(H :- Body)]):-!.
+gen_clause_cw((H :- Body),_M,N,N,(H :- Body),[(H :- Body)]):-!.
 
-gen_clause_cw(rule(_R,HeadList,BodyList,Lit),N,N1,
+gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
 % disjunctive clause with more than one head atom senza depth_bound
   process_body_cw(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Module),
@@ -2858,7 +2857,6 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
-  input_module(M),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
   ;
@@ -2866,7 +2864,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),N,N1,
   ),
   N1 is N+1.
 
-gen_clause_cw(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
+gen_clause_cw(def_rule(H,BodyList,Lit),_M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   process_body_cw(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Module),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
@@ -2875,19 +2873,18 @@ gen_clause_cw(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- 
   Clauses=[(Head1 :- Body1)].
 
 
-generate_clauses([],[],_N,C,C):-!.
+generate_clauses([],_M,[],_N,C,C):-!.
 
-generate_clauses([H|T],[H1|T1],N,C0,C):-
-  gen_clause(H,N,N1,H1,CL),!,  %agg.cut
+generate_clauses([H|T],M,[H1|T1],N,C0,C):-
+  gen_clause(H,M,N,N1,H1,CL),!,  %agg.cut
   append(C0,CL,C1),
-  generate_clauses(T,T1,N1,C1,C).
+  generate_clauses(T,M,T1,N1,C1,C).
 
 
-gen_clause((H :- Body),N,N,(H :- Body),[(H :- Body)]):-!.
+gen_clause((H :- Body),_M,N,N,(H :- Body),[(H :- Body)]):-!.
 
-gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
+gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-
-  input_module(M),
   M:local_setting(depth_bound,true),!,
 % disjunctive clause with more than one head atom e depth_bound
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
@@ -2903,9 +2900,8 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
    ),
   N1 is N+1.
 
-gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
+gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
-  input_module(M),
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList1,BodyList2),
@@ -2920,9 +2916,8 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),N,N1,
   ),
   N1 is N+1.
 
-gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :-
+gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
-  input_module(M),
   M:local_setting(depth_bound,true),!,
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
@@ -2930,9 +2925,8 @@ gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :-
   add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
   Clauses=[(Head1 :- (DBH>=1,DB is DBH-1,Body1))].
 
-gen_clause(def_rule(H,BodyList,Lit),N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
+gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
-  input_module(M),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
