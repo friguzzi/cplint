@@ -3282,15 +3282,6 @@ test_no_area(TestSet,M,NPos,NNeg,CLL,Results):-
   test_folds(TestSet,M,[],Results,0,NPos,0,NNeg,0,CLL).
 
 
-test_int(TestSet,M,CLL,AUCROC,ROC,AUCPR,PR):-
-%  S= user_output,
-%  SA= user_output,
-%  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
-  test_folds(TestSet,M,[],LG,0,_Pos,0,_Neg,0,CLL),
-%  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
-%  write_prob(LG),
-  compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
-
 test_folds([],_M,LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
 
 test_folds([HT|TT],M,LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
