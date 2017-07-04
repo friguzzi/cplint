@@ -3003,8 +3003,7 @@ specialize_theory(Theory,M,Ref):-
   SpecRule = rule(_,_,_B,_).
 
 
-specialize_rule(Rule,SpecRule,Lit):-
-  lm_input_module(M),
+specialize_rule(Rule,M,SpecRule,Lit):-
   M:local_setting(specialization,bottom),
   Rule = rule(ID,LH,BL,Lits),
   delete_one(Lits,RLits,Lit),
@@ -3018,12 +3017,11 @@ specialize_rule(Rule,SpecRule,Lit):-
   length(Vars1,NV),
   M:local_setting(max_var,MV),
   NV=<MV,
-  linked_clause(BL1,LH2),
+  linked_clause(BL1,M,LH2),
   \+ banned_clause(LH2,BL1),
   SpecRule=rule(ID,LH,BL1,RLits).
 
-specialize_rule(Rule,SpecRule,Lit):-
-  lm_input_module(M),
+specialize_rule(Rule,M,SpecRule,Lit):-
   M:local_setting(specialization,bottom),
   Rule = rule(ID,LH,BL,Lits),
   delete_one(Lits,RLits,Lit),
@@ -3039,15 +3037,14 @@ specialize_rule(Rule,SpecRule,Lit):-
   length(Vars1,NV),
   M:local_setting(max_var,MV),
   NV=<MV,
-  linked_clause(BL1,LH2),
-  \+ banned_clause(LH2,BL1),
+  linked_clause(BL1,M,LH2),
+  \+ banned_clause(LH2,M,BL1),
   SpecRule=rule(ID,LH,BL1,RLits1).
 
-specialize_rule(Rule,SpecRule,Lit):-
-  lm_input_module(M),
+specialize_rule(Rule,M,SpecRule,Lit):-
   M:local_setting(specialization,mode),!,
   %findall(BL , modeb(_,BL), BLS),
-  mcts_modeb(BSL0),
+  M:mcts_modeb(BSL0),
   Rule = rule(_ID,_LH,BL,_),
   ( BL \= [] ->
     %last(BL,LastLit),
@@ -3057,7 +3054,7 @@ specialize_rule(Rule,SpecRule,Lit):-
   ;
     BSL = BSL0
   ),
-  specialize_rule(BSL,Rule,SpecRule,Lit).
+  specialize_rule(BSL,M,Rule,SpecRule,Lit).
 
 
 filter_modeb([],_Pred,[]).
@@ -3105,16 +3102,15 @@ mysublist([H|T],L):-
   nth1(_,L,H,R),
   mysublist(T,R).
 
-/*
-specialize_rule([Lit|_RLit],Rule,SpecRul,SLit):-
-  lm_input_module(M),
+
+specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
   Rule = rule(ID,LH,BL,true),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
-  specialize_rule1(Lit,ALL,SLit),
+  specialize_rule1(Lit,M,ALL,SLit),
   append(BL,[SLit],BL1),
   (lookahead(SLit,LLit1);lookahead_cons(SLit,LLit1)),
-  specialize_rule_la(LLit1,LH1,BL1,BL2),
+  specialize_rule_la(LLit1,M,LH1,BL1,BL2),
   append(LH1,BL2,ALL2),
   extract_fancy_vars(ALL2,Vars1),
   length(Vars1,NV),
@@ -3123,12 +3119,11 @@ specialize_rule([Lit|_RLit],Rule,SpecRul,SLit):-
   \+ banned_clause(LH1,BL2),
   SpecRul = rule(ID,LH,BL2,true).
 
-specialize_rule([Lit|_RLit],Rule,SpecRul,SLit):-
-  lm_input_module(M),
+specialize_rule([Lit|_RLit],M,Rule,SpecRul,SLit):-
   Rule = rule(ID,LH,BL,true),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
-  specialize_rule1(Lit,ALL,SLit),
+  specialize_rule1(Lit,M,ALL,SLit),
 
   %\+ member(SLit,LH1)
 
@@ -3145,20 +3140,19 @@ specialize_rule([Lit|_RLit],Rule,SpecRul,SLit):-
   SpecRul = rule(ID,LH,BL1,true).
 
 
-specialize_rule([_|RLit],Rule,SpecRul,Lit):-
-  specialize_rule(RLit,Rule,SpecRul,Lit).
+specialize_rule([_|RLit],M,Rule,SpecRul,Lit):-
+  specialize_rule(RLit,M,Rule,SpecRul,Lit).
 
-*/
-specialize_rule_la([],_LH1,BL1,BL1).
 
-specialize_rule_la([Lit1|T],LH1,BL1,BL3):-
+specialize_rule_la([],_M,_LH1,BL1,BL1).
+
+specialize_rule_la([Lit1|T],M,LH1,BL1,BL3):-
   copy_term(Lit1,Lit2),
-  lm_input_module(M),
   M:modeb(_,Lit2),
   append(LH1,BL1,ALL1),
-  specialize_rule1(Lit2,ALL1,SLit1),
+  specialize_rule1(Lit2,M,ALL1,SLit1),
   append(BL1,[SLit1],BL2),
-  specialize_rule_la(T,LH1,BL2,BL3).
+  specialize_rule_la(T,M,LH1,BL2,BL3).
 
 
 specialize_rule_la_bot([],Bot,Bot,BL,BL).
@@ -3175,9 +3169,9 @@ remove_prob([X:_|R],[X|R1]):-
   remove_prob(R,R1).
 
 
-specialize_rule1(Lit,Lits,SpecLit):-
+specialize_rule1(Lit,M,Lits,SpecLit):-
   Lit =.. [Pred|Args],
-  exctract_type_vars(Lits,TypeVars0),
+  exctract_type_vars(Lits,M,TypeVars0),
   remove_duplicates(TypeVars0,TypeVars),
   take_var_args(Args,TypeVars,Args1),
   SpecLit =.. [Pred|Args1],
@@ -3375,19 +3369,7 @@ add_probs([H|T],[H:P|T1],P):-
   add_probs(T,T1,P).
 
 */
-extract_fancy_vars(List,Vars):-
-  term_variables(List,Vars0),
-  fancy_vars(Vars0,1,Vars).
 
-
-fancy_vars([],_,[]).
-
-fancy_vars([X|R],N,[NN2=X|R1]):-
-  name(N,NN),
-  append([86],NN,NN1),
-  name(NN2,NN1),
-  N1 is N + 1,
-  fancy_vars(R,N1,R1).
 
 
 delete_one([X|R],R,X).
@@ -3580,7 +3562,6 @@ user:term_expansion((:- lemur), []) :-!,
 user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
-  writeln(ecco),
   make_dynamic(M),
   %retractall(lm_input_mod(M)),
   style_check(+discontiguous).
