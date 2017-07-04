@@ -123,9 +123,7 @@ default_setting_lm(depth_bound,false).  %if true, it limits the derivation of th
 default_setting_lm(depth,2).
 default_setting_lm(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-:- thread_local database/1, mcts_modeb/1, mcts_restart/1, mcts_best_score/1,
-   mcts_best_theory/1, mcts_theories/1, mcts_best_theories_iteration/1, node/7,
-   lastid/1, v/3, rule_sc_n/1, lm_input_mod/1, local_setting/2, in_on/0, in/1, model/1, int/1.
+:- thread_local database/1, lm_input_mod/1.
 
 /**
  * induce_lm(:TrainFolds:list_of_atoms,-P:probabilistic_program) is det
@@ -138,34 +136,6 @@ induce_lm(TrainFolds,P):-
   induce_rules(TrainFolds,P0),
   rules2terms(P0,P).
 
-
-/**
- * test_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
- *
- * The predicate takes as input in P a probabilistic program,
- * tests P on the folds indicated in TestFolds and returns the
- * log likelihood of the test examples in LL, the area under the Receiver
- * Operating Characteristic curve in AUCROC, a dict containing the points
- * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
- * and a dict containing the points of the PR curve in PR
- */
-test_lm(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
-  test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
-
-/**
- * test_lm_r(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-AUCPR:float) is det
- *
- * The predicate takes as input in P a probabilistic program,
- * tests P on the folds indicated in TestFolds and returns the
- * log likelihood of the test examples in LL, the area under the Receiver
- * Operating Characteristic curve in AUCROC, the area under the Precision Recall
- * curve in AUCPR and draws R diagrams of the curves.
- */
-test_lm_r(P,TestFolds,LL,AUCROC,AUCPR):-
-  lm_input_mod(M),
-  assert(slipcover:lm_input_mod(M)),
-  test_r(P,TestFolds,LL,AUCROC,AUCPR),
-  retract((slipcover:lm_input_mod(M))).
 
 
 induce_rules(M:Folds,R):-
@@ -1426,15 +1396,6 @@ head_predicate(P/Ar):-
   functor(At,P,Ar).
 
 
-generate_top_cl([],[]):-!.
-
-generate_top_cl([A|T],[(rule(R,[A1:0.5,'':0.5],[],true),-1e20)|TR]):-
-  A=..[F|ArgM],
-  keep_const(ArgM,Arg),
-  A1=..[F|Arg],
-  get_next_rule_number(R),
-  generate_top_cl(T,TR).
-
 
 generate_head_ex([],_M,[],[]).
 
@@ -1539,7 +1500,7 @@ generate_body_pred([(A,H,Det)|T],[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
   CLV=(Head1:-BodyList1),
   remove_int_atom_list(Head1,Head),
   remove_int_atom_list(BodyList1,BodyList),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   length(Head,LH),
   Prob is 1/(LH+1),
   gen_head(Head,Prob,HP),
@@ -1562,7 +1523,7 @@ generate_body_pred([(A,H)|T],[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0]
   CLV=([Head1]:-BodyList1),
   remove_int_atom(Head1,Head),
   remove_int_atom_list(BodyList1,BodyList),
-  get_next_rule_number(R),
+  get_next_rule_number(M,R),
   copy_term((Head,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
   format("Bottom clause: example ~p~nClause~n~p:0.5 :-~n",[H,HeadV]),
@@ -1819,11 +1780,6 @@ process_clauses([H|T],C0,C1,R0,R1):-
   process_clauses(T,C2,C1,R2,R1).
 
 
-get_next_rule_number(R):-
-  lm_input_module(M),
-  retract(M:rule_sc_n(R)),
-  R1 is R+1,
-  assert(M:rule_sc_n(R1)).
 
 
 get_node(\+ Goal,M,Env,BDD):-
@@ -2274,13 +2230,6 @@ or_list1([],B,B).
 or_list1([H|T],B0,B1):-
   or(B0,H,B2),
   or_list1(T,B2,B1).
-
-
-/* set(Par,Value) can be used to set the value of a parameter */
-set(Parameter,Value):-
-  lm_input_module(M),
-  retract(M:local_setting(Parameter,_)),
-  assert(M:local_setting(Parameter,Value)).
 
 
 extract_vars_list(L,[],V):-
@@ -2870,7 +2819,7 @@ generalize_theory(Theory,M,Ref):-
 
 add_rule(Mod,add(rule(ID,Head,[],Lits))):-
   Mod:local_setting(specialization,bottom),!,
-  database(DB),
+  Mod:database(DB),
   sample(1,DB,[M]),
   get_head_atoms(O,Mod),
   member(A,O),
@@ -2890,7 +2839,7 @@ add_rule(M,add(SpecRule)):-
   L1 is L+1,
   P is 1/L1,
   generate_head(HLS,P,Head),
-  get_next_rule_number(ID),
+  get_next_rule_number(M,ID),
   Rule0 = rule(ID,Head,[],true),
   specialize_rule(Rule0,M,SpecRule,_Lit).
 
@@ -3544,7 +3493,7 @@ user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   make_dynamic(M),
-  %retractall(lm_input_mod(M)),
+  retractall(lm_input_mod(M)),
   style_check(+discontiguous).
 
 user:term_expansion((:- begin_bg), []) :-

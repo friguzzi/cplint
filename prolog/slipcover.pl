@@ -34,6 +34,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   linked_clause/3,
   banned_clause/3,
   exctract_type_vars/3,
+  get_next_rule_number/2,
   retract_all/1,assert_all/3,
   write2/2,write3/2,format2/3,format3/3,
   write_rules2/3,write_rules3/3,
