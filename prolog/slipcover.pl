@@ -192,7 +192,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   retract_all(ThRef),
   retract_all(RFRef).
 
-induce_rules(M:Folds,M:R):-
+induce_rules(M:Folds,R):-
   set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -394,7 +394,7 @@ induce_par(Folds,ROut):-
   induce_parameters(Folds,R),
   rules2terms(R,ROut).
 
-induce_parameters(M:Folds,M:R):-
+induce_parameters(M:Folds,R):-
   set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
