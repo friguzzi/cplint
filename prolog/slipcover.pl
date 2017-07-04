@@ -436,7 +436,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   ),
   Mod:local_setting(random_restarts_number,N),
   format3(Mod,"~nInitial CLL ~f~n~n",[CLL0]),
-  random_restarts(N,ExData,Nodes,CLL0,Score,initial,Par,LE),   %output:CLL,Par
+  random_restarts(N,Mod,ExData,Nodes,CLL0,Score,initial,Par,LE),   %output:CLL,Par
   format3(Mod,"Score after EMBLEM = ~f~n",[Score]),
   retract_all(Th1Ref),
   retract_all(R2Ref),!,
@@ -532,7 +532,7 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   ),
   format3(M,"Initial score ~f~n",[CLL0]),
   M:local_setting(random_restarts_number,N),
-  random_restarts(N,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
+  random_restarts(N,M,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
   end(ExData),
   retract_all(Th0Ref),
   retract_all(R1Ref),!,
@@ -639,7 +639,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   ),
   format3(M,"Initial CLL ~f~n",[CLL0]),
   M:local_setting(random_restarts_REFnumber,N),
-  random_restarts_ref(N,ExData,Nodes,CLL0,Score,initial,Par,LE),
+  random_restarts_ref(N,M,ExData,Nodes,CLL0,Score,initial,Par,LE),
   end(ExData),
   update_theory([R2],Par,[R3]),
   write3(M,'Updated refinement\n'),
@@ -883,10 +883,9 @@ get_bdd_group([H|T],M,Env,T1,Gmax,G1,BDD0,BDD,CE,[H|LE0],LE):-
 
 
 /* EM start */
-random_restarts(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
+random_restarts(0,_M,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
-random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
-  input_module(M),
+random_restarts(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(random_restarts_number,NMax),
   Num is NMax-N+1,
   format3(M,"Restart number ~d~n~n",[Num]),
@@ -899,15 +898,14 @@ random_restarts(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   format3(M,"Random_restart: Score ~f~n",[ScoreR]),
   N1 is N-1,
   (ScoreR>Score0->
-    random_restarts(N1,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
+    random_restarts(N1,M,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
   ;
-    random_restarts(N1,ExData,Nodes,Score0,Score,Par0,Par,LE)
+    random_restarts(N1,M,ExData,Nodes,Score0,Score,Par0,Par,LE)
   ).
 
-random_restarts_ref(0,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
+random_restarts_ref(0,_M,_ExData,_Nodes,Score,Score,Par,Par,_LE):-!.
 
-random_restarts_ref(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
-  input_module(M),
+random_restarts_ref(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(random_restarts_REFnumber,NMax),
   Num is NMax-N+1,
   format3(M,"Restart number ~d~n~n",[Num]),
@@ -919,9 +917,9 @@ random_restarts_ref(N,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   format3(M,"Random_restart: Score ~f~n",[ScoreR]),
   N1 is N-1,
   (ScoreR>Score0->
-    random_restarts_ref(N1,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
+    random_restarts_ref(N1,M,ExData,Nodes,ScoreR,Score,Par1,Par,LE)
   ;
-    random_restarts_ref(N1,ExData,Nodes,Score0,Score,Par0,Par,LE)
+    random_restarts_ref(N1,M,ExData,Nodes,Score0,Score,Par0,Par,LE)
   ).
 
 
