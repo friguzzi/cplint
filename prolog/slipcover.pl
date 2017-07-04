@@ -63,7 +63,6 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate test_prob(:,+,-,-,-,-).
 :- meta_predicate set_sc(:,+).
 :- meta_predicate setting_sc(:,-).
-:- meta_predicate rules2terms(:,-).
 
 default_setting_sc(epsilon_em,0.0001).
 default_setting_sc(epsilon_em_fraction,0.00001).
@@ -188,7 +187,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   retract_all(ThRef),
   retract_all(RFRef).
 
-induce_rules(M:Folds,R):-
+induce_rules(M:Folds,M:R):-
   set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -390,7 +389,7 @@ induce_par(Folds,ROut):-
   induce_parameters(Folds,R),
   rules2terms(R,ROut).
 
-induce_parameters(M:Folds,R):-
+induce_parameters(M:Folds,M:R):-
   set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -995,7 +994,7 @@ update_head([H:_P|T],[PU|TP],N,[H:P|T1]):-
  * representation format (rule/4 and def_rule/3) to the
  * LPAD syntax.
  */
-rules2terms(M:R,M:T):-
+rules2terms(R,T):-
   maplist(rule2term,R,T).
 
 rule2term(rule(_N,HL,BL,_Lit),(H:-B)):-

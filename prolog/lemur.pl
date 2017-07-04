@@ -26,7 +26,7 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,test_lm/7,test_lm_r/5,test_prob_lm/6,
+  induce_lm/2, sample/4,test/7,test_prob/6,
   op(500,fx,#),op(500,fx,'-#')]).
 
 /*slipcover_lemur.pl declarations start*/
@@ -48,9 +48,6 @@
 
 :- meta_predicate induce_lm(:,-).
 :- meta_predicate induce_rules(:,-).
-:- meta_predicate induce_par(:,-).
-:- meta_predicate induce_parameters(:,-).
-:- meta_predicate test_prob(:,+,-,-,-,-).
 :- meta_predicate set_lm(:,+).
 :- meta_predicate setting_lm(:,-).
 /* :- [dv_lemur].
@@ -170,24 +167,8 @@ test_lm_r(P,TestFolds,LL,AUCROC,AUCPR):-
   test_r(P,TestFolds,LL,AUCROC,AUCPR),
   retract((slipcover:lm_input_mod(M))).
 
-/**
- * test_prob_lm(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,
- * -NNeg:int,-LL:float,-Results:list) is det
- *
- * The predicate takes as input in P a probabilistic program,
- * tests P on the folds indicated in TestFolds and returns
- * the number of positive examples in NPos, the number of negative examples
- * in NNeg, the log likelihood in LL
- * and in Results a list containing the probabilistic result for each query cont
-ained in TestFolds.
- */
-test_prob_lm(P,TestFolds,NPos,NNeg,CLL,Results) :-
-  lm_input_mod(M),
-  assert(slipcover:lm_input_mod(M)),
-  test_prob(P,TestFolds,NPos,NNeg,CLL,Results),
-  retract((slipcover:lm_input_mod(M))).
 
-induce_rules(M:Folds,M:R):-
+induce_rules(M:Folds,R):-
   set_lm(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
@@ -3648,14 +3629,9 @@ user:term_expansion(At, A) :-
     )
 	).
 
-:- multifile sandbox:safe_primitive/1.
-
-sandbox:safe_primitive(lemur:test_lm(_,_,_,_,_,_,_)).
-sandbox:safe_primitive(lemur:test_lm_r(_,_,_,_,_)).
-sandbox:safe_primitive(lemur:test_prob_lm(_,_,_,_,_,_)).
-sandbox:safe_primitive(lemur:set_lm(_,_)).
-sandbox:safe_primitive(lemur:setting_lm(_,_)).
 
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(lemur:induce_lm(_,_),[]).
+sandbox:safe_meta(lemur:set_lm(_,_), []).
+sandbox:safe_meta(lemur:setting_lm(_,_), []).
