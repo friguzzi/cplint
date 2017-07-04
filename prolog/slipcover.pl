@@ -128,23 +128,6 @@ induce(TrainFolds,P):-
   rules2terms(P0,P).
 
 /**
- * induce(+TrainFolds:list_of_atoms,+TestFolds:list_of_atoms,-P:probabilistic_program,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
- *
- * The predicate performs structure learning using the folds indicated in
- * TrainFolds for training.
- * It returns in P the learned probabilistic program.
- * Moreover, it tests P on the folds indicated in TestFolds and returns the
- * log likelihood of the test examples in LL, the area under the Receiver
- * Operating Characteristic curve in AUCROC, a dict containing the points
- * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
- * and a dict containing the points of the PR curve in PR
- */
-induce(TrainFolds,TestFolds,ROut,LL,AUCROC,ROC,AUCPR,PR):-
-  induce_rules(TrainFolds,R),
-  rules2terms(R,ROut),
-  test(ROut,TestFolds,LL,AUCROC,ROC,AUCPR,PR).
-
-/**
  * test(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate takes as input in P a probabilistic program,
@@ -187,7 +170,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
     true
   ),
   set_sc(compiling,off),
-  test_no_area([TE],NPos,NNeg,CLL,Results),
+  test_no_area([TE],M,NPos,NNeg,CLL,Results),
   % write(Results),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
@@ -3291,46 +3274,35 @@ sandbox:safe_meta(slipcover:test(_,_,_,_,_,_,_), []).
 
 
 
-test_no_area(TestSet,NPos,NNeg,CLL,Results):-
+test_no_area(TestSet,M,NPos,NNeg,CLL,Results):-
 %  S= user_output,
 %  SA= user_output,
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
   %gtrace,
-  test_folds(TestSet,[],Results,0,NPos,0,NNeg,0,CLL).
+  test_folds(TestSet,M,[],Results,0,NPos,0,NNeg,0,CLL).
 
 
-test(TestSet,CLL,AUCROC,ROC,AUCPR,PR):-
+test_int(TestSet,M,CLL,AUCROC,ROC,AUCPR,PR):-
 %  S= user_output,
 %  SA= user_output,
 %  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
-  test_folds(TestSet,[],LG,0,_Pos,0,_Neg,0,CLL),
+  test_folds(TestSet,M,[],LG,0,_Pos,0,_Neg,0,CLL),
 %  format(S,"cll(all,post,~d,~d,[",[Pos,Neg]),
 %  write_prob(LG),
   compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
-/*
-  ROC = c3{data:_{x:x, rows:[x-'ROC'|ROC0]},
-    axis:_{x:_{min:0.0,max:1.0,padding:0.0,
-        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
-           y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}},
-  PR = c3{data:_{x:x, rows:[x-'PR'|PR0]},
-    axis:_{x:_{min:0.0,max:1.0,padding:0.0,
-        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},
-           y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}}}.
-*/
-test_folds([],LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
 
-test_folds([HT|TT],LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
-  test_1fold(HT,LG1,Pos1,Neg1,CLL1),
+test_folds([],_M,LG,LG,Pos,Pos,Neg,Neg,CLL,CLL).
+
+test_folds([HT|TT],M,LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
+  test_1fold(HT,M,LG1,Pos1,Neg1,CLL1),
   append(LG0,LG1,LG2),
   Pos2 is Pos0+Pos1,
   Neg2 is Neg0+Neg1,
   CLL2 is CLL0+CLL1,
-  test_folds(TT,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
+  test_folds(TT,M,LG2,LG,Pos2,Pos,Neg2,Neg,CLL2,CLL).
 
-test_1fold(F,LGOrd,Pos,Neg,CLL1):-
-  find_ex(F,LG,Pos,Neg),
+test_1fold(F,M,LGOrd,Pos,Neg,CLL1):-
+  find_ex(F,M,LG,Pos,Neg),
   compute_CLL_atoms(LG,0,0,CLL1,LG1),
   keysort(LG1,LGOrd).
 /*
@@ -3481,32 +3453,29 @@ interpolate(I,N,Pos,R0,P0,TPA,FPA,TPB,FPB,A0,A,PR0,[R-P|PR]):-
   interpolate(I1,N,Pos,R,P,TPA,FPA,TPB,FPB,A1,A,PR0,PR).
 */
 
-find_ex(DB,LG,Pos,Neg):-
-  input_module(M),
+find_ex(DB,M,LG,Pos,Neg):-
   findall(P/A,M:output(P/A),LP),
   M:local_setting(neg_ex,given),!,
-  find_ex_pred(LP,DB,[],LG,0,Pos,0,Neg).
+  find_ex_pred(LP,M,DB,[],LG,0,Pos,0,Neg).
 
-find_ex(DB,LG,Pos,Neg):-
-  input_module(M),
+find_ex(DB,M,LG,Pos,Neg):-
   findall(P/A,M:output(P/A),LP),
   M:local_setting(neg_ex,cw),
-  find_ex_pred_cw(LP,DB,[],LG,0,Pos,0,Neg).
+  find_ex_pred_cw(LP,M,DB,[],LG,0,Pos,0,Neg).
 
 
-find_ex_pred([],_DB,LG,LG,Pos,Pos,Neg,Neg).
+find_ex_pred([],_M,_DB,LG,LG,Pos,Pos,Neg,Neg).
 
-find_ex_pred([P/A|T],DB,LG0,LG,Pos0,Pos,Neg0,Neg):-
+find_ex_pred([P/A|T],M,DB,LG0,LG,Pos0,Pos,Neg0,Neg):-
   functor(At,P,A),
-  find_ex_db(DB,At,LG0,LG1,Pos0,Pos1,Neg0,Neg1),
-  find_ex_pred(T,DB,LG1,LG,Pos1,Pos,Neg1,Neg).
+  find_ex_db(DB,M,At,LG0,LG1,Pos0,Pos1,Neg0,Neg1),
+  find_ex_pred(T,M,DB,LG1,LG,Pos1,Pos,Neg1,Neg).
 
-find_ex_db([],_At,LG,LG,Pos,Pos,Neg,Neg).
+find_ex_db([],_M,_At,LG,LG,Pos,Pos,Neg,Neg).
 
-find_ex_db([H|T],At,LG0,LG,Pos0,Pos,Neg0,Neg):-
+find_ex_db([H|T],M,At,LG0,LG,Pos0,Pos,Neg0,Neg):-
   At=..[P|L],
   At1=..[P,H|L],
-  input_module(M),
   findall(At1,M:At1,LP),
   findall(\+ At1,M:neg(At1),LN),
   length(LP,NP),
@@ -3514,30 +3483,28 @@ find_ex_db([H|T],At,LG0,LG,Pos0,Pos,Neg0,Neg):-
   append([LG0,LP,LN],LG1),
   Pos1 is Pos0+NP,
   Neg1 is Neg0+NN,
-  find_ex_db(T,At,LG1,LG,Pos1,Pos,Neg1,Neg).
+  find_ex_db(T,M,At,LG1,LG,Pos1,Pos,Neg1,Neg).
 
 
-find_ex_pred_cw([],_DB,LG,LG,Pos,Pos,Neg,Neg).
+find_ex_pred_cw([],_M,_DB,LG,LG,Pos,Pos,Neg,Neg).
 
-find_ex_pred_cw([P/A|T],DB,LG0,LG,Pos0,Pos,Neg0,Neg):-
+find_ex_pred_cw([P/A|T],M,DB,LG0,LG,Pos0,Pos,Neg0,Neg):-
   functor(At,P,A),
-  findall(Types,get_types(At,Types),LT),
+  findall(Types,get_types(At,M,Types),LT),
   append(LT,LLT),
   remove_duplicates(LLT,Types1),
-  find_ex_db_cw(DB,At,Types1,LG0,LG1,Pos0,Pos1,Neg0,Neg1),
-  find_ex_pred_cw(T,DB,LG1,LG,Pos1,Pos,Neg1,Neg).
+  find_ex_db_cw(DB,M,At,Types1,LG0,LG1,Pos0,Pos1,Neg0,Neg1),
+  find_ex_pred_cw(T,M,DB,LG1,LG,Pos1,Pos,Neg1,Neg).
 
-get_types(At,[]):-
+get_types(At,_M,[]):-
   At=..[_],!.
 
-get_types(At,Types):-
-  input_module(M),
+get_types(At,M,Types):-
   M:modeh(_,At),
   At=..[_|Args],
   get_args(Args,Types).
 
-get_types(At,Types):-
-  input_module(M),
+get_types(At,M,Types):-
   M:modeh(_,HT,_,_),
   member(At,HT),
   At=..[_|Args],
@@ -3635,10 +3602,9 @@ gen_goal(Arg,Ar,A,[ArgV|Args],[ArgV|ArgsNoV],V):-
 
 
 
-find_ex_db_cw([],_At,_Ty,LG,LG,Pos,Pos,Neg,Neg).
+find_ex_db_cw([],_M,_At,_Ty,LG,LG,Pos,Pos,Neg,Neg).
 
-find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
-  input_module(M),
+find_ex_db_cw([H|T],M,At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   get_constants(Types,H,C),
   At=..[P|L],
   get_types(At,TypesA),!,
@@ -3646,22 +3612,21 @@ find_ex_db_cw([H|T],At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   length(LN,N),
   At1=..[P,H|LN],
   findall(At1,M:At1,LP),
-  (setof(\+ At1,neg_ex(LN,TypesA,At1,C),LNeg)->true;LNeg=[]),
+  (setof(\+ At1,neg_ex(LN,M,TypesA,At1,C),LNeg)->true;LNeg=[]),
   length(LP,NP),
   length(LNeg,NN),
   append([LG0,LP,LNeg],LG1),
   Pos1 is Pos0+NP,
   Neg1 is Neg0+NN,
-  find_ex_db_cw(T,At,Types,LG1,LG,Pos1,Pos,Neg1,Neg).
+  find_ex_db_cw(T,M,At,Types,LG1,LG,Pos1,Pos,Neg1,Neg).
 
-neg_ex([],[],At1,_C):-
-  input_module(M),
+neg_ex([],M,[],At1,_C):-
   \+ M:At1.
 
-neg_ex([H|T],[HT|TT],At1,C):-
+neg_ex([H|T],M,[HT|TT],At1,C):-
   member((HT,Co),C),
   member(H,Co),
-  neg_ex(T,TT,At1,C).
+  neg_ex(T,M,TT,At1,C).
 
 compute_CLL_atoms([],_N,CLL,CLL,[]):-!.
 
