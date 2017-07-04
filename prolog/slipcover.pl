@@ -3294,7 +3294,7 @@ test_folds([HT|TT],M,LG0,LG,Pos0,Pos,Neg0,Neg,CLL0,CLL):-
 
 test_1fold(F,M,LGOrd,Pos,Neg,CLL1):-
   find_ex(F,M,LG,Pos,Neg),
-  compute_CLL_atoms(LG,0,0,CLL1,LG1),
+  compute_CLL_atoms(LG,M,0,0,CLL1,LG1),
   keysort(LG1,LGOrd).
 /*
 compute_areas(LG,Pos,Neg,AUCROC,ROC,AUCPR,PR):-
@@ -3522,29 +3522,27 @@ get_args([H|T],[H|T1]):-
 
 
 
-get_constants([],_M,[]).
+get_constants([],_M,_Mod,[]).
 
-get_constants([Type|T],M,[(Type,Co)|C]):-
-  find_pred_using_type(Type,LP),
-  find_constants(LP,M,[],Co),
-  get_constants(T,M,C).
+get_constants([Type|T],M,Mod,[(Type,Co)|C]):-
+  find_pred_using_type(Type,Mod,LP),
+  find_constants(LP,M,Mod,[],Co),
+  get_constants(T,M,Mod,C).
 
-find_pred_using_type(T,L):-
-  (setof((P,Ar,A),pred_type(T,P,Ar,A),L)->
+find_pred_using_type(T,M,L):-
+  (setof((P,Ar,A),pred_type(T,M,P,Ar,A),L)->
     true
   ;
     L=[]
   ).
 
-pred_type(T,P,Ar,A):-
-  input_module(M),
+pred_type(T,M,P,Ar,A):-
   M:modeh(_,S),
   S=..[P|Args],
   length(Args,Ar),
   scan_args(Args,T,1,A).
 
-pred_type(T,P,Ar,A):-
-  input_module(M),
+pred_type(T,M,P,Ar,A):-
   M:modeb(_,S),
   S=..[P|Args],
   length(Args,Ar),
@@ -3562,10 +3560,9 @@ scan_args([_|Tail],T,A0,A):-
   A1 is A0+1,
   scan_args(Tail,T,A1,A).
 
-find_constants([],_M,C,C).
+find_constants([],_M,_Mod,C,C).
 
-find_constants([(P,Ar,A)|T],M,C0,C):-
-  input_module(Mod),
+find_constants([(P,Ar,A)|T],M,Mod,C0,C):-
   gen_goal(1,Ar,A,Args,ArgsNoV,V),
   G=..[P,M|Args],
   (setof(V,ArgsNoV^call_goal(Mod,G),LC)->
@@ -3575,7 +3572,7 @@ find_constants([(P,Ar,A)|T],M,C0,C):-
   ),
   append(C0,LC,C1),
   remove_duplicates(C1,C2),
-  find_constants(T,M,C2,C).
+  find_constants(T,M,Mod,C2,C).
 
 call_goal(M,G):-
   M:G.
@@ -3596,7 +3593,7 @@ gen_goal(Arg,Ar,A,[ArgV|Args],[ArgV|ArgsNoV],V):-
 find_ex_db_cw([],_M,_At,_Ty,LG,LG,Pos,Pos,Neg,Neg).
 
 find_ex_db_cw([H|T],M,At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
-  get_constants(Types,H,C),
+  get_constants(Types,H,M,C),
   At=..[P|L],
   get_types(At,TypesA),!,
   length(L,N),
@@ -3619,11 +3616,10 @@ neg_ex([H|T],M,[HT|TT],At1,C):-
   member(H,Co),
   neg_ex(T,M,TT,At1,C).
 
-compute_CLL_atoms([],_N,CLL,CLL,[]):-!.
+compute_CLL_atoms([],_M,_N,CLL,CLL,[]):-!.
 
-compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
+compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
 %  write(\+ H),nl,
-  input_module(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3638,11 +3634,10 @@ compute_CLL_atoms([\+ H|T],N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
     CLL2 is CLL0+ log(PG1)
   ),
   N1 is N+1,
-  compute_CLL_atoms(T,N1,CLL2,CLL1,T1).
+  compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
-compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
+compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
 %  write(H),nl,
-  input_module(M),
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3656,7 +3651,7 @@ compute_CLL_atoms([H|T],N,CLL0,CLL1,[PG-H|T1]):-
     CLL2 is CLL0+ log(PG)
   ),
   N1 is N+1,
-  compute_CLL_atoms(T,N1,CLL2,CLL1,T1).
+  compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 
 writes([H-H1],S):-
