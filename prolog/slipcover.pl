@@ -25,9 +25,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   sample/4,learn_params/5,
   op(500,fx,#),op(500,fx,'-#'),
   test_prob/6,rules2terms/2]).
-%:- meta_predicate get_node(:,-).
 :-use_module(library(auc)).
-%:- if((absolute_file_name(library(cplint_r),F,[solutions(all),extensions([pl])]),exists_file(F))).
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
@@ -35,11 +33,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(rbtrees)).
 :-use_module(library(pita)).
 :-use_module(library(apply)).
-%:-use_foreign_library(foreign(bddem),install).
 :-set_prolog_flag(unknown,warning).
 
-%:-multifile setting_sc/2.
-%:-use_module(library(sandbox)).
 
 :- dynamic db/1.
 
@@ -56,7 +51,6 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate set_sc(:,+).
 :- meta_predicate setting_sc(:,-).
 
-%:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
 default_setting_sc(epsilon_em,0.0001).
 default_setting_sc(epsilon_em_fraction,0.00001).
@@ -90,7 +84,6 @@ default_setting_sc(neg_literals,false).
 default_setting_sc(background_clauses,50).
 
 default_setting_sc(specialization,bottom).
-%setting_sc(specialization,mode).
 /* allowed values: mode,bottom */
 default_setting_sc(specialize_head,false).
 
@@ -120,7 +113,7 @@ default_setting_sc(approx_value,100).
 
 
 /**
- * induce(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
+ * induce(:TrainFolds:list_of_atoms,-P:probabilistic_program) is det
  *
  * The predicate performs structure learning using the folds indicated in
  * TrainFolds for training.
@@ -131,7 +124,7 @@ induce(TrainFolds,P):-
   rules2terms(P0,P).
 
 /**
- * test(+P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+ * test(:P:probabilistic_program,+TestFolds:list_of_atoms,-LL:float,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns the
@@ -145,7 +138,7 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
   compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
 
 /**
- * test_prob(+P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-LL:float,-Results:list) is det
+ * test_prob(:P:probabilistic_program,+TestFolds:list_of_atoms,-NPos:int,-NNeg:int,-LL:float,-Results:list) is det
  *
  * The predicate takes as input in P a probabilistic program,
  * tests P on the folds indicated in TestFolds and returns
@@ -168,16 +161,13 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
     generate_clauses_bg(RBG,ClBG),
     assert_all(ClBG,M,ClBGRef),
     assert_all(ThBG,ThBGRef)
-%    assert_all(RBGRF,RBGRFRef)
   ;
     true
   ),
   set_sc(M:compiling,off),
   test_no_area([TE],M,NPos,NNeg,CLL,Results),
-  % write(Results),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
-%    retract_all(RBGRFRef),
     retract_all(ClBGRef)
   ;
     true
@@ -231,7 +221,6 @@ induce_rules(M:Folds,R):-
   format2(M,'/* SLIPCOVER Final score ~f~n',[Score]),
   format2(M,'Wall time ~f */~n',[WTS]),
   write_rules2(M,R,user_output),
-%  told,
   set_sc(M:compiling,off),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
@@ -378,7 +367,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   cycle_structure(RT,Mod,R4,S4,SP1,DB,R,S,M1).
 
 /**
- * induce_par(+TrainFolds:list_of_atoms,-P:probabilistic_program) is det
+ * induce_par(:TrainFolds:list_of_atoms,-P:probabilistic_program) is det
  *
  * The predicate learns the parameters of the program stored in the in/1 fact
  * of the input file using the folds indicated in TrainFolds for training.
@@ -426,7 +415,14 @@ induce_parameters(M:Folds,R):-
 
 
 
-
+/**
+ * learn_params(+DB:list_of_atoms,+M:atom,+R0:probabilistic_program,-P:probabilistic_program,-Score:float) is det
+ *
+ * The predicate learns the parameters of the program R0 and returns
+ * the updated program in R and the score in Score.
+ * DB contains the list of interpretations ids and M the module where
+ * the data is stored.
+ */
 
 learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   generate_clauses(R0,M,R1,0,[],Th0),
@@ -510,11 +506,6 @@ cycle_beam(Beam,Mod,DB,CL0,CL,CLBG0,CLBG,M):-
 cycle_clauses([],_M,_DB,NB,NB,CL,CL,CLBG,CLBG):-!.
 
 cycle_clauses([(RH,_ScoreH)|T],M,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
-%  write3(M,'\n\nRevising clause\n'),
-%  write_rules3(M,[RH],user_output),
-%  RH=rule(_,H,B,Lits),
-%  write3(M,H),write3(M,' '),write3(M,B),
-%  write3(M,'\n'),write3(M,Lits),write3(M,'\n'),
   findall(RS,specialize_rule(RH,M,RS,_L),LR),!,   %-LR:list of lists, each one correponding to a different revised theory; specialize_rule defined in revise.pl
   length(LR,NR),
   write3(M,'Number of revisions '),write3(M,NR),write3(M,'\n'),
@@ -652,7 +643,7 @@ elab_ref([def_rule(H,B,_Lits)|T],[rule(H1,B1)|T1]):-
   numbervars((H1,B1),0,_N),
   elab_ref(T,T1).
 
-%insertion in the beam
+% insertion in the beam
 insert_in_order([],C,BeamSize,[C]):-
   BeamSize>0,!.
 
@@ -984,57 +975,13 @@ update_head([H:_P|T],[PU|TP],N,[H:P|T1]):-
 
 
 /* utilities */
-
-generate_file_names(File,FileKB,FileIn,FileBG,FileOut,FileL):-
-  atom_concat(File,'.kb',FileKB),
-  atom_concat(File,'.cpl',FileIn),
-  atom_concat(File,'.rules',FileOut),
-  atom_concat(File,'.bg',FileBG),
-  atom_concat(File,'.l',FileL).
-
-
-load_models(File,ModulesList):-  %carica le interpretazioni, 1 alla volta
-  open(File,read,Stream),
-  read_models(Stream,ModulesList),
-  close(Stream).
-
-
-read_models(Stream,[Name1|Names]):-
-  read(Stream,begin(model(Name))),!,
-  (number(Name)->
-     name(Name,NameStr),
-     append("i",NameStr,Name1Str),
-     name(Name1,Name1Str)
-  ;
-     Name1=Name
-  ),
-  read_all_atoms(Stream,Name1),
-  read_models(Stream,Names).
-
-read_models(_S,[]).
-
-
-read_all_atoms(Stream,Name):-
-  read(Stream,At),
-  At \=end(model(_Name)),!,
-  (At=neg(Atom)->
-    Atom=..[Pred|Args],
-    Atom1=..[Pred,Name|Args],
-    assertz(neg(Atom1))
-  ;
-    (At=prob(Pr)->
-      assertz(prob(Name,Pr))
-    ;
-      At=..[Pred|Args],
-      Atom1=..[Pred,Name|Args],
-      assertz(Atom1)
-    )
-  ),
-  read_all_atoms(Stream,Name).
-
-read_all_atoms(_S,_N).
-
-
+/**
+ * rules2terms(+R:list_of_rules,-T:tern) is det
+ *
+ * The predicate translates a list of rules from the internal
+ * representation format (rule/4 and def_rule/3) to the
+ * LPAD syntax.
+ */
 rules2terms(R,T):-
   maplist(rule2term,R,T).
 
@@ -1141,7 +1088,6 @@ deduct(NM,Mod,DB,InTheory0,InTheory):-
   sample(1,DB,Sampled,DB1),
   (Sampled=[M]->
     generate_head(O,M,Mod,[],HL),
-    %gtrace,
     NM1 is NM-1,
     ( HL \== [] ->
        (generate_body(HL,Mod,InTheory1),
@@ -1322,7 +1268,6 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList),-1e20)|CL0]):-!,
 
 generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList),-1e20)|CL0]):-
   functor(A,F,AA),
-%  findall((R,B),(Mod:modeb(R,B),functor(B,FB,AB),Mod:determination(F/AA,FB/AB)),BL),
   findall(FB/AB,Mod:determination(F/AA,FB/AB),Det),
   get_modeb(Det,Mod,[],BL),
   A=..[F|ArgsTypes],
@@ -1693,7 +1638,7 @@ specialize_rule(Rule,M,SpecRule,Lit):-
   findall(BL , M:modeb(_,BL), BLS),
   specialize_rule(BLS,Rule,M,SpecRule,Lit).
 
-%specializes the clause's head
+%specializes the clause head
 specialize_rule(rule(ID,LH,BL,Lits),M,rule(ID,LH2,BL,Lits),Lit):-
   M:local_setting(specialize_head,true),
 	length(LH,L),
@@ -1975,7 +1920,7 @@ delete_matching([H|T],El,[H|T1]):-
   delete_matching(T,El,T1).
 
 
-%Computation of the depth of the variables in the clause's head/body
+%Computation of the depth of the variables in the clause head/body
 dv(H,B,M,DV1):-			%DV1: returns a list of couples (Variable, Max depth)
 	term_variables(H,V),
 	head_depth(V,DV0),
@@ -2002,12 +1947,12 @@ input_variables_b(LitM,M,InputVars):-
 
 
 
-%associates depth 0 to each variable in the clause's head
+%associates depth 0 to each variable in the clause head
 head_depth([],[]).
 head_depth([V|R],[[V,0]|R1]):-
   head_depth(R,R1).
 
-%associates a depth to each variable in the clause's body
+%associates a depth to each variable in the clause body
 var_depth([],_M,PrevDs1,PrevDs1,MD,MD):-!.
 
 var_depth([L|R],M,PrevDs,PrevDs1,_MD,MD):-    		%L = a body literal, MD = maximum depth set by the user
@@ -2068,7 +2013,7 @@ compute_depth([O|Output],D,PD,[[O,D]|RestO]):-
 
 
 
-%checks if a variable's depth exceeds the setting_sc
+%checks if a variable depth exceeds the setting_sc
 exceed_depth([],_):-!.
 exceed_depth([H|T],MD):-
 	nth1(2,H,Dep),
@@ -2082,34 +2027,6 @@ EMBLEM and SLIPCASE
 Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 */
-
-
-
-
-%:- yap_flag(single_var_warnings, on).
-
-
-load(FileIn,C1,R):-
-  open(FileIn,read,SI),
-  read_clauses_dir(SI,C),
-  close(SI),
-  process_clauses(C,user,[],C1,[],R).
-
-
-add_inter_cl(CL):-
-  %findall(A,(input(A);output(A)),L),
-  findall(A,(input(A)),L),
-  gen_cl(L,CL).
-
-
-gen_cl([],[]).
-
-gen_cl([H/A|T],[C|T1]):-
-  functor(F,H,A),
-  add_mod_arg(F,Module,F1),
-  add_bdd_arg(F,BDD,Module,F2),
-  C=(F2:-(F1,one(BDD))),
-  gen_cl(T,T1).
 
 
 assert_all([],_M,[]).
@@ -2270,26 +2187,6 @@ get_node(Goal,M,Env,B):- %with DB=false
   ;
     zero(Env,B)
   ).
-
-
-s(Goal,P,CPUTime1,0,WallTime1,0):-
-  statistics(cputime,[_,_]),
-  statistics(walltime,[_,_]),
-    init,
-    retractall(pita:v(_,_,_)),
-    abolish_all_tables,
-    add_bdd_arg(Goal,BDD,Goal1),
-    (bagof(BDD,Goal1,L)->
-      or_list(L,B),
-      ret_prob(B,P)
-    ;
-      P=0.0
-    ),
-    end,
-  statistics(cputime,[_,CT1]),
-  CPUTime1 is CT1/1000,
-  statistics(walltime,[_,WT1]),
-  WallTime1 is WT1/1000.
 
 
 add_bdd_arg(A,Env,BDD,A1):-
@@ -2691,7 +2588,7 @@ and_list([H|T],B0,B1):-
 
 
 /**
- * set_sc(+Parameter:atom,+Value:term) is det
+ * set_sc(:Parameter:atom,+Value:term) is det
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
@@ -2703,7 +2600,7 @@ set_sc(M:Parameter,Value):-
   assert(M:local_setting(Parameter,Value)).
 
 /**
- * setting_sc(+Parameter:atom,-Value:term) is det
+ * setting_sc(:Parameter:atom,-Value:term) is det
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
@@ -2738,27 +2635,6 @@ extract_vars_tree([Term|Tail], Var0, Var1) :-
   extract_vars_term(Term, Var0, Var),
   extract_vars_tree(Tail, Var, Var1).
 
-/*
-extract_vars(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (member_eq(Variable, Var0) ->
-    Var1 = Var0
-  ;
-    Var1=[Variable| Var0]
-  ).
-
-extract_vars(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  extract_vars_list(Args, Var0, Var1).
-
-
-
-extract_vars_list([], Var, Var).
-
-extract_vars_list([Term|Tail], Var0, Var1) :-
-  extract_vars(Term, Var0, Var),
-  extract_vars_list(Tail, Var, Var1).
-*/
 
 difference([],_,[]).
 
@@ -3218,31 +3094,9 @@ term_expansion_int(Head,M, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])
   add_bdd_arg(Head,Env,One,_Module,Head1).
 
 /*-----------*/
-:- multifile sandbox:safe_primitive/1.
 
 
 
-
-/*
-:- multifile sandbox:safe_primitive/1.
-
-sandbox:safe_primitive(slipcover:set_sc(_,_)).
-sandbox:safe_primitive(slipcover:setting_sc(_,_)).
-sandbox:safe_primitive(slipcover:init(_,_,_)).
-sandbox:safe_primitive(slipcover:init_bdd(_,_)).
-sandbox:safe_primitive(slipcover:init_test(_)).
-sandbox:safe_primitive(slipcover:ret_prob(_,_)).
-sandbox:safe_primitive(slipcover:end(_)).
-sandbox:safe_primitive(slipcover:end_bdd(_)).
-sandbox:safe_primitive(slipcover:end_test).
-sandbox:safe_primitive(slipcover:one(_)).
-sandbox:safe_primitive(slipcover:zero(_)).
-sandbox:safe_primitive(slipcover:and(_,_,_)).
-sandbox:safe_primitive(slipcover:or(_,_,_)).
-sandbox:safe_primitive(slipcover:bdd_not(_,_)).
-sandbox:safe_primitive(slipcover:add_var(_,_,_,_)).
-sandbox:safe_primitive(slipcover:equality(_,_,_)).
-*/
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(slipcover:induce_par(_,_) ,[]).
@@ -3256,10 +3110,6 @@ sandbox:safe_meta(slipcover:setting_sc(_,_), []).
 
 
 test_no_area(TestSet,M,NPos,NNeg,CLL,Results):-
-%  S= user_output,
-%  SA= user_output,
-%  format(SA,"Fold;\tCLL;\t AUCROC;\t AUCPR~n",[]),
-  %gtrace,
   test_folds(TestSet,M,[],Results,0,NPos,0,NNeg,0,CLL).
 
 
@@ -3277,153 +3127,7 @@ test_1fold(F,M,LGOrd,Pos,Neg,CLL1):-
   find_ex(F,M,LG,Pos,Neg),
   compute_CLL_atoms(LG,M,0,0,CLL1,LG1),
   keysort(LG1,LGOrd).
-/*
-compute_areas(LG,Pos,Neg,AUCROC,ROC,AUCPR,PR):-
-  compute_pointsroc(LG,+1e20,0,0,Pos,Neg,[],ROC),
-  hull(ROC,0,0,0,AUCROC),
-%  SC=user_output,
-%  write_p(ROC,SC),
-  compute_aucpr(LG,Pos,Neg,AUCPR,PR).
-%  SPR=user_output,
-%  write_ppr(PR,SPR).
 
-compute_pointsroc([],_P0,_TP,_FP,_FN,_TN,P0,P1):-!,
-  append(P0,[1.0-1.0],P1).
-
-compute_pointsroc([P- (\+ _)|T],P0,TP,FP,FN,TN,Po0,Po1):-!,
-  (P<P0->
-    FPR is FP/(FP+TN),
-    TPR is TP/(TP+FN),
-    append(Po0,[(FPR-TPR)],Po2),
-    P1=P
-  ;
-    Po2=Po0,
-    P1=P0
-  ),
-  FP1 is FP+1,
-  TN1 is TN-1,
-  compute_pointsroc(T,P1,TP,FP1,FN,TN1,Po2,Po1).
-
-compute_pointsroc([P- _|T],P0,TP,FP,FN,TN,Po0,Po1):-!,
-  (P<P0->
-    FPR is FP/(FP+TN),
-    TPR is TP/(TP+FN),
-    append(Po0,[FPR-TPR],Po2),
-    P1=P
-  ;
-    Po2=Po0,
-    P1=P0
-  ),
-  TP1 is TP+1,
-  FN1 is FN-1,
-  compute_pointsroc(T,P1,TP1,FP,FN1,TN,Po2,Po1).
-
-
-hull([],FPR,TPR,AUC0,AUC1):-
-  AUC1 is AUC0+(1-FPR)*(1+TPR)/2.
-
-
-hull([FPR1-TPR1|T],FPR,TPR,AUC0,AUC1):-
-  AUC2 is AUC0+(FPR1-FPR)*(TPR1+TPR)/2,
-  hull(T,FPR1,TPR1,AUC2,AUC1).
-
-compute_aucpr(L,Pos,Neg,A,PR):-
-  L=[P_0-E|TL],
-  (E= (\+ _ )->
-    FP=1,
-    TP=0,
-    FN=Pos,
-    TN is Neg -1
-  ;
-    FP=0,
-    TP=1,
-    FN is Pos -1,
-    TN=Neg
-  ),
-  compute_curve_points(TL,P_0,TP,FP,FN,TN,Points),
-  Points=[R0-P0|_TPoints],
-  (R0=:=0,P0=:=0->
-    Flag=true
-  ;
-    Flag=false
-  ),
-  area(Points,Flag,Pos,0,0,0,A,[],PR).
-
-compute_curve_points([],_P0,TP,FP,_FN,_TN,[1.0-Prec]):-!,
-  Prec is TP/(TP+FP).
-
-compute_curve_points([P- (\+ _)|T],P0,TP,FP,FN,TN,Pr):-!,
-  (P<P0->
-    Prec is TP/(TP+FP),
-    Rec is TP/(TP+FN),
-    Pr=[Rec-Prec|Pr1],
-    P1=P
-  ;
-    Pr=Pr1,
-    P1=P0
-  ),
-  FP1 is FP+1,
-  TN1 is TN-1,
-  compute_curve_points(T,P1,TP,FP1,FN,TN1,Pr1).
-
-compute_curve_points([P- _|T],P0,TP,FP,FN,TN,Pr):-!,
-  (P<P0->
-    Prec is TP/(TP+FP),
-    Rec is TP/(TP+FN),
-    Pr=[Rec-Prec|Pr1],
-    P1=P
-  ;
-    Pr=Pr1,
-    P1=P0
-  ),
-  TP1 is TP+1,
-  FN1 is FN-1,
-  compute_curve_points(T,P1,TP1,FP,FN1,TN,Pr1).
-
-area([],_Flag,_Pos,_TPA,_FPA,A,A,PR,PR).
-
-area([R0-P0|T],Flag,Pos,TPA,FPA,A0,A,PR0,PR):-
- TPB is R0*Pos,
-  (TPB=:=0->
-    A1=A0,
-    FPB=0,
-    PR2=PR0,
-    PR=[R0-P0|PR3]
-  ;
-    R_1 is TPA/Pos,
-    (TPA=:=0->
-      (Flag=false->
-        P_1=P0,
-	PR=[0.0-P0|PR3]
-      ;
-        P_1=0.0,
-	PR=[0.0-0.0|PR3]
-      )
-    ;
-      P_1 is TPA/(TPA+FPA),
-      PR=PR3
-    ),
-    FPB is TPB*(1-P0)/P0,
-    N is TPB-TPA+0.5,
-    (N<1.0->
-      append(PR0,[R0-P0],PR2),
-      A1=A0
-    ;
-      interpolate(1,N,Pos,R_1,P_1,TPA,FPA,TPB,FPB,A0,A1,[],PR1),
-      append(PR0,PR1,PR2)
-    )
-  ),
-  area(T,Flag,Pos,TPB,FPB,A1,A,PR2,PR3).
-
-interpolate(I,N,_Pos,_R0,_P0,_TPA,_FPA,_TPB,_FPB,A,A,PR,PR):-I>N,!.
-
-interpolate(I,N,Pos,R0,P0,TPA,FPA,TPB,FPB,A0,A,PR0,[R-P|PR]):-
-  R is (TPA+I)/Pos,
-  P is (TPA+I)/(TPA+I+FPA+(FPB-FPA)/(TPB-TPA)*I),
-  A1 is A0+(R-R0)*(P+P0)/2,
-  I1 is I+1,
-  interpolate(I1,N,Pos,R,P,TPA,FPA,TPB,FPB,A1,A,PR0,PR).
-*/
 
 find_ex(DB,M,LG,Pos,Neg):-
   findall(P/A,M:output(P/A),LP),
@@ -3600,7 +3304,6 @@ neg_ex([H|T],M,[HT|TT],At1,C):-
 compute_CLL_atoms([],_M,_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
-%  write(\+ H),nl,
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3618,7 +3321,6 @@ compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
-%  write(H),nl,
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
@@ -3635,63 +3337,6 @@ compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
   compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 
-writes([H-H1],S):-
-  format(S,"~f - (~q)]).~n~n",[H,H1]).
-
-writes([H-H1|T],S):-
-  format(S,"~f - (~q),~n",[H,H1]),
-  writes(T,S).
-
-
-write_p(P,S):-
-  get_xy(P,PX,PY),
-  format(S,"x=[",[]),
-  writesf(PX,S),
-  format(S,"y=[",[]),
-  writesf(PY,S),
-  format(S,"
-figure('Name','roc','NumberTitle','off')
-set(gca,'XLim',[0.0 1.0])
-set(gca,'YLim',[0.0 1.0])
-x=[x 1.0]
-y=[y 0.0]
-k=convhull(x,y)
-plot(x(k),y(k),'r-',x,y,'--b+')
-%A = polyarea(x,y)~n~n
-%save area_roc.csv  A -ascii -append
-",
-  []).
-
-get_xy([],[],[]).
-
-get_xy([X-Y|T],[X|TX],[Y|TY]):-
-  get_xy(T,TX,TY).
-
-
-writesf([H],S):-
-  format(S,"~f]~n",[H]).
-
-writesf([H|T],S):-
-  format(S,"~f ",[H]),
-  writesf(T,S).
-
-write_ppr(P,S):-
-  get_xy(P,PX,PY),
-  format(S,"rec=[",[A]),
-  writesf(PX,S),
-  format(S,"prec=[",[A]),
-  writesf(PY,S),
-  format(S,"
-figure('Name','pr','NumberTitle','off')
-set(gca,'XLim',[0.0 1.0])
-set(gca,'YLim',[0.0 1.0])
-rec=[0.0  rec 1.0];
-prec=[0.0 prec 0.0];
-plot(rec,prec,'--*k')
-%A=polyarea(rec,prec)
-%save area_pr.csv  A -ascii -append
-~n~n",
-  []).
 
 write2(M,A):-
   M:local_setting(verbosity,Ver),
@@ -3792,13 +3437,11 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3)),
   style_check(-discontiguous).
 
-
 user:term_expansion(end_of_file, end_of_file) :-!,
   prolog_load_context(module, M),
   make_dynamic(M),
-%  retractall(input_mod(M)),
+  retractall(input_mod(M)),
   style_check(+discontiguous).
-
 
 user:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
@@ -3850,8 +3493,6 @@ user:term_expansion((:- end_in), []) :-
     assert(M:in(L))
   ).
 
-
-%
 user:term_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
@@ -3866,7 +3507,6 @@ user:term_expansion(end(model(_I)), []) :-
 
 user:term_expansion(At, A) :-
   prolog_load_context(module, M),
-%  write(At),nl,
   input_mod(M),
   M:model(Name),
   At \= (_ :- _),
