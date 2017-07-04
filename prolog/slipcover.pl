@@ -155,12 +155,12 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
   set_sc(compiling,on),
-  process_clauses(P,[],_,[],PRules),
+  process_clauses(P,M,[],_,[],PRules),
   generate_clauses(PRules,M,RuleFacts,0,[],Th),
   assert_all(Th,M,ThRef),
   assert_all(RuleFacts,M,RFRef),
   (M:bg(RBG0)->
-    process_clauses(RBG0,[],_,[],RBG),
+    process_clauses(RBG0,M,[],_,[],RBG),
     generate_clauses(RBG,M,_RBGRF,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ClBG,M,ClBGRef),
@@ -192,7 +192,7 @@ induce_rules(M:Folds,R):-
   append(L,DB),
   assert(M:database(DB)),
   (M:bg(RBG0)->
-    process_clauses(RBG0,[],_,[],RBG),
+    process_clauses(RBG0,M,[],_,[],RBG),
     generate_clauses(RBG,M,_RBG1,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ThBG,M,ThBGRef),
@@ -396,7 +396,7 @@ induce_parameters(M:Folds,R):-
   assert(M:database(DB)),
   statistics(walltime,[_,_]),
   (M:bg(RBG0)->
-    process_clauses(RBG0,[],_,[],RBG),
+    process_clauses(RBG0,M,[],_,[],RBG),
     generate_clauses(RBG,M,_RBG1,0,[],ThBG),
     generate_clauses_bg(RBG,ClBG),
     assert_all(ClBG,M,ClBGRef),
@@ -405,7 +405,7 @@ induce_parameters(M:Folds,R):-
     true
   ),
   M:in(R00),
-  process_clauses(R00,[],_,[],R0),
+  process_clauses(R00,M,[],_,[],R0),
   statistics(walltime,[_,_]),
   learn_params(DB,M,R0,R,Score),
   statistics(walltime,[_,CT]),
@@ -2090,7 +2090,7 @@ load(FileIn,C1,R):-
   open(FileIn,read,SI),
   read_clauses_dir(SI,C),
   close(SI),
-  process_clauses(C,[],C1,[],R).
+  process_clauses(C,user,[],C1,[],R).
 
 
 add_inter_cl(CL):-
@@ -2144,12 +2144,12 @@ read_clauses_dir(S,[Cl|Out]):-
   ).
 
 
-process_clauses([],C,C,R,R):-!.
+process_clauses([],_M,C,C,R,R):-!.
 
-process_clauses([end_of_file],C,C,R,R):-!.
+process_clauses([end_of_file],_M,C,C,R,R):-!.
 
-process_clauses([H|T],C0,C1,R0,R1):-
-  (term_expansion_int(H,H1)->
+process_clauses([H|T],M,C0,C1,R0,R1):-
+  (term_expansion_int(H,M,H1)->
     true
   ;
     H1=(H,[])
@@ -2168,7 +2168,7 @@ process_clauses([H|T],C0,C1,R0,R1):-
       append(R0,R,R2)
     )
   ),
-  process_clauses(T,C2,C1,R2,R1).
+  process_clauses(T,M,C2,C1,R2,R1).
 
 
 get_next_rule_number(M,R):-
@@ -2959,11 +2959,10 @@ average(L,Av):-
         length(L,N),
         Av is Sum/N.
 
-term_expansion_int((Head :- Body), ((H :- Body),[])):-
+term_expansion_int((Head :- Body),_M, ((H :- Body),[])):-
   Head=db(H),!.
 
-term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
-  input_module(M),
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
@@ -2984,8 +2983,7 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
 
-term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
-  input_module(M),
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)])):-
   M:local_setting(compiling,on),
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
@@ -3005,16 +3003,14 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])):-
     generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body), ([],[])) :-
+term_expansion_int((Head :- Body),M, ([],[])) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
-  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (_H:P),P=:=0.0, !.
 
-term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[def_rule(H,BodyList,true)])) :-
 % disjunctive clause with a single head atom e depth_bound
-  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3028,9 +3024,8 @@ term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
   add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
 
-term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
+term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
-  input_module(M),
   M:local_setting(compiling,on),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
@@ -3043,9 +3038,8 @@ term_expansion_int((Head :- Body), (Clauses,[def_rule(H,BodyList,true)])) :-
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
-  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3066,9 +3060,8 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :
     generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)])) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
-  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !,
@@ -3088,17 +3081,15 @@ term_expansion_int((Head :- Body), (Clauses,[rule(R,HeadList,BodyList,true)])) :
     generate_clause(H,Env,Body2,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body),(Clauses,[])) :-
+term_expansion_int((Head :- Body),M,(Clauses,[])) :-
 % definite clause for db facts
-  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
   Clauses=(Head1 :- Body).
 
-term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
+term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
 % definite clause with depth_bound
-  input_module(M),
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
@@ -3109,9 +3100,8 @@ term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
   add_bdd_arg_db(Head,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
 
-term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
+term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
 % definite clause senza DB
-  input_module(M),
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
@@ -3121,8 +3111,7 @@ term_expansion_int((Head :- Body),(Clauses,[def_rule(Head,BodyList,true)])) :-
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
 
-term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
@@ -3138,8 +3127,7 @@ term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
     generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
   ).
 
-term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
@@ -3154,15 +3142,13 @@ term_expansion_int(Head,(Clauses,[rule(R,HeadList,[],true)])) :-
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
   ).
 
-term_expansion_int(Head,([],[])) :-
-  input_module(M),
+term_expansion_int(Head,M,([],[])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 0
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_H:P),P=:=0.0, !.
 
-term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -3172,8 +3158,7 @@ term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   Clause=(Head1 :- Body1).
 
-term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3182,8 +3167,7 @@ term_expansion_int(Head,(Clause,[def_rule(H,[],true)])) :-
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
 
-term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
@@ -3201,8 +3185,7 @@ term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
     Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equality(Env,V,0,BDD)))
   ).
 
-term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3219,8 +3202,7 @@ term_expansion_int(Head,(Clause,[rule(R,HeadList,[],true)])) :-
     Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equality(Env,V,0,BDD)))
   ).
 
-term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % definite fact with db
@@ -3228,8 +3210,7 @@ term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) 
   (Head\= end_of_file),!,
   add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
 
-term_expansion_int(Head, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :-
-  input_module(M),
+term_expansion_int(Head,M, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])) :-
   M:local_setting(compiling,on),
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
@@ -3799,13 +3780,6 @@ input_module(M):-
 
 %:-style_check(-discontiguous).
 :- dynamic input_mod/1.
-
-/* input_module(0).
-:-prolog_load_context(module, M),
-  retract(input_module(_)),
-  write(M),
-  assert(input_mod(M)).
-*/
 
 user:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
