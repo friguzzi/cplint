@@ -3280,7 +3280,7 @@ find_ex_db_cw([],_M,_At,_Ty,LG,LG,Pos,Pos,Neg,Neg).
 find_ex_db_cw([H|T],M,At,Types,LG0,LG,Pos0,Pos,Neg0,Neg):-
   get_constants(Types,H,M,C),
   At=..[P|L],
-  get_types(At,TypesA),!,
+  get_types(At,M,TypesA),!,
   length(L,N),
   length(LN,N),
   At1=..[P,H|LN],
