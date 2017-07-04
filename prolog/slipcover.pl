@@ -43,8 +43,9 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 :- dynamic db/1.
 
+:- dynamic input_mod/1.
 
-:- thread_local  input_mod/1,  rule_sc_n/1.
+:- thread_local  input_mod/1.
 
 :- meta_predicate induce(:,-).
 :- meta_predicate induce_rules(:,-).
@@ -52,6 +53,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate induce_parameters(:,-).
 :- meta_predicate test(:,+,-,-,-,-,-).
 :- meta_predicate test_prob(:,+,-,-,-,-).
+:- meta_predicate set_sc(:,+).
+:- meta_predicate setting_sc(:,-).
 
 %:- multifile init/3,init_bdd/2,init_test/2,ret_prob/3,end/1,end_bdd/1,end_test/1,one/2,zero/2,and/4,or/4,add_var/5,equality/4,remove/3.
 
@@ -154,7 +157,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   write2(M,'Testing\n'),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
-  set_sc(compiling,on),
+  set_sc(M:compiling,on),
   process_clauses(P,M,[],_,[],PRules),
   generate_clauses(PRules,M,RuleFacts,0,[],Th),
   assert_all(Th,M,ThRef),
@@ -169,7 +172,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   ;
     true
   ),
-  set_sc(compiling,off),
+  set_sc(M:compiling,off),
   test_no_area([TE],M,NPos,NNeg,CLL,Results),
   % write(Results),
   (M:bg(RBG0)->
@@ -183,7 +186,7 @@ test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
   retract_all(RFRef).
 
 induce_rules(M:Folds,R):-
-  set_sc(compiling,on),
+  set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
   M:local_setting(c_seed,CSeed),
@@ -206,7 +209,7 @@ induce_rules(M:Folds,R):-
       true
     ;
       format2(M,"~nWARN: Number of required bottom clauses is greater than the number of training examples!~n. The number of required bottom clauses will be equal to the number of training examples", []),
-      set_sc(megaex_bottom, NMegaEx)
+      set_sc(M:megaex_bottom, NMegaEx)
   ),
 
   statistics(walltime,[_,_]),
@@ -229,7 +232,7 @@ induce_rules(M:Folds,R):-
   format2(M,'Wall time ~f */~n',[WTS]),
   write_rules2(M,R,user_output),
 %  told,
-  set_sc(compiling,off),
+  set_sc(M:compiling,off),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
     retract_all(ClBGRef)
@@ -271,7 +274,7 @@ learn_struct(DB,Mod,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h]
   format2(Mod,"Clause search~n~n",[]),
   Mod:local_setting(max_iter,M),
   Mod:local_setting(depth_bound,DepthB),
-  set_sc(depth_bound,false),
+  set_sc(Mod:depth_bound,false),
   findall((H,B,BL),Mod:fixed_rule(H,B,BL),LF),
   length(LF,LLF),
   gen_fixed(LF,Mod,LFR),
@@ -280,7 +283,7 @@ learn_struct(DB,Mod,R1,R,Score):-   %+R1:initial theory of the form [rule(NR,[h]
   append(NB1,R1,Beam),
   cycle_beam(Beam,Mod,DB,CL0,CL,CLBG0,BG,M),
   learn_params(DB,Mod,[],REmpty,S),
-  set_sc(depth_bound,DepthB),
+  set_sc(Mod:depth_bound,DepthB),
   format2(Mod,"Theory search~n~n",[]),
   Mod:local_setting(max_iter_structure,MS),
   cycle_structure(CL,Mod,REmpty,S,-1e20,DB,R2,Score,MS),
@@ -386,7 +389,7 @@ induce_par(Folds,ROut):-
   rules2terms(R,ROut).
 
 induce_parameters(M:Folds,R):-
-  set_sc(compiling,on),
+  set_sc(M:compiling,on),
   M:local_setting(seed,Seed),
   set_random(Seed),
   M:local_setting(c_seed,CSeed),
@@ -413,7 +416,7 @@ induce_parameters(M:Folds,R):-
   format2(M,'/* EMBLEM Final score ~f~n',[Score]),
   format2(M,'Wall time ~f */~n',[CTS]),
   write_rules2(M,R,user_output),
-  set_sc(compiling,off),
+  set_sc(M:compiling,off),
   (M:bg(RBG0)->
     retract_all(ThBGRef),
     retract_all(ClBGRef)
@@ -2695,8 +2698,7 @@ and_list([H|T],B0,B1):-
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
-set_sc(Parameter,Value):-
-  input_module(M),
+set_sc(M:Parameter,Value):-
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
@@ -2708,8 +2710,7 @@ set_sc(Parameter,Value):-
  * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
-setting_sc(P,V):-
-  input_module(M),
+setting_sc(M:P,V):-
   M:local_setting(P,V).
 
 extract_vars_list(L,[],V):-
@@ -2778,21 +2779,20 @@ member_eq(E,[_H|T]):-
 
 
 
-process_head(HeadList, GroundHeadList) :-
+process_head(HeadList,M, GroundHeadList) :-
   ground_prob(HeadList), !,
-  process_head_ground(HeadList, 0, GroundHeadList).
+  process_head_ground(HeadList,M, 0, GroundHeadList).
 
-process_head(HeadList, HeadList).
+process_head(HeadList,_M, HeadList).
 
 
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
  */
-process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
+process_head_ground([Head:ProbHead],M, Prob, [Head:ProbHead1|Null]) :-!,
   ProbHead1 is ProbHead,
   ProbLast is 1 - Prob - ProbHead1,
-  input_module(M),
   M:local_setting(epsilon_parsing, Eps),
   EpsNeg is - Eps,
   ProbLast > EpsNeg,
@@ -2802,10 +2802,10 @@ process_head_ground([Head:ProbHead], Prob, [Head:ProbHead1|Null]) :-!,
     Null = []
   ).
 
-process_head_ground([Head:ProbHead|Tail], Prob, [Head:ProbHead1|Next]) :-
+process_head_ground([Head:ProbHead|Tail], M, Prob, [Head:ProbHead1|Next]) :-
   ProbHead1 is ProbHead,
   ProbNext is Prob + ProbHead1,
-  process_head_ground(Tail, ProbNext, Next).
+  process_head_ground(Tail, M, ProbNext, Next).
 
 
 ground_prob([]).
@@ -2968,7 +2968,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)]))
 % disjunctive clause with more than one head atom e depth_bound
   Head = (_;_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList1,BodyList2),
@@ -2988,7 +2988,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)]))
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList1,BodyList2),
@@ -3015,7 +3015,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[def_rule(H,BodyList,true)])) :-
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
@@ -3029,7 +3029,7 @@ term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
   M:local_setting(compiling,on),
    ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   HeadList=[H:_],!,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
@@ -3045,7 +3045,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)]))
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
@@ -3066,7 +3066,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true)]))
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
   append([pita:one(Env,BDD)],BodyList2,BodyList3),
@@ -3117,7 +3117,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true)])) :-
 % disjunctive FACT with more than one head atom e db
   Head=(_;_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
@@ -3132,7 +3132,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true)])) :-
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
@@ -3174,7 +3174,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true)])) :-
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
@@ -3191,7 +3191,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true)])) :-
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:_), !,
   list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
+  process_head(HeadListOr,M,HeadList),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
@@ -3222,8 +3222,6 @@ term_expansion_int(Head,M, ((Head1:-pita:one(Env,One)),[def_rule(Head,[],true)])
 
 
 
-sandbox:safe_primitive(slipcover:set_sc(_,_)).
-sandbox:safe_primitive(slipcover:setting_sc(_,_)).
 
 /*
 :- multifile sandbox:safe_primitive/1.
@@ -3252,6 +3250,8 @@ sandbox:safe_meta(slipcover:induce(_,_), []).
 sandbox:safe_meta(slipcover:get_node(_,_), []).
 sandbox:safe_meta(slipcover:test_prob(_,_,_,_,_,_), []).
 sandbox:safe_meta(slipcover:test(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(slipcover:set_sc(_,_), []).
+sandbox:safe_meta(slipcover:setting_sc(_,_), []).
 
 
 
@@ -3774,19 +3774,13 @@ write_body3(M,A,B):-
     true
   ).
 
-input_module(M):-
-  input_mod(M).
 
 
-%:-style_check(-discontiguous).
-:- dynamic input_mod/1.
+
 
 user:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
   retractall(M:local_setting(_,_)),
-%  retractall(input_mod(_)),
-%  M:dynamic(model/1),
-%  M:set_prolog_flag(unkonw,fail),
   findall(local_setting(P,V),default_setting_sc(P,V),L),
   assert_all(L,M,_),
   assert(input_mod(M)),
