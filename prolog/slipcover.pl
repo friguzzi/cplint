@@ -24,7 +24,16 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   induce/2,induce_par/2,test/7,list2or/2,list2and/2,
   sample/4,learn_params/5,
   op(500,fx,#),op(500,fx,'-#'),
-  test_prob/6,rules2terms/2]).
+  test_prob/6,rules2terms/2,
+  process_clauses/6,
+  generate_clauses/6,
+  generate_clauses_bg/2,
+  generate_body/3,
+  specialize_rule/4,make_dynamic/1,
+  retract_all/1,assert_all/3,
+  write2/2,write3/2,format2/3,format3/3,
+  write_rules2/3,write_rules3/3,
+  nl2/1,nl3/1]).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
 :-use_module(library(random)).
@@ -50,7 +59,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :- meta_predicate test_prob(:,+,-,-,-,-).
 :- meta_predicate set_sc(:,+).
 :- meta_predicate setting_sc(:,-).
-
+:- meta_predicate rules2terms(:,-).
 
 default_setting_sc(epsilon_em,0.0001).
 default_setting_sc(epsilon_em_fraction,0.00001).
@@ -976,13 +985,13 @@ update_head([H:_P|T],[PU|TP],N,[H:P|T1]):-
 
 /* utilities */
 /**
- * rules2terms(+R:list_of_rules,-T:tern) is det
+ * rules2terms(:R:list_of_rules,-T:tern) is det
  *
  * The predicate translates a list of rules from the internal
  * representation format (rule/4 and def_rule/3) to the
  * LPAD syntax.
  */
-rules2terms(R,T):-
+rules2terms(M:R,M:T):-
   maplist(rule2term,R,T).
 
 rule2term(rule(_N,HL,BL,_Lit),(H:-B)):-
@@ -3354,6 +3363,22 @@ write3(M,A):-
     true
   ).
 
+nl2(M):-
+  M:local_setting(verbosity,Ver),
+  (Ver>1->
+    nl
+  ;
+    true
+  ).
+
+nl3(M):-
+  M:local_setting(verbosity,Ver),
+  (Ver>2->
+    nl
+  ;
+    true
+  ).
+
 format2(M,A,B):-
   M:local_setting(verbosity,Ver),
   (Ver>1->
@@ -3437,8 +3462,9 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3)),
   style_check(-discontiguous).
 
-user:term_expansion(end_of_file, end_of_file) :-!,
+user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
+  input_mod(M),!,
   make_dynamic(M),
   retractall(input_mod(M)),
   style_check(+discontiguous).

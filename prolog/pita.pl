@@ -953,8 +953,9 @@ act(M,A/B):-
 tab(A/B,A/B1):-
   B1 is B + 2.
 
-user:term_expansion(end_of_file, end_of_file) :-!,
+user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
+  pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
   style_check(+discontiguous).
 
