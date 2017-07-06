@@ -554,6 +554,7 @@ mc_mh_sample_arg_bar_r/6</code></pre>
 :- table path/2.
 :- begin_lpad.
 path(X,X).
+path(X,Y):-
   path(X,Z),edge(Z,Y).
 edge(X,Y):-arc(X,Y).
 edge(X,Y):-arc(Y,X).

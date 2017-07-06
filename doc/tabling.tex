@@ -14,6 +14,7 @@ the program (\href{http://cplint.lamping.unife.it/example/inference/path_tabling
 :- table path/2.
 :- begin_lpad.
 path(X,X).
+path(X,Y):-
   path(X,Z),edge(Z,Y).
 edge(X,Y):-arc(X,Y).
 edge(X,Y):-arc(Y,X).
