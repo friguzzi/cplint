@@ -83,8 +83,6 @@ default_setting_lm(group,1).
 default_setting_lm(d,1).
 default_setting_lm(verbosity,1).
 default_setting_lm(logzero,log(0.000001)).
-default_setting_lm(megaex_bottom,1).
-default_setting_lm(initial_clauses_per_megaex,1).
 default_setting_lm(max_iter,10).
 default_setting_lm(max_iter_structure,10000).
 default_setting_lm(maxdepth_var,2).
@@ -92,9 +90,6 @@ default_setting_lm(beamsize,100).
 default_setting_lm(background_clauses,50).
 default_setting_lm(neg_ex,cw).
 
-%setting(specialization,bottom).
-default_setting_lm(specialization,mode).
-/* allowed values: mode,bottom */
 
 default_setting_lm(seed,seed(3032)).
 default_setting_lm(c_seed,21344).
