@@ -350,11 +350,11 @@ prob_bar(M:Goal,Chart):-
  */
 prob(M:Goal,M:Evidence,P):-
   get_next_goal_number(M,GN),
-  atomic_concat('$goal',GN,NewGoal),
-  Goal1=..[NewGoal|VG],
   atomic_concat('$ev',GN,NewEv),
   deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
   term_variables(Goal,VG),
+  atomic_concat('$goal',GN,NewGoal),
+  Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
   append([one(Env,BDD)],BodyList2,BodyList3),
