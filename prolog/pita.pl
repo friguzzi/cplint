@@ -14,13 +14,14 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
+:- module(pita,[s/2, prob/2, prob_bar/2,abd_prob/2, prob/3, prob_bar/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
+  abd_bdd_dot_string/3,
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
-  ret_prob/3,get_var_n/6,equality/4,or_list/3,
+  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,or_list/3,
   em/8,randomize/1,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
@@ -31,10 +32,12 @@ details.
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
+:-meta_predicate abd_prob(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
+:-meta_predicate abd_bdd_dot_string(:,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-meta_predicate get_p(:,+,-).
@@ -272,6 +275,24 @@ s(M:Goal,P):-
   erase(Ref),
   member((Goal,P),L).
 
+abd_prob(M:Goal,P):-
+  term_variables(Goal,VG),
+  get_next_goal_number(M,GN),
+  atomic_concat('$goal',GN,NewGoal),
+  Goal1=..[NewGoal|VG],
+  list2and(GoalL,Goal),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  append([one(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  M:(asserta((Head1 :- Body2),Ref)),
+  M:rule_n(NR),
+  init_test(NR,Env),
+  findall((Goal,P),get_abd_p(M:Goal1,Env,P),L),
+  end_test(Env),
+  erase(Ref),
+  member((Goal,P),L).
+
 /**
  * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
  *
@@ -306,6 +327,23 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
+/**
+ * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
+ *
+ * The predicate builds the BDD for Query and returns its dot representation
+ * in DotString and a list in LV with the association of variables to rules.
+ * LV is a list of list, each sublist has three elements:
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
+ */
+abd_bdd_dot_string(M:Goal,dot(Dot),LV):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  get_node(M:Goal,Env,BDD),!,
+  findall([V,R,S],M:v(R,S,V),LV),
+  reorder(Env),
+  create_dot_string(Env,BDD,Dot),
+  end_test(Env).
 
 /**
  * prob(:Query:atom,-Probability:float) is nondet
@@ -481,6 +519,10 @@ get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_prob(Env,BDD,P).
 
+get_abd_p(M:Goal,Env,P):-
+  get_node(M:Goal,Env,BDD),
+  ret_abd_prob(Env,BDD,P).
+
 get_cond_p(M:Goal,M:Evidence,Env,P):-
   get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
   ret_prob(Env,BDDE,PE),
@@ -590,6 +632,28 @@ get_var_n(M,Env,R,S,Probs0,V):-
     ;
       length(Probs,L),
       add_var(Env,L,Probs,R,V),
+      assert(M:v(R,S,V))
+    )
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
+/**
+ * get_abd_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
+ *
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule, grouding substitution Substitution and head distribution
+ * Probabilities in environment Environment.
+ */
+get_abd_var_n(M,Env,R,S,Probs0,V):-
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    (M:av(R,S,V)->
+      true
+    ;
+      length(Probs,L),
+      add_abd_var(Env,L,Probs,R,V),
+      assert(M:av(R,S,V)),
       assert(M:v(R,S,V))
     )
   ;
@@ -985,6 +1049,7 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
   M:(dynamic v/3),
+  M:(dynamic av/3),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
@@ -1235,6 +1300,20 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
   ).
 
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
+% abductive fact senza db
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head=(H:abducible);Head=(abducible::H)), !,
+  extract_vars_list([H],[],VC),
+  get_next_rule_number(M,R),
+  add_bdd_arg(H,Env,BDD,M,Head1),%***test single_var
+  (M:local_pita_setting(single_var,true)->
+    Clause=(Head1:-(get_abd_var_n(M,Env,R,[],[1,1],V),equality(Env,V,0,BDD)))
+  ;
+    Clause=(Head1:-(get_abd_var_n(M,Env,R,VC,[1,1],V),equality(Env,V,0,BDD)))
+  ).
+
 user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % disjunctive fact with a single head atom con prob. 0
@@ -1388,6 +1467,7 @@ sandbox:safe_primitive(pita:zero(_,_)).
 sandbox:safe_primitive(pita:and(_,_,_,_)).
 sandbox:safe_primitive(pita:or(_,_,_,_)).
 sandbox:safe_primitive(pita:bdd_not(_,_,_)).
+sandbox:safe_primitive(pita:get_abd_var_n(_,_,_,_,_,_)).
 sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_,_)).
 sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
 sandbox:safe_primitive(pita:equality(_,_,_,_)).
@@ -1397,10 +1477,12 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
+sandbox:safe_meta(pita:abd_prob(_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
+sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).

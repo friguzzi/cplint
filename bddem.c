@@ -32,6 +32,7 @@ typedef struct
 {
   int nVal,nRule;
   int firstBoolVar;
+  int abducible;
 } variable;
 
 
@@ -58,6 +59,7 @@ typedef struct
   int  boolVars;  // number of Boolean variables
   int nRules;  // number of rules
   int * rules; // array with the number of head atoms for each rule
+  int n_abd;
 } environment;
 
 typedef struct
@@ -77,10 +79,12 @@ typedef struct
 
 
 static foreign_t ret_prob(term_t,term_t,term_t);
+static foreign_t ret_abd_prob(term_t,term_t,term_t);
 double Prob(DdNode *node,environment *env,tablerow *table,int comp_par);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
+static foreign_t add_abd_var(term_t,term_t,term_t,term_t,term_t);
 static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
@@ -208,6 +212,8 @@ static foreign_t init_test(term_t arg1,term_t arg2)
 
   env=(environment *)malloc(sizeof(environment));
   env->mgr=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
+  env->n_abd=0;
+
   Cudd_AutodynEnable(env->mgr, CUDD_REORDER_GROUP_SIFT);
   Cudd_SetMaxCacheHard(env->mgr, 0);
   Cudd_SetLooseUpTo(env->mgr, 0);
@@ -352,6 +358,90 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   return(PL_unify(out,arg3));
 }
 
+int reorder_int(environment *env)
+{
+  int i,j,var_ind,abd_ind=0,ind=env->n_abd;
+  variable var,* vars=env->vars;
+  DdManager *mgr=env->mgr;
+  int boolVars=env->boolVars;
+  int * permutation;
+  int * bVar2mVar=env->bVar2mVar;
+
+  permutation=malloc(boolVars*sizeof(int));
+
+  for (i=0;i<boolVars;i++)
+  {
+    j=Cudd_ReadInvPerm(mgr,i);
+    var_ind=bVar2mVar[j];
+    var=vars[var_ind];
+//    printf("%d %d %d %d\n",i,j,var_ind, ind);
+    if (var.abducible)
+    {
+//      printf("abd\n");
+      permutation[abd_ind]=i;
+      abd_ind++;
+    }
+    else
+    {
+      permutation[ind]=i;
+      ind++;
+    }
+  }
+  return Cudd_ShuffleHeap(mgr,permutation);
+}
+
+static foreign_t reorder(term_t arg1)
+{
+  environment * env;
+  int ret;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=reorder_int(env);
+  RETURN_IF_FAIL
+  return 1;
+}
+
+static foreign_t ret_abd_prob(term_t arg1, term_t arg2, term_t arg3)
+{
+  term_t out;
+  environment * env;
+  DdNode * node;
+  tablerow * table;
+  int ret;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_pointer(arg2,(void **)&node);
+  RETURN_IF_FAIL
+  out=PL_new_term_ref();
+
+  ret=reorder_int(env);
+  RETURN_IF_FAIL
+
+  if (!Cudd_IsConstant(node))
+  {
+    table=init_table(env->boolVars);
+    ret=PL_put_float(out,Prob(node,env,table,0));
+    RETURN_IF_FAIL
+    destroy_table(table,env->boolVars);
+  }
+  else
+  {
+    if (node==Cudd_ReadOne(env->mgr))
+    {
+      ret=PL_put_float(out,1.0);
+      RETURN_IF_FAIL
+    }
+    else
+    {
+      ret=PL_put_float(out,0.0);
+      RETURN_IF_FAIL
+    }
+  }
+
+  return(PL_unify(out,arg3));
+}
 double Prob(DdNode *node, environment * env, tablerow * table,int comp_par)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
@@ -415,6 +505,7 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
 
   v=&env->vars[env->nVars-1];
+  v->abducible=0;
   ret=PL_get_integer(arg2,&v->nVal);
   RETURN_IF_FAIL
   ret=PL_get_integer(arg4,&v->nRule);
@@ -438,6 +529,52 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   env->boolVars=env->boolVars+v->nVal-1;
   env->rules[v->nRule]= v->nVal;
 
+  ret=PL_put_integer(out,env->nVars-1);
+  RETURN_IF_FAIL
+
+  return(PL_unify(out,arg5));
+}
+static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+{
+  term_t out,head,probTerm;
+  variable * v;
+  int i,ret;
+  double p,p0;
+  environment * env;
+
+  head=PL_new_term_ref();
+  out=PL_new_term_ref();
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  env->nVars=env->nVars+1;
+  env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
+
+  env->n_abd=env->n_abd+1;
+
+  v=&env->vars[env->nVars-1];
+  v->abducible=1;
+  ret=PL_get_integer(arg2,&v->nVal);
+  RETURN_IF_FAIL
+  ret=PL_get_integer(arg4,&v->nRule);
+  RETURN_IF_FAIL
+
+  v->firstBoolVar=env->boolVars;
+  env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
+  env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
+  probTerm=PL_copy_term_ref(arg3);
+  p0=1;
+  for (i=0;i<v->nVal-1;i++)
+  {
+    ret=PL_get_list(probTerm,head,probTerm);
+    RETURN_IF_FAIL
+    ret=PL_get_float(head,&p);
+    RETURN_IF_FAIL
+    env->bVar2mVar[env->boolVars+i]=env->nVars-1;
+    env->probs[env->boolVars+i]=p/p0;
+    p0=p0*(1-p/p0);
+  }
+  env->boolVars=env->boolVars+v->nVal-1;
+  env->rules[v->nRule]= v->nVal;
   ret=PL_put_integer(out,env->nVars-1);
   RETURN_IF_FAIL
 
@@ -1279,6 +1416,7 @@ install_t install()
   PL_register_foreign("end",1,end,0);
   PL_register_foreign("end_bdd",1,end_bdd,0);
   PL_register_foreign("add_var",5,add_var,0);
+  PL_register_foreign("add_abd_var",5,add_abd_var,0);
   PL_register_foreign("equality",4,equality,0);
   PL_register_foreign("and",4,and,0);
   PL_register_foreign("one",2,one,0);
@@ -1290,6 +1428,8 @@ install_t install()
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
+  PL_register_foreign("ret_abd_prob",3,ret_abd_prob,0);
+  PL_register_foreign("reorder",1,reorder,0);
   PL_register_foreign("em",8,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
   PL_register_foreign("rand_seed",1,rand_seed,0);
