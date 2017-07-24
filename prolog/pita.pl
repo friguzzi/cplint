@@ -14,10 +14,11 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2,abd_prob/2, prob/3, prob_bar/3,
+:- module(pita,[s/2, prob/2, prob_bar/2,abd_prob/3, prob/3, prob_bar/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
-  abd_bdd_dot_string/3,
+  abd_bdd_dot_string/4,
+  abd_bdd_dot_string/6,
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
@@ -32,12 +33,13 @@ details.
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
-:-meta_predicate abd_prob(:,-).
+:-meta_predicate abd_prob(:,-,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
-:-meta_predicate abd_bdd_dot_string(:,-,-).
+:-meta_predicate abd_bdd_dot_string(:,-,-,-).
+:-meta_predicate abd_bdd_dot_string(:,-,-,-,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-meta_predicate get_p(:,+,-).
@@ -275,7 +277,7 @@ s(M:Goal,P):-
   erase(Ref),
   member((Goal,P),L).
 
-abd_prob(M:Goal,P):-
+abd_prob(M:Goal,P,Delta):-
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -288,10 +290,24 @@ abd_prob(M:Goal,P):-
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
-  findall((Goal,P),get_abd_p(M:Goal1,Env,P),L),
+  findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
-  member((Goal,P),L).
+  member((Goal,P,Exp),L),
+  from_assign_to_exp(Exp,M,Delta).
+
+from_assign_to_exp([],_M,[]).
+
+from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
+  M:av(R,S,Var),
+  M:abd(R,S,H),
+  (Val=1->
+    Abd=H
+  ;
+    Abd= \+(H)
+  ),
+  from_assign_to_exp(TA,M,TDelta).
+
 
 /**
  * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
@@ -336,12 +352,23 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * the mutlivalued variable number,
  * the rule number and the grounding substituion.
  */
-abd_bdd_dot_string(M:Goal,dot(Dot),LV):-
+abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
-  reorder(Env),
+  findall([V,R,S],M:av(R,S,V),LAV),
+  create_dot_string(Env,BDD,Dot),
+  end_test(Env).
+
+abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  get_node(M:Goal,Env,BDD),!,
+  findall([V,R,S],M:v(R,S,V),LV),
+  findall([V,R,S],M:av(R,S,V),LAV),
+  ret_abd_prob(Env,BDD,P,Exp),
+  from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
@@ -519,9 +546,9 @@ get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_prob(Env,BDD,P).
 
-get_abd_p(M:Goal,Env,P):-
+get_abd_p(M:Goal,Env,P,Exp):-
   get_node(M:Goal,Env,BDD),
-  ret_abd_prob(Env,BDD,P).
+  ret_abd_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
   get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
@@ -653,8 +680,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
     ;
       length(Probs,L),
       add_abd_var(Env,L,Probs,R,V),
-      assert(M:av(R,S,V)),
-      assert(M:v(R,S,V))
+      assert(M:av(R,S,V))
     )
   ;
     trhow(error('Non ground probailities not instantiated by the body'))
@@ -1300,7 +1326,7 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
   ).
 
-user:term_expansion(Head,Clause) :-
+user:term_expansion(Head,[Clause,abd(R,S,H)]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % abductive fact senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -1309,10 +1335,11 @@ user:term_expansion(Head,Clause) :-
   get_next_rule_number(M,R),
   add_bdd_arg(H,Env,BDD,M,Head1),%***test single_var
   (M:local_pita_setting(single_var,true)->
-    Clause=(Head1:-(get_abd_var_n(M,Env,R,[],[1,1],V),equality(Env,V,0,BDD)))
+    S=[]
   ;
-    Clause=(Head1:-(get_abd_var_n(M,Env,R,VC,[1,1],V),equality(Env,V,0,BDD)))
-  ).
+    S=VC
+  ),
+  Clause=(Head1:-(get_abd_var_n(M,Env,R,S,[1,1],V),equality(Env,V,0,BDD))).
 
 user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1477,12 +1504,13 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_), []).
-sandbox:safe_meta(pita:abd_prob(_,_), []).
+sandbox:safe_meta(pita:abd_prob(_,_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob_bar(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
-sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_), []).
+sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
+sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).

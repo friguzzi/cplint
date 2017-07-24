@@ -77,10 +77,31 @@ typedef struct
   double * example_prob; // probability (frequency) of examples in the data
 } example_data;
 
+typedef struct
+{
+  int var,val;
+} assign;
+
+typedef struct explan
+{
+  assign a;
+  struct explan * next;
+} explan_t;
+
+typedef struct
+{
+  double probt,probf;
+  explan_t * mpat,* mpaf;
+} prob_abd_expl;
+
+
+
 
 static foreign_t ret_prob(term_t,term_t,term_t);
-static foreign_t ret_abd_prob(term_t,term_t,term_t);
+static foreign_t ret_abd_prob(term_t,term_t,term_t,term_t);
 double Prob(DdNode *node,environment *env,tablerow *table,int comp_par);
+prob_abd_expl abd_Prob(DdNode *node,environment *env,tablerow *table,
+  int comp_par);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
@@ -105,6 +126,9 @@ void add_node(tablerow *tab, DdNode *node, double value);
 void destroy_table(tablerow *tab,int varcnt);
 install_t install(void);
 void write_dot(environment * env, DdNode * bdd, FILE * file);
+
+explan_t * insert(assign assignment,explan_t * head);
+term_t clist_to_pllist(explan_t *mpa);
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -374,16 +398,14 @@ int reorder_int(environment *env)
     j=Cudd_ReadInvPerm(mgr,i);
     var_ind=bVar2mVar[j];
     var=vars[var_ind];
-//    printf("%d %d %d %d\n",i,j,var_ind, ind);
     if (var.abducible)
     {
-//      printf("abd\n");
-      permutation[abd_ind]=i;
+      permutation[abd_ind]=j;
       abd_ind++;
     }
     else
     {
-      permutation[ind]=i;
+      permutation[ind]=j;
       ind++;
     }
   }
@@ -402,13 +424,18 @@ static foreign_t reorder(term_t arg1)
   return 1;
 }
 
-static foreign_t ret_abd_prob(term_t arg1, term_t arg2, term_t arg3)
+static foreign_t ret_abd_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4)
 {
-  term_t out;
+  term_t out,outass;
   environment * env;
   DdNode * node;
   tablerow * table;
+  //abdtablerow * abdtable;
+  prob_abd_expl delta;
   int ret;
+  double p;
+  explan_t * mpa;
 
   ret=PL_get_pointer(arg1,(void **)&env);
   RETURN_IF_FAIL
@@ -422,9 +449,17 @@ static foreign_t ret_abd_prob(term_t arg1, term_t arg2, term_t arg3)
   if (!Cudd_IsConstant(node))
   {
     table=init_table(env->boolVars);
-    ret=PL_put_float(out,Prob(node,env,table,0));
+    //abdtable=init_abd_table(env->n_abd);
+
+    delta=abd_Prob(node,env,table,0);
+    p=delta.probt;
+    mpa=delta.mpat;
+    ret=PL_put_float(out,p);
     RETURN_IF_FAIL
     destroy_table(table,env->boolVars);
+    //destroy_table(abdtable,env->n_abd);
+    outass=clist_to_pllist(mpa);
+    RETURN_IF_FAIL
   }
   else
   {
@@ -440,8 +475,41 @@ static foreign_t ret_abd_prob(term_t arg1, term_t arg2, term_t arg3)
     }
   }
 
-  return(PL_unify(out,arg3));
+  return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
 }
+
+term_t clist_to_pllist(explan_t *mpa)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  minus=PL_new_functor(PL_new_atom("-"), 2);
+  out=PL_new_term_ref();
+  head=PL_new_term_ref();
+  int ret;
+  if (mpa==NULL)
+  {
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+    tail=clist_to_pllist(mpa->next);
+    a=mpa->a;
+    var=PL_new_term_ref();
+    val=PL_new_term_ref();
+    ret=PL_put_integer(var,a.var);
+    RETURN_IF_FAIL
+    ret=PL_put_integer(val,a.val);
+    RETURN_IF_FAIL
+    ret=PL_cons_functor(head, minus,var,val);
+    RETURN_IF_FAIL
+    ret=PL_cons_list(out,head,tail);
+    RETURN_IF_FAIL
+  }
+  return out;
+}
+
 double Prob(DdNode *node, environment * env, tablerow * table,int comp_par)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
@@ -487,6 +555,90 @@ so that it is not recomputed
   }
 }
 
+prob_abd_expl abd_Prob(DdNode *node, environment * env, tablerow * table,
+  int comp_par)
+/* compute the probability of the expression rooted at node.
+table is used to store nodeB for which the probability has alread been computed
+so that it is not recomputed
+ */
+{
+  int index,comp,compf,pos;
+  double p,p0,p1;
+  DdNode *nodekey,*T,*F;
+  prob_abd_expl deltat,deltaf,delta;
+  assign assignment;
+  explan_t * mpa0,* mpa1,* mpat,* mpaf;
+
+  comp=Cudd_IsComplement(node);
+  comp=(comp && !comp_par) ||(!comp && comp_par);
+  index=Cudd_NodeReadIndex(node);
+  pos=Cudd_ReadPerm(env->mgr,index);
+  if (pos>=env->n_abd)
+  {
+    p1=Prob(node,env,table,comp_par);
+    //    printf("%x %f %d\n",node,p1,comp );
+
+    delta.probt=p1;
+    delta.mpat=NULL;
+    delta.probf=p1;
+    delta.mpaf=NULL;
+    return delta;
+  }
+  else
+  {
+    nodekey=Cudd_Regular(node);
+    p=env->probs[index];
+    T = Cudd_T(node);
+    F = Cudd_E(node);
+    compf=Cudd_IsComplement(F);
+    deltaf=abd_Prob(F,env,table,comp);
+    deltat=abd_Prob(T,env,table,comp);
+    if (0)
+    {
+      p0=deltaf.probf;
+      mpa0=deltaf.mpaf;
+    }
+    else
+    {
+      p0=deltaf.probt;
+      mpa0=deltaf.mpat;
+    }
+    p1=deltat.probt;
+    mpa1=deltat.mpat;
+    assignment.var=env->bVar2mVar[index];
+    assignment.val=1;
+    mpat=insert(assignment,mpa1);
+    assignment.var=env->bVar2mVar[index];
+    assignment.val=0;
+    mpaf=insert(assignment,mpa0);
+    //printf("%x %x %f %f\n",F,T,p0,p1 );
+    if (p1>p0)
+    {
+      delta.probt=p1;
+      delta.mpat=mpat;
+      delta.probf=p0;
+      delta.mpaf=mpaf;
+    }
+    else
+    {
+      delta.probt=p0;
+      delta.mpat=mpaf;
+      delta.probf=p1;
+      delta.mpaf=mpat;
+    }
+    return delta;
+  }
+}
+
+explan_t * insert(assign assignment,explan_t * head)
+{
+  explan_t * newhead;
+
+  newhead=malloc(sizeof(explan_t));
+  newhead->a=assignment;
+  newhead->next=head;
+  return newhead;
+}
 
 
 static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
@@ -1428,7 +1580,7 @@ install_t install()
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
-  PL_register_foreign("ret_abd_prob",3,ret_abd_prob,0);
+  PL_register_foreign("ret_abd_prob",4,ret_abd_prob,0);
   PL_register_foreign("reorder",1,reorder,0);
   PL_register_foreign("em",8,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
