@@ -19,6 +19,7 @@ details.
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
   abd_bdd_dot_string/6,
+  map_bdd_dot_string/6,
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
@@ -27,6 +28,7 @@ details.
   load/1,load_file/1,
   op(600,xfy,'::'),
   op(1150,fx,action),
+  op(1200,fy,map_query),
   msw/4,
   msw/5
     ]).
@@ -40,6 +42,7 @@ details.
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-,-,-).
+:-meta_predicate map_bdd_dot_string(:,-,-,-,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-meta_predicate get_p(:,+,-).
@@ -371,6 +374,42 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
+
+map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
+  M:rule_n(NR),
+  init_test(NR,Env),
+  get_node(M:Goal,Env,BDD),!,
+  findall([V,R,S],M:v(R,S,V),LV),
+  make_query_vars(LV,M,Env,LAV),
+  ret_map_prob(Env,BDD,P,Exp),
+  writeln(Exp),
+  from_assign_to_map(Exp,M,MAP),
+  create_dot_string(Env,BDD,Dot),
+  end_test(Env).
+
+make_query_vars([],_M,_Env,[]).
+
+make_query_vars([[V,R,S]|T],M,Env,[[V,R,S]|TV]):-
+  M:rule(R,_,_,_),!,
+  make_query_var(Env,V),
+  make_query_vars(T,M,Env,TV).
+
+make_query_vars([_H|T],M,Env,LV):-
+  make_query_vars(T,M,Env,LV).
+
+from_assign_to_map([],_M,[]).
+
+from_assign_to_map([Var-Val|TA],M,[Clause|TDelta]):-
+  M:v(R,S,Var),
+  M:rule(R,HeadList,Body,S),
+  Val1 is 1-Val,
+  nth0(Val1,HeadList,Head:_),
+  (Body=true->
+    Clause=Head
+  ;
+    Clause=(Head:-Body)
+  ),
+  from_assign_to_map(TA,M,TDelta).
 
 /**
  * prob(:Query:atom,-Probability:float) is nondet
@@ -1109,6 +1148,26 @@ user:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),M:pita_on,!.
 
+user:term_expansion(map_query(Clause),[rule(R,HeadList,Body,VC)|Clauses]):-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,!,
+  M:rule_n(R),
+  user:term_expansion(Clause, Clauses0),
+  (Clause=(Head:-Body)->
+    true
+  ;
+    Head=Clause
+  ),
+  (is_list(Clauses0)->
+    Clauses=Clauses0
+  ;
+    Clauses=[Clauses0]
+  ),
+  extract_vars_term(Clause,[],VC),
+  list2or(HeadListOr, Head),
+  process_head(HeadListOr, HeadList).
+
+
+
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   M:local_pita_setting(depth_bound,true),
@@ -1511,6 +1570,7 @@ sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
+sandbox:safe_meta(pita:map_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
