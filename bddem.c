@@ -136,7 +136,7 @@ typedef struct
 static foreign_t ret_prob(term_t,term_t,term_t);
 static foreign_t ret_abd_prob(term_t,term_t,term_t,term_t);
 static foreign_t ret_map_prob(term_t,term_t,term_t,term_t);
-double Prob(DdNode *node,environment *env,tablerow *table,int comp_par);
+double Prob(DdNode *node,environment *env,tablerow *table);
 prob_abd_expl abd_Prob(DdNode *node,environment *env,expltablerow *expltable,
   tablerow *table,
   int comp_par);
@@ -420,7 +420,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   if (!Cudd_IsConstant(node))
   {
     table=init_table(env->boolVars);
-    prob=Prob(node,env,table,0);
+    prob=Prob(node,env,table);
     if (Cudd_IsComplement(node))
       prob=1.0-prob;
     ret=PL_put_float(out,prob);
@@ -653,7 +653,7 @@ term_t clist_to_pllist(explan_t *mpa)
   return out;
 }
 
-double Prob(DdNode *node, environment * env, tablerow * table,int comp_par)
+double Prob(DdNode *node, environment * env, tablerow * table)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
@@ -687,8 +687,8 @@ so that it is not recomputed
       p=env->probs[index];
       T = Cudd_T(node);
       F = Cudd_E(node);
-      pf=Prob(F,env,table,comp);
-      pt=Prob(T,env,table,comp);
+      pf=Prob(F,env,table);
+      pt=Prob(T,env,table);
       if (Cudd_IsComplement(F))
         pf=1.0-pf;
 
@@ -722,7 +722,7 @@ so that it is not recomputed
   pos=Cudd_ReadPerm(env->mgr,index);
   if (pos>=env->n_abd)
   {
-    p1=Prob(node,env,table,comp_par);
+    p1=Prob(node,env,table);
     //   printf("%x %f %d\n",node,p1,comp );
     if (Cudd_IsComplement(node))
       p1= 1.0-p1;
@@ -830,7 +830,7 @@ so that it is not recomputed
     if (pos>=env->n_abd)
     {
 
-      p1=Prob(node,env,table,comp_par);
+      p1=Prob(node,env,table);
       //   printf("after prob%x %f %d\n",node,p1,comp_par );
       if (Cudd_IsComplement(node))
         p1= 1.0-p1;
