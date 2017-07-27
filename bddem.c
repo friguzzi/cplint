@@ -152,7 +152,7 @@ static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
   term_t,term_t,term_t,term_t);
 static foreign_t reorder(term_t arg1);
-static foreign_t make_query_var(term_t arg1,term_t arg2);
+static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3);
 
 double ProbPath(example_data * ex_d,DdNode *node, int comp_par, int nex);
 //static int rec_deref(void);
@@ -186,7 +186,7 @@ explan_t * insert(assign assignment,explan_t * head);
 explan_t * duplicate(explan_t * head);
 void free_list(explan_t * head);
 
-term_t clist_to_pllist(explan_t *mpa);
+term_t clist_to_pllist(explan_t *mpa, environment * env);
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -454,12 +454,14 @@ int reorder_int(environment *env)
   int * bVar2mVar=env->bVar2mVar;
 
   permutation=malloc(boolVars*sizeof(int));
-
   for (i=0;i<boolVars;i++)
   {
+    printf("i %d\n",i );
     j=Cudd_ReadInvPerm(mgr,i);
+    printf("j %d\n",j );
     var_ind=bVar2mVar[j];
     var=vars[var_ind];
+    printf("var_ind 0%d\n",var_ind );
     if (var.abducible_or_query)
     {
       permutation[abd_ind]=j;
@@ -470,7 +472,10 @@ int reorder_int(environment *env)
       permutation[ind]=j;
       ind++;
     }
+    printf("and inf %d ind %d\n",abd_ind,ind );
+
   }
+  printf("ffff\n" );
   return Cudd_ShuffleHeap(mgr,permutation);
 }
 
@@ -521,7 +526,7 @@ static foreign_t ret_abd_prob(term_t arg1, term_t arg2,
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
     //destroy_table(abdtable,env->n_abd);
-    outass=clist_to_pllist(mpa);
+    outass=clist_to_pllist(mpa,env);
     RETURN_IF_FAIL
     expl_destroy_table(expltable,env->boolVars);
     destroy_table(table,env->boolVars);
@@ -559,14 +564,20 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
   int ret;
   double p;
   explan_t * mpa;
+printf("prima1\n" );
 
   ret=PL_get_pointer(arg1,(void **)&env);
   RETURN_IF_FAIL
+printf("prima1\n" );
   ret=PL_get_pointer(arg2,(void **)&node);
   RETURN_IF_FAIL
+printf("prima1\n" );
   out=PL_new_term_ref();
+printf("prima re\n" );
 
   ret=reorder_int(env);
+printf("prima1\n" );
+
   RETURN_IF_FAIL
 
   if (!Cudd_IsConstant(node))
@@ -574,14 +585,15 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
     maptable=map_init_table(env->boolVars);
     table=init_table(env->boolVars);
     //abdtable=init_abd_table(env->n_abd);
-
+printf("prima\n" );
     delta=map_Prob(node,env,maptable,table,0,0);
     p=delta.probt;
     mpa=delta.mpat;
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
+    printf("dopo\n" );
     //destroy_table(abdtable,env->n_abd);
-    outass=clist_to_pllist(mpa);
+    outass=clist_to_pllist(mpa,env);
     RETURN_IF_FAIL
     map_destroy_table(maptable,env->boolVars);
     destroy_table(table,env->boolVars);
@@ -606,49 +618,111 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
   return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
 }
 
-static foreign_t make_query_var(term_t arg1, term_t arg2)
+static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
 {
   environment * env;
-  int ret,var;
+  int ret,varIndex,i,j;
+  DdNode * cons, * tmp1, * tmp2, * vari, * varj;
+  term_t out;
+  variable var;
 
   ret=PL_get_pointer(arg1,(void **)&env);
   RETURN_IF_FAIL
-  ret=PL_get_integer(arg2,&var);
+  ret=PL_get_integer(arg2,&varIndex);
   RETURN_IF_FAIL
 
-  env->vars[var].abducible_or_query=1;
-  env->n_abd++;
 
-  return 1;
+  env->vars[varIndex].abducible_or_query=1;
+  env->n_abd++;
+  var=env->vars[varIndex];
+
+  cons=Cudd_ReadOne(env->mgr);
+  for (i=var.firstBoolVar; i<var.firstBoolVar+var.nVal-2; i++)
+  {
+    printf("vari %d %d\n", i,var.firstBoolVar+var.nVal-2);
+    vari=Cudd_bddIthVar(env->mgr,i);
+    for(j=i+1; j<var.firstBoolVar+var.nVal-1; j++)
+    {
+      printf("i j %d %d\n",i,j );
+      varj=Cudd_bddIthVar(env->mgr,j);
+      tmp1=Cudd_Not(Cudd_bddAnd(env->mgr,vari,varj));
+      tmp2=Cudd_bddAnd(env->mgr,cons,tmp1);
+      Cudd_Ref(tmp2);
+      Cudd_RecursiveDeref(env->mgr,cons);
+      cons=tmp2;
+    }
+  }
+
+  out=PL_new_term_ref();
+  ret=PL_put_pointer(out,(void *)cons);
+  RETURN_IF_FAIL
+  return(PL_unify(out,arg3));
 }
-term_t clist_to_pllist(explan_t *mpa)
+term_t clist_to_pllist(explan_t *mpa, environment * env)
 {
   term_t out,tail,head,var,val;
   functor_t minus;
   assign a;
+  int value,bvar,i,* assignment, ret, mvari, mval;
+  variable mvar;
+
   minus=PL_new_functor(PL_new_atom("-"), 2);
-  out=PL_new_term_ref();
-  head=PL_new_term_ref();
-  int ret;
+  tail=PL_new_term_ref();
+  ret=PL_put_nil(tail);
+  RETURN_IF_FAIL
+printf("ciaoe\n" );
   if (mpa==NULL)
   {
+    out=PL_new_term_ref();
     ret=PL_put_nil(out);
     RETURN_IF_FAIL
   }
   else
   {
-    tail=clist_to_pllist(mpa->next);
-    a=mpa->a;
-    var=PL_new_term_ref();
-    val=PL_new_term_ref();
-    ret=PL_put_integer(var,a.var);
-    RETURN_IF_FAIL
-    ret=PL_put_integer(val,a.val);
-    RETURN_IF_FAIL
-    ret=PL_cons_functor(head, minus,var,val);
-    RETURN_IF_FAIL
-    ret=PL_cons_list(out,head,tail);
-    RETURN_IF_FAIL
+    assignment=malloc(env->nVars*sizeof(int));
+    for (i=0; i<env->nVars; i++)
+    {
+      mvar=env->vars[i];
+      if (mvar.abducible_or_query)
+        assignment[i]=mvar.nVal;
+      else
+        assignment[i]=0;
+    }
+    for (; mpa; mpa=mpa->next)
+    {
+      a=mpa->a;
+      bvar=a.var;
+      value=a.val;
+      printf("bvar %d %d\n",bvar,value );
+      if (value)
+      {
+        mvari=env->bVar2mVar[bvar];
+        mvar=env->vars[mvari];
+        mval=a.var-mvar.firstBoolVar+1;
+        printf("%d %d\n",mvar,mval );
+        assignment[mvari]=mval;
+      }
+    }
+
+    for (i=0; i<env->nVars; i++)
+      if (assignment[i])
+      {
+        var=PL_new_term_ref();
+        val=PL_new_term_ref();
+        ret=PL_put_integer(var,i);
+        RETURN_IF_FAIL
+        ret=PL_put_integer(val,assignment[i]);
+        RETURN_IF_FAIL
+        head=PL_new_term_ref();
+        ret=PL_cons_functor(head, minus,var,val);
+        RETURN_IF_FAIL
+        out=PL_new_term_ref();
+        ret=PL_cons_list(out,head,tail);
+        RETURN_IF_FAIL
+        tail=out;
+      }
+    free(assignment);
+    out=tail;
   }
   return out;
 }
@@ -676,9 +750,6 @@ so that it is not recomputed
     nodekey=Cudd_Regular(node);
     value_p=get_value(table,nodekey);
     if (value_p!=NULL)
-      if (comp)
-        return 1.0- *value_p;
-      else
         return *value_p;
     else
     {
@@ -724,7 +795,7 @@ so that it is not recomputed
   {
     p1=Prob(node,env,table);
     //   printf("%x %f %d\n",node,p1,comp );
-    if (Cudd_IsComplement(node))
+    if (comp)
       p1= 1.0-p1;
 
     delta.probt=p1;
@@ -819,20 +890,18 @@ so that it is not recomputed
   deltaptr=map_get_value(maptable,nodekey,comp,level);
   if (deltaptr!=NULL)
   {
-        //printf("found %x\n", nodekey);
+        printf("found %x\n", nodekey);
     return *deltaptr;
   }
-
 
 //  printf("%d %d\n",pos,level );
   if (pos==level)
   {
     if (pos>=env->n_abd)
     {
-
       p1=Prob(node,env,table);
-      //   printf("after prob%x %f %d\n",node,p1,comp_par );
-      if (Cudd_IsComplement(node))
+         printf("after prob%x %f %d\n",node,p1,comp_par );
+      if (comp)
         p1= 1.0-p1;
       delta.probt=p1;
       delta.mpat=NULL;
@@ -867,7 +936,7 @@ so that it is not recomputed
       assignment.var=env->bVar2mVar[index];
       assignment.val=0;
       mpaf=insert(assignment,mpa0);
-    //  printf("%x %x %f %f\n",F,T,p0,p1 );
+      printf("%x %x %f %f\n",F,T,p0,p1 );
       if ((p1>p0 && !comp) ||
           (p0>p1 && comp))
       {
@@ -1898,7 +1967,7 @@ install_t install()
   PL_register_foreign("ret_abd_prob",4,ret_abd_prob,0);
   PL_register_foreign("ret_map_prob",4,ret_map_prob,0);
   PL_register_foreign("reorder",1,reorder,0);
-  PL_register_foreign("make_query_var",2,make_query_var,0);
+  PL_register_foreign("make_query_var",3,make_query_var,0);
   PL_register_foreign("em",8,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
   PL_register_foreign("rand_seed",1,rand_seed,0);

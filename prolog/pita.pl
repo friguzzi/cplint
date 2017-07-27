@@ -296,7 +296,8 @@ abd_prob(M:Goal,P,Delta):-
   findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
-  member((Goal,P,Exp),L),
+  member((Goal,P,Exp0),L),
+  reverse(Exp0,Exp),
   from_assign_to_exp(Exp,M,Delta).
 
 from_assign_to_exp([],_M,[]).
@@ -370,7 +371,8 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   get_node(M:Goal,Env,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
-  ret_abd_prob(Env,BDD,P,Exp),
+  ret_abd_prob(Env,BDD,P,Exp0),
+  reverse(Exp0,Exp),
   from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
@@ -378,36 +380,40 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,BDD0),!,
   findall([V,R,S],M:v(R,S,V),LV),
-  make_query_vars(LV,M,Env,LAV),
-  ret_map_prob(Env,BDD,P,Exp),
+  one(Env,One),
+  writeln(qui),
+  make_query_vars(LV,M,Env,One,Cons,LAV),
+  writeln(qua),
+  and(Env,BDD0,Cons,BDD),
+%  BDD=BDD0,
+  writeln((Env,One,BDD0,Cons,BDD)),
+  ret_map_prob(Env,BDD,P,Exp0),
+  reverse(Exp0,Exp),
+  writeln(Exp),
   from_assign_to_map(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
-make_query_vars([],_M,_Env,[]).
+make_query_vars([],_M,_Env,C,C,[]).
 
-make_query_vars([[V,R,S]|T],M,Env,[[V,R,S]|TV]):-
+make_query_vars([[V,R,S]|T],M,Env,Cons0,Cons,[[V,R,S]|TV]):-
   M:rule(R,_,_,_),!,
-  make_query_var(Env,V),
-  make_query_vars(T,M,Env,TV).
+  writeln((V,R,S)),
+  make_query_var(Env,V,B),
+  and(Env,Cons0,B,Cons1),
+  make_query_vars(T,M,Env,Cons1,Cons,TV).
 
-make_query_vars([_H|T],M,Env,LV):-
-  make_query_vars(T,M,Env,LV).
+make_query_vars([_H|T],M,Env,Cons0,Cons,LV):-
+  make_query_vars(T,M,Env,Cons0,Cons,LV).
 
 from_assign_to_map([],_M,[]).
 
-from_assign_to_map([Var-Val|TA],M,[Clause|TDelta]):-
+from_assign_to_map([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
   M:v(R,S,Var),
   M:rule(R,HeadList,Body,S),
-  Val1 is 1-Val,
-  nth0(Val1,HeadList,Head:_),
-  (Body=true->
-    Clause=Head
-  ;
-    Clause=(Head:-Body)
-  ),
+  nth1(Val,HeadList,Head:_),
   from_assign_to_map(TA,M,TDelta).
 
 /**
@@ -1156,7 +1162,8 @@ user:term_expansion(map_query(Clause),[rule(R,HeadList,Body,VC)|Clauses]):-
   (Clause=(Head:-Body)->
     true
   ;
-    Head=Clause
+    Head=Clause,
+    Body=true
   ),
   (is_list(Clauses0)->
     Clauses=Clauses0
