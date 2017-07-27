@@ -382,7 +382,6 @@ map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   findall([V,R,S],M:v(R,S,V),LV),
   make_query_vars(LV,M,Env,LAV),
   ret_map_prob(Env,BDD,P,Exp),
-  writeln(Exp),
   from_assign_to_map(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
@@ -605,6 +604,7 @@ get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
@@ -614,6 +614,7 @@ get_node(M:Goal,Env,B):-
 
 get_node(M:Goal,Env,B):- %with DB=false
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (bagof(BDD,M:Goal1,L)*->
     or_list(L,Env,B)
