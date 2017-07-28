@@ -296,8 +296,7 @@ abd_prob(M:Goal,P,Delta):-
   findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
-  member((Goal,P,Exp0),L),
-  reverse(Exp0,Exp),
+  member((Goal,P,Exp),L),
   from_assign_to_exp(Exp,M,Delta).
 
 from_assign_to_exp([],_M,[]).
@@ -371,8 +370,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   get_node(M:Goal,Env,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
-  ret_abd_prob(Env,BDD,P,Exp0),
-  reverse(Exp0,Exp),
+  ret_abd_prob(Env,BDD,P,Exp),
   from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
@@ -383,15 +381,10 @@ map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   get_node(M:Goal,Env,BDD0),!,
   findall([V,R,S],M:v(R,S,V),LV),
   one(Env,One),
-  writeln(qui),
   make_query_vars(LV,M,Env,One,Cons,LAV),
-  writeln(qua),
   and(Env,BDD0,Cons,BDD),
-%  BDD=BDD0,
-  writeln((Env,One,BDD0,Cons,BDD)),
   ret_map_prob(Env,BDD,P,Exp0),
   reverse(Exp0,Exp),
-  writeln(Exp),
   from_assign_to_map(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
@@ -400,7 +393,6 @@ make_query_vars([],_M,_Env,C,C,[]).
 
 make_query_vars([[V,R,S]|T],M,Env,Cons0,Cons,[[V,R,S]|TV]):-
   M:rule(R,_,_,_),!,
-  writeln((V,R,S)),
   make_query_var(Env,V,B),
   and(Env,Cons0,B,Cons1),
   make_query_vars(T,M,Env,Cons1,Cons,TV).
@@ -697,6 +689,21 @@ retract_all([H|T]):-
  * index Rule, grouding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
+get_var_n(M,Env,R,S,Probs0,V):-
+  M:rule(R,_H,_B,_S),!,
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    (M:v(R,S,V)->
+      true
+    ;
+      length(Probs,L),
+      add_query_var(Env,L,Probs,R,V),
+      assert(M:v(R,S,V))
+    )
+  ;
+    trhow(error('Non ground probailities not instantiated by the body'))
+  ).
+
 get_var_n(M,Env,R,S,Probs0,V):-
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
@@ -1122,6 +1129,8 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:goal_n(0)),
   M:(dynamic v/3),
   M:(dynamic av/3),
+  M:(dynamic rule/4),
+  retractall(M:rule(_,_,_,_)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,

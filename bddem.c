@@ -32,7 +32,8 @@ typedef struct
 {
   int nVal,nRule;
   int firstBoolVar;
-  int abducible_or_query;
+  int abducible;
+  int query;
 } variable;
 
 
@@ -60,6 +61,7 @@ typedef struct
   int nRules;  // number of rules
   int * rules; // array with the number of head atoms for each rule
   int n_abd;
+  int n_abd_boolVars;
 } environment;
 
 typedef struct
@@ -146,6 +148,7 @@ prob_abd_expl map_Prob(DdNode *node, environment * env,
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
+static foreign_t add_query_var(term_t,term_t,term_t,term_t,term_t);
 static foreign_t add_abd_var(term_t,term_t,term_t,term_t,term_t);
 static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
@@ -187,6 +190,7 @@ explan_t * duplicate(explan_t * head);
 void free_list(explan_t * head);
 
 term_t clist_to_pllist(explan_t *mpa, environment * env);
+term_t abd_clist_to_pllist(explan_t *mpa);
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -295,6 +299,7 @@ static foreign_t init_test(term_t arg1,term_t arg2)
   env=(environment *)malloc(sizeof(environment));
   env->mgr=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
   env->n_abd=0;
+  env->n_abd_boolVars=0;
 
   Cudd_AutodynEnable(env->mgr, CUDD_REORDER_GROUP_SIFT);
   Cudd_SetMaxCacheHard(env->mgr, 0);
@@ -446,7 +451,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
 
 int reorder_int(environment *env)
 {
-  int i,j,var_ind,abd_ind=0,ind=env->n_abd;
+  int i,j,var_ind,abd_ind=0,ind=env->n_abd_boolVars;
   variable var,* vars=env->vars;
   DdManager *mgr=env->mgr;
   int boolVars=env->boolVars;
@@ -456,13 +461,10 @@ int reorder_int(environment *env)
   permutation=malloc(boolVars*sizeof(int));
   for (i=0;i<boolVars;i++)
   {
-    printf("i %d\n",i );
     j=Cudd_ReadInvPerm(mgr,i);
-    printf("j %d\n",j );
     var_ind=bVar2mVar[j];
     var=vars[var_ind];
-    printf("var_ind 0%d\n",var_ind );
-    if (var.abducible_or_query)
+    if (var.abducible || var.query)
     {
       permutation[abd_ind]=j;
       abd_ind++;
@@ -472,10 +474,8 @@ int reorder_int(environment *env)
       permutation[ind]=j;
       ind++;
     }
-    printf("and inf %d ind %d\n",abd_ind,ind );
 
   }
-  printf("ffff\n" );
   return Cudd_ShuffleHeap(mgr,permutation);
 }
 
@@ -526,7 +526,7 @@ static foreign_t ret_abd_prob(term_t arg1, term_t arg2,
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
     //destroy_table(abdtable,env->n_abd);
-    outass=clist_to_pllist(mpa,env);
+    outass=abd_clist_to_pllist(mpa);
     RETURN_IF_FAIL
     expl_destroy_table(expltable,env->boolVars);
     destroy_table(table,env->boolVars);
@@ -564,19 +564,14 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
   int ret;
   double p;
   explan_t * mpa;
-printf("prima1\n" );
 
   ret=PL_get_pointer(arg1,(void **)&env);
   RETURN_IF_FAIL
-printf("prima1\n" );
   ret=PL_get_pointer(arg2,(void **)&node);
   RETURN_IF_FAIL
-printf("prima1\n" );
   out=PL_new_term_ref();
-printf("prima re\n" );
 
   ret=reorder_int(env);
-printf("prima1\n" );
 
   RETURN_IF_FAIL
 
@@ -585,13 +580,11 @@ printf("prima1\n" );
     maptable=map_init_table(env->boolVars);
     table=init_table(env->boolVars);
     //abdtable=init_abd_table(env->n_abd);
-printf("prima\n" );
     delta=map_Prob(node,env,maptable,table,0,0);
     p=delta.probt;
     mpa=delta.mpat;
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
-    printf("dopo\n" );
     //destroy_table(abdtable,env->n_abd);
     outass=clist_to_pllist(mpa,env);
     RETURN_IF_FAIL
@@ -622,7 +615,7 @@ static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
 {
   environment * env;
   int ret,varIndex,i,j;
-  DdNode * cons, * tmp1, * tmp2, * vari, * varj;
+  DdNode * cons, * tmp1, * tmp2, * vari, * varj, * or, * tmpor;
   term_t out;
   variable var;
 
@@ -632,18 +625,22 @@ static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
   RETURN_IF_FAIL
 
 
-  env->vars[varIndex].abducible_or_query=1;
-  env->n_abd++;
+  //env->vars[varIndex].abducible_or_query=1;
+  //env->n_abd++;
   var=env->vars[varIndex];
 
   cons=Cudd_ReadOne(env->mgr);
-  for (i=var.firstBoolVar; i<var.firstBoolVar+var.nVal-2; i++)
+  or=Cudd_ReadLogicZero(env->mgr);
+
+  for (i=var.firstBoolVar; i<var.firstBoolVar+var.nVal-1; i++)
   {
-    printf("vari %d %d\n", i,var.firstBoolVar+var.nVal-2);
     vari=Cudd_bddIthVar(env->mgr,i);
+    tmpor=Cudd_bddOr(env->mgr,or,vari);
+    Cudd_Ref(tmpor);
+    Cudd_RecursiveDeref(env->mgr,or);
+    or=tmpor;
     for(j=i+1; j<var.firstBoolVar+var.nVal-1; j++)
     {
-      printf("i j %d %d\n",i,j );
       varj=Cudd_bddIthVar(env->mgr,j);
       tmp1=Cudd_Not(Cudd_bddAnd(env->mgr,vari,varj));
       tmp2=Cudd_bddAnd(env->mgr,cons,tmp1);
@@ -652,25 +649,63 @@ static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
       cons=tmp2;
     }
   }
+  tmpor=Cudd_bddOr(env->mgr,or,Cudd_bddIthVar(env->mgr,var.firstBoolVar+var.nVal-1));
+  Cudd_Ref(tmpor);
+  Cudd_RecursiveDeref(env->mgr,or);
+  tmp1=Cudd_bddAnd(env->mgr,cons,tmpor);
+  Cudd_Ref(tmp1);
+  Cudd_RecursiveDeref(env->mgr,cons);
+  Cudd_RecursiveDeref(env->mgr,or);
+  cons=tmp1;
 
   out=PL_new_term_ref();
   ret=PL_put_pointer(out,(void *)cons);
   RETURN_IF_FAIL
   return(PL_unify(out,arg3));
 }
+term_t abd_clist_to_pllist(explan_t *mpa)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  minus=PL_new_functor(PL_new_atom("-"), 2);
+  out=PL_new_term_ref();
+  head=PL_new_term_ref();
+  int ret;
+  if (mpa==NULL)
+  {
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+    tail=abd_clist_to_pllist(mpa->next);
+    a=mpa->a;
+    var=PL_new_term_ref();
+    val=PL_new_term_ref();
+    ret=PL_put_integer(var,a.var);
+    RETURN_IF_FAIL
+    ret=PL_put_integer(val,a.val);
+    RETURN_IF_FAIL
+    ret=PL_cons_functor(head, minus,var,val);
+    RETURN_IF_FAIL
+    ret=PL_cons_list(out,head,tail);
+    RETURN_IF_FAIL
+  }
+  return out;
+}
 term_t clist_to_pllist(explan_t *mpa, environment * env)
 {
   term_t out,tail,head,var,val;
   functor_t minus;
   assign a;
-  int value,bvar,i,* assignment, ret, mvari, mval;
+  int value,bvar, ret, mvari, mval;
   variable mvar;
 
   minus=PL_new_functor(PL_new_atom("-"), 2);
   tail=PL_new_term_ref();
   ret=PL_put_nil(tail);
   RETURN_IF_FAIL
-printf("ciaoe\n" );
   if (mpa==NULL)
   {
     out=PL_new_term_ref();
@@ -679,39 +714,22 @@ printf("ciaoe\n" );
   }
   else
   {
-    assignment=malloc(env->nVars*sizeof(int));
-    for (i=0; i<env->nVars; i++)
-    {
-      mvar=env->vars[i];
-      if (mvar.abducible_or_query)
-        assignment[i]=mvar.nVal;
-      else
-        assignment[i]=0;
-    }
+
     for (; mpa; mpa=mpa->next)
     {
       a=mpa->a;
       bvar=a.var;
       value=a.val;
-      printf("bvar %d %d\n",bvar,value );
       if (value)
       {
         mvari=env->bVar2mVar[bvar];
         mvar=env->vars[mvari];
         mval=a.var-mvar.firstBoolVar+1;
-        printf("%d %d\n",mvar,mval );
-        assignment[mvari]=mval;
-      }
-    }
-
-    for (i=0; i<env->nVars; i++)
-      if (assignment[i])
-      {
         var=PL_new_term_ref();
         val=PL_new_term_ref();
-        ret=PL_put_integer(var,i);
+        ret=PL_put_integer(var,mvari);
         RETURN_IF_FAIL
-        ret=PL_put_integer(val,assignment[i]);
+        ret=PL_put_integer(val,mval);
         RETURN_IF_FAIL
         head=PL_new_term_ref();
         ret=PL_cons_functor(head, minus,var,val);
@@ -721,11 +739,12 @@ printf("ciaoe\n" );
         RETURN_IF_FAIL
         tail=out;
       }
-    free(assignment);
+    }
     out=tail;
   }
   return out;
 }
+
 
 double Prob(DdNode *node, environment * env, tablerow * table)
 /* compute the probability of the expression rooted at node.
@@ -890,17 +909,14 @@ so that it is not recomputed
   deltaptr=map_get_value(maptable,nodekey,comp,level);
   if (deltaptr!=NULL)
   {
-        printf("found %x\n", nodekey);
     return *deltaptr;
   }
 
-//  printf("%d %d\n",pos,level );
   if (pos==level)
   {
-    if (pos>=env->n_abd)
+    if (pos>=env->n_abd_boolVars)
     {
       p1=Prob(node,env,table);
-         printf("after prob%x %f %d\n",node,p1,comp_par );
       if (comp)
         p1= 1.0-p1;
       delta.probt=p1;
@@ -925,20 +941,18 @@ so that it is not recomputed
       }
       else
       {
-        p0=deltaf.probt*(1-p);
+        p0=deltaf.probt;
         mpa0=deltaf.mpat;
       }
       p1=deltat.probt*p;
       mpa1=deltat.mpat;
-      assignment.var=env->bVar2mVar[index];
+      assignment.var=index;
       assignment.val=1;
       mpat=insert(assignment,mpa1);
-      assignment.var=env->bVar2mVar[index];
+      assignment.var=index;
       assignment.val=0;
       mpaf=insert(assignment,mpa0);
-      printf("%x %x %f %f\n",F,T,p0,p1 );
-      if ((p1>p0 && !comp) ||
-          (p0>p1 && comp))
+      if (p1>p0)
       {
         delta.probt=p1;
         delta.mpat=mpat;
@@ -962,14 +976,14 @@ so that it is not recomputed
 
     deltat=map_Prob(node,env,maptable,table,level+1,comp_par);
 
-    p0=deltat.probt*(1-p);
+    p0=deltat.probt;
     p1=deltat.probt*p;
   //  printf("map p %x %f %f %d\n",node,p0,p1 ,index);
     mpa1=deltat.mpat;
-    assignment.var=env->bVar2mVar[Cudd_ReadInvPerm(env->mgr,level)];
+    assignment.var=Cudd_ReadInvPerm(env->mgr,level);
     assignment.val=1;
     mpat=insert(assignment,mpa1);
-    assignment.var=env->bVar2mVar[Cudd_ReadInvPerm(env->mgr,level)];
+    assignment.var=Cudd_ReadInvPerm(env->mgr,level);
     assignment.val=0;
     mpaf=insert(assignment,mpa1);
   //  printf("ciii\n" );
@@ -1020,8 +1034,7 @@ void free_list(explan_t * head)
 {
   if (head)
   {
-    if (head->next)
-      free_list(head->next);
+    free_list(head->next);
     free(head);
   }
 }
@@ -1041,7 +1054,8 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
 
   v=&env->vars[env->nVars-1];
-  v->abducible_or_query=0;
+  v->abducible=0;
+  v->query=0;
   ret=PL_get_integer(arg2,&v->nVal);
   RETURN_IF_FAIL
   ret=PL_get_integer(arg4,&v->nRule);
@@ -1070,6 +1084,55 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
 
   return(PL_unify(out,arg5));
 }
+
+static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+{
+  term_t out,head,probTerm;
+  variable * v;
+  int i,ret;
+  double p;
+  environment * env;
+
+  head=PL_new_term_ref();
+  out=PL_new_term_ref();
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  env->nVars=env->nVars+1;
+  env->n_abd++;
+  env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
+
+  v=&env->vars[env->nVars-1];
+  v->query=1;
+  v->abducible=0;
+  ret=PL_get_integer(arg2,&v->nVal);
+  RETURN_IF_FAIL
+  ret=PL_get_integer(arg4,&v->nRule);
+  RETURN_IF_FAIL
+
+  env->n_abd_boolVars=env->n_abd_boolVars+v->nVal;
+  v->firstBoolVar=env->boolVars;
+  env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal)* sizeof(double))));
+  env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal)* sizeof(int)));
+  probTerm=PL_copy_term_ref(arg3);
+
+  for (i=0;i<v->nVal;i++)
+  {
+    ret=PL_get_list(probTerm,head,probTerm);
+    RETURN_IF_FAIL
+    ret=PL_get_float(head,&p);
+    RETURN_IF_FAIL
+    env->bVar2mVar[env->boolVars+i]=env->nVars-1;
+    env->probs[env->boolVars+i]=p;
+  }
+  env->boolVars=env->boolVars+v->nVal;
+  env->rules[v->nRule]= v->nVal;
+
+  ret=PL_put_integer(out,env->nVars-1);
+  RETURN_IF_FAIL
+
+  return(PL_unify(out,arg5));
+}
+
 static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
 {
   term_t out,head,probTerm;
@@ -1088,12 +1151,15 @@ static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, te
   env->n_abd=env->n_abd+1;
 
   v=&env->vars[env->nVars-1];
-  v->abducible_or_query=1;
+
+  v->abducible=1;
+  v->query=0;
   ret=PL_get_integer(arg2,&v->nVal);
   RETURN_IF_FAIL
+  env->n_abd_boolVars=env->n_abd_boolVars+v->nVal-1;
+
   ret=PL_get_integer(arg4,&v->nRule);
   RETURN_IF_FAIL
-
   v->firstBoolVar=env->boolVars;
   env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
   env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
@@ -1147,7 +1213,7 @@ static foreign_t equality(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
     Cudd_RecursiveDeref(env->mgr,tmp);
     tmp=node;
   }
-  if (!(value==v.nVal-1))
+  if (!(value==v.nVal-1)|| v.query)
   {
     var=Cudd_bddIthVar(env->mgr,v.firstBoolVar+value);
     node=Cudd_bddAnd(env->mgr,tmp,var);
@@ -1359,7 +1425,7 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
 {
   char * onames[]={"Out"};
   char ** inames;
-  int i,b,index;
+  int i,b,index,nv;
   variable v;
   char numberVar[10],numberBit[10];
   inames= (char **) malloc(sizeof(char *)*(env->boolVars));
@@ -1367,7 +1433,11 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
   for (i=0;i<env->nVars;i++)
   {
     v=env->vars[i];
-    for (b=0;b<v.nVal-1;b++)
+      if (v.query)
+        nv=v.nVal;
+      else
+        nv=v.nVal-1;
+    for (b=0;b<nv;b++)
     {
       inames[b+index]=(char *) malloc(sizeof(char)*20);
       strcpy(inames[b+index],"X");
@@ -1377,18 +1447,22 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
       sprintf(numberBit,"%d",b);
       strcat(inames[b+index],numberBit);
     }
-    index=index+v.nVal-1;
+    index=index+nv;
   }
   Cudd_DumpDot(env->mgr,1,&bdd,(const char * const *)inames,(const char * const *)onames,file);
   index=0;
   for (i=0;i<env->nVars;i++)
   {
     v=env->vars[i];
-    for (b=0;b<v.nVal-1;b++)
+    if (v.query)
+      nv=v.nVal;
+    else
+      nv=v.nVal-1;
+    for (b=0;b<nv;b++)
     {
       free(inames[b+index]);
     }
-    index=index+v.nVal-1;
+    index=index+nv;
   }
   free(inames);
 }
@@ -1952,6 +2026,7 @@ install_t install()
   PL_register_foreign("end",1,end,0);
   PL_register_foreign("end_bdd",1,end_bdd,0);
   PL_register_foreign("add_var",5,add_var,0);
+  PL_register_foreign("add_query_var",5,add_query_var,0);
   PL_register_foreign("add_abd_var",5,add_abd_var,0);
   PL_register_foreign("equality",4,equality,0);
   PL_register_foreign("and",4,and,0);
