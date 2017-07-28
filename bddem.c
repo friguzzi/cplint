@@ -976,7 +976,6 @@ so that it is not recomputed
     deltat=map_Prob(node,env,maptable,table,level+1,comp_par);
 
     p0=deltat.probt;
-    p1=deltat.probt*p;
   //  printf("map p %x %f %f %d\n",node,p0,p1 ,index);
     mpa1=deltat.mpat;
     assignment.var=Cudd_ReadInvPerm(env->mgr,level);
@@ -986,20 +985,10 @@ so that it is not recomputed
     assignment.val=0;
     mpaf=insert(assignment,mpa1);
   //  printf("ciii\n" );
-    if (p1>p0)
-    {
-      delta.probt=p1;
-      delta.mpat=mpat;
-      delta.probf=p0;
-      delta.mpaf=mpaf;
-    }
-    else
-    {
-      delta.probt=p0;
-      delta.mpat=mpaf;
-      delta.probf=p1;
-      delta.mpaf=mpat;
-    }
+    delta.probt=p0;
+    delta.mpat=mpaf;
+    delta.probf=p0;
+    delta.mpaf=mpat;
     map_add_node(maptable,nodekey,comp,level,delta);
     return delta;
   }
@@ -1204,20 +1193,29 @@ static foreign_t equality(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
   tmp=Cudd_ReadOne(env->mgr);
   Cudd_Ref(tmp);
   node=NULL;
-  for (i=v.firstBoolVar;i<v.firstBoolVar+value;i++)
-  {
-    var=Cudd_bddIthVar(env->mgr,i);
-    node=Cudd_bddAnd(env->mgr,tmp,Cudd_Not(var));
-    Cudd_Ref(node);
-    Cudd_RecursiveDeref(env->mgr,tmp);
-    tmp=node;
-  }
-  if (!(value==v.nVal-1)|| v.query)
+  if (v.query)
   {
     var=Cudd_bddIthVar(env->mgr,v.firstBoolVar+value);
     node=Cudd_bddAnd(env->mgr,tmp,var);
     Cudd_Ref(node);
-    Cudd_RecursiveDeref(env->mgr,tmp);
+  }
+  else
+  {
+    for (i=v.firstBoolVar;i<v.firstBoolVar+value;i++)
+    {
+      var=Cudd_bddIthVar(env->mgr,i);
+      node=Cudd_bddAnd(env->mgr,tmp,Cudd_Not(var));
+      Cudd_Ref(node);
+      Cudd_RecursiveDeref(env->mgr,tmp);
+      tmp=node;
+    }
+    if (!(value==v.nVal-1))
+    {
+      var=Cudd_bddIthVar(env->mgr,v.firstBoolVar+value);
+      node=Cudd_bddAnd(env->mgr,tmp,var);
+      Cudd_Ref(node);
+      Cudd_RecursiveDeref(env->mgr,tmp);
+    }
   }
   out=PL_new_term_ref();
   ret=PL_put_pointer(out,(void *)node);
