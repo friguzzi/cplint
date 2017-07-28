@@ -85,3 +85,13 @@ test((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.36),
 		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
 			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
 		  ]),map_es2).
+
+test((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.54),
+	  Exp=[
+		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)
+		  ]),map_es2map).
+
+test((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
+	  Exp=[
+		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ]),map_es2map1).

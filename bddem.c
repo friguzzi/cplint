@@ -655,7 +655,6 @@ static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
   tmp1=Cudd_bddAnd(env->mgr,cons,tmpor);
   Cudd_Ref(tmp1);
   Cudd_RecursiveDeref(env->mgr,cons);
-  Cudd_RecursiveDeref(env->mgr,or);
   cons=tmp1;
 
   out=PL_new_term_ref();
