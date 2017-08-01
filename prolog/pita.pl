@@ -1067,6 +1067,11 @@ extract_vars_list(L,[],V):-
   extract_vars_tree(L,T,T1),
   rb_keys(T1,V).
 
+extract_vars(Term,V):-
+  rb_new(T),
+  extract_vars_term(Term,T,T1),
+  rb_keys(T1,V).
+
 extract_vars_term(Variable, Var0, Var1) :-
   var(Variable), !,
   (rb_lookup(Variable, Var0,_) ->
@@ -1180,7 +1185,7 @@ user:term_expansion(map_query(Clause),[rule(R,HeadList,Body,VC)|Clauses]):-
   ;
     Clauses=[Clauses0]
   ),
-  extract_vars_term(Clause,[],VC),
+  extract_vars(Clause,VC),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList).
 
