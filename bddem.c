@@ -860,14 +860,13 @@ table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp,compf,pos,level;
+  int index,comp,compf,pos;
   double p,p0,p1;
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
   assign assignment;
   explan_t * mpa0,* mpa1,* mpa;
 
-level=0;
 
   index=Cudd_NodeReadIndex(node);
   pos=Cudd_ReadPerm(env->mgr,index);
