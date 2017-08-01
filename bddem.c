@@ -820,8 +820,7 @@ so that it is not recomputed
 
       p1=deltat.prob;
       mpa1=deltat.mpa;
-      if ((p1>p0 && !comp) ||
-          (p0>p1 && comp))
+      if (p1>p0)
       {
         assignment.var=env->bVar2mVar[index];
         assignment.val=1;
