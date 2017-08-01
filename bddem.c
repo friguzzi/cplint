@@ -787,7 +787,7 @@ so that it is not recomputed
   comp=(comp && !comp_par) ||(!comp && comp_par);
   index=Cudd_NodeReadIndex(node);
   pos=Cudd_ReadPerm(env->mgr,index);
-  if (pos>=env->n_abd)
+  if (pos>=env->n_abd_boolVars)
   {
     p1=Prob(node,env,table);
     if (comp)
