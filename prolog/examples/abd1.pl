@@ -15,9 +15,9 @@ a:- b,c.
 a:- d,e.
 
 b:0.3.
-c:abducible.
+abducible c.
 d:0.6.
-e:abducible.
+abducible e.
 
 
 :- end_lpad.
