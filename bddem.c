@@ -114,24 +114,6 @@ typedef struct
   explrowel *row;
 } expltablerow;
 
-typedef struct
-{
-  DdNode *node;
-  int level;
-  int comp;
-} mapkey;
-
-typedef struct
-{
-  mapkey key;
-  prob_abd_expl value;
-} maprowel;
-
-typedef struct
-{
-  int cnt;
-  maprowel *row;
-} maptablerow;
 
 
 
@@ -143,7 +125,7 @@ prob_abd_expl abd_Prob(DdNode *node,environment *env,expltablerow *expltable,
   tablerow *table,
   int comp_par);
 prob_abd_expl map_Prob(DdNode *node, environment * env,
-    maptablerow * maptable, tablerow * table, int level,
+    expltablerow * maptable, tablerow * table,
     int comp_par);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
@@ -177,10 +159,7 @@ expltablerow* expl_init_table(int varcnt);
 prob_abd_expl * expl_get_value(expltablerow *tab,  DdNode *node, int comp);
 void expl_add_node(expltablerow *tab, DdNode *node, int comp, prob_abd_expl value);
 void expl_destroy_table(expltablerow *tab,int varcnt);
-maptablerow* map_init_table(int varcnt);
-void map_add_node(maptablerow *tab, DdNode *node, int comp, int level, prob_abd_expl value);
-prob_abd_expl * map_get_value(maptablerow *tab,  DdNode *node, int comp, int level);
-void map_destroy_table(maptablerow *tab,int varcnt);
+
 
 install_t install(void);
 void write_dot(environment * env, DdNode * bdd, FILE * file);
@@ -557,7 +536,7 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
   term_t out,outass;
   environment * env;
   DdNode * node;
-  maptablerow * maptable;
+  expltablerow * maptable;
   tablerow * table;
   //abdtablerow * abdtable;
   prob_abd_expl delta;
@@ -577,10 +556,10 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
 
   if (!Cudd_IsConstant(node))
   {
-    maptable=map_init_table(env->boolVars);
+    maptable=expl_init_table(env->boolVars);
     table=init_table(env->boolVars);
     //abdtable=init_abd_table(env->n_abd);
-    delta=map_Prob(node,env,maptable,table,0,0);
+    delta=map_Prob(node,env,maptable,table,0);
     p=delta.prob;
     mpa=delta.mpa;
     ret=PL_put_float(out,p);
@@ -588,7 +567,7 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
     //destroy_table(abdtable,env->n_abd);
     outass=clist_to_pllist(mpa,env);
     RETURN_IF_FAIL
-    map_destroy_table(maptable,env->boolVars);
+    expl_destroy_table(maptable,env->boolVars);
     destroy_table(table,env->boolVars);
   }
   else
@@ -756,7 +735,6 @@ so that it is not recomputed
   double p,pt,pf,BChild0,BChild1;
   double * value_p;
   DdNode *nodekey,*T,*F;
-
   comp=Cudd_IsComplement(node);
   //comp=(comp && !comp_par) ||(!comp && comp_par);
   if (Cudd_IsConstant(node))
@@ -812,7 +790,6 @@ so that it is not recomputed
   if (pos>=env->n_abd)
   {
     p1=Prob(node,env,table);
-    //   printf("%x %f %d\n",node,p1,comp );
     if (comp)
       p1= 1.0-p1;
 
@@ -827,7 +804,6 @@ so that it is not recomputed
     deltaptr=expl_get_value(expltable,nodekey,comp);
     if (deltaptr!=NULL)
     {
-      //printf("found %x\n", nodekey);
       return *deltaptr;
     }
     else
@@ -844,7 +820,6 @@ so that it is not recomputed
 
       p1=deltat.prob;
       mpa1=deltat.mpa;
-      //printf("%x %x %f %f\n",F,T,p0,p1 );
       if ((p1>p0 && !comp) ||
           (p0>p1 && comp))
       {
@@ -869,104 +844,79 @@ so that it is not recomputed
 }
 
 prob_abd_expl map_Prob(DdNode *node, environment * env,
-  maptablerow * maptable, tablerow * table, int level,
+  expltablerow * maptable, tablerow * table,
   int comp_par)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp,compf,pos;
+  int index,comp,compf,pos,level;
   double p,p0,p1;
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
   assign assignment;
   explan_t * mpa0,* mpa1,* mpa;
 
-
+level=0;
 
   index=Cudd_NodeReadIndex(node);
   pos=Cudd_ReadPerm(env->mgr,index);
   comp=Cudd_IsComplement(node);
   comp=(comp && !comp_par) ||(!comp && comp_par);
 
-  if (pos>=env->boolVars)
-    pos=env->boolVars;
-
-  nodekey=Cudd_Regular(node);
-  deltaptr=map_get_value(maptable,nodekey,comp,level);
-  if (deltaptr!=NULL)
+  if (pos>=env->n_abd_boolVars)
   {
-    return *deltaptr;
-  }
-
-  if (pos==level)
-  {
-    if (pos>=env->n_abd_boolVars)
-    {
-      p1=Prob(node,env,table);
-      if (comp)
-        p1= 1.0-p1;
-      delta.prob=p1;
-      delta.mpa=NULL;
+    p1=Prob(node,env,table);
+    if (comp)
+      p1= 1.0-p1;
+    delta.prob=p1;
+    delta.mpa=NULL;
 
 
-      return delta;
-    }
-    else
-    {
-      p=env->probs[index];
-      T = Cudd_T(node);
-      F = Cudd_E(node);
-      compf=Cudd_IsComplement(F);
-      deltaf=map_Prob(F,env,maptable,table,level+1,comp);
-      deltat=map_Prob(T,env,maptable,table,level+1,comp);
-
-      p0=deltaf.prob;
-      mpa0=deltaf.mpa;
-
-      p1=deltat.prob*p;
-      mpa1=deltat.mpa;
-
-
-      if (p1>p0)
-      {
-        assignment.var=index;
-        assignment.val=1;
-        mpa=insert(assignment,mpa1);
-        delta.prob=p1;
-        delta.mpa=mpa;
-      }
-      else
-      {
-        assignment.var=index;
-        assignment.val=0;
-        mpa=insert(assignment,mpa0);
-        delta.prob=p0;
-        delta.mpa=mpa;
-      }
-      map_add_node(maptable,nodekey,comp,level,delta);
-      return delta;
-    }
+    return delta;
   }
   else
   {
-    p=env->probs[Cudd_ReadInvPerm(env->mgr,level)];
+    nodekey=Cudd_Regular(node);
+    deltaptr=expl_get_value(maptable,nodekey,comp);
+    if (deltaptr!=NULL)
+    {
+      return *deltaptr;
+    }
+    p=env->probs[index];
+    T = Cudd_T(node);
+    F = Cudd_E(node);
+    compf=Cudd_IsComplement(F);
+    deltaf=map_Prob(F,env,maptable,table,comp);
+    deltat=map_Prob(T,env,maptable,table,comp);
 
-    deltat=map_Prob(node,env,maptable,table,level+1,comp_par);
+    p0=deltaf.prob;
+    mpa0=deltaf.mpa;
 
-    p0=deltat.prob;
-  //  printf("map p %x %f %f %d\n",node,p0,p1 ,index);
+    p1=deltat.prob*p;
     mpa1=deltat.mpa;
-    assignment.var=Cudd_ReadInvPerm(env->mgr,level);
-    assignment.val=0;
-    mpa=insert(assignment,mpa1);
-  //  printf("ciii\n" );
-    delta.prob=p0;
-    delta.mpa=mpa;
-    map_add_node(maptable,nodekey,comp,level,delta);
+
+    if (p1>p0)
+    {
+      assignment.var=index;
+      assignment.val=1;
+      mpa=insert(assignment,mpa1);
+      delta.prob=p1;
+      delta.mpa=mpa;
+    }
+    else
+    {
+      assignment.var=index;
+      assignment.val=0;
+      mpa=insert(assignment,mpa0);
+      delta.prob=p0;
+      delta.mpa=mpa;
+    }
+    expl_add_node(maptable,nodekey,comp,delta);
     return delta;
   }
+
 }
 
 explan_t * insert(assign assignment,explan_t * head)
@@ -2138,7 +2088,6 @@ prob_abd_expl * expl_get_value(expltablerow *tab,  DdNode *node, int comp) {
 
   for(i = 0; i < tab[index].cnt; i++)
   {
-    //printf("%d %x\n",i,node );
     if (tab[index].row[i].key.node == node &&
        tab[index].row[i].key.comp == comp)
     {
@@ -2153,73 +2102,6 @@ void expl_destroy_table(expltablerow *tab,int varcnt)
   int i,j;
 
   for (i = 0; i < varcnt; i++)
-  {
-    for (j = 0; j< tab[i].cnt; j++)
-    {
-      free_list(tab[i].row[j].value.mpa);
-    }
-    free(tab[i].row);
-  }
-  free(tab);
-}
-
-
-maptablerow* map_init_table(int varcnt) {
-  int i;
-  maptablerow *tab;
-  tab = (maptablerow *) malloc(sizeof(maprowel) * varcnt);
-  for (i = 0; i < varcnt+1; i++)
-  {
-    tab[i].row = NULL;
-    tab[i].cnt = 0;
-  }
-  return tab;
-}
-
-
-void map_add_node(maptablerow *tab, DdNode *node, int comp, int level, prob_abd_expl value) {
-  int index;
-
-  if (Cudd_IsConstant(node))
-    index = 0;
-  else
-    index = Cudd_NodeReadIndex(node)+1;
-
-  tab[index].row = (maprowel *) realloc(tab[index].row,
-    (tab[index].cnt + 1) * sizeof(maprowel));
-  tab[index].row[tab[index].cnt].key.node = node;
-  tab[index].row[tab[index].cnt].key.comp = comp;
-  tab[index].row[tab[index].cnt].key.level = level;
-  tab[index].row[tab[index].cnt].value = value;
-  tab[index].cnt += 1;
-}
-
-prob_abd_expl * map_get_value(maptablerow *tab,  DdNode *node, int comp, int level) {
-  int i;
-  int index;
-
-  if (Cudd_IsConstant(node))
-    index = 0;
-  else
-    index = Cudd_NodeReadIndex(node)+1;
-
-  for(i = 0; i < tab[index].cnt; i++)
-  {
-    if (tab[index].row[i].key.node == node &&
-        tab[index].row[i].key.comp == comp &&
-        tab[index].row[i].key.level == level)
-    {
-      return &tab[index].row[i].value;
-    }
-  }
-  return NULL;
-}
-
-void map_destroy_table(maptablerow *tab,int varcnt)
-{
-  int i,j;
-
-  for (i = 0; i < varcnt+1; i++)
   {
     for (j = 0; j< tab[i].cnt; j++)
     {
