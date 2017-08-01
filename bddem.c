@@ -92,8 +92,8 @@ typedef struct explan
 
 typedef struct
 {
-  double probt,probf;
-  explan_t * mpat,* mpaf;
+  double prob;
+  explan_t * mpa;
 } prob_abd_expl;
 
 typedef struct
@@ -521,8 +521,8 @@ static foreign_t ret_abd_prob(term_t arg1, term_t arg2,
     //abdtable=init_abd_table(env->n_abd);
 
     delta=abd_Prob(node,env,expltable,table,0);
-    p=delta.probt;
-    mpa=delta.mpat;
+    p=delta.prob;
+    mpa=delta.mpa;
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
     //destroy_table(abdtable,env->n_abd);
@@ -581,8 +581,8 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
     table=init_table(env->boolVars);
     //abdtable=init_abd_table(env->n_abd);
     delta=map_Prob(node,env,maptable,table,0,0);
-    p=delta.probt;
-    mpa=delta.mpat;
+    p=delta.prob;
+    mpa=delta.mpa;
     ret=PL_put_float(out,p);
     RETURN_IF_FAIL
     //destroy_table(abdtable,env->n_abd);
@@ -803,7 +803,7 @@ so that it is not recomputed
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
   assign assignment;
-  explan_t * mpa0,* mpa1,* mpat,* mpaf;
+  explan_t * mpa0,* mpa1,* mpa;
 
   comp=Cudd_IsComplement(node);
   comp=(comp && !comp_par) ||(!comp && comp_par);
@@ -816,10 +816,9 @@ so that it is not recomputed
     if (comp)
       p1= 1.0-p1;
 
-    delta.probt=p1;
-    delta.mpat=NULL;
-    delta.probf=p1;
-    delta.mpaf=NULL;
+    delta.prob=p1;
+    delta.mpa=NULL;
+
     return delta;
   }
   else
@@ -839,39 +838,29 @@ so that it is not recomputed
       compf=Cudd_IsComplement(F);
       deltaf=abd_Prob(F,env,expltable,table,comp);
       deltat=abd_Prob(T,env,expltable,table,comp);
-      if (0)
-      {
-        p0=deltaf.probf;
-        mpa0=deltaf.mpaf;
-      }
-      else
-      {
-        p0=deltaf.probt;
-        mpa0=deltaf.mpat;
-      }
-      p1=deltat.probt;
-      mpa1=deltat.mpat;
-      assignment.var=env->bVar2mVar[index];
-      assignment.val=1;
-      mpat=insert(assignment,mpa1);
-      assignment.var=env->bVar2mVar[index];
-      assignment.val=0;
-      mpaf=insert(assignment,mpa0);
+
+      p0=deltaf.prob;
+      mpa0=deltaf.mpa;
+
+      p1=deltat.prob;
+      mpa1=deltat.mpa;
       //printf("%x %x %f %f\n",F,T,p0,p1 );
       if ((p1>p0 && !comp) ||
           (p0>p1 && comp))
       {
-        delta.probt=p1;
-        delta.mpat=mpat;
-        delta.probf=p0;
-        delta.mpaf=mpaf;
+        assignment.var=env->bVar2mVar[index];
+        assignment.val=1;
+        mpa=insert(assignment,mpa1);
+        delta.prob=p1;
+        delta.mpa=mpa;
       }
       else
       {
-        delta.probt=p0;
-        delta.mpat=mpaf;
-        delta.probf=p1;
-        delta.mpaf=mpat;
+        assignment.var=env->bVar2mVar[index];
+        assignment.val=0;
+        mpa=insert(assignment,mpa0);
+        delta.prob=p0;
+        delta.mpa=mpa;
       }
       expl_add_node(expltable,nodekey,comp,delta);
       return delta;
@@ -892,7 +881,7 @@ so that it is not recomputed
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
   assign assignment;
-  explan_t * mpa0,* mpa1,* mpat,* mpaf;
+  explan_t * mpa0,* mpa1,* mpa;
 
 
 
@@ -918,10 +907,9 @@ so that it is not recomputed
       p1=Prob(node,env,table);
       if (comp)
         p1= 1.0-p1;
-      delta.probt=p1;
-      delta.mpat=NULL;
-      delta.probf=p1;
-      delta.mpaf=NULL;
+      delta.prob=p1;
+      delta.mpa=NULL;
+
 
       return delta;
     }
@@ -933,37 +921,29 @@ so that it is not recomputed
       compf=Cudd_IsComplement(F);
       deltaf=map_Prob(F,env,maptable,table,level+1,comp);
       deltat=map_Prob(T,env,maptable,table,level+1,comp);
-      if (0)
-      {
-        p0=deltaf.probf*(1-p);
-        mpa0=deltaf.mpaf;
-      }
-      else
-      {
-        p0=deltaf.probt;
-        mpa0=deltaf.mpat;
-      }
-      p1=deltat.probt*p;
-      mpa1=deltat.mpat;
-      assignment.var=index;
-      assignment.val=1;
-      mpat=insert(assignment,mpa1);
-      assignment.var=index;
-      assignment.val=0;
-      mpaf=insert(assignment,mpa0);
+
+      p0=deltaf.prob;
+      mpa0=deltaf.mpa;
+
+      p1=deltat.prob*p;
+      mpa1=deltat.mpa;
+
+
       if (p1>p0)
       {
-        delta.probt=p1;
-        delta.mpat=mpat;
-        delta.probf=p0;
-        delta.mpaf=mpaf;
+        assignment.var=index;
+        assignment.val=1;
+        mpa=insert(assignment,mpa1);
+        delta.prob=p1;
+        delta.mpa=mpa;
       }
       else
       {
-        delta.probt=p0;
-        delta.mpat=mpaf;
-        delta.probf=p1;
-        delta.mpaf=mpat;
+        assignment.var=index;
+        assignment.val=0;
+        mpa=insert(assignment,mpa0);
+        delta.prob=p0;
+        delta.mpa=mpa;
       }
       map_add_node(maptable,nodekey,comp,level,delta);
       return delta;
@@ -975,20 +955,15 @@ so that it is not recomputed
 
     deltat=map_Prob(node,env,maptable,table,level+1,comp_par);
 
-    p0=deltat.probt;
+    p0=deltat.prob;
   //  printf("map p %x %f %f %d\n",node,p0,p1 ,index);
-    mpa1=deltat.mpat;
-    assignment.var=Cudd_ReadInvPerm(env->mgr,level);
-    assignment.val=1;
-    mpat=insert(assignment,mpa1);
+    mpa1=deltat.mpa;
     assignment.var=Cudd_ReadInvPerm(env->mgr,level);
     assignment.val=0;
-    mpaf=insert(assignment,mpa1);
+    mpa=insert(assignment,mpa1);
   //  printf("ciii\n" );
-    delta.probt=p0;
-    delta.mpat=mpaf;
-    delta.probf=p0;
-    delta.mpaf=mpat;
+    delta.prob=p0;
+    delta.mpa=mpa;
     map_add_node(maptable,nodekey,comp,level,delta);
     return delta;
   }
@@ -2181,8 +2156,7 @@ void expl_destroy_table(expltablerow *tab,int varcnt)
   {
     for (j = 0; j< tab[i].cnt; j++)
     {
-      free_list(tab[i].row[j].value.mpat);
-      free_list(tab[i].row[j].value.mpaf);
+      free_list(tab[i].row[j].value.mpa);
     }
     free(tab[i].row);
   }
@@ -2249,8 +2223,7 @@ void map_destroy_table(maptablerow *tab,int varcnt)
   {
     for (j = 0; j< tab[i].cnt; j++)
     {
-      free_list(tab[i].row[j].value.mpat);
-      free_list(tab[i].row[j].value.mpaf);
+      free_list(tab[i].row[j].value.mpa);
     }
     free(tab[i].row);
   }
