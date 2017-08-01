@@ -60,6 +60,10 @@ test((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[c, d, f, (\+g)]),abd2).
 test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
   Exp=[c, d, f, (\+g)]),abd2).
 
+test((abd_prob(a,P,Exp),close_to(P,0.42),Exp=[(\+ c), f, (\+g)]),abd3).
+test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.42),
+  Exp=[(\+ c),f, (\+g)]),abd3).
+
 test((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
   Exp=[
 	  rule(0, '', [red:0.4, '':0.6], true),

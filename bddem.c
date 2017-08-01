@@ -808,18 +808,28 @@ so that it is not recomputed
     }
     else
     {
-      p=env->probs[index];
+
       T = Cudd_T(node);
       F = Cudd_E(node);
       compf=Cudd_IsComplement(F);
       deltaf=abd_Prob(F,env,expltable,table,comp);
       deltat=abd_Prob(T,env,expltable,table,comp);
+      p=env->probs[index];
 
-      p0=deltaf.prob;
+      if (p==1.0)
+      {
+        p0=deltaf.prob;
+        p1=deltat.prob;
+      }
+      else
+      {
+        p0=deltaf.prob*(1-p);
+        p1=deltat.prob*p;
+      }
+
       mpa0=deltaf.mpa;
-
-      p1=deltat.prob;
       mpa1=deltat.mpa;
+
       if (p1>p0)
       {
         assignment.var=env->bVar2mVar[index];

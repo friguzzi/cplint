@@ -29,6 +29,7 @@ details.
   op(600,xfy,'::'),
   op(1150,fx,action),
   op(1200,fy,map_query),
+  op(1200,fy,abducible),
   msw/4,
   msw/5
     ]).
@@ -1183,6 +1184,26 @@ user:term_expansion(map_query(Clause),[rule(R,HeadList,Body,VC)|Clauses]):-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList).
 
+user:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,!,
+  ((Head=(H:P);Head=(P::H))->
+    P1 is P,
+    P0 is 1.0-P,
+    Probs=[P1,P0]
+  ;
+    H=Head,
+    Probs=[1.0,1.0]
+  ),
+  extract_vars_list([H],[],VC),
+  get_next_rule_number(M,R),
+  add_bdd_arg(H,Env,BDD,M,Head1),%***test single_var
+  (M:local_pita_setting(single_var,true)->
+    S=[]
+  ;
+    S=VC
+  ),
+  Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equality(Env,V,0,BDD))).
+
 
 
 user:term_expansion((Head :- Body), Clauses):-
@@ -1401,21 +1422,6 @@ user:term_expansion(Head,Clauses) :-
   ;
     generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
   ).
-
-user:term_expansion(Head,[Clause,abd(R,S,H)]) :-
-  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-% abductive fact senza db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:abducible);Head=(abducible::H)), !,
-  extract_vars_list([H],[],VC),
-  get_next_rule_number(M,R),
-  add_bdd_arg(H,Env,BDD,M,Head1),%***test single_var
-  (M:local_pita_setting(single_var,true)->
-    S=[]
-  ;
-    S=VC
-  ),
-  Clause=(Head1:-(get_abd_var_n(M,Env,R,S,[1,1],V),equality(Env,V,0,BDD))).
 
 user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
