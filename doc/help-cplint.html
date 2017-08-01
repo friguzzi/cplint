@@ -320,7 +320,7 @@ female(cathy).</code></pre>
 <p>of <a href="http://cplint.lamping.unife.it/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> that takes 50 samples of <code>L</code> in <code>findall(S,(reach(s0,0,S),L)</code>.</p>
 <p>You can sample arguments of queries also with</p>
 <pre><code>mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list).</code></pre>
-<p>that samples <code>Query</code> a number of <code>Samples</code> times The predicate returns in <code>Values</code> a list of values of verb|Arg| returned as the first answer by <code>Query</code> in a world sampled at random. The value is <code>failure</code> if the query fails.</p>
+<p>that samples <code>Query</code> a number of <code>Samples</code> times The predicate returns in <code>Values</code> a list of values of <code>Arg</code> returned as the first answer by <code>Query</code> in a world sampled at random. The value is <code>failure</code> if the query fails.</p>
 <p>The predicate</p>
 <pre><code>mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list).</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times and returns in <code>Values</code> a list of couples <code>V-N</code> where <code>V</code> is the value of <code>Arg</code> returned as the first answer by <code>Query</code> in a world sampled at random and <code>N</code> is the number of samples returning that value. <code>V</code> is failure if the query fails. <code>mc_sample_arg_first/4</code> differs from <code>mc_sample_arg/4</code> because the first just computes the first answer of the query for each sampled world.</p>
@@ -820,7 +820,7 @@ fold(test,[490,491,...]).</code></pre>
 <p>A program can also be tested on a test set in SLIPCOVER and LEMUR with</p>
 <pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
 <p>or</p>
-<pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,LL,NPos,NNeg,ExampleList).</code></pre>
+<pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,NPos,NNeg,LL,ExampleList).</code></pre>
 <p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds.</p>
 <p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
 <p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
