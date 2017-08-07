@@ -10,7 +10,7 @@
 
 :-use_module(library(rbtrees)).
 
-:- thread_local rule_n/1,vit_input_mod/1.
+:- thread_local vit_input_mod/1.
 
 :-meta_predicate viterbi(:,-,-).
 
@@ -37,7 +37,7 @@ viterbi(M:Goals,Prob,Exp):-
 convert_exp([],_M,[]).
 
 convert_exp([(R,S,N,_)|T],M,[rule(R,Head,HeadList,Body)|TDelta]):-
-	M:rule(Head, _, N, R, S, _NH, HeadList, Body),
+	M:rule(Head, _, N, R, S, _NH, HeadList, Body),!,
   convert_exp(T,M,TDelta).
 
 find_exp(GL,M):-
@@ -68,13 +68,12 @@ solve([\+ H|T],M,CIn,COut,P0,P):-
 solve([\+ H |T],M,CIn,COut,P0,P):-
   !,
 	list2and(HL,H),
-  solve_neg(HL,M,CIn,COut,P0,P).
-  % (setof(D,solve_nob(HL,M,[],D),L)->
-  % choose_clauses(L,CIn,M,C1,P0,P1),
-  % solve(T,M,C1,COut,P1,P)
-  % ;
-  % solve(T,M,CIn,COut,P0,P)
-  % ).
+  (setof(D,solve_nob(HL,M,[],D),L)->
+    choose_clauses(L,CIn,M,C1,P0,P1),
+    solve(T,M,C1,COut,P1,P)
+  ;
+    solve(T,M,CIn,COut,P0,P)
+  ).
 
 solve([H|T],M,CIn,COut,P0,P):-
 	builtin(H),!,
@@ -92,79 +91,6 @@ solve([H|T],M,CIn,COut,P0,P):-
 	solve(NG,M,CIn,C1,P0,P1),
   update_exp(C1,COut,(R,S,N,PR),P1,P),
   check_bound(P,M).
-
-
-
-solve_neg([\+ H|_T],M,CIn,COut,P0,P):-
-	builtin(H),!,
-	(call(H)->
-    COut=CIn,
-    P=P0,
-  ;
-    solve_neg(T,M,CIn,COut,P0,P)
-  ).
-
-
-solve_neg([\+ H |T],M,CIn,COut,P0,P):-!,
-	list2and(HL,H),
-  solve(H,M,CIn,COut,P0,P1)
-  ;
-  solve_neg(T,M,CIn,COut,P0,P).
-
-solve_neg([H|T],M,CIn,COut,P0,P):-
-	builtin(H),!,
-	(call(\+ H)->
-    COut=CIn,
-    P=P0
-  ;
-    call(H),
-    solve_neg(T,M,CIn,COut,P0,P)
-  ).
-
-solve_neg([H|T],M,CIn,COut,P0,P):-
-  findall((H,T,N,R,S,PR,Body,NH),
-    M:rule(H, PR, N, R, S, NH, _Head, Body),
-    L),
-  findall(def(H,B,T),
-    	M:def_rule(H,B),
-      LD),
-  append(LD,L,LR),
-  scan_rules(LR,M,CIn,COut,P0,P).
-
-scan_rules([],_M,C,C,P,P).
-
-scan_rules([def(H,B,T)|Rest],M,CIn,COut,P0,P):-!,
-	append(B,T,NG0),
-  solve_neg(NG0,M,CIn,C1,P0,P1),
-  scan_rules(Rest,M,C1,COut,P1,P).
-
-scan_rules([(H,T,N,R,S,PR,Body,NH)|Rest],M,CIn,COut,P0,P):-
-  new_head(M,N,R,S,N1,P),
-  scan_heads(NH,N,R,S,PR,Body,T,M,CIn,C1,P0,P1).
-  scan_rules(Rest,M,C1,COut,P1,P).
-
-scan_rules([(H,T,N,R,S,PR,Body,NH)|Rest],M,CIn,COut,P0,P):-
-	append(Body,T,NG),
-  solve_neg(NG,M,CIn,C1,P0,P1),
-  update_exp(C1,C2,(R,S,N,PR),P1,P2),
-  check_bound(P2,M),
-  scan_rules(Rest,M,C1,COut,P1,P).
-
-scan_heads([],_N,_R,_S,_PR,_B,_G,_M,C,C,P,P).
-
-scan_heads([N|T],N,R,S,PR,B,G,M,CIn,COut,P0,P):-!,
-	append(B,G,NG0),
-  copy_term(NG0,NG),
-  solve_neg(NG0,M,CIn,C1,P0,P1),
-  update_exp(C1,C2,(R,S,N,PR),P1,P2),
-  check_bound(P2,M),
-  scan_heads(T,N,R,S,PR,B,G,M,C2,COut,P2,P).
-
-scan_heads([N0|T],N,R,S,PR,B,G,M,CIn,COut,P0,P):-
-  M:rule(_H, PR0, N0, R, S, _NH, _Head, _Body),
-  update_exp(CIn,C1,(R,S,N0,PR0),P0,P1),
-  check_bound(P,M),
-  scan_heads(T,N,R,S,PR,B,G,M,C2,COut,P2,P).
 
 
 update_exp(C,C,Ch,P,P):-
@@ -207,7 +133,7 @@ solve_nob([H|T],M,CIn,COut):-
 solve_nob([H|T],M,CIn,COut):-
 	find_rule(H,M,(R,S,N,P),B,CIn),
 	append(B,T,NG),
-	solve(NG,M,CIn,C1),
+	solve_nob(NG,M,CIn,C1),
   update_exp(C1,COut,(R,S,N,P),1,_P2).
 
 
@@ -217,11 +143,11 @@ find_rule(H, M,(R, S, N,P), Body, C) :-
 
 not_already_present_with_a_different_head(_HeadId, _RuleId, _Subst, []).
 
-not_already_present_with_a_different_head(HeadId, RuleId, Subst, [(HeadId1, RuleId, Subst1)|Tail]) :-
+not_already_present_with_a_different_head(HeadId, RuleId, Subst, [(HeadId1, RuleId, Subst1,_P)|Tail]) :-
 	not_different(HeadId, HeadId1, Subst, Subst1), !,
 	not_already_present_with_a_different_head(HeadId, RuleId, Subst, Tail).
 
-not_already_present_with_a_different_head(HeadId, RuleId, Subst, [(_HeadId1, RuleId1, _Subst1)|Tail]) :-
+not_already_present_with_a_different_head(HeadId, RuleId, Subst, [(_HeadId1, RuleId1, _Subst1,_P)|Tail]) :-
 	RuleId \== RuleId1,
 	not_already_present_with_a_different_head(HeadId, RuleId, Subst, Tail).
 
@@ -245,27 +171,27 @@ choose_clauses([D|T],CIn,M,COut,P0,P):-
 	choose_clauses(T,CIn,M,COut,P0,P).
 
 
-choose_clauses([D|T],CIn,M,+COut,P0,P):-
-	member((N,R,S,_P),D),
+choose_clauses([D|T],CIn,M,COut,P0,P):-
+	member((R,S,N,_P),D),
 	new_head(M,N,R,S,N1,PR),
 	\+ already_present(N1,R,S,CIn),
   P1 is P0*PR,
   check_bound(P1,M),
-	choose_clauses(T,[(N1,R,S,PR)|CIn],M,COut,P1,P).
+	choose_clauses(T,[(R,S,N1,PR)|CIn],M,COut,P1,P).
 
 choose_clauses_nob([],C,_M,C).
 
 choose_clauses_nob([D|T],CIn,M,COut):-
-	member((N,R,S,_P),D),
+	member((R,S,N,_P),D),
 	already_present_with_a_different_head(N,R,S,CIn),!,
 	choose_clauses_nob(T,CIn,M,COut).
 
 
-choose_clauses_nob([D|T],CIn,M,+COut):-
-	member((N,R,S,_P),D),
+choose_clauses_nob([D|T],CIn,M,COut):-
+	member((R,S,N,_P),D),
 	new_head(M,N,R,S,N1,PR),
 	\+ already_present(N1,R,S,CIn),
-	choose_clauses_nob(T,[(N1,R,S,PR)|CIn],M,COut).
+	choose_clauses_nob(T,[(R,S,N1,PR)|CIn],M,COut).
 
 /* select a head different from N for rule R with
 substitution S, return it in N1 */
@@ -580,8 +506,8 @@ user:term_expansion((Head :- Body), []):-
 	assert_rules(HeadList, M,0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
-user:term_expansion((Head :- Body), []):-!,
-  prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
+user:term_expansion((Head :- Body), []):-
+  prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	list2and(BodyList, Body),
 	assert(M:def_rule(Head, BodyList)).
 
@@ -609,6 +535,10 @@ user:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-user:term_expansion(Head, []):-!,
-  prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
+user:term_expansion(Head, []):-
+  prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	assert(M:def_rule(Head, [])).
+
+:- multifile sandbox:safe_meta/2.
+
+sandbox:safe_meta(viterbi:viterbi(_,_,_), []).
