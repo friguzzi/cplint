@@ -120,6 +120,8 @@ typedef struct
 static foreign_t ret_prob(term_t,term_t,term_t);
 static foreign_t ret_abd_prob(term_t,term_t,term_t,term_t);
 static foreign_t ret_map_prob(term_t,term_t,term_t,term_t);
+static foreign_t ret_vit_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4);
 double Prob(DdNode *node,environment *env,tablerow *table);
 prob_abd_expl abd_Prob(DdNode *node,environment *env,expltablerow *expltable,
   tablerow *table,
@@ -127,6 +129,9 @@ prob_abd_expl abd_Prob(DdNode *node,environment *env,expltablerow *expltable,
 prob_abd_expl map_Prob(DdNode *node, environment * env,
     expltablerow * maptable, tablerow * table,
     int comp_par);
+prob_abd_expl vit_Prob(DdNode *node, environment * env,
+  expltablerow * expltable, tablerow * table,
+  int comp_par);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
@@ -170,6 +175,8 @@ void free_list(explan_t * head);
 
 term_t clist_to_pllist(explan_t *mpa, environment * env);
 term_t abd_clist_to_pllist(explan_t *mpa);
+term_t vit_clist_to_pllist(explan_t *mpa, environment * env);
+
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -590,6 +597,64 @@ static foreign_t ret_map_prob(term_t arg1, term_t arg2,
   return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
 }
 
+static foreign_t ret_vit_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4)
+{
+  term_t out,outass;
+  environment * env;
+  DdNode * node;
+  expltablerow * expltable;
+  tablerow * table;
+  //abdtablerow * abdtable;
+  prob_abd_expl delta;
+  int ret;
+  double p;
+  explan_t * mpa;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_pointer(arg2,(void **)&node);
+  RETURN_IF_FAIL
+  out=PL_new_term_ref();
+
+
+  if (!Cudd_IsConstant(node))
+  {
+    expltable=expl_init_table(env->boolVars);
+    table=init_table(env->boolVars);
+    //abdtable=init_abd_table(env->n_abd);
+
+    delta=vit_Prob(node,env,expltable,table,0);
+    p=delta.prob;
+    mpa=delta.mpa;
+    ret=PL_put_float(out,p);
+    RETURN_IF_FAIL
+    //destroy_table(abdtable,env->n_abd);
+    outass=vit_clist_to_pllist(mpa,env);
+    RETURN_IF_FAIL
+    expl_destroy_table(expltable,env->boolVars);
+    destroy_table(table,env->boolVars);
+  }
+  else
+  {
+    if (node==Cudd_ReadOne(env->mgr))
+    {
+      ret=PL_put_float(out,1.0);
+      RETURN_IF_FAIL
+    }
+    else
+    {
+      ret=PL_put_float(out,0.0);
+      RETURN_IF_FAIL
+    }
+      outass=PL_new_term_ref();
+      ret=PL_put_nil(outass);
+      RETURN_IF_FAIL
+  }
+
+  return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
+}
+
 static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
 {
   environment * env;
@@ -723,6 +788,71 @@ term_t clist_to_pllist(explan_t *mpa, environment * env)
   return out;
 }
 
+term_t vit_clist_to_pllist(explan_t *mpa, environment * env)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  int value,bvar, ret, mvari, mval,nVars,i,*assignments;
+  variable mvar;
+
+  if (mpa==NULL)
+  {
+    out=PL_new_term_ref();
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+    nVars=env->nVars;
+    assignments=malloc(nVars*sizeof(int));
+    for (i=0;i<nVars;i++)
+      assignments[i]=-1;
+
+    for (; mpa; mpa=mpa->next)
+    {
+      a=mpa->a;
+      bvar=a.var;
+      value=a.val;
+      mvari=env->bVar2mVar[bvar];
+      mvar=env->vars[mvari];
+      if (value)
+      {
+        mval=a.var-mvar.firstBoolVar;
+        assignments[mvari]=mval;
+      }
+      else
+      {
+        assignments[mvari]=env->vars[mvari].nVal-1;
+      }
+    }
+    minus=PL_new_functor(PL_new_atom("-"), 2);
+    tail=PL_new_term_ref();
+    ret=PL_put_nil(tail);
+    RETURN_IF_FAIL
+    for (i=0;i<nVars;i++)
+    {
+      if (assignments[i]!=-1)
+      {
+        var=PL_new_term_ref();
+        val=PL_new_term_ref();
+        ret=PL_put_integer(var,i);
+        RETURN_IF_FAIL
+        ret=PL_put_integer(val,assignments[i]);
+        RETURN_IF_FAIL
+        head=PL_new_term_ref();
+        ret=PL_cons_functor(head, minus,var,val);
+        RETURN_IF_FAIL
+        out=PL_new_term_ref();
+        ret=PL_cons_list(out,head,tail);
+        RETURN_IF_FAIL
+        tail=out;
+      }
+    }
+    out=tail;
+  }
+  return out;
+}
 
 double Prob(DdNode *node, environment * env, tablerow * table)
 /* compute the probability of the expression rooted at node.
@@ -925,6 +1055,84 @@ so that it is not recomputed
     return delta;
   }
 
+}
+prob_abd_expl vit_Prob(DdNode *node, environment * env,
+  expltablerow * expltable, tablerow * table,
+  int comp_par)
+/* compute the probability of the expression rooted at node.
+table is used to store nodeB for which the probability has alread been computed
+so that it is not recomputed
+ */
+{
+  int index,comp,compf,pos;
+  double p,p0,p1;
+  DdNode *nodekey,*T,*F;
+  prob_abd_expl deltat,deltaf,delta,*deltaptr;
+  assign assignment;
+  explan_t * mpa0,* mpa1,* mpa;
+
+  comp=Cudd_IsComplement(node);
+  comp=(comp && !comp_par) ||(!comp && comp_par);
+  index=Cudd_NodeReadIndex(node);
+  pos=Cudd_ReadPerm(env->mgr,index);
+  if (Cudd_IsConstant(node))
+  {
+
+    if (comp)
+      p1= 0.0;
+    else
+      p1= 1.0;
+
+    delta.prob=p1;
+    delta.mpa=NULL;
+
+    return delta;
+  }
+  else
+  {
+    nodekey=Cudd_Regular(node);
+    deltaptr=expl_get_value(expltable,nodekey,comp);
+    if (deltaptr!=NULL)
+    {
+      return *deltaptr;
+    }
+    else
+    {
+
+      T = Cudd_T(node);
+      F = Cudd_E(node);
+      compf=Cudd_IsComplement(F);
+      deltaf=vit_Prob(F,env,expltable,table,comp);
+      deltat=vit_Prob(T,env,expltable,table,comp);
+      p=env->probs[index];
+
+
+      p0=deltaf.prob*(1-p);
+      p1=deltat.prob*p;
+
+      mpa0=deltaf.mpa;
+      mpa1=deltat.mpa;
+
+      if (p1>p0)
+      {
+        assignment.var=index;
+        assignment.val=1;
+        mpa=insert(assignment,mpa1);
+        delta.prob=p1;
+        delta.mpa=mpa;
+      }
+      else
+      {
+        assignment.var=index;
+        assignment.val=0;
+        mpa=insert(assignment,mpa0);
+        delta.prob=p0;
+        delta.mpa=mpa;
+      }
+      expl_add_node(expltable,nodekey,comp,delta);
+      return delta;
+    }
+  }
 }
 
 explan_t * insert(assign assignment,explan_t * head)
@@ -1971,6 +2179,7 @@ install_t install()
   PL_register_foreign("ret_prob",3,ret_prob,0);
   PL_register_foreign("ret_abd_prob",4,ret_abd_prob,0);
   PL_register_foreign("ret_map_prob",4,ret_map_prob,0);
+  PL_register_foreign("ret_vit_prob",4,ret_vit_prob,0);
   PL_register_foreign("reorder",1,reorder,0);
   PL_register_foreign("make_query_var",3,make_query_var,0);
   PL_register_foreign("em",8,EM,0);
