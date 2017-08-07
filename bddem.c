@@ -906,7 +906,7 @@ table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp,compf,pos;
+  int index,comp,pos;
   double p,p0,p1;
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
@@ -941,7 +941,6 @@ so that it is not recomputed
 
       T = Cudd_T(node);
       F = Cudd_E(node);
-      compf=Cudd_IsComplement(F);
       deltaf=abd_Prob(F,env,expltable,table,comp);
       deltat=abd_Prob(T,env,expltable,table,comp);
       p=env->probs[index];
