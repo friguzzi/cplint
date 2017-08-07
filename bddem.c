@@ -989,7 +989,7 @@ table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp,compf,pos;
+  int index,comp,pos;
   double p,p0,p1;
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
@@ -1024,7 +1024,6 @@ so that it is not recomputed
     p=env->probs[index];
     T = Cudd_T(node);
     F = Cudd_E(node);
-    compf=Cudd_IsComplement(F);
     deltaf=map_Prob(F,env,maptable,table,comp);
     deltat=map_Prob(T,env,maptable,table,comp);
 
@@ -1063,7 +1062,7 @@ table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp,compf,pos;
+  int index,comp,pos;
   double p,p0,p1;
   DdNode *nodekey,*T,*F;
   prob_abd_expl deltat,deltaf,delta,*deltaptr;
@@ -1100,7 +1099,6 @@ so that it is not recomputed
 
       T = Cudd_T(node);
       F = Cudd_E(node);
-      compf=Cudd_IsComplement(F);
       deltaf=vit_Prob(F,env,expltable,table,comp);
       deltat=vit_Prob(T,env,expltable,table,comp);
       p=env->probs[index];
