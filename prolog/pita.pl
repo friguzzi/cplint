@@ -20,6 +20,7 @@ details.
   set_pita/2,setting_pita/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
+  or/3,
   ret_prob/3,get_var_n/6,equality/4,or_list/3,
   em/8,randomize/1,rand_seed/1,
   load/1,load_file/1,
@@ -237,6 +238,10 @@ load(File):-
     )
   ).
 
+or(A,B,C):-
+  env(Env),
+  or(Env,A,B,C).
+
 /**
  * load_file(++FileWithExtension:atom) is det
  *
@@ -267,6 +272,7 @@ s(M:Goal,P):-
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
+  assert(env(Env)),
   findall((Goal,P),get_p(M:Goal1,Env,P),L),
   end_test(Env),
   erase(Ref),
