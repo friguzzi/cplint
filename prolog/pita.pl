@@ -249,7 +249,11 @@ zeroc(Env,(Env,Zero)):-
   zero(Env,Zero).
 
 andc(Env,(_,A),(_,B),(Env,C)):-
-  and(Env,A,B,C).
+  (zero(Env,A)->
+    fail
+  ;
+    and(Env,A,B,C)
+  ).
 
 bdd_notc(Env,(_,A),(Env,NA)):-
   bdd_not(Env,A,NA).
