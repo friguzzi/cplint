@@ -521,57 +521,61 @@ get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+  add_bdd_arg_db(Goal,Env,B,DB,M,Goal1),%DB=depth bound
+  abolish_all_tables,
+  (M:Goal1 *->
+    true
   ;
-    zeroc(Env,B)
+    zero(Env,B)
   ).
 
 get_node(M:Goal,Env,B):- %with DB=false
   retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,M,Goal1),
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+  add_bdd_arg(Goal,Env,B,M,Goal1),
+  abolish_all_tables,
+  (M:Goal1 *->
+    true
   ;
-    zeroc(Env,B)
+    zero(Env,B)
   ).
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,BG)
+  add_bdd_arg_db(Goal,Env,BG,DB,M,Goal1),%DB=depth bound
+  abolish_all_tables,
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,BG)
+    zero(Env,BG)
   ),
-  add_bdd_arg_db(Ev,Env,BDDE,DB,M,Ev1),%DB=depth bound
-  (bagof(BDDE,M:Ev1,LE)*->
-    or_list(LE,Env,BE)
+  add_bdd_arg_db(Ev,Env,BE,DB,M,Ev1),%DB=depth bound
+  (M:Ev1*->
+    true
   ;
-    zeroc(Env,BE)
+    zero(Env,BE)
   ),
-  andc(Env,BG,BE,BGE).
+  and(Env,BG,BE,BGE).
 
 
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,M,Goal1),
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,BG)
+  add_bdd_arg(Goal,Env,BG,M,Goal1),
+  abolish_all_tables,
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,BG)
+    zero(Env,BG)
   ),
-  add_bdd_arg(Ev,Env,BDDE,M,Ev1),
-  (bagof(BDDE,M:Ev1,LE)*->
-    or_list(LE,Env,BE)
+  add_bdd_arg(Ev,Env,BE,M,Ev1),
+  (M:Ev1*->
+    true
   ;
-    zeroc(Env,BE)
+    zero(Env,BE)
   ),
-  andc(Env,BG,BE,BGE).
+  and(Env,BG,BE,BGE).
 
 
 get_next_goal_number(PName,R):-
@@ -773,8 +777,8 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
+[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -802,16 +806,16 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
+[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
+[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).

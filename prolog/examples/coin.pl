@@ -1,10 +1,11 @@
 /*
 Throwing a coin with uncertainty on its fairness, from
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
-disjunctions. In International Conference on Logic Programming, 
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
+disjunctions. In International Conference on Logic Programming,
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(pita)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -13,6 +14,8 @@ volume 3131 of LNCS, pages 195-209. Springer, 2004.
 :- endif.
 
 :- pita.
+
+:- table heads/1, toss/1, biased/1, fair/1, tails/1.
 
 :- begin_lpad.
 
@@ -40,17 +43,16 @@ toss(coin).
 ?- prob_bar(tails(coin),Prob).  % what is the probability that coin lands tails?
 % expected result 0.49
 
-?- prob(heads(coin),biased(coin),Prob).  
+?- prob(heads(coin),biased(coin),Prob).
 % what is the probability that coin lands heads given the coin is biased?
 % expected result 0.6
 
-?- bdd_dot_string(heads(coin),BDD,Var).  
+?- bdd_dot_string(heads(coin),BDD,Var).
 % What is the BDD for query heads(coin)?
-% A solid edge indicates a 1-child, a dashed edge indicates a 0-child and 
-% a dotted 
+% A solid edge indicates a 1-child, a dashed edge indicates a 0-child and
+% a dotted
 % edge indicates a negated 0-child.
 % The table Var contains the associations between the rule groundings and the
 % multivalued variables.
 
 */
- 

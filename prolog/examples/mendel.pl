@@ -1,10 +1,10 @@
 /*
-Program describing the Mendelian rules of inheritance of the color of pea 
+Program describing the Mendelian rules of inheritance of the color of pea
 plants. It considers a family of two parents and a child.
 The problem is, given the alleles of the parents, predict the
 probability of the color (or of its alleles) of a pea plant.
 From
-H. Blockeel. Probabilistic logical models for mendel's experiments: 
+H. Blockeel. Probabilistic logical models for mendel's experiments:
 An exercise.
 In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 */
@@ -15,6 +15,8 @@ In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 :- endif.
 
 :- pita.
+
+:- table mother/2, father/2, cg/3, color/2.
 
 :- begin_lpad.
 
@@ -34,12 +36,12 @@ cg(f,2,p).
 % we know with certainty the alleles of the parants of s
 
 cg(X,1,A):0.5 ; cg(X,1,B):0.5 :- mother(Y,X),cg(Y,1,A), cg(Y,2,B).
-% the color allele of an individual on chromosome 1 is inherited from its 
+% the color allele of an individual on chromosome 1 is inherited from its
 % mother. The two alleles of the mother have equal probability of being
 % transmitted
 
 cg(X,2,A):0.5 ; cg(X,2,B):0.5 :- father(Y,X),cg(Y,1,A), cg(Y,2,B).
-% the color allele of an individual on chromosome 2 is inherited from its 
+% the color allele of an individual on chromosome 2 is inherited from its
 % father. The two alleles of the mother have equal probability of being
 % transmitted
 
@@ -82,4 +84,3 @@ color(X,white) :- cg(X,1,w), cg(X,2,w).
 % expected result 0.5
 
 */
- 
