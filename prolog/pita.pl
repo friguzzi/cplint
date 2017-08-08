@@ -563,7 +563,6 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,BG,M,Goal1),
-  abolish_all_tables,
   (M:Goal1*->
     true
   ;
@@ -812,14 +811,6 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
-  andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -827,11 +818,6 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
 process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
 [H1,andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
