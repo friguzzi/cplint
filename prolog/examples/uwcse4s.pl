@@ -31,6 +31,10 @@ student(s1).
 
 student(s2).
 
+student(s3).
+
+student(s4).
+
 advised_by(A,B):0.10708782742681 :-
     student(A),
     professor(B),

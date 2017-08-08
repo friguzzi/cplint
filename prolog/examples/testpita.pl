@@ -125,3 +125,5 @@ test((prob(recovery,(do(\+ drug),\+ female),P),close_to(P,0.7)),simpson).
 
 test((prob(has(2),has(3),P),close_to(P,0.4065135474609725)),viral).
 test((prob(has(2),do(has(3)),P),close_to(P,0.136)),viral).
+
+test((prob(taught_by(c1,p1),P),close_to(P,0.0926040439925477)),uwcse).
