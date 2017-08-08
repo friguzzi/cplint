@@ -249,7 +249,7 @@ zeroc(Env,(Env,Zero)):-
   zero(Env,Zero).
 
 andc(Env,(_,A),(_,B),(Env,C)):-
-  (zero(Env,A)->
+  (zero(Env,B)->
     fail
   ;
     and(Env,A,B,C)
