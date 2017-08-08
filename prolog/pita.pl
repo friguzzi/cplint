@@ -503,18 +503,18 @@ get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+  add_bdd_arg_db(Goal,Env,B,DB,M,Goal1),%DB=depth bound
+  (M:Goal1 *->
+    true
   ;
     zero(Env,B)
   ).
 
 get_node(M:Goal,Env,B):- %with DB=false
   retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,M,Goal1),
-  (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+  add_bdd_arg(Goal,Env,B,M,Goal1),
+  (M:Goal1 *->
+    true
   ;
     zero(Env,B)
   ).
@@ -966,8 +966,10 @@ act(M,A/B):-
   B1 is B + 2,
   M:(dynamic A/B1).
 
-tab(A/B,A/B1):-
-  B1 is B + 2.
+tab(A/B,P):-
+  length(Args0,B),
+  append(Args0,[-,lattice(or/3)],Args),
+  P=..[A|Args].
 
 user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
@@ -998,7 +1000,8 @@ user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   pita_input_mod(M),!,
   list2and(L,Conj),
   maplist(tab,L,L1),
-  list2and(L1,Conj1).
+  list2and(L1,Conj1),
+  writeln(table(Conj1)).
 
 user:term_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),

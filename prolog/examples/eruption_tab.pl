@@ -18,11 +18,10 @@ Programming, FirstView Articles, 2014
 :- use_rendering(c3).
 :- endif.
 
-:- table eruption(_,lattice(or/3)).
-:- table sudden_energy_release(_,lattice(or/3)),
-  fault_rupture(_,_,lattice(or/3)).
-:- pita.
 
+:- pita.
+:- table eruption/0, sudden_energy_release/0,
+  fault_rupture/1.
 :- begin_lpad.
 
 eruption : 0.6 ; earthquake : 0.3 :-
