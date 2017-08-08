@@ -426,17 +426,26 @@ deal_with_actions(ActL,M,UC,CA):-
   append([ActRefs|UCL],UC),
   append(CAL,CA).
 
-assert_actions(M,do(A),Ref):-
+zero_clauses_actions(M,do(\+ A),Ref):-
   A=..[P|Args],
   append(Args,[Env,BDD],Args1),
   A1=..[P|Args1],
+  M:assertz((A1:-zeroc(Env,BDD)),Ref).
+
+assert_actions(M,do(A),Ref):-
+  A=..[P|Args],
+  append(Args,[Env,BDD],Args1),
+  atomic_concat(P,' tabled',P1),
+  A1=..[P1|Args1],
   M:assertz((A1:-onec(Env,BDD)),Ref).
 
-update_clauses(M,P/0- _,[],LCA):-!,
+update_clauses(M,P/0- _,[RefZ],[(H:-zeroc(Env,BDD))|LCA]):-!,
   functor(G1,P,2),
   findall(Ref,M:clause(G1,_B,Ref),UC),
   findall((G1:-B),M:clause(G1,B),LCA),
-  maplist(erase,UC).
+  H=..[P,Env,BDD],
+  maplist(erase,UC),
+  M:assertz((H:-zeroc(Env,BDD)),RefZ).
 
 update_clauses(M,P/A-Constants,UC,CA):-
   functor(G,P,A),
@@ -447,6 +456,10 @@ update_clauses(M,P/A-Constants,UC,CA):-
   maplist(get_const(Args),Constants,ConstraintsL),
   list2and(ConstraintsL,Constraints),
   maplist(add_cons(G1,Constraints,M),LC,UC,CA).
+
+add_cons(_G,_C,M,(H,zeroc(Env,Zero),Ref),Ref1,(H:-zeroc(Env,Zero))):-!,
+  erase(Ref),
+  M:assertz((H:-zeroc(Env,Zero)),Ref1).
 
 add_cons(G,C,M,(H,B,Ref),Ref1,(H:-B)):-
   copy_term((G,C),(G1,C1)),
@@ -469,10 +482,11 @@ get_pred_const(do(Do0),AP0,AP):-
   ),
   functor(Do,F,A),
   Do=..[_|Args],
-  (get_assoc(F/A,AP0,V)->
-    put_assoc(F/A,AP0,[Args|V],AP)
+  atomic_concat(F,' tabled',F1),
+  (get_assoc(F1/A,AP0,V)->
+    put_assoc(F1/A,AP0,[Args|V],AP)
   ;
-    put_assoc(F/A,AP0,[Args],AP)
+    put_assoc(F1/A,AP0,[Args],AP)
   ).
 
 
@@ -521,20 +535,20 @@ get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,B,DB,M,Goal1),%DB=depth bound
   abolish_all_tables,
-  (M:Goal1 *->
-    true
+  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
+  (bagof(BDD,M:Goal1,L)*->
+    or_list(L,Env,B)
   ;
     zero(Env,B)
   ).
 
 get_node(M:Goal,Env,B):- %with DB=false
   retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,B,M,Goal1),
   abolish_all_tables,
-  (M:Goal1 *->
-    true
+  add_bdd_arg(Goal,Env,BDD,M,Goal1),
+  (bagof(BDD,M:Goal1,L)*->
+    or_list(L,Env,B)
   ;
     zero(Env,B)
   ).
@@ -543,38 +557,39 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BG,DB,M,Goal1),%DB=depth bound
   abolish_all_tables,
-  (M:Goal1*->
-    true
+  add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
+  (bagof(BDD,M:Goal1,L)*->
+    or_list(L,Env,BG)
   ;
     zero(Env,BG)
   ),
-  add_bdd_arg_db(Ev,Env,BE,DB,M,Ev1),%DB=depth bound
-  (M:Ev1*->
-    true
+  add_bdd_arg_db(Ev,Env,BDDE,DB,M,Ev1),%DB=depth bound
+  (bagof(BDDE,M:Ev1,LE)*->
+    or_list(LE,Env,BE)
   ;
     zero(Env,BE)
   ),
-  and(Env,BG,BE,BGE).
+  andc(Env,BG,BE,BGE).
 
 
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BG,M,Goal1),
-  (M:Goal1*->
-    true
+  abolish_all_tables,
+  add_bdd_arg(Goal,Env,BDD,M,Goal1),
+  (bagof(BDD,M:Goal1,L)*->
+    or_list(L,Env,BG)
   ;
     zero(Env,BG)
   ),
-  add_bdd_arg(Ev,Env,BE,M,Ev1),
-  (M:Ev1*->
-    true
+  add_bdd_arg(Ev,Env,BDDE,M,Ev1),
+  (bagof(BDDE,M:Ev1,LE)*->
+    or_list(LE,Env,BE)
   ;
     zero(Env,BE)
   ),
-  and(Env,BG,BE,BGE).
+  andc(Env,BG,BE,BGE).
 
 
 get_next_goal_number(PName,R):-
@@ -777,7 +792,7 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
+[(H1,bdd_notc(Env,BDDH,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -806,7 +821,7 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)),
+[(H1,bdd_notc(Env,BDDH,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -972,18 +987,25 @@ set_sw(M:A,B):-
 
 act(M,A/B):-
   B1 is B + 2,
-  M:(dynamic A/B1).
+  atomic_concat(A,' tabled',A1),
+  M:(dynamic A1/B1).
 
 tab(A/B,P):-
   length(Args0,B),
   append(Args0,[-,lattice(orc/3)],Args),
   P=..[A|Args].
 
-user:term_expansion(end_of_file, end_of_file) :-
+zero_clause(A/B,(H:-zeroc(Env,BDD))):-
+  length(Args0,B),
+  append(Args0,[Env,BDD],Args),
+  H=..[A|Args].
+
+user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
-  style_check(+discontiguous).
+  retract(M:zero_clauses(LZ)),
+  append(LZ,[end_of_file],C).
 
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
@@ -1008,6 +1030,8 @@ user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   pita_input_mod(M),!,
   list2and(L,Conj),
   maplist(tab,L,L1),
+  maplist(zero_clause,L,LZ),
+  assert(M:zero_clauses(LZ)),
   list2and(L1,Conj1).
 
 user:term_expansion((:- begin_plp), []) :-
@@ -1053,7 +1077,7 @@ user:term_expansion((Head :- Body), Clauses):-
     generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,M)
   ;
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
-   ).
+  ).
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
