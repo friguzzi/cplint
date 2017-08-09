@@ -71,7 +71,8 @@ typedef struct
   int nRules; // number of rules
   double * nodes_probs;
   tablerow * nodesB; // tables of probabilities for nodes in Backward step
-  tablerow * nodesF; // tables of probabilities for nodes in Forward step
+  tablerow * nodesFE; // tables of probabilities for nodes in Forward step
+  tablerow * nodesFO; // tables of probabilities for nodes in Forward step
   double * example_prob; // probability (frequency) of examples in the data
 } example_data;
 
@@ -254,7 +255,8 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
     if (!Cudd_IsConstant(nodes_ex[i]))
     {
       ex_d->nodesB=init_table(ex_d->env[i].boolVars);
-      ex_d->nodesF=init_table(ex_d->env[i].boolVars);
+      ex_d->nodesFE=init_table(ex_d->env[i].boolVars);
+      ex_d->nodesFO=init_table(ex_d->env[i].boolVars);
 
       Forward(ex_d,nodes_ex[i],i);
       rootProb=GetOutsideExpe(ex_d,nodes_ex[i],ex_d->example_prob[i],i);
@@ -266,7 +268,8 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
 
       ex_d->nodes_probs[i]=rootProb;
       destroy_table(ex_d->nodesB,ex_d->env[i].boolVars);
-      destroy_table(ex_d->nodesF,ex_d->env[i].boolVars);
+      destroy_table(ex_d->nodesFE,ex_d->env[i].boolVars);
+      destroy_table(ex_d->nodesFO,ex_d->env[i].boolVars);
     }
     else
       if (nodes_ex[i]==Cudd_ReadLogicZero(ex_d->env[i].mgr))
@@ -741,15 +744,15 @@ double ProbPath(example_data * ex_d,DdNode *node, int nex)
   int index,mVarIndex,comp,pos,position;//,boolVarIndex;
   variable v;
   double res;
-  double p,pt,pf,BChild0,BChild1,e0,e1;
-  double * value_p,** eta_rule;
+  double p,pt,pf,BChild0e,BChild1e,BChild0o,BChild1o,e0,e1;
+  double *value_p, * value_p_e, *value_p_o,** eta_rule;
   DdNode *nodekey,*T,*F;
 
   comp=Cudd_IsComplement(node);
-  printf("node %p comp %d\n",node,comp );
+  // printf("node %p comp %d\n",node,comp );
   if (Cudd_IsConstant(node))
   {
-    printf("constant\n");
+    // printf("constant\n");
     return 1.0;
   }
   else
@@ -758,7 +761,7 @@ double ProbPath(example_data * ex_d,DdNode *node, int nex)
     value_p=get_value(ex_d->nodesB,nodekey);
     if (value_p!=NULL)
     {
-      printf("found %f\n", *value_p);
+      // printf("found %f\n", *value_p);
       return *value_p;
     }
     else
@@ -769,23 +772,27 @@ double ProbPath(example_data * ex_d,DdNode *node, int nex)
       F = Cudd_E(node);
       pf=ProbPath(ex_d,F,nex);
       pt=ProbPath(ex_d,T,nex);
-      printf("pt %f pf %f\n",pt,pf );
+      // printf("pt %f pf %f\n",pt,pf );
       if (Cudd_IsComplement(F))
         pf=1.0-pf;
-      printf("pt %f pf %f\n",pt,pf );
+      // printf("pt %f pf %f\n",pt,pf );
 
-      BChild0=pf*(1-p);
-      BChild1=pt*p;
-      value_p=get_value(ex_d->nodesF,nodekey);
-      e0 = (*value_p)*BChild0;
-      e1 = (*value_p)*BChild1;
+      BChild0e=pf*(1-p);
+      BChild0o=(1-pf)*(1-p);
+      BChild1e=pt*p;
+      BChild1o=(1-pt)*p;
+      value_p_e=get_value(ex_d->nodesFE,nodekey);
+      value_p_o=get_value(ex_d->nodesFO,nodekey);
+      e0 = (*value_p_e)*BChild0e+(*value_p_o)*BChild0o;
+      e1 = (*value_p_e)*BChild1e+(*value_p_o)*BChild1o;
+    //  printf("e node %p %f %f %f %f\n",node,*value_p_e,*value_p_o,e0,e1 );
       mVarIndex=ex_d->env[nex].bVar2mVar[index];
       v=ex_d->env[nex].vars[mVarIndex];
       pos=index-v.firstBoolVar;
       eta_rule=ex_d->eta_temp[v.nRule];
       eta_rule[pos][0]=eta_rule[pos][0]+e0;
       eta_rule[pos][1]=eta_rule[pos][1]+e1;
-      res=BChild0+BChild1;
+      res=BChild0e+BChild1e;
       add_node(ex_d->nodesB,nodekey,res);
       position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
       position=position+1;
@@ -820,11 +827,24 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
 {
   DdNode *** nodesToVisit;
   int * NnodesToVisit,comp;
-  double Froot;
+  double FrootE,FrootO;
 
   environment env;
   int i,j;
   env=ex_d->env[nex];
+  comp=Cudd_IsComplement(root);
+  if (comp)
+  {
+    FrootE=0.0;
+    FrootO=1.0;
+  }
+  else
+  {
+    FrootE=1.0;
+    FrootO=0.0;
+  }
+  add_node(ex_d->nodesFE,Cudd_Regular(root),FrootE);
+  add_node(ex_d->nodesFO,Cudd_Regular(root),FrootO);
   if (env.boolVars)
   {
     nodesToVisit= (DdNode ***)malloc(sizeof(DdNode **)* env.boolVars);
@@ -837,12 +857,6 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
       nodesToVisit[i]=NULL;
       NnodesToVisit[i]=0;
     }
-    comp=Cudd_IsComplement(root);
-    if (comp)
-      Froot=0.0;
-    else
-      Froot=1.0;
-    add_node(ex_d->nodesF,Cudd_Regular(root),Froot);
     for(i=0;i<env.boolVars;i++)
     {
       for(j=0;j<NnodesToVisit[i];j++)
@@ -855,10 +869,6 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
     free(nodesToVisit);
     free(NnodesToVisit);
   }
-  else
-  {
-    add_node(ex_d->nodesF,Cudd_Regular(root),1);
-  }
 }
 
 void UpdateForward(example_data *ex_d,DdNode *node, int nex,
@@ -866,9 +876,10 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
 {
   int index,position;
   DdNode *T,*E,*nodereg;
-  double *value_p,*value_p_T,*value_p_F,p,value_par;
+  double *value_p_E,*value_p_O,*value_p_T_E,*value_p_T_O,
+    *value_p_F_E,*value_p_F_O,p,value_par_E,value_par_O;
 
-printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
+// printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
   if (Cudd_IsConstant(node))
   {
     return;
@@ -878,8 +889,9 @@ printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
     index=Cudd_NodeReadIndex(node);
     p=ex_d->env[nex].probs[index];
     nodereg=Cudd_Regular(node);
-    value_p=get_value(ex_d->nodesF,nodereg);
-    if (value_p== NULL)
+    value_p_E=get_value(ex_d->nodesFE,nodereg);
+    value_p_O=get_value(ex_d->nodesFO,nodereg);
+    if (value_p_E== NULL)
     {
       printf("Error\n");
       return;
@@ -890,17 +902,21 @@ printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
       E = Cudd_E(node);
       if (!Cudd_IsConstant(T))
       {
-        value_p_T=get_value(ex_d->nodesF,T);
-        if (value_p_T!= NULL)
+        value_p_T_E=get_value(ex_d->nodesFE,T);
+        value_p_T_O=get_value(ex_d->nodesFO,T);
+        if (value_p_T_E!= NULL)
         {
-           *value_p_T= *value_p_T+*value_p*p;
-          printf("update f t %p %f %g\n",T,*value_p_T ,*value_p*p);
+           *value_p_T_E= *value_p_T_E+*value_p_E*p;
+           *value_p_T_O= *value_p_T_O+*value_p_O*p;
+          // printf("update f t %p %f %f %f %f\n",T,*value_p_T_E,
+          //  *value_p_E*p,*value_p_T_O,*value_p_O*p);
         }
         else
         {
-                    printf("new f t %p %f \n",T,*value_p*p );
+          // printf("new f t %p %f %f \n",T,*value_p_E*p,*value_p_O*p );
 
-          add_or_replace_node(ex_d->nodesF,Cudd_Regular(T),*value_p*p);
+          add_or_replace_node(ex_d->nodesFE,Cudd_Regular(T),*value_p_E*p);
+          add_or_replace_node(ex_d->nodesFO,Cudd_Regular(T),*value_p_O*p);
           index=Cudd_NodeReadIndex(T);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
           nodesToVisit[position]=(DdNode **)realloc(nodesToVisit[position],
@@ -911,25 +927,40 @@ printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
       }
       if (!Cudd_IsConstant(E))
       {
-        value_p_F=get_value(ex_d->nodesF,Cudd_Regular(E));
+        value_p_F_E=get_value(ex_d->nodesFE,Cudd_Regular(E));
+        value_p_F_O=get_value(ex_d->nodesFO,Cudd_Regular(E));
         // if (Cudd_IsComplement(E))
         //   value_par=1 - *value_p;
         // else
         //   value_par= *value_p;
         // if (Cudd_IsComplement(E))
         //   p=1 -p;
-        value_par= *value_p;        
-printf("f child %d %f\n",Cudd_IsComplement(E),value_par );
-        if (value_p_F!= NULL)
+        if (Cudd_IsComplement(E))
         {
-          *value_p_F= *value_p_F+value_par*(1-p);
-          printf("update f f %p %f %f\n",E,*value_p_F, value_par*(1-p));
+          value_par_E= *value_p_O;
+          value_par_O= *value_p_E;
         }
         else
         {
-                              printf("new f f %p %f\n",E,value_par*(1-p) );
+          value_par_E= *value_p_E;
+          value_par_O= *value_p_O;
+        }
+        // printf("f child %d %f %f\n",Cudd_IsComplement(E),value_par_E,value_par_O );
 
-          add_or_replace_node(ex_d->nodesF,Cudd_Regular(E),value_par*(1-p));
+        if (value_p_F_E!= NULL)
+        {
+
+          *value_p_F_E= *value_p_F_E+value_par_E*(1-p);
+          *value_p_F_O= *value_p_F_O+value_par_O*(1-p);
+          // printf("update f f %p %f %f %f %f\n",E,*value_p_F_E, value_par_E*(1-p),
+        // *value_p_F_O, value_par_O*(1-p));
+        }
+        else
+        {
+                              // printf("new f f %p %f\n",E,value_par_E*(1-p) );
+
+          add_or_replace_node(ex_d->nodesFE,Cudd_Regular(E),value_par_E*(1-p));
+          add_or_replace_node(ex_d->nodesFO,Cudd_Regular(E),value_par_O*(1-p));
           index=Cudd_NodeReadIndex(E);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
           nodesToVisit[position]=(DdNode **)realloc(nodesToVisit[position],
