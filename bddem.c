@@ -77,7 +77,7 @@ typedef struct
 
 
 static foreign_t ret_prob(term_t,term_t,term_t);
-double Prob(DdNode *node,environment *env,tablerow *table,int comp_par);
+double Prob(DdNode *node,environment *env,tablerow *table);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
@@ -320,6 +320,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   environment * env;
   DdNode * node;
   tablerow * table;
+  double prob;
   int ret;
 
   ret=PL_get_pointer(arg1,(void **)&env);
@@ -331,8 +332,10 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   if (!Cudd_IsConstant(node))
   {
     table=init_table(env->boolVars);
-    ret=PL_put_float(out,Prob(node,env,table,0));
-    RETURN_IF_FAIL
+    prob=Prob(node,env,table);
+    if (Cudd_IsComplement(node))
+      prob=1.0-prob;
+    ret=PL_put_float(out,prob);
     destroy_table(table,env->boolVars);
   }
   else
@@ -352,7 +355,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   return(PL_unify(out,arg3));
 }
 
-double Prob(DdNode *node, environment * env, tablerow * table,int comp_par)
+double Prob(DdNode *node, environment * env, tablerow * table)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
@@ -363,14 +366,10 @@ so that it is not recomputed
   double p,pt,pf,BChild0,BChild1;
   double * value_p;
   DdNode *nodekey,*T,*F;
-
   comp=Cudd_IsComplement(node);
-  comp=(comp && !comp_par) ||(!comp && comp_par);
+  //comp=(comp && !comp_par) ||(!comp && comp_par);
   if (Cudd_IsConstant(node))
   {
-    if (comp)
-      return 0.0;
-    else
       return 1.0;
   }
   else
@@ -378,7 +377,7 @@ so that it is not recomputed
     nodekey=Cudd_Regular(node);
     value_p=get_value(table,nodekey);
     if (value_p!=NULL)
-      return *value_p;
+        return *value_p;
     else
     {
       index=Cudd_NodeReadIndex(node);  //Returns the index of the node. The node pointer can be either regular or complemented.
@@ -386,8 +385,11 @@ so that it is not recomputed
       p=env->probs[index];
       T = Cudd_T(node);
       F = Cudd_E(node);
-      pf=Prob(F,env,table,comp);
-      pt=Prob(T,env,table,comp);
+      pf=Prob(F,env,table);
+      pt=Prob(T,env,table);
+      if (Cudd_IsComplement(F))
+        pf=1.0-pf;
+
       BChild0=pf*(1-p);
       BChild1=pt*p;
       res=BChild0+BChild1;
