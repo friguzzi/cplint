@@ -255,6 +255,9 @@ andc(Env,(_,A),(_,B),(Env,C)):-
     and(Env,A,B,C)
   ).
 
+andcnf(Env,(_,A),(_,B),(Env,C)):-
+  and(Env,A,B,C).
+
 bdd_notc(Env,(_,A),(Env,NA)):-
   bdd_not(Env,A,NA).
 
@@ -574,7 +577,7 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   ;
     zero(Env,BE)
   ),
-  andc(Env,BG,BE,BGE).
+  andcnf(Env,BG,BE,BGE).
 
 
 
@@ -593,7 +596,7 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   ;
     zero(Env,BE)
   ),
-  andc(Env,BG,BE,BGE).
+  andcnf(Env,BG,BE,BGE).
 
 
 get_next_goal_number(PName,R):-
