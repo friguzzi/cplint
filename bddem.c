@@ -85,7 +85,7 @@ static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
   term_t,term_t,term_t,term_t);
-double ProbPath(example_data * ex_d,DdNode *node, int comp_par, int nex);
+double ProbPath(example_data * ex_d,DdNode *node, int nex);
 //static int rec_deref(void);
 void Forward(example_data * ex_d,DdNode *node, int nex);
 void UpdateForward(example_data * ex_d,DdNode * node, int nex,
@@ -736,7 +736,7 @@ static int rec_deref(void)
 
 */
 
-double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
+double ProbPath(example_data * ex_d,DdNode *node, int nex)
 {
   int index,mVarIndex,comp,pos,position;//,boolVarIndex;
   variable v;
@@ -746,17 +746,11 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
   DdNode *nodekey,*T,*F;
 
   comp=Cudd_IsComplement(node);
-  comp=(comp && !comp_par) ||(!comp && comp_par);
+  printf("node %p comp %d\n",node,comp );
   if (Cudd_IsConstant(node))
   {
-    if (comp)
-    {
-      return 0.0;
-    }
-    else
-    {
-      return 1.0;
-    }
+    printf("constant\n");
+    return 1.0;
   }
   else
   {
@@ -764,6 +758,7 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
     value_p=get_value(ex_d->nodesB,nodekey);
     if (value_p!=NULL)
     {
+      printf("found %f\n", *value_p);
       return *value_p;
     }
     else
@@ -772,8 +767,13 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
       p=ex_d->env[nex].probs[index];
       T = Cudd_T(node);
       F = Cudd_E(node);
-      pf=ProbPath(ex_d,F,comp,nex);
-      pt=ProbPath(ex_d,T,comp,nex);
+      pf=ProbPath(ex_d,F,nex);
+      pt=ProbPath(ex_d,T,nex);
+      printf("pt %f pf %f\n",pt,pf );
+      if (Cudd_IsComplement(F))
+        pf=1.0-pf;
+      printf("pt %f pf %f\n",pt,pf );
+
       BChild0=pf*(1-p);
       BChild1=pt*p;
       value_p=get_value(ex_d->nodesF,nodekey);
@@ -819,7 +819,8 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
 void Forward(example_data * ex_d,DdNode *root, int nex)
 {
   DdNode *** nodesToVisit;
-  int * NnodesToVisit;
+  int * NnodesToVisit,comp;
+  double Froot;
 
   environment env;
   int i,j;
@@ -836,7 +837,12 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
       nodesToVisit[i]=NULL;
       NnodesToVisit[i]=0;
     }
-    add_node(ex_d->nodesF,Cudd_Regular(root),1);
+    comp=Cudd_IsComplement(root);
+    if (comp)
+      Froot=0.0;
+    else
+      Froot=1.0;
+    add_node(ex_d->nodesF,Cudd_Regular(root),Froot);
     for(i=0;i<env.boolVars;i++)
     {
       for(j=0;j<NnodesToVisit[i];j++)
@@ -860,8 +866,9 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
 {
   int index,position;
   DdNode *T,*E,*nodereg;
-  double *value_p,*value_p_T,*value_p_F,p;
+  double *value_p,*value_p_T,*value_p_F,p,value_par;
 
+printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
   if (Cudd_IsConstant(node))
   {
     return;
@@ -887,9 +894,12 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
         if (value_p_T!= NULL)
         {
            *value_p_T= *value_p_T+*value_p*p;
+          printf("update f t %p %f %g\n",T,*value_p_T ,*value_p*p);
         }
         else
         {
+                    printf("new f t %p %f \n",T,*value_p*p );
+
           add_or_replace_node(ex_d->nodesF,Cudd_Regular(T),*value_p*p);
           index=Cudd_NodeReadIndex(T);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
@@ -902,14 +912,24 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
       if (!Cudd_IsConstant(E))
       {
         value_p_F=get_value(ex_d->nodesF,Cudd_Regular(E));
-
+        // if (Cudd_IsComplement(E))
+        //   value_par=1 - *value_p;
+        // else
+        //   value_par= *value_p;
+        // if (Cudd_IsComplement(E))
+        //   p=1 -p;
+        value_par= *value_p;        
+printf("f child %d %f\n",Cudd_IsComplement(E),value_par );
         if (value_p_F!= NULL)
         {
-          *value_p_F= *value_p_F+*value_p*(1-p);
+          *value_p_F= *value_p_F+value_par*(1-p);
+          printf("update f f %p %f %f\n",E,*value_p_F, value_par*(1-p));
         }
         else
         {
-          add_or_replace_node(ex_d->nodesF,Cudd_Regular(E),*value_p*(1-p));
+                              printf("new f f %p %f\n",E,value_par*(1-p) );
+
+          add_or_replace_node(ex_d->nodesF,Cudd_Regular(E),value_par*(1-p));
           index=Cudd_NodeReadIndex(E);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
           nodesToVisit[position]=(DdNode **)realloc(nodesToVisit[position],
@@ -947,7 +967,9 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
       ex_d->eta_temp[j][i][1]=0;
     }
   }
-  rootProb=ProbPath(ex_d,root,0,nex);
+  rootProb=ProbPath(ex_d,root,nex);
+  if (Cudd_IsComplement(root))
+    rootProb=1.0-rootProb;
   if (rootProb>0.0)
   {
     for (j=0; j<ex_d->env[nex].boolVars; j++)
