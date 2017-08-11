@@ -1437,8 +1437,8 @@ lw_sample(M:G):-
   G1=..[P|A],
   lw_sample(M:G1).
 
-lw_sample(_M:(sample_head(R,VC,_HL,N))):-!,
-  check(R,VC,N).
+lw_sample(_M:(sample_head(R,VC,HL,N))):-!,
+  sample_head(R,VC,HL,N).
 
 lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
