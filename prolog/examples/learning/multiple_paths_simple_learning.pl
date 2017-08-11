@@ -18,7 +18,7 @@
 
 bg([]).
 
-fold(train,[train1,train2]).
+fold(train,[train1,train2,train3]).
 
 output(p/0).
 
@@ -39,4 +39,6 @@ begin(model(train2)).
 neg(p).
 end(model(train2)).
 
-
+begin(model(train3)).
+p.
+end(model(train3)).
