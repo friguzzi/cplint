@@ -1,4 +1,3 @@
-% Empty with mcintyre loaded
 :- use_module(library(mcintyre)).
 
 :- mc.
