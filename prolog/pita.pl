@@ -980,14 +980,6 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
-  and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -995,11 +987,6 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
 process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
 [H1,and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
