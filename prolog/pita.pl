@@ -441,7 +441,7 @@ map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
 make_query_vars([],_M,_Env,C,C,[]).
 
 make_query_vars([[V,R,S]|T],M,Env,Cons0,Cons,[[V,R,S]|TV]):-
-  M:rule(R,_,_,_),!,
+  M:query_rule(R,_,_,_),!,
   make_query_var(Env,V,B),
   and(Env,Cons0,B,Cons1),
   make_query_vars(T,M,Env,Cons1,Cons,TV).
@@ -453,7 +453,7 @@ from_assign_to_map([],_M,[]).
 
 from_assign_to_map([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
   M:v(R,S,Var),
-  M:rule(R,HeadList,Body,S),
+  M:query_rule(R,HeadList,Body,S),
   nth1(Val,HeadList,Head:_),
   from_assign_to_map(TA,M,TDelta).
 
@@ -743,7 +743,7 @@ retract_all([H|T]):-
  * Probabilities in environment Environment.
  */
 get_var_n(M,Env,R,S,Probs0,V):-
-  M:rule(R,_H,_B,_S),!,
+  M:query_rule(R,_H,_B,_S),!,
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
     (M:v(R,S,V)->
@@ -1174,9 +1174,9 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:goal_n(0)),
   M:(dynamic v/3),
   M:(dynamic av/3),
-  M:(dynamic rule/4),
+  M:(dynamic query_rule/4),
   M:(dynamic rule_by_num/4),
-  retractall(M:rule(_,_,_,_)),
+  retractall(M:query_rule(_,_,_,_)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
@@ -1210,7 +1210,7 @@ user:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),M:pita_on,!.
 
-user:term_expansion(map_query(Clause),[rule(R,HeadList,Body,VC)|Clauses]):-
+user:term_expansion(map_query(Clause),[query_rule(R,HeadList,Body,VC)|Clauses]):-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,!,
   M:rule_n(R),
   user:term_expansion(Clause, Clauses0),
