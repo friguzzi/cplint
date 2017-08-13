@@ -1032,7 +1032,7 @@ user:term_expansion((:- pita), []) :-!,
   M:(dynamic v/3),
   style_check(-discontiguous).
 
-user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   list2and(L,Conj),
