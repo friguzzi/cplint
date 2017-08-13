@@ -1,9 +1,9 @@
-/* 
+/*
 The task is to decide whether a machine should be fixed, sent back or is ok.
 Machines dataset from The ACE Data Mining System User's Manual
 https://dtai.cs.kuleuven.be/ACE/doc/ACEuser-1.2.16.pdf
 
-Downloaded from 
+Downloaded from
 https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
@@ -15,6 +15,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 ?- induce([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
 */
 :-use_module(library(slipcover)).
+:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -22,6 +23,8 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- endif.
 
 :-sc.
+:- table class/1, component/1, replaceable/1, not_replaceable/1,
+  worn/1,not_worn/1,one_worn/0,none_worn/0.
 
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
@@ -42,7 +45,7 @@ class(fix):0.6 :-
 
 class(ok):0.5 :-
   not_worn(_A).
-:- end_in.  
+:- end_in.
 
 :- begin_bg.
 component(C):-
@@ -236,4 +239,3 @@ neg(class(ok)).
 worn(wheel).
 worn(gear).
 end(model(15)).
-
