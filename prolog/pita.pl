@@ -1011,8 +1011,10 @@ user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
-  retract(M:zero_clauses(LZ)),
-  append(LZ,[end_of_file],C).
+  findall(LZ,M:zero_clauses(LZ),L0),
+  append(L0,L),
+  retractall(M:zero_clauses(_)),
+  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
