@@ -23,7 +23,8 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- endif.
 
 :-sc.
-:- table class/1, component/1, replaceable/1, not_replaceable/1,
+:- table class/1, component/1, replaceable/1, not_replaceable/1.
+:- table
   worn/1,not_worn/1,one_worn/0,none_worn/0.
 
 :- set_sc(depth_bound,false).

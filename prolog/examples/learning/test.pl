@@ -11,7 +11,7 @@ main:-
 
 t:-
 	format("Test unsuccessful.",[]).
-	
+
 test_files([]).
 
 test_files([H|T]):-
@@ -30,9 +30,10 @@ test_all([],_F).
 
 test_all([H|T],F):-
 	copy_term(H,NH),
-	format("~a ~q.~n",[F,NH]),
+	format("~a~n~q.~n~n",[F,NH]),
 	call(H),!,
-	format("Result: ~a ~q.~n",[F,NH]),
+	%format("Result: ~a ~q.~n",[F,NH]),
+	nl,
 	test_all(T,F).
 
 
@@ -47,4 +48,3 @@ close_to(V,T):-
 	THigh is A*(1+E),
 	TLow<VA,
 	VA<THigh.
-

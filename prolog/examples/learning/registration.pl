@@ -1,14 +1,14 @@
-/* 
-Registration dataset, it contains information about participants in a recent 
-Seminar on Data Mining. 
+/*
+Registration dataset, it contains information about participants in a recent
+Seminar on Data Mining.
 We would like to find out what type of people attend the parties at the seminar.
-From 
+From
 L. De Raedt, H. Blockeel, L. Dehaspe, and W. Van Laer. Three companions for data mining in first order logic. In S. Dzeroski and N. Lavrac, editors, Relational Data Mining, pages 105-139.  Springer-Verlag, 2001.
 
 See also The ACE Data Mining System User's Manual
 http://dtai.cs.kuleuven.be/ACE/doc/ACEuser-1.2.16.pdf
 
-Downloaded from 
+Downloaded from
 http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
@@ -19,6 +19,7 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 :-use_module(library(slipcover)).
+:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -27,6 +28,10 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :-sc.
 
+:- table party/1, company_info/2, course/3, job/1,
+  company/1, party_yes/0, party_no/0, company_type/1.
+
+:- table not_company_type/1, course_len/2, course_type/2.
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
 :- set_sc(megaex_bottom,7).
@@ -65,7 +70,7 @@ not_company_type(university):-
 
 course_len(C, L):-
 	course(C, L, _).
-	
+
 course_type(C, T):-
 	course(C, _, T).
 
@@ -98,7 +103,7 @@ input_cw(course_type/2).
 input_cw(company/1).
 input_cw(company_info/2).
 input_cw(participant/4).
-input_cw(course/3)/
+input_cw(course/3).
 
 determination(party/1,job/1).
 determination(party/1,not_company_type/1).
@@ -171,5 +176,3 @@ end(model(turner)).
    sample(4,F,FTr,FTe),
    assert(fold(rand_train,FTr)),
    assert(fold(rand_test,FTe)).
-
-

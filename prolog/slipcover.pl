@@ -2101,7 +2101,47 @@ get_next_rule_number(M,R):-
   retract(M:rule_sc_n(R)),
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
+/*
+get_node(\+ Goal,M,Env,BDD):-
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(depth,DB),
+  retractall(M:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,B,DB,Goal1),
+  (M:Goal1->
+    bdd_notc(Env,B,(_,BDD))
+  ;
+    zeroc(Env,(_,BDD))
+  ).
 
+get_node(\+ Goal,M,Env,BDD):-!,
+  retractall(M:v(_,_,_)),
+  add_bdd_arg(Goal,Env,B,Goal1),
+  (M:Goal1->
+    bdd_notc(Env,B,(_,BDD))
+  ;
+    zeroc(Env,(_,BDD))
+  ).
+
+get_node(Goal,M,Env,BDD):-
+  M:local_setting(depth_bound,true),!,
+  M:local_setting(depth,DB),
+  retractall(M:v(_,_,_)),
+  add_bdd_arg_db(Goal,Env,B,DB,Goal1),%DB=depth bound
+  (M:Goal1->
+    (_,BDD)=B
+  ;
+    zeroc(Env,(_,BDD))
+  ).
+
+get_node(Goal,M,Env,BDD):- %with DB=false
+  retractall(M:v(_,_,_)),
+  add_bdd_arg(Goal,Env,B,Goal1),
+  (M:Goal1->
+    (_,BDD)=B
+  ;
+    zeroc(Env,(_,BDD))
+  ).
+*/
 
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
@@ -2596,7 +2636,22 @@ generate_clauses_cw([H|T],M,[H1|T1],N,C0,C):-
   append(C0,CL,C1),
   generate_clauses_cw(T,M,T1,N1,C1,C).
 
-gen_clause_cw((H :- Body),_M,N,N,(H :- Body),[(H :- Body)]):-!.
+to_tabled(H0,H):-
+  input_mod(M),
+  (M:tabled(H0)->
+    H0=..[P|Args],
+    atomic_concat(P, ' tabled',PT),
+    H=..[PT|Args]
+  ;
+    H=H0
+  ).
+
+to_tabled_head_list(A0:P,A:P):-
+  to_tabled(A0,A).
+
+gen_clause_cw((H :- Body),_M,N,N,(H :- Body),[(H1 :- Body)]):-
+  !,
+  to_tabled(H,H1).
 
 gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
@@ -2607,10 +2662,11 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
+  maplist(to_tabled_head_list,HeadList,HeadList1),
   (M:local_setting(single_var,true)->
-    generate_rules(HeadList,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules(HeadList,Env,Body1,VC,N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,VC,N,Probs,BDDAnd,0,Clauses,Module,M)
   ),
   N1 is N+1.
 
@@ -2620,7 +2676,8 @@ gen_clause_cw(def_rule(H,BodyList,Lit),_M,N,N,def_rule(H,BodyList,Lit),Clauses) 
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
-  Clauses=[(Head1 :- Body1)].
+  to_tabled(Head1,Head2),
+  Clauses=[(Head2 :- Body1)].
 
 
 generate_clauses([],_M,[],_N,C,C):-!.
@@ -2631,7 +2688,9 @@ generate_clauses([H|T],M,[H1|T1],N,C0,C):-
   generate_clauses(T,M,T1,N1,C1,C).
 
 
-gen_clause((H :- Body),_M,N,N,(H :- Body),[(H :- Body)]):-!.
+gen_clause((H :- Body),_M,N,N,(H :- Body),[(H1 :- Body)]):-
+  !,
+  to_tabled(H,H1).
 
 gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-
@@ -2643,10 +2702,11 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
+  maplist(to_tabled_head_list,HeadList,HeadList1),
   (M:local_setting(single_var,true)->
-    generate_rules_db(HeadList,Env,Body1,[],N,Probs,DB,BDDAnd,0,Clauses,Module,M)
+    generate_rules_db(HeadList1,Env,Body1,[],N,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules_db(HeadList,Env,Body1,VC,N,Probs,DB,BDDAnd,0,Clauses,Module,M)
+    generate_rules_db(HeadList1,Env,Body1,VC,N,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ),
   N1 is N+1.
 
@@ -2659,10 +2719,11 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
+  maplist(to_tabled_head_list,HeadList,HeadList1),
   (M:local_setting(single_var,true)->
-    generate_rules(HeadList,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules(HeadList,Env,Body1,VC,N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,VC,N,Probs,BDDAnd,0,Clauses,Module,M)
   ),
   N1 is N+1.
 
@@ -2673,7 +2734,8 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
-  Clauses=[(Head1 :- (DBH>=1,DB is DBH-1,Body1))].
+  to_tabled(Head1,Head2),
+  Clauses=[(Head2 :- (DBH>=1,DB is DBH-1,Body1))].
 
 gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -2681,7 +2743,8 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
-  Clauses=[(Head1 :- Body1)].
+  to_tabled(Head1,Head2),
+  Clauses=[(Head2 :- Body1)].
 
 
 generate_clauses_bg([],[]):-!.
@@ -3198,6 +3261,7 @@ compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
+  abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
   end_test(Env),!,
@@ -3215,6 +3279,7 @@ compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
   findall(R,M:rule(R,_HL,_BL,_Lit),LR),
   length(LR,NR),
   init_test(NR,Env),
+  abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
   end_test(Env),!,
@@ -3327,16 +3392,18 @@ write_body3(M,A,B):-
   ).
 
 
-tab(A/B,P):-
+tab(M,A/B,P):-
   length(Args0,B),
-  append(Args0,[_,-,lattice(orc/3)],Args),
-  P=..[A|Args].
+  append(Args0,[_,-,lattice(pita:orc/3)],Args),
+  P=..[A|Args],
+  append(Args0,[_,_,_],ArgsT),
+  PT=..[A|ArgsT],
+  assert(M:tabled(PT)).
 
 zero_clause(A/B,(H:-pita:zeroc(Env,BDD))):-
   length(Args0,B),
   append(Args0,[_,Env,BDD],Args),
   H=..[A|Args].
-
 
 user:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
@@ -3349,14 +3416,15 @@ user:term_expansion((:- sc), []) :-!,
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,prob/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
-    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3)),
+    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3,
+    zero_clauses/1,tabled/1)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   prolog_load_context(module, M),
   input_mod(M),!,
   list2and(L,Conj),
-  maplist(tab,L,L1),
+  maplist(tab(M),L,L1),
   maplist(zero_clause,L,LZ),
   assert(M:zero_clauses(LZ)),
   list2and(L1,Conj1).
@@ -3365,9 +3433,11 @@ user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   make_dynamic(M),
+  findall(LZ,M:zero_clauses(LZ),L0),
+  append(L0,L),
+  retractall(M:zero_clauses(_)),
   %retractall(input_mod(M)),
-  retract(M:zero_clauses(LZ)),
-  append(LZ,[(:- style_check(+discontiguous)),end_of_file],C).
+  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
 user:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
