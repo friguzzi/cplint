@@ -1612,7 +1612,7 @@ lw_sample_weight(M:(G1;G2),W0,W):-!,
   lw_sample_weight(M:G2,W0,W).
 
 lw_sample_weight(M:(\+ G),W0,W):-!,
-  lw_sample(M:G,1,W1),
+  lw_sample_weight(M:G,1,W1),
   W is W0*(1-W1).
 
 lw_sample_weight(M:G,W,W):-
