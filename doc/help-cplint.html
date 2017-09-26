@@ -415,6 +415,9 @@ mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
 <pre><code>?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>value(0,X)</code> given that <code>value(1,9)</code> and <code>value(2,8)</code> have been observed.</p>
+<p>You can compute conditional expectations using likelihood wwighting with</p>
+<pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
+<p>that computes the expected value of <code>Arg</code> in <code>Query</code> given that <code>Evidence</code> is true. It takes <code>N</code> samples of <code>Arg</code> in <code>Query</code>, weighting each according to the evidence, and returns their weighted average.</p>
 <p>The predicate</p>
 <pre><code>mc_particle_sample(:Query:atom,:Evidence:list,
   +Samples:int,-Prob:float)</code></pre>
