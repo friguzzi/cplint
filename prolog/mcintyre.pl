@@ -1437,8 +1437,8 @@ lw_sample(M:G):-
   G1=..[P|A],
   lw_sample(M:G1).
 
-lw_sample(_M:(sample_head(R,VC,_HL,N))):-!,
-  check(R,VC,N).
+lw_sample(_M:(sample_head(R,VC,HL,N))):-!,
+  sample_head(R,VC,HL,N).
 
 lw_sample(_M:sample_gauss(R,VC,Mean,Variance,S)):-!,
   sample_gauss(R,VC,Mean,Variance,S).
@@ -1612,7 +1612,7 @@ lw_sample_weight(M:(G1;G2),W0,W):-!,
   lw_sample_weight(M:G2,W0,W).
 
 lw_sample_weight(M:(\+ G),W0,W):-!,
-  lw_sample(M:G,1,W1),
+  lw_sample_weight(M:G,1,W1),
   W is W0*(1-W1).
 
 lw_sample_weight(M:G,W,W):-
