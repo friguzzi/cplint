@@ -260,10 +260,17 @@ s(M:Goal,P):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  ( M:local_pita_setting(depth_bound,true) *->
+      ( process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
+        add_bdd_arg_db(Goal1,Env,BDDAnd,DB,Module,Head1)
+      )
+    ;
+      ( process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+        add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1)
+      )
+  ),
   append([one(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
-  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
