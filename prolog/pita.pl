@@ -40,6 +40,8 @@ details.
   msw/4,
   msw/5
     ]).
+:- reexport(library(tabling)).
+
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob_bar(:,-).
@@ -1213,7 +1215,9 @@ tab(M,A/B,P):-
     ExtraArgs=[-,lattice(orc/3)]
   ),
   append(Args0,ExtraArgs,Args),
-  P=..[A|Args].
+  P=..[A|Args],
+  PT=..[A|Args0],
+  assert(M:tabled(PT)).
 
 zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(Env,BDD))):-
   length(Args0,B),
@@ -1225,6 +1229,20 @@ zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(Env,BDD))):-
   append(Args0,ExtraArgs,Args),
   H=..[A|Args].
 
+to_table(M,Heads,ProcTabDir):-
+  maplist(tab_dir(M),Heads,TabDirList),
+  append(TabDirList,TabDir),
+  maplist(user:term_expansion,TabDir,ProcTabDirL),
+  append(ProcTabDirL,ProcTabDir).
+
+tab_dir(_M,'':_,[]):-!.
+
+tab_dir(M,H:_,[]):-
+  M:tabled(H),!.
+
+tab_dir(_M,H:_,[(:- table F/A)]):-
+  functor(H,F,A).
+
 user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
@@ -1232,6 +1250,7 @@ user:term_expansion(end_of_file, C) :-
   findall(LZ,M:zero_clauses(LZ),L0),
   append(L0,L),
   retractall(M:zero_clauses(_)),
+  retractall(M:tabled(_)),
   append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
 user:term_expansion((:- action Conj), []) :-!,
@@ -1250,7 +1269,7 @@ user:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
   M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4,
-    zero_clauses/1, pita_on),
+    zero_clauses/1, pita_on/0, tabled/1),
   retractall(M:query_rule(_,_,_,_)),
   style_check(-discontiguous).
 
@@ -1349,7 +1368,9 @@ user:term_expansion((Head :- Body),
   ;
     VC1 = VC
   ),
-  generate_rules_db(HeadList,Env,Body1,VC1,R,Probs,DB,BDDAnd,0,Clauses,M).
+  generate_rules_db(HeadList,Env,Body1,VC1,R,Probs,DB,BDDAnd,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion((Head :- Body),
   [rule_by_num(R,HeadList,BodyList,VC1)|Clauses]):-
@@ -1371,7 +1392,9 @@ user:term_expansion((Head :- Body),
   ;
     VC1 = VC
   ),
-  generate_rules(HeadList,Env,Body1,VC1,R,Probs,BDDAnd,0,Clauses,M).
+  generate_rules(HeadList,Env,Body1,VC1,R,Probs,BDDAnd,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
@@ -1394,7 +1417,8 @@ user:term_expansion((Head :- Body), Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH -1|BodyList3],Body1),
   add_bdd_arg_db(H,Env,BDDAnd,DBH,M,Head1),
-  Clauses=(Head1 :- Body1).
+  to_table(M,HeadList,TabDir),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -1408,7 +1432,8 @@ user:term_expansion((Head :- Body), Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,M,Head1),
-  Clauses=(Head1 :- Body1).
+  to_table(M,HeadList,TabDir),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
@@ -1431,9 +1456,11 @@ user:term_expansion((Head :- Body), Clauses) :-
   ;
     VC1 = VC
   ),
-  generate_clause_db(H,Env,Body2,VC1,R,Probs,DB,BDDAnd,0,Clauses,M).
+  generate_clause_db(H,Env,Body2,VC1,R,Probs,DB,BDDAnd,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
-user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clause]) :-
+user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clauses]) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -1453,7 +1480,9 @@ user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clause
   ;
     VC1 = VC
   ),
-  generate_clause(H,Env,Body2,VC1,R,Probs,BDDAnd,0,Clause,M).
+  generate_clause(H,Env,Body2,VC1,R,Probs,BDDAnd,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 /*user:term_expansion((Head :- Body),Clauses) :-
 % definite clause for db facts
@@ -1472,7 +1501,8 @@ user:term_expansion((Head :- Body),Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH-1|BodyList3],Body1),
   add_bdd_arg_db(Head,Env,BDDAnd,DBH,M,Head1),
-  Clauses=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 user:term_expansion((Head :- Body),Clauses) :-
 % definite clause senza DB
@@ -1483,7 +1513,8 @@ user:term_expansion((Head :- Body),Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,Env,BDDAnd,M,Head1),
-  Clauses=(Head1 :- Body2).
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1 :- Body2)],Clauses).
 
 user:term_expansion(Head,
   [rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
@@ -1501,7 +1532,9 @@ user:term_expansion(Head,
   ;
     VC1 = VC
   ),
-  generate_rules_fact_db(HeadList,_Env,VC1,R,Probs,0,Clauses,M).
+  generate_rules_fact_db(HeadList,_Env,VC1,R,Probs,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1517,7 +1550,9 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ;
     VC1 = VC
   ),
-  generate_rules_fact(HeadList,_Env,VC1,R,Probs,0,Clauses,M).
+  generate_rules_fact(HeadList,_Env,VC1,R,Probs,0,Clauses0,M),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1538,10 +1573,12 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
     VC1 = VC
   ),
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,M)
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 
 user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
@@ -1561,10 +1598,12 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
     VC1 = VC
   ),
   (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,M)
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact_vars(HeadList,_Env,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1574,7 +1613,7 @@ user:term_expansion(Head,[]) :-
   ground(P),
   P=:=0.0, !.
 
-user:term_expansion(Head,Clause) :-
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   M:local_pita_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -1584,9 +1623,10 @@ user:term_expansion(Head,Clause) :-
   P=:=1.0, !,
   list2and([onec(Env,BDD)],Body1),
   add_bdd_arg_db(H,Env,BDD,_DB,M,Head1),
-  Clause=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
-user:term_expansion(Head,Clause) :-
+user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -1595,7 +1635,8 @@ user:term_expansion(Head,Clause) :-
   P=:=1.0, !,
   list2and([onec(Env,BDD)],Body1),
   add_bdd_arg(H,Env,BDD,M,Head1),
-  Clause=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1614,7 +1655,9 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ;
     VC1 = VC
   ),
-  Clauses=[(Head1:-(get_var_n(M,Env,R,VC1,Probs,V),equalityc(Env,V,0,BDD)))].
+  Clauses0=[(Head1:-(get_var_n(M,Env,R,VC1,Probs,V),equalityc(Env,V,0,BDD)))],
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1632,7 +1675,9 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ;
     VC1 = VC
   ),
-  Clauses=[(Head1:-(get_var_n(M,Env,R,VC1,Probs,V),equalityc(Env,V,0,BDD)))].
+  Clauses0=[(Head1:-(get_var_n(M,Env,R,VC1,Probs,V),equalityc(Env,V,0,BDD)))],
+  to_table(M,HeadList,TabDir),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion((:- set_pita(P,V)), []) :-!,
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1643,21 +1688,24 @@ user:term_expansion((:- set_sw(A,B)), []) :-!,
   set_sw(M:A,B).
 
 
-user:term_expansion(Head, (Head1:-onec(Env,One))) :-
+user:term_expansion(Head, Clauses) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   M:local_pita_setting(depth_bound,true),
 % definite fact with db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
-  add_bdd_arg_db(Head,Env,One,_DB,M,Head1).
+  add_bdd_arg_db(Head,Env,One,_DB,M,Head1),
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1:-onec(Env,One))],Clauses).
 
-user:term_expansion(Head, (Head1:-onec(Env,One))) :-
+user:term_expansion(Head, Clauses) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),
-  add_bdd_arg(Head,Env,One,M,Head1).
-
+  add_bdd_arg(Head,Env,One,M,Head1),
+  to_table(M,[Head:_],TabDir),
+  append(TabDir,[(Head1:-onec(Env,One))],Clauses).
 
 /**
  * begin_lpad_pred is det
