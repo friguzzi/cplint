@@ -997,14 +997,24 @@ act(M,A/B):-
   atomic_concat(A,' tabled',A1),
   M:(dynamic A1/B1).
 
-tab(A/B,P):-
+tab(M,A/B,P):-
   length(Args0,B),
-  append(Args0,[-,lattice(orc/3)],Args),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[-,-,lattice(orc/3)]
+  ;
+    ExtraArgs=[-,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
   P=..[A|Args].
 
-zero_clause(A/B,(H:-zeroc(Env,BDD))):-
+zero_clause(M,A/B,(H:-zeroc(Env,BDD))):-
   length(Args0,B),
-  append(Args0,[Env,BDD],Args),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[Env,_,BDD]
+  ;
+    ExtraArgs=[Env,BDD]
+  ),
+  append(Args0,ExtraArgs,Args),
   H=..[A|Args].
 
 user:term_expansion(end_of_file, C) :-
@@ -1038,8 +1048,8 @@ user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   list2and(L,Conj),
-  maplist(tab,L,L1),
-  maplist(zero_clause,L,LZ),
+  maplist(tab(M),L,L1),
+  maplist(zero_clause(M),L,LZ),
   assert(M:zero_clauses(LZ)),
   list2and(L1,Conj1).
 
