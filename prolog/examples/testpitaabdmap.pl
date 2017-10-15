@@ -53,23 +53,23 @@ close_to(V,T):-
 	TLow<V,
 	V<THigh.
 
-test((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[c, e]),abd1).
-test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),Exp=[c, e]),abd1).
+test((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[e, c]),abd1).
+test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),Exp=[e, c]),abd1).
 
-test((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[c, d, f, (\+g)]),abd2).
+test((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[f, (\+g), c, d]),abd2).
 test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
-  Exp=[c, d, f, (\+g)]),abd2).
+  Exp=[f, (\+g), c, d]),abd2).
 
-test((abd_prob(a,P,Exp),close_to(P,0.42),Exp=[(\+ c), f, (\+g)]),abd3).
+test((abd_prob(a,P,Exp),close_to(P,0.42),Exp=[f, (\+g), (\+ c)]),abd3).
 test((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.42),
-  Exp=[(\+ c),f, (\+g)]),abd3).
+  Exp=[f, (\+g), (\+ c)]),abd3).
 
 test((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
   Exp=[
 	  rule(0, '', [red:0.4, '':0.6], true),
-	  rule(1, green, [green:0.9, '':0.09999999999999998], true),
 		rule(2, blue, [blue:0.5, '':0.5], true),
-		rule(3, yellow, [yellow:0.6, '':0.4], true)
+		rule(3, yellow, [yellow:0.6, '':0.4], true),
+	  rule(1, green, [green:0.9, '':0.09999999999999998], true)
 	 ]),map1).
 
 test((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.27),

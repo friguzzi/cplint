@@ -1,14 +1,11 @@
 
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(graphviz).
 :- endif.
 
 :- pita.
-
-:- table female/0, recovery/0, drug/0.
 
 :- begin_lpad.
 :- action drug/0.

@@ -6,7 +6,6 @@ diagrams for probabilistic logic programs. Intelligent Data Analysis,
 17(2):343-363, 2013.
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -15,9 +14,6 @@ diagrams for probabilistic logic programs. Intelligent Data Analysis,
 :- endif.
 
 :- pita.
-
-:- table epidemic/0, pandemic/0, flu/1, cold/0.
-
 
 :- begin_lpad.
 

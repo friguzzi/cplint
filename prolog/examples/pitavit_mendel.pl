@@ -16,6 +16,8 @@ In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 
 :- pita.
 
+:- set_pita(tabling,explicit).
+
 :- begin_lpad.
 
 mother(m,s).

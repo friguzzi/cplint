@@ -12,7 +12,6 @@ programs by searching the clause space. Theory and Practice of Logic
 Programming, FirstView Articles, 2014
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -20,8 +19,7 @@ Programming, FirstView Articles, 2014
 
 
 :- pita.
-:- table eruption/0, sudden_energy_release/0,
-  fault_rupture/1.
+
 :- begin_lpad.
 
 eruption : 0.6 ; earthquake : 0.3 :-

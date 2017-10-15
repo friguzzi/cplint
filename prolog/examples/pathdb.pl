@@ -7,7 +7,6 @@ its application in link discovery. In International Joint Conference on
 Artificial Intelligence, pages 2462-2467, 2007.
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -16,7 +15,6 @@ Artificial Intelligence, pages 2462-2467, 2007.
 :- endif.
 
 :- pita.
-
 
 :- begin_lpad.
 :- set_pita(depth_bound,true).

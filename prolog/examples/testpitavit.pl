@@ -75,6 +75,7 @@ test(coin2,heads(coin2),0.45).
 test(coin2,tails(coin1),0.45).
 test(coin2,tails(coin2),0.45).
 */
+
 test((vit_prob(win,P,Exp),close_to(P,0.36),
 Exp=[
   rule(0, red, [red:0.4, '':0.6], []),

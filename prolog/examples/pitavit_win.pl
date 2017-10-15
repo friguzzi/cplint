@@ -9,6 +9,8 @@
 
 :- pita.
 
+:- set_pita(tabling,explicit).
+
 :- begin_lpad.
 
 win :- red, green.

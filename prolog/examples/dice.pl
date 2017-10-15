@@ -7,15 +7,12 @@ disjunctions. In International Conference on Logic Programming,
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- endif.
 
 :- pita.
-
-:- table on/2, evidence/0.
 
 :- begin_lpad.
 

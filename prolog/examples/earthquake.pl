@@ -6,15 +6,12 @@ F. Riguzzi and N. Di Mauro. Applying the information bottleneck to statistical
 relational learning. Machine Learning, 86(1):89-114, 2012
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- endif.
 
 :- pita.
-
-:- table earthquake/2, fault_rupture/1, volcanic_eruption/1.
 
 :- begin_lpad.
 

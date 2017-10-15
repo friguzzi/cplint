@@ -2,12 +2,11 @@
 Computing the probability of a path between two nodes in a probabilistic graph.
 Each edge has a probability of being present.
 From
-L. De Raedt, A. Kimmig, and H. Toivonen. ProbLog: A probabilistic Prolog and 
-its application in link discovery. In International Joint Conference on 
+L. De Raedt, A. Kimmig, and H. Toivonen. ProbLog: A probabilistic Prolog and
+its application in link discovery. In International Joint Conference on
 Artificial Intelligence, pages 2462-2467, 2007.
 */
 :- use_module(library(pita)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -16,8 +15,6 @@ Artificial Intelligence, pages 2462-2467, 2007.
 :- endif.
 
 :- pita.
-
-:- table path/2, edge/2.
 
 :- begin_lpad.
 
@@ -56,10 +53,10 @@ graph(digraph(G)):-
 % expected result 0.22888
 ?- graph(G). % shows the probabilistic graph
 
-?- bdd_dot_string(path(a,e),BDD,Var).  
+?- bdd_dot_string(path(a,e),BDD,Var).
 % What is the BDD for query path(a,e)?
-% A solid edge indicates a 1-child, a dashed edge indicates a 0-child and 
-% a dotted 
+% A solid edge indicates a 1-child, a dashed edge indicates a 0-child and
+% a dotted
 % edge indicates a negated 0-child.
 % The table Var contains the associations between the rule groundings and the
 % multivalued variables.
