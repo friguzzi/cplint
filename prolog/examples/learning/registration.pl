@@ -19,7 +19,6 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 :-use_module(library(slipcover)).
-:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -28,10 +27,6 @@ http://dtai.cs.kuleuven.be/static/ACE/doc/
 
 :-sc.
 
-:- table party/1, company_info/2, course/3, job/1,
-  company/1, party_yes/0, party_no/0, company_type/1.
-
-:- table not_company_type/1, course_len/2, course_type/2.
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
 :- set_sc(megaex_bottom,7).

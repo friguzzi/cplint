@@ -22,7 +22,6 @@ the target program.
 
 
 :- use_module(library(slipcover)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -30,7 +29,7 @@ the target program.
 :- endif.
 
 :-sc.
-:- table bought/1, shops/1.
+
 :- set_sc(verbosity,1).
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).

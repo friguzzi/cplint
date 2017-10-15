@@ -15,7 +15,6 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 ?- induce([rand_train],P),test(P,[rand_test],LL,AUCROC,ROC,AUCPR,PR).
 */
 :-use_module(library(slipcover)).
-:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -23,9 +22,6 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- endif.
 
 :-sc.
-:- table class/1, component/1, replaceable/1, not_replaceable/1.
-:- table
-  worn/1,not_worn/1,one_worn/0,none_worn/0.
 
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).

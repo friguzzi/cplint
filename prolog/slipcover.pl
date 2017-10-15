@@ -43,13 +43,14 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   write2/2,write3/2,format2/3,format3/3,
   write_rules2/3,write_rules3/3,
   nl2/1,nl3/1]).
+:-reexport(library(pita)).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
-:-use_module(library(pita)).
+%:-use_module(library(pita)).
 :-use_module(library(apply)).
 :-set_prolog_flag(unknown,warning).
 
@@ -112,8 +113,11 @@ default_setting_sc(neg_ex,cw).
 
 
 default_setting_sc(epsilon_parsing, 1e-5).
-default_setting_sc(tabling, off).
-/* on, off */
+default_setting_sc(tabling,auto).
+/* values:
+  auto
+  explicit
+*/
 
 default_setting_sc(bagof,false).
 /* values: false, intermediate, all, extra */
@@ -721,7 +725,7 @@ derive_bdd_nodes([],_ExData,_E,Nodes,Nodes,CLL,CLL).
 derive_bdd_nodes([H|T],ExData,E,Nodes0,Nodes,CLL0,CLL):-
   get_output_atoms(O),
   generate_goal(O,H,[],GL),
-  (prob(H,P)->
+  ('$prob'(H,P)->
     CardEx is P*E
 
   ;
@@ -756,7 +760,7 @@ derive_bdd_nodes_groupatoms_output_atoms([],_M,_ExData,_O,_E,_G,Nodes,Nodes,CLL,
 derive_bdd_nodes_groupatoms_output_atoms([H|T],M,ExData,O,E,G,Nodes0,Nodes,CLL0,CLL,LE0,LE):-
   generate_goal(O,M,H,[],GL),
   length(GL,NA),
-  (M:prob(H,P)->
+  (M:'$prob'(H,P)->
     CardEx is P*E/NA
   ;
     CardEx is 1.0
@@ -772,7 +776,7 @@ derive_bdd_nodes_groupatoms([H|T],M,ExData,E,G,Nodes0,Nodes,CLL0,CLL,LE0,LE):-
   get_output_atoms(O,M),
   generate_goal(O,M,H,[],GL),
   length(GL,NA),
-  (M:prob(H,P)->
+  (M:'$prob'(H,P)->
     CardEx is P*E/NA
   ;
     CardEx is 1.0
@@ -2636,8 +2640,7 @@ generate_clauses_cw([H|T],M,[H1|T1],N,C0,C):-
   append(C0,CL,C1),
   generate_clauses_cw(T,M,T1,N1,C1,C).
 
-to_tabled(H0,H):-
-  input_mod(M),
+to_tabled(M,H0,H):-
   (M:tabled(H0)->
     H0=..[P|Args],
     atomic_concat(P, ' tabled',PT),
@@ -2646,12 +2649,12 @@ to_tabled(H0,H):-
     H=H0
   ).
 
-to_tabled_head_list(A0:P,A:P):-
-  to_tabled(A0,A).
+to_tabled_head_list(M,A0:P,A:P):-
+  to_tabled(M,A0,A).
 
-gen_clause_cw((H :- Body),_M,N,N,(H :- Body),[(H1 :- Body)]):-
+gen_clause_cw((H :- Body),M,N,N,(H :- Body),[(H1 :- Body)]):-
   !,
-  to_tabled(H,H1).
+  to_tabled(M,H,H1).
 
 gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-!,
@@ -2662,7 +2665,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
-  maplist(to_tabled_head_list,HeadList,HeadList1),
+  maplist(to_tabled_head_list(M),HeadList,HeadList1),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList1,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
   ;
@@ -2670,14 +2673,14 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   ),
   N1 is N+1.
 
-gen_clause_cw(def_rule(H,BodyList,Lit),_M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
+gen_clause_cw(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   process_body_cw(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Module),
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg(H,Env,BDDAnd,Module,Head1),
-  to_tabled(Head1,Head2),
-  Clauses=[(Head2 :- Body1)].
+  to_tabled(M,H,H1),
+  add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
+  Clauses=[(Head1 :- Body1)].
 
 
 generate_clauses([],_M,[],_N,C,C):-!.
@@ -2688,9 +2691,9 @@ generate_clauses([H|T],M,[H1|T1],N,C0,C):-
   generate_clauses(T,M,T1,N1,C1,C).
 
 
-gen_clause((H :- Body),_M,N,N,(H :- Body),[(H1 :- Body)]):-
+gen_clause((H :- Body),M,N,N,(H :- Body),[(H1 :- Body)]):-
   !,
-  to_tabled(H,H1).
+  to_tabled(M,H,H1).
 
 gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   rule(N,HeadList,BodyList,Lit),Clauses):-
@@ -2702,7 +2705,7 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
-  maplist(to_tabled_head_list,HeadList,HeadList1),
+  maplist(to_tabled_head_list(M),HeadList,HeadList1),
   (M:local_setting(single_var,true)->
     generate_rules_db(HeadList1,Env,Body1,[],N,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ;
@@ -2719,7 +2722,7 @@ gen_clause(rule(_R,HeadList,BodyList,Lit),M,N,N1,
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   get_probs(HeadList,Probs),
-  maplist(to_tabled_head_list,HeadList,HeadList1),
+  maplist(to_tabled_head_list(M),HeadList,HeadList1),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList1,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
   ;
@@ -2733,18 +2736,18 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
-  to_tabled(Head1,Head2),
-  Clauses=[(Head2 :- (DBH>=1,DB is DBH-1,Body1))].
+  to_tabled(M,H,H1),
+  add_bdd_arg_db(H1,Env,BDDAnd,DBH,Module,Head1),
+  Clauses=[(Head1 :- (DBH>=1,DB is DBH-1,Body1))].
 
 gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
   append([pita:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
-  add_bdd_arg(H,Env,BDDAnd,Module,Head1),
-  to_tabled(Head1,Head2),
-  Clauses=[(Head2 :- Body1)].
+  to_tabled(M,H,H1),
+  add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
+  Clauses=[(Head1 :- Body1)].
 
 
 generate_clauses_bg([],[]):-!.
@@ -3401,9 +3404,12 @@ tab(M,A/B,P):-
   ),
   append(Args0,ExtraArgs,Args),
   P=..[A|Args],
-  append(Args0,[_,_,_],ArgsT),
-  PT=..[A|ArgsT],
-  assert(M:tabled(PT)).
+  PT=..[A|Args0],
+  (M:tabled(PT)->
+    true
+  ;
+    assert(M:tabled(PT))
+  ).
 
 zero_clause(M,A/B,(H:-maplist(nonvar,Args0),pita:zeroc(Env,BDD))):-
   B1 is B+1,
@@ -3425,7 +3431,7 @@ user:term_expansion((:- sc), []) :-!,
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
-    lookahead_cons/2,lookahead_cons_var/2,prob/2,output/1,input/1,input_cw/1,
+    lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3,
     query_rule/4,
@@ -3448,6 +3454,7 @@ user:term_expansion(end_of_file, C) :-
   findall(LZ,M:zero_clauses(LZ),L0),
   append(L0,L),
   retractall(M:zero_clauses(_)),
+%  retractall(M:tabled(_)),
   %retractall(input_mod(M)),
   append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
@@ -3513,6 +3520,20 @@ user:term_expansion(end(model(_I)), []) :-
   input_mod(M),!,
   retractall(M:model(_)).
 
+user:term_expansion(output(P/A), [(:- table P1),(:- dynamic P/A1),output(P/A)]) :-
+  prolog_load_context(module, M),
+  input_mod(M),
+  M:local_setting(tabling,auto),!,
+  tab(M,P/A,P1),
+  functor(P1,P,A1).
+
+user:term_expansion(input(P/A), [(:- table P1),(:- dynamic P/A1),input(P/A)]) :-
+  prolog_load_context(module, M),
+  input_mod(M),
+  M:local_setting(tabling,auto),!,
+  tab(M,P/A,P1),
+  functor(P1,P,A1).
+
 user:term_expansion(At, A) :-
   prolog_load_context(module, M),
   input_mod(M),
@@ -3525,7 +3546,7 @@ user:term_expansion(At, A) :-
     A=neg(Atom1)
   ;
     (At=prob(Pr)->
-      A=prob(Name,Pr)
+      A='$prob'(Name,Pr)
     ;
       At=..[Pred|Args],
       Atom1=..[Pred,Name|Args],

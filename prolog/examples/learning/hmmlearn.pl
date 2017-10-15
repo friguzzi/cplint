@@ -20,7 +20,6 @@ program). When learning, the initial parameters are randomly set.
 */
 :- use_module(library(slipcover)).
 :- use_module(library(lists)).
-:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -35,9 +34,8 @@ program). When learning, the initial parameters are randomly set.
 :-set_sc(single_var,false).
 :-set_sc(neg_ex,cw).
 :-set_sc(depth_bound,false).
-:-set_sc(verbosity,15).
+:-set_sc(verbosity,1).
 
-:- table success/1, hmmf/3, tr/2.
 
 bg([]).
 
@@ -45,6 +43,8 @@ bg([]).
 
 output(success/1).
 
+input(hmmf/3).
+input(tr/2).
 
 in([
 (success(L) :- hmmf(L,[r0],3)),

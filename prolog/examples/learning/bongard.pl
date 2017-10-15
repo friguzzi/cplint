@@ -17,7 +17,6 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 ?- induce([all],P).
 */
 :-use_module(library(slipcover)).
-:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -25,7 +24,6 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- endif.
 
 :-sc.
-:- table pos/0.
 
 :- set_sc(megaex_bottom,20).
 :- set_sc(max_iter,3).
