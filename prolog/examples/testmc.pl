@@ -35,7 +35,7 @@ test_all([H|T],F):-
 %	NH=(_Query,close_to('P',_Prob)),
 	format("~a ~p.~n",[F,NH]),
 	(H=(G,R)),
-	call(G),!,
+	time(call(G)),!,
 	format("\t~p.~n",[G]),
 	(setting(check,true)->
 	  call(R),!
@@ -114,7 +114,7 @@ test((mc_mh_expectation(mix(X),heads,1000,1,X,E),close_to(E,0,1)),gaussian_mixtu
 test((mc_mh_expectation(mix(X),(mix(Y),Y>2),1000,1,X,E),relatively_close_to(E,5.00202846171105,0.25)),gaussian_mixture).
 
 test((mc_expectation(kf(1,_O2,[T]),1000,T,E),close_to(E,0,0.1)),kalman_filter).
-test((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),1000,T,[E]),relatively_close_to(E,0.6324846033555553)),kalman_filter).
+test((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,[E]),relatively_close_to(E,0.6324846033555553)),kalman_filter).
 
 
 
@@ -164,7 +164,7 @@ test((mc_mh_sample(recovery,(do(drug),\+ female),500,2,P),close_to(P,0.6)),simps
 test((mc_mh_sample(recovery,(do(\+ drug),\+ female),500,2,P),close_to(P,0.7)),simpsonmc).
 
 test((mc_rejection_sample(has(2),has(3),500,P),close_to(P,0.4065135474609725,0.1)),viralmc).
-test((mc_mh_sample(has(2),has(3),500,2,P),close_to(P,0.4065135474609725,0.1)),viralmc).
+test((mc_mh_sample(has(2),has(3),1000,2,P),close_to(P,0.4065135474609725,0.1)),viralmc).
 test((mc_rejection_sample(has(2),do(has(3)),500,P),close_to(P,0.136)),viralmc).
 test((mc_mh_sample(has(2),do(has(3)),500,1,P),close_to(P,0.136)),viralmc).
 
