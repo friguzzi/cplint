@@ -32,6 +32,8 @@ typedef struct
 {
   int nVal,nRule;
   int firstBoolVar;
+  int abducible;
+  int query;
 } variable;
 
 
@@ -47,7 +49,7 @@ typedef struct
   rowel *row;
 } tablerow;
 
-tablerow * table;
+
 typedef struct
 {
   DdManager * mgr; //Cudd manager
@@ -58,6 +60,8 @@ typedef struct
   int  boolVars;  // number of Boolean variables
   int nRules;  // number of rules
   int * rules; // array with the number of head atoms for each rule
+  int n_abd;
+  int n_abd_boolVars;
 } environment;
 
 typedef struct
@@ -71,21 +75,77 @@ typedef struct
   int nRules; // number of rules
   double * nodes_probs;
   tablerow * nodesB; // tables of probabilities for nodes in Backward step
-  tablerow * nodesF; // tables of probabilities for nodes in Forward step
+  tablerow * nodesFE; // tables of probabilities for nodes in Forward step
+  tablerow * nodesFO; // tables of probabilities for nodes in Forward step
   double * example_prob; // probability (frequency) of examples in the data
 } example_data;
 
+typedef struct
+{
+  int var,val;
+} assign;
+
+typedef struct explan
+{
+  assign a;
+  struct explan * next;
+} explan_t;
+
+typedef struct
+{
+  double prob;
+  explan_t * mpa;
+} prob_abd_expl;
+
+typedef struct
+{
+  DdNode *node;
+  int comp;
+} explkey;
+
+typedef struct
+{
+  explkey key;
+  prob_abd_expl value;
+} explrowel;
+
+typedef struct
+{
+  int cnt;
+  explrowel *row;
+} expltablerow;
+
+
+
 
 static foreign_t ret_prob(term_t,term_t,term_t);
-double Prob(DdNode *node,environment *env,tablerow *table,int comp_par);
+static foreign_t ret_abd_prob(term_t,term_t,term_t,term_t);
+static foreign_t ret_map_prob(term_t,term_t,term_t,term_t);
+static foreign_t ret_vit_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4);
+double Prob(DdNode *node,environment *env,tablerow *table);
+prob_abd_expl abd_Prob(DdNode *node,environment *env,expltablerow *expltable,
+  tablerow *table,
+  int comp_par);
+prob_abd_expl map_Prob(DdNode *node, environment * env,
+    expltablerow * maptable, tablerow * table,
+    int comp_par);
+prob_abd_expl vit_Prob(DdNode *node, environment * env,
+  expltablerow * expltable, tablerow * table,
+  int comp_par);
 static foreign_t end_bdd(term_t);
 static foreign_t init_test(term_t, term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
+static foreign_t add_query_var(term_t,term_t,term_t,term_t,term_t);
+static foreign_t add_abd_var(term_t,term_t,term_t,term_t,term_t);
 static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
   term_t,term_t,term_t,term_t);
-double ProbPath(example_data * ex_d,DdNode *node, int comp_par, int nex);
+static foreign_t reorder(term_t arg1);
+static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3);
+
+double ProbPath(example_data * ex_d,DdNode *node, int nex);
 //static int rec_deref(void);
 void Forward(example_data * ex_d,DdNode *node, int nex);
 void UpdateForward(example_data * ex_d,DdNode * node, int nex,
@@ -93,14 +153,31 @@ void UpdateForward(example_data * ex_d,DdNode * node, int nex,
 double GetOutsideExpe(example_data *ex_d,DdNode *root,double ex_prob, int nex);
 void Maximization(example_data * ex_d, double ** arrayprob);
 static double Expectation(example_data *ex_d,DdNode **nodes_ex, int lenNodes);
+int reorder_int(environment *env);
+
 FILE *open_file(char *filename, const char *mode);
 tablerow* init_table(int varcnt);
 double * get_value(tablerow *tab,  DdNode *node);
 void add_or_replace_node(tablerow *tab, DdNode *node, double value);
 void add_node(tablerow *tab, DdNode *node, double value);
 void destroy_table(tablerow *tab,int varcnt);
+expltablerow* expl_init_table(int varcnt);
+prob_abd_expl * expl_get_value(expltablerow *tab,  DdNode *node, int comp);
+void expl_add_node(expltablerow *tab, DdNode *node, int comp, prob_abd_expl value);
+void expl_destroy_table(expltablerow *tab,int varcnt);
+
+
 install_t install(void);
 void write_dot(environment * env, DdNode * bdd, FILE * file);
+
+explan_t * insert(assign assignment,explan_t * head);
+explan_t * duplicate(explan_t * head);
+void free_list(explan_t * head);
+
+term_t clist_to_pllist(explan_t *mpa, environment * env);
+term_t abd_clist_to_pllist(explan_t *mpa);
+term_t vit_clist_to_pllist(explan_t *mpa, environment * env);
+
 
 static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
 {
@@ -208,6 +285,9 @@ static foreign_t init_test(term_t arg1,term_t arg2)
 
   env=(environment *)malloc(sizeof(environment));
   env->mgr=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
+  env->n_abd=0;
+  env->n_abd_boolVars=0;
+
   Cudd_AutodynEnable(env->mgr, CUDD_REORDER_GROUP_SIFT);
   Cudd_SetMaxCacheHard(env->mgr, 0);
   Cudd_SetLooseUpTo(env->mgr, 0);
@@ -254,7 +334,8 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
     if (!Cudd_IsConstant(nodes_ex[i]))
     {
       ex_d->nodesB=init_table(ex_d->env[i].boolVars);
-      ex_d->nodesF=init_table(ex_d->env[i].boolVars);
+      ex_d->nodesFE=init_table(ex_d->env[i].boolVars);
+      ex_d->nodesFO=init_table(ex_d->env[i].boolVars);
 
       Forward(ex_d,nodes_ex[i],i);
       rootProb=GetOutsideExpe(ex_d,nodes_ex[i],ex_d->example_prob[i],i);
@@ -266,7 +347,8 @@ static double Expectation(example_data * ex_d,DdNode **nodes_ex,int lenNodes)
 
       ex_d->nodes_probs[i]=rootProb;
       destroy_table(ex_d->nodesB,ex_d->env[i].boolVars);
-      destroy_table(ex_d->nodesF,ex_d->env[i].boolVars);
+      destroy_table(ex_d->nodesFE,ex_d->env[i].boolVars);
+      destroy_table(ex_d->nodesFO,ex_d->env[i].boolVars);
     }
     else
       if (nodes_ex[i]==Cudd_ReadLogicZero(ex_d->env[i].mgr))
@@ -320,6 +402,7 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   environment * env;
   DdNode * node;
   tablerow * table;
+  double prob;
   int ret;
 
   ret=PL_get_pointer(arg1,(void **)&env);
@@ -331,7 +414,10 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   if (!Cudd_IsConstant(node))
   {
     table=init_table(env->boolVars);
-    ret=PL_put_float(out,Prob(node,env,table,0));
+    prob=Prob(node,env,table);
+    if (Cudd_IsComplement(node))
+      prob=1.0-prob;
+    ret=PL_put_float(out,prob);
     RETURN_IF_FAIL
     destroy_table(table,env->boolVars);
   }
@@ -352,25 +438,439 @@ static foreign_t ret_prob(term_t arg1, term_t arg2, term_t arg3)
   return(PL_unify(out,arg3));
 }
 
-double Prob(DdNode *node, environment * env, tablerow * table,int comp_par)
+int reorder_int(environment *env)
+{
+  int i,j,var_ind,abd_ind=0,ind=env->n_abd_boolVars;
+  variable var,* vars=env->vars;
+  DdManager *mgr=env->mgr;
+  int boolVars=env->boolVars;
+  int * permutation;
+  int * bVar2mVar=env->bVar2mVar;
+
+  permutation=malloc(boolVars*sizeof(int));
+  for (i=0;i<boolVars;i++)
+  {
+    j=Cudd_ReadInvPerm(mgr,i);
+    var_ind=bVar2mVar[j];
+    var=vars[var_ind];
+    if (var.abducible || var.query)
+    {
+      permutation[abd_ind]=j;
+      abd_ind++;
+    }
+    else
+    {
+      permutation[ind]=j;
+      ind++;
+    }
+
+  }
+  return Cudd_ShuffleHeap(mgr,permutation);
+}
+
+static foreign_t reorder(term_t arg1)
+{
+  environment * env;
+  int ret;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=reorder_int(env);
+  RETURN_IF_FAIL
+  return 1;
+}
+
+static foreign_t ret_abd_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4)
+{
+  term_t out,outass;
+  environment * env;
+  DdNode * node;
+  expltablerow * expltable;
+  tablerow * table;
+  //abdtablerow * abdtable;
+  prob_abd_expl delta;
+  int ret;
+  double p;
+  explan_t * mpa;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_pointer(arg2,(void **)&node);
+  RETURN_IF_FAIL
+  out=PL_new_term_ref();
+
+  ret=reorder_int(env);
+  RETURN_IF_FAIL
+
+  if (!Cudd_IsConstant(node))
+  {
+    expltable=expl_init_table(env->boolVars);
+    table=init_table(env->boolVars);
+    //abdtable=init_abd_table(env->n_abd);
+
+    delta=abd_Prob(node,env,expltable,table,0);
+    p=delta.prob;
+    mpa=delta.mpa;
+    ret=PL_put_float(out,p);
+    RETURN_IF_FAIL
+    //destroy_table(abdtable,env->n_abd);
+    outass=abd_clist_to_pllist(mpa);
+    RETURN_IF_FAIL
+    expl_destroy_table(expltable,env->boolVars);
+    destroy_table(table,env->boolVars);
+  }
+  else
+  {
+    if (node==Cudd_ReadOne(env->mgr))
+    {
+      ret=PL_put_float(out,1.0);
+      RETURN_IF_FAIL
+    }
+    else
+    {
+      ret=PL_put_float(out,0.0);
+      RETURN_IF_FAIL
+    }
+      outass=PL_new_term_ref();
+      ret=PL_put_nil(outass);
+      RETURN_IF_FAIL
+  }
+
+  return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
+}
+
+static foreign_t ret_map_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4)
+{
+  term_t out,outass;
+  environment * env;
+  DdNode * node;
+  expltablerow * maptable;
+  tablerow * table;
+  //abdtablerow * abdtable;
+  prob_abd_expl delta;
+  int ret;
+  double p;
+  explan_t * mpa;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_pointer(arg2,(void **)&node);
+  RETURN_IF_FAIL
+  out=PL_new_term_ref();
+
+  ret=reorder_int(env);
+
+  RETURN_IF_FAIL
+
+  if (!Cudd_IsConstant(node))
+  {
+    maptable=expl_init_table(env->boolVars);
+    table=init_table(env->boolVars);
+    //abdtable=init_abd_table(env->n_abd);
+    delta=map_Prob(node,env,maptable,table,0);
+    p=delta.prob;
+    mpa=delta.mpa;
+    ret=PL_put_float(out,p);
+    RETURN_IF_FAIL
+    //destroy_table(abdtable,env->n_abd);
+    outass=clist_to_pllist(mpa,env);
+    RETURN_IF_FAIL
+    expl_destroy_table(maptable,env->boolVars);
+    destroy_table(table,env->boolVars);
+  }
+  else
+  {
+    if (node==Cudd_ReadOne(env->mgr))
+    {
+      ret=PL_put_float(out,1.0);
+      RETURN_IF_FAIL
+    }
+    else
+    {
+      ret=PL_put_float(out,0.0);
+      RETURN_IF_FAIL
+    }
+    outass=PL_new_term_ref();
+    ret=PL_put_nil(outass);
+    RETURN_IF_FAIL
+  }
+
+  return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
+}
+
+static foreign_t ret_vit_prob(term_t arg1, term_t arg2,
+  term_t arg3, term_t arg4)
+{
+  term_t out,outass;
+  environment * env;
+  DdNode * node;
+  expltablerow * expltable;
+  tablerow * table;
+  //abdtablerow * abdtable;
+  prob_abd_expl delta;
+    //abdtable=init_abd_table(env->n_abd);
+  int ret;
+  double p;
+  explan_t * mpa;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_pointer(arg2,(void **)&node);
+  RETURN_IF_FAIL
+  out=PL_new_term_ref();
+
+
+  if (!Cudd_IsConstant(node))
+  {
+    expltable=expl_init_table(env->boolVars);
+    table=init_table(env->boolVars);
+    //abdtable=init_abd_table(env->n_abd);
+    delta=vit_Prob(node,env,expltable,table,0);
+    p=delta.prob;
+    mpa=delta.mpa;
+    ret=PL_put_float(out,p);
+    RETURN_IF_FAIL
+    //destroy_table(abdtable,env->n_abd);
+    outass=vit_clist_to_pllist(mpa,env);
+    RETURN_IF_FAIL
+    expl_destroy_table(expltable,env->boolVars);
+    destroy_table(table,env->boolVars);
+  }
+  else
+  {
+    if (node==Cudd_ReadOne(env->mgr))
+    {
+      ret=PL_put_float(out,1.0);
+      RETURN_IF_FAIL
+    }
+    else
+    {
+      ret=PL_put_float(out,0.0);
+      RETURN_IF_FAIL
+    }
+      outass=PL_new_term_ref();
+      ret=PL_put_nil(outass);
+      RETURN_IF_FAIL
+  }
+
+  return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
+}
+
+static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
+{
+  environment * env;
+  int ret,varIndex,i,j;
+  DdNode * cons, * tmp1, * tmp2, * vari, * varj, * or, * tmpor;
+  term_t out;
+  variable var;
+
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  ret=PL_get_integer(arg2,&varIndex);
+  RETURN_IF_FAIL
+
+
+  //env->vars[varIndex].abducible_or_query=1;
+  //env->n_abd++;
+  var=env->vars[varIndex];
+
+  cons=Cudd_ReadOne(env->mgr);
+  or=Cudd_ReadLogicZero(env->mgr);
+
+  for (i=var.firstBoolVar; i<var.firstBoolVar+var.nVal-1; i++)
+  {
+    vari=Cudd_bddIthVar(env->mgr,i);
+    tmpor=Cudd_bddOr(env->mgr,or,vari);
+    Cudd_Ref(tmpor);
+    Cudd_RecursiveDeref(env->mgr,or);
+    or=tmpor;
+    for(j=i+1; j<var.firstBoolVar+var.nVal-1; j++)
+    {
+      varj=Cudd_bddIthVar(env->mgr,j);
+      tmp1=Cudd_Not(Cudd_bddAnd(env->mgr,vari,varj));
+      tmp2=Cudd_bddAnd(env->mgr,cons,tmp1);
+      Cudd_Ref(tmp2);
+      Cudd_RecursiveDeref(env->mgr,cons);
+      cons=tmp2;
+    }
+  }
+  tmpor=Cudd_bddOr(env->mgr,or,Cudd_bddIthVar(env->mgr,var.firstBoolVar+var.nVal-1));
+  Cudd_Ref(tmpor);
+  Cudd_RecursiveDeref(env->mgr,or);
+  tmp1=Cudd_bddAnd(env->mgr,cons,tmpor);
+  Cudd_Ref(tmp1);
+  Cudd_RecursiveDeref(env->mgr,cons);
+  cons=tmp1;
+
+  out=PL_new_term_ref();
+  ret=PL_put_pointer(out,(void *)cons);
+  RETURN_IF_FAIL
+  return(PL_unify(out,arg3));
+}
+term_t abd_clist_to_pllist(explan_t *mpa)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  minus=PL_new_functor(PL_new_atom("-"), 2);
+  out=PL_new_term_ref();
+  head=PL_new_term_ref();
+  int ret;
+  if (mpa==NULL)
+  {
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+    tail=abd_clist_to_pllist(mpa->next);
+    a=mpa->a;
+    var=PL_new_term_ref();
+    val=PL_new_term_ref();
+    ret=PL_put_integer(var,a.var);
+    RETURN_IF_FAIL
+    ret=PL_put_integer(val,a.val);
+    RETURN_IF_FAIL
+    ret=PL_cons_functor(head, minus,var,val);
+    RETURN_IF_FAIL
+    ret=PL_cons_list(out,head,tail);
+    RETURN_IF_FAIL
+  }
+  return out;
+}
+term_t clist_to_pllist(explan_t *mpa, environment * env)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  int value,bvar, ret, mvari, mval;
+  variable mvar;
+
+  minus=PL_new_functor(PL_new_atom("-"), 2);
+  tail=PL_new_term_ref();
+  ret=PL_put_nil(tail);
+  RETURN_IF_FAIL
+  if (mpa==NULL)
+  {
+    out=PL_new_term_ref();
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+
+    for (; mpa; mpa=mpa->next)
+    {
+      a=mpa->a;
+      bvar=a.var;
+      value=a.val;
+      if (value)
+      {
+        mvari=env->bVar2mVar[bvar];
+        mvar=env->vars[mvari];
+        mval=a.var-mvar.firstBoolVar+1;
+        var=PL_new_term_ref();
+        val=PL_new_term_ref();
+        ret=PL_put_integer(var,mvari);
+        RETURN_IF_FAIL
+        ret=PL_put_integer(val,mval);
+        RETURN_IF_FAIL
+        head=PL_new_term_ref();
+        ret=PL_cons_functor(head, minus,var,val);
+        RETURN_IF_FAIL
+        out=PL_new_term_ref();
+        ret=PL_cons_list(out,head,tail);
+        RETURN_IF_FAIL
+        tail=out;
+      }
+    }
+    out=tail;
+  }
+  return out;
+}
+
+term_t vit_clist_to_pllist(explan_t *mpa, environment * env)
+{
+  term_t out,tail,head,var,val;
+  functor_t minus;
+  assign a;
+  int value,bvar, ret, mvari, mval,nVars,i,*assignments;
+  variable mvar;
+
+  if (mpa==NULL)
+  {
+    out=PL_new_term_ref();
+    ret=PL_put_nil(out);
+    RETURN_IF_FAIL
+  }
+  else
+  {
+    nVars=env->nVars;
+    assignments=malloc(nVars*sizeof(int));
+    for (i=0;i<nVars;i++)
+      assignments[i]=-1;
+
+    for (; mpa; mpa=mpa->next)
+    {
+      a=mpa->a;
+      bvar=a.var;
+      value=a.val;
+      mvari=env->bVar2mVar[bvar];
+      mvar=env->vars[mvari];
+      if (value)
+      {
+        mval=a.var-mvar.firstBoolVar;
+        assignments[mvari]=mval;
+      }
+      else
+      {
+        assignments[mvari]=env->vars[mvari].nVal-1;
+      }
+    }
+    minus=PL_new_functor(PL_new_atom("-"), 2);
+    tail=PL_new_term_ref();
+    ret=PL_put_nil(tail);
+    RETURN_IF_FAIL
+    for (i=0;i<nVars;i++)
+    {
+      if (assignments[i]!=-1)
+      {
+        var=PL_new_term_ref();
+        val=PL_new_term_ref();
+        ret=PL_put_integer(var,i);
+        RETURN_IF_FAIL
+        ret=PL_put_integer(val,assignments[i]);
+        RETURN_IF_FAIL
+        head=PL_new_term_ref();
+        ret=PL_cons_functor(head, minus,var,val);
+        RETURN_IF_FAIL
+        out=PL_new_term_ref();
+        ret=PL_cons_list(out,head,tail);
+        RETURN_IF_FAIL
+        tail=out;
+      }
+    }
+    out=tail;
+  }
+  return out;
+}
+
+double Prob(DdNode *node, environment * env, tablerow * table)
 /* compute the probability of the expression rooted at node.
 table is used to store nodeB for which the probability has alread been computed
 so that it is not recomputed
  */
 {
-  int index,comp;
+  int index;
   double res;
   double p,pt,pf,BChild0,BChild1;
   double * value_p;
   DdNode *nodekey,*T,*F;
-
-  comp=Cudd_IsComplement(node);
-  comp=(comp && !comp_par) ||(!comp && comp_par);
+  //comp=(comp && !comp_par) ||(!comp && comp_par);
   if (Cudd_IsConstant(node))
   {
-    if (comp)
-      return 0.0;
-    else
       return 1.0;
   }
   else
@@ -378,7 +878,7 @@ so that it is not recomputed
     nodekey=Cudd_Regular(node);
     value_p=get_value(table,nodekey);
     if (value_p!=NULL)
-      return *value_p;
+        return *value_p;
     else
     {
       index=Cudd_NodeReadIndex(node);  //Returns the index of the node. The node pointer can be either regular or complemented.
@@ -386,8 +886,11 @@ so that it is not recomputed
       p=env->probs[index];
       T = Cudd_T(node);
       F = Cudd_E(node);
-      pf=Prob(F,env,table,comp);
-      pt=Prob(T,env,table,comp);
+      pf=Prob(F,env,table);
+      pt=Prob(T,env,table);
+      if (Cudd_IsComplement(F))
+        pf=1.0-pf;
+
       BChild0=pf*(1-p);
       BChild1=pt*p;
       res=BChild0+BChild1;
@@ -397,8 +900,271 @@ so that it is not recomputed
   }
 }
 
+prob_abd_expl abd_Prob(DdNode *node, environment * env,
+  expltablerow * expltable, tablerow * table,
+  int comp_par)
+/* compute the probability of the expression rooted at node.
+table is used to store nodeB for which the probability has alread been computed
+so that it is not recomputed
+ */
+{
+  int index,comp,pos;
+  double p,p0,p1;
+  DdNode *nodekey,*T,*F;
+  prob_abd_expl deltat,deltaf,delta,*deltaptr;
+  assign assignment;
+  explan_t * mpa0,* mpa1,* mpa;
+
+  comp=Cudd_IsComplement(node);
+  comp=(comp && !comp_par) ||(!comp && comp_par);
+  index=Cudd_NodeReadIndex(node);
+  pos=Cudd_ReadPerm(env->mgr,index);
+  if (pos>=env->n_abd_boolVars)
+  {
+    p1=Prob(node,env,table);
+    if (comp)
+      p1= 1.0-p1;
+
+    delta.prob=p1;
+    delta.mpa=NULL;
+
+    return delta;
+  }
+  else
+  {
+    nodekey=Cudd_Regular(node);
+    deltaptr=expl_get_value(expltable,nodekey,comp);
+    if (deltaptr!=NULL)
+    {
+      return *deltaptr;
+    }
+    else
+    {
+
+      T = Cudd_T(node);
+      F = Cudd_E(node);
+      deltaf=abd_Prob(F,env,expltable,table,comp);
+      deltat=abd_Prob(T,env,expltable,table,comp);
+      p=env->probs[index];
+
+      if (p==1.0)
+      {
+        p0=deltaf.prob;
+        p1=deltat.prob;
+      }
+      else
+      {
+        p0=deltaf.prob*(1-p);
+        p1=deltat.prob*p;
+      }
+
+      mpa0=deltaf.mpa;
+      mpa1=deltat.mpa;
+
+      if (p1>p0)
+      {
+        assignment.var=env->bVar2mVar[index];
+        assignment.val=1;
+        mpa=insert(assignment,mpa1);
+        delta.prob=p1;
+        delta.mpa=mpa;
+      }
+      else
+      {
+        assignment.var=env->bVar2mVar[index];
+        assignment.val=0;
+        mpa=insert(assignment,mpa0);
+        delta.prob=p0;
+        delta.mpa=mpa;
+      }
+      expl_add_node(expltable,nodekey,comp,delta);
+      return delta;
+    }
+  }
+}
+
+prob_abd_expl map_Prob(DdNode *node, environment * env,
+  expltablerow * maptable, tablerow * table,
+  int comp_par)
+/* compute the probability of the expression rooted at node.
+table is used to store nodeB for which the probability has alread been computed
+so that it is not recomputed
+ */
+{
+  int index,comp,pos;
+  double p,p0,p1;
+  DdNode *nodekey,*T,*F;
+  prob_abd_expl deltat,deltaf,delta,*deltaptr;
+  assign assignment;
+  explan_t * mpa0,* mpa1,* mpa;
 
 
+  index=Cudd_NodeReadIndex(node);
+  pos=Cudd_ReadPerm(env->mgr,index);
+  comp=Cudd_IsComplement(node);
+  comp=(comp && !comp_par) ||(!comp && comp_par);
+
+  if (pos>=env->n_abd_boolVars)
+  {
+    p1=Prob(node,env,table);
+    if (comp)
+      p1= 1.0-p1;
+    delta.prob=p1;
+    delta.mpa=NULL;
+
+
+    return delta;
+  }
+  else
+  {
+    nodekey=Cudd_Regular(node);
+    deltaptr=expl_get_value(maptable,nodekey,comp);
+    if (deltaptr!=NULL)
+    {
+      return *deltaptr;
+    }
+    p=env->probs[index];
+    T = Cudd_T(node);
+    F = Cudd_E(node);
+    deltaf=map_Prob(F,env,maptable,table,comp);
+    deltat=map_Prob(T,env,maptable,table,comp);
+
+    p0=deltaf.prob;
+    mpa0=deltaf.mpa;
+
+    p1=deltat.prob*p;
+    mpa1=deltat.mpa;
+
+    if (p1>p0)
+    {
+      assignment.var=index;
+      assignment.val=1;
+      mpa=insert(assignment,mpa1);
+      delta.prob=p1;
+      delta.mpa=mpa;
+    }
+    else
+    {
+      assignment.var=index;
+      assignment.val=0;
+      mpa=insert(assignment,mpa0);
+      delta.prob=p0;
+      delta.mpa=mpa;
+    }
+    expl_add_node(maptable,nodekey,comp,delta);
+    return delta;
+  }
+
+}
+prob_abd_expl vit_Prob(DdNode *node, environment * env,
+  expltablerow * expltable, tablerow * table,
+  int comp_par)
+/* compute the probability of the expression rooted at node.
+table is used to store nodeB for which the probability has alread been computed
+so that it is not recomputed
+ */
+{
+  int index,comp;
+  double p,p0,p1;
+  DdNode *nodekey,*T,*F;
+  prob_abd_expl deltat,deltaf,delta,*deltaptr;
+  assign assignment;
+  explan_t * mpa0,* mpa1,* mpa;
+
+  comp=Cudd_IsComplement(node);
+  comp=(comp && !comp_par) ||(!comp && comp_par);
+  index=Cudd_NodeReadIndex(node);
+  if (Cudd_IsConstant(node))
+  {
+
+    if (comp)
+      p1= 0.0;
+    else
+      p1= 1.0;
+
+    delta.prob=p1;
+    delta.mpa=NULL;
+
+    return delta;
+  }
+  else
+  {
+    nodekey=Cudd_Regular(node);
+    deltaptr=expl_get_value(expltable,nodekey,comp);
+    if (deltaptr!=NULL)
+    {
+      return *deltaptr;
+    }
+    else
+    {
+
+      T = Cudd_T(node);
+      F = Cudd_E(node);
+      deltaf=vit_Prob(F,env,expltable,table,comp);
+      deltat=vit_Prob(T,env,expltable,table,comp);
+      p=env->probs[index];
+
+
+      p0=deltaf.prob*(1-p);
+      p1=deltat.prob*p;
+
+      mpa0=deltaf.mpa;
+      mpa1=deltat.mpa;
+
+      if (p1>p0)
+      {
+        assignment.var=index;
+        assignment.val=1;
+        mpa=insert(assignment,mpa1);
+        delta.prob=p1;
+        delta.mpa=mpa;
+      }
+      else
+      {
+        assignment.var=index;
+        assignment.val=0;
+        mpa=insert(assignment,mpa0);
+        delta.prob=p0;
+        delta.mpa=mpa;
+      }
+      expl_add_node(expltable,nodekey,comp,delta);
+      return delta;
+    }
+  }
+}
+
+explan_t * insert(assign assignment,explan_t * head)
+{
+  explan_t * newhead;
+
+  newhead=malloc(sizeof(explan_t));
+  newhead->a=assignment;
+  newhead->next=duplicate(head);
+  return newhead;
+}
+
+explan_t * duplicate(explan_t * head)
+{
+  explan_t * newhead;
+  if (head)
+  {
+    newhead=malloc(sizeof(explan_t));
+    newhead->a=head->a;
+    newhead->next=duplicate(head->next);
+  }
+  else
+    newhead=NULL;
+  return newhead;
+}
+
+void free_list(explan_t * head)
+{
+  if (head)
+  {
+    free_list(head->next);
+    free(head);
+  }
+}
 static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
 {
   term_t out,head,probTerm;
@@ -415,6 +1181,8 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
 
   v=&env->vars[env->nVars-1];
+  v->abducible=0;
+  v->query=0;
   ret=PL_get_integer(arg2,&v->nVal);
   RETURN_IF_FAIL
   ret=PL_get_integer(arg4,&v->nRule);
@@ -444,6 +1212,104 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   return(PL_unify(out,arg5));
 }
 
+static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+{
+  term_t out,head,probTerm;
+  variable * v;
+  int i,ret;
+  double p;
+  environment * env;
+
+  head=PL_new_term_ref();
+  out=PL_new_term_ref();
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  env->nVars=env->nVars+1;
+  env->n_abd++;
+  env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
+
+  v=&env->vars[env->nVars-1];
+  v->query=1;
+  v->abducible=0;
+  ret=PL_get_integer(arg2,&v->nVal);
+  RETURN_IF_FAIL
+  ret=PL_get_integer(arg4,&v->nRule);
+  RETURN_IF_FAIL
+
+  env->n_abd_boolVars=env->n_abd_boolVars+v->nVal;
+  v->firstBoolVar=env->boolVars;
+  env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal)* sizeof(double))));
+  env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal)* sizeof(int)));
+  probTerm=PL_copy_term_ref(arg3);
+
+  for (i=0;i<v->nVal;i++)
+  {
+    ret=PL_get_list(probTerm,head,probTerm);
+    RETURN_IF_FAIL
+    ret=PL_get_float(head,&p);
+    RETURN_IF_FAIL
+    env->bVar2mVar[env->boolVars+i]=env->nVars-1;
+    env->probs[env->boolVars+i]=p;
+  }
+  env->boolVars=env->boolVars+v->nVal;
+  env->rules[v->nRule]= v->nVal;
+
+  ret=PL_put_integer(out,env->nVars-1);
+  RETURN_IF_FAIL
+
+  return(PL_unify(out,arg5));
+}
+
+static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+{
+  term_t out,head,probTerm;
+  variable * v;
+  int i,ret;
+  double p,p0;
+  environment * env;
+
+  head=PL_new_term_ref();
+  out=PL_new_term_ref();
+  ret=PL_get_pointer(arg1,(void **)&env);
+  RETURN_IF_FAIL
+  env->nVars=env->nVars+1;
+  env->vars=(variable *) realloc(env->vars,env->nVars * sizeof(variable));
+
+  env->n_abd=env->n_abd+1;
+
+  v=&env->vars[env->nVars-1];
+
+  v->abducible=1;
+  v->query=0;
+  ret=PL_get_integer(arg2,&v->nVal);
+  RETURN_IF_FAIL
+  env->n_abd_boolVars=env->n_abd_boolVars+v->nVal-1;
+
+  ret=PL_get_integer(arg4,&v->nRule);
+  RETURN_IF_FAIL
+  v->firstBoolVar=env->boolVars;
+  env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
+  env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
+  probTerm=PL_copy_term_ref(arg3);
+  p0=1;
+  for (i=0;i<v->nVal-1;i++)
+  {
+    ret=PL_get_list(probTerm,head,probTerm);
+    RETURN_IF_FAIL
+    ret=PL_get_float(head,&p);
+    RETURN_IF_FAIL
+    env->bVar2mVar[env->boolVars+i]=env->nVars-1;
+    env->probs[env->boolVars+i]=p/p0;
+    p0=p0*(1-p/p0);
+  }
+  env->boolVars=env->boolVars+v->nVal-1;
+  env->rules[v->nRule]= v->nVal;
+  ret=PL_put_integer(out,env->nVars-1);
+  RETURN_IF_FAIL
+
+  return(PL_unify(out,arg5));
+}
+
 static foreign_t equality(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
 {
   term_t out;
@@ -466,20 +1332,29 @@ static foreign_t equality(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
   tmp=Cudd_ReadOne(env->mgr);
   Cudd_Ref(tmp);
   node=NULL;
-  for (i=v.firstBoolVar;i<v.firstBoolVar+value;i++)
-  {
-    var=Cudd_bddIthVar(env->mgr,i);
-    node=Cudd_bddAnd(env->mgr,tmp,Cudd_Not(var));
-    Cudd_Ref(node);
-    Cudd_RecursiveDeref(env->mgr,tmp);
-    tmp=node;
-  }
-  if (!(value==v.nVal-1))
+  if (v.query)
   {
     var=Cudd_bddIthVar(env->mgr,v.firstBoolVar+value);
     node=Cudd_bddAnd(env->mgr,tmp,var);
     Cudd_Ref(node);
-    Cudd_RecursiveDeref(env->mgr,tmp);
+  }
+  else
+  {
+    for (i=v.firstBoolVar;i<v.firstBoolVar+value;i++)
+    {
+      var=Cudd_bddIthVar(env->mgr,i);
+      node=Cudd_bddAnd(env->mgr,tmp,Cudd_Not(var));
+      Cudd_Ref(node);
+      Cudd_RecursiveDeref(env->mgr,tmp);
+      tmp=node;
+    }
+    if (!(value==v.nVal-1))
+    {
+      var=Cudd_bddIthVar(env->mgr,v.firstBoolVar+value);
+      node=Cudd_bddAnd(env->mgr,tmp,var);
+      Cudd_Ref(node);
+      Cudd_RecursiveDeref(env->mgr,tmp);
+    }
   }
   out=PL_new_term_ref();
   ret=PL_put_pointer(out,(void *)node);
@@ -686,7 +1561,7 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
 {
   char * onames[]={"Out"};
   char ** inames;
-  int i,b,index;
+  int i,b,index,nv;
   variable v;
   char numberVar[10],numberBit[10];
   inames= (char **) malloc(sizeof(char *)*(env->boolVars));
@@ -694,7 +1569,11 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
   for (i=0;i<env->nVars;i++)
   {
     v=env->vars[i];
-    for (b=0;b<v.nVal-1;b++)
+      if (v.query)
+        nv=v.nVal;
+      else
+        nv=v.nVal-1;
+    for (b=0;b<nv;b++)
     {
       inames[b+index]=(char *) malloc(sizeof(char)*20);
       strcpy(inames[b+index],"X");
@@ -704,18 +1583,22 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
       sprintf(numberBit,"%d",b);
       strcat(inames[b+index],numberBit);
     }
-    index=index+v.nVal-1;
+    index=index+nv;
   }
   Cudd_DumpDot(env->mgr,1,&bdd,(const char * const *)inames,(const char * const *)onames,file);
   index=0;
   for (i=0;i<env->nVars;i++)
   {
     v=env->vars[i];
-    for (b=0;b<v.nVal-1;b++)
+    if (v.query)
+      nv=v.nVal;
+    else
+      nv=v.nVal-1;
+    for (b=0;b<nv;b++)
     {
       free(inames[b+index]);
     }
-    index=index+v.nVal-1;
+    index=index+nv;
   }
   free(inames);
 }
@@ -734,27 +1617,20 @@ static int rec_deref(void)
 
 */
 
-double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
+double ProbPath(example_data * ex_d,DdNode *node, int nex)
 {
-  int index,mVarIndex,comp,pos,position;//,boolVarIndex;
+  int index,mVarIndex,pos,position;//,boolVarIndex;
   variable v;
   double res;
-  double p,pt,pf,BChild0,BChild1,e0,e1;
-  double * value_p,** eta_rule;
+  double p,pt,pf,BChild0e,BChild1e,BChild0o,BChild1o,e0,e1;
+  double *value_p, * value_p_e, *value_p_o,** eta_rule;
   DdNode *nodekey,*T,*F;
 
-  comp=Cudd_IsComplement(node);
-  comp=(comp && !comp_par) ||(!comp && comp_par);
+  // printf("node %p comp %d\n",node,comp );
   if (Cudd_IsConstant(node))
   {
-    if (comp)
-    {
-      return 0.0;
-    }
-    else
-    {
-      return 1.0;
-    }
+    // printf("constant\n");
+    return 1.0;
   }
   else
   {
@@ -762,6 +1638,7 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
     value_p=get_value(ex_d->nodesB,nodekey);
     if (value_p!=NULL)
     {
+      // printf("found %f\n", *value_p);
       return *value_p;
     }
     else
@@ -770,20 +1647,29 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
       p=ex_d->env[nex].probs[index];
       T = Cudd_T(node);
       F = Cudd_E(node);
-      pf=ProbPath(ex_d,F,comp,nex);
-      pt=ProbPath(ex_d,T,comp,nex);
-      BChild0=pf*(1-p);
-      BChild1=pt*p;
-      value_p=get_value(ex_d->nodesF,nodekey);
-      e0 = (*value_p)*BChild0;
-      e1 = (*value_p)*BChild1;
+      pf=ProbPath(ex_d,F,nex);
+      pt=ProbPath(ex_d,T,nex);
+      // printf("pt %f pf %f\n",pt,pf );
+      if (Cudd_IsComplement(F))
+        pf=1.0-pf;
+      // printf("pt %f pf %f\n",pt,pf );
+
+      BChild0e=pf*(1-p);
+      BChild0o=(1-pf)*(1-p);
+      BChild1e=pt*p;
+      BChild1o=(1-pt)*p;
+      value_p_e=get_value(ex_d->nodesFE,nodekey);
+      value_p_o=get_value(ex_d->nodesFO,nodekey);
+      e0 = (*value_p_e)*BChild0e+(*value_p_o)*BChild0o;
+      e1 = (*value_p_e)*BChild1e+(*value_p_o)*BChild1o;
+    //  printf("e node %p %f %f %f %f\n",node,*value_p_e,*value_p_o,e0,e1 );
       mVarIndex=ex_d->env[nex].bVar2mVar[index];
       v=ex_d->env[nex].vars[mVarIndex];
       pos=index-v.firstBoolVar;
       eta_rule=ex_d->eta_temp[v.nRule];
       eta_rule[pos][0]=eta_rule[pos][0]+e0;
       eta_rule[pos][1]=eta_rule[pos][1]+e1;
-      res=BChild0+BChild1;
+      res=BChild0e+BChild1e;
       add_node(ex_d->nodesB,nodekey,res);
       position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
       position=position+1;
@@ -817,11 +1703,25 @@ double ProbPath(example_data * ex_d,DdNode *node,int comp_par, int nex)
 void Forward(example_data * ex_d,DdNode *root, int nex)
 {
   DdNode *** nodesToVisit;
-  int * NnodesToVisit;
+  int * NnodesToVisit,comp;
+  double FrootE,FrootO;
 
   environment env;
   int i,j;
   env=ex_d->env[nex];
+  comp=Cudd_IsComplement(root);
+  if (comp)
+  {
+    FrootE=0.0;
+    FrootO=1.0;
+  }
+  else
+  {
+    FrootE=1.0;
+    FrootO=0.0;
+  }
+  add_node(ex_d->nodesFE,Cudd_Regular(root),FrootE);
+  add_node(ex_d->nodesFO,Cudd_Regular(root),FrootO);
   if (env.boolVars)
   {
     nodesToVisit= (DdNode ***)malloc(sizeof(DdNode **)* env.boolVars);
@@ -834,7 +1734,6 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
       nodesToVisit[i]=NULL;
       NnodesToVisit[i]=0;
     }
-    add_node(ex_d->nodesF,Cudd_Regular(root),1);
     for(i=0;i<env.boolVars;i++)
     {
       for(j=0;j<NnodesToVisit[i];j++)
@@ -847,10 +1746,6 @@ void Forward(example_data * ex_d,DdNode *root, int nex)
     free(nodesToVisit);
     free(NnodesToVisit);
   }
-  else
-  {
-    add_node(ex_d->nodesF,Cudd_Regular(root),1);
-  }
 }
 
 void UpdateForward(example_data *ex_d,DdNode *node, int nex,
@@ -858,8 +1753,10 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
 {
   int index,position;
   DdNode *T,*E,*nodereg;
-  double *value_p,*value_p_T,*value_p_F,p;
+  double *value_p_E,*value_p_O,*value_p_T_E,*value_p_T_O,
+    *value_p_F_E,*value_p_F_O,p,value_par_E,value_par_O;
 
+// printf("F node %p comp %d\n",node,Cudd_IsComplement(node) );
   if (Cudd_IsConstant(node))
   {
     return;
@@ -869,8 +1766,9 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
     index=Cudd_NodeReadIndex(node);
     p=ex_d->env[nex].probs[index];
     nodereg=Cudd_Regular(node);
-    value_p=get_value(ex_d->nodesF,nodereg);
-    if (value_p== NULL)
+    value_p_E=get_value(ex_d->nodesFE,nodereg);
+    value_p_O=get_value(ex_d->nodesFO,nodereg);
+    if (value_p_E== NULL)
     {
       printf("Error\n");
       return;
@@ -881,14 +1779,21 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
       E = Cudd_E(node);
       if (!Cudd_IsConstant(T))
       {
-        value_p_T=get_value(ex_d->nodesF,T);
-        if (value_p_T!= NULL)
+        value_p_T_E=get_value(ex_d->nodesFE,T);
+        value_p_T_O=get_value(ex_d->nodesFO,T);
+        if (value_p_T_E!= NULL)
         {
-           *value_p_T= *value_p_T+*value_p*p;
+           *value_p_T_E= *value_p_T_E+*value_p_E*p;
+           *value_p_T_O= *value_p_T_O+*value_p_O*p;
+          // printf("update f t %p %f %f %f %f\n",T,*value_p_T_E,
+          //  *value_p_E*p,*value_p_T_O,*value_p_O*p);
         }
         else
         {
-          add_or_replace_node(ex_d->nodesF,Cudd_Regular(T),*value_p*p);
+          // printf("new f t %p %f %f \n",T,*value_p_E*p,*value_p_O*p );
+
+          add_or_replace_node(ex_d->nodesFE,Cudd_Regular(T),*value_p_E*p);
+          add_or_replace_node(ex_d->nodesFO,Cudd_Regular(T),*value_p_O*p);
           index=Cudd_NodeReadIndex(T);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
           nodesToVisit[position]=(DdNode **)realloc(nodesToVisit[position],
@@ -899,15 +1804,40 @@ void UpdateForward(example_data *ex_d,DdNode *node, int nex,
       }
       if (!Cudd_IsConstant(E))
       {
-        value_p_F=get_value(ex_d->nodesF,Cudd_Regular(E));
-
-        if (value_p_F!= NULL)
+        value_p_F_E=get_value(ex_d->nodesFE,Cudd_Regular(E));
+        value_p_F_O=get_value(ex_d->nodesFO,Cudd_Regular(E));
+        // if (Cudd_IsComplement(E))
+        //   value_par=1 - *value_p;
+        // else
+        //   value_par= *value_p;
+        // if (Cudd_IsComplement(E))
+        //   p=1 -p;
+        if (Cudd_IsComplement(E))
         {
-          *value_p_F= *value_p_F+*value_p*(1-p);
+          value_par_E= *value_p_O;
+          value_par_O= *value_p_E;
         }
         else
         {
-          add_or_replace_node(ex_d->nodesF,Cudd_Regular(E),*value_p*(1-p));
+          value_par_E= *value_p_E;
+          value_par_O= *value_p_O;
+        }
+        // printf("f child %d %f %f\n",Cudd_IsComplement(E),value_par_E,value_par_O );
+
+        if (value_p_F_E!= NULL)
+        {
+
+          *value_p_F_E= *value_p_F_E+value_par_E*(1-p);
+          *value_p_F_O= *value_p_F_O+value_par_O*(1-p);
+          // printf("update f f %p %f %f %f %f\n",E,*value_p_F_E, value_par_E*(1-p),
+        // *value_p_F_O, value_par_O*(1-p));
+        }
+        else
+        {
+                              // printf("new f f %p %f\n",E,value_par_E*(1-p) );
+
+          add_or_replace_node(ex_d->nodesFE,Cudd_Regular(E),value_par_E*(1-p));
+          add_or_replace_node(ex_d->nodesFO,Cudd_Regular(E),value_par_O*(1-p));
           index=Cudd_NodeReadIndex(E);
           position=Cudd_ReadPerm(ex_d->env[nex].mgr,index);
           nodesToVisit[position]=(DdNode **)realloc(nodesToVisit[position],
@@ -945,7 +1875,9 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
       ex_d->eta_temp[j][i][1]=0;
     }
   }
-  rootProb=ProbPath(ex_d,root,0,nex);
+  rootProb=ProbPath(ex_d,root,nex);
+  if (Cudd_IsComplement(root))
+    rootProb=1.0-rootProb;
   if (rootProb>0.0)
   {
     for (j=0; j<ex_d->env[nex].boolVars; j++)
@@ -1279,6 +2211,8 @@ install_t install()
   PL_register_foreign("end",1,end,0);
   PL_register_foreign("end_bdd",1,end_bdd,0);
   PL_register_foreign("add_var",5,add_var,0);
+  PL_register_foreign("add_query_var",5,add_query_var,0);
+  PL_register_foreign("add_abd_var",5,add_abd_var,0);
   PL_register_foreign("equality",4,equality,0);
   PL_register_foreign("and",4,and,0);
   PL_register_foreign("one",2,one,0);
@@ -1290,6 +2224,11 @@ install_t install()
   PL_register_foreign("init_test",2,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
+  PL_register_foreign("ret_abd_prob",4,ret_abd_prob,0);
+  PL_register_foreign("ret_map_prob",4,ret_map_prob,0);
+  PL_register_foreign("ret_vit_prob",4,ret_vit_prob,0);
+  PL_register_foreign("reorder",1,reorder,0);
+  PL_register_foreign("make_query_var",3,make_query_var,0);
   PL_register_foreign("em",8,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
   PL_register_foreign("rand_seed",1,rand_seed,0);
@@ -1377,6 +2316,61 @@ void destroy_table(tablerow *tab,int varcnt)
 
   for (i = 0; i < varcnt; i++)
   {
+    free(tab[i].row);
+  }
+  free(tab);
+}
+
+expltablerow* expl_init_table(int varcnt) {
+  int i;
+  expltablerow *tab;
+
+  tab = (expltablerow *) malloc(sizeof(explrowel) * varcnt);
+  for (i = 0; i < varcnt; i++)
+  {
+    tab[i].row = NULL;
+    tab[i].cnt = 0;
+  }
+  return tab;
+}
+
+
+void expl_add_node(expltablerow *tab, DdNode *node, int comp, prob_abd_expl value) {
+  int index = Cudd_NodeReadIndex(node);
+
+  tab[index].row = (explrowel *) realloc(tab[index].row,
+    (tab[index].cnt + 1) * sizeof(explrowel));
+  tab[index].row[tab[index].cnt].key.node = node;
+  tab[index].row[tab[index].cnt].key.comp = comp;
+  tab[index].row[tab[index].cnt].value = value;
+  tab[index].cnt += 1;
+}
+
+prob_abd_expl * expl_get_value(expltablerow *tab,  DdNode *node, int comp) {
+  int i;
+  int index = Cudd_NodeReadIndex(node);
+
+  for(i = 0; i < tab[index].cnt; i++)
+  {
+    if (tab[index].row[i].key.node == node &&
+       tab[index].row[i].key.comp == comp)
+    {
+      return &tab[index].row[i].value;
+    }
+  }
+  return NULL;
+}
+
+void expl_destroy_table(expltablerow *tab,int varcnt)
+{
+  int i,j;
+
+  for (i = 0; i < varcnt; i++)
+  {
+    for (j = 0; j< tab[i].cnt; j++)
+    {
+      free_list(tab[i].row[j].value.mpa);
+    }
     free(tab[i].row);
   }
   free(tab);

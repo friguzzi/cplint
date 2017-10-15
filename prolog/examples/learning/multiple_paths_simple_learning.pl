@@ -7,7 +7,7 @@
 
 /** <examples>
 ?- induce_par([train],P),test_prob(P,[train],NP,NN,LL,L).
-?- induce_par([train],P).  % learn the parameteters
+?- induce_par([train],P).  % learn the parameteters 
 */
 
 :-sc.
@@ -18,23 +18,18 @@
 
 bg([]).
 
-fold(train,[train1,train2]).
+fold(train,[train1,train2,train3]).
 
 output(p/0).
 
 :- begin_in.
-p:- c,\+ d,a,b.
+p:- a,b.
 
-p:- d, \+ a,\+b.
+p:- \+ a,\+b.
 
 a:0.3.
 
 b:0.4.
-
-c:0.2.
-
-d:0.1.
-
 :- end_in.
 
 begin(model(train1)).
@@ -43,3 +38,7 @@ end(model(train1)).
 begin(model(train2)).
 neg(p).
 end(model(train2)).
+
+begin(model(train3)).
+p.
+end(model(train3)).
