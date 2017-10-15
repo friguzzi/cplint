@@ -30,13 +30,14 @@ program). When learning, the initial parameters are randomly set.
 
 :-sc.
 
-:- table success/1, hmmf/3, tr/2.
 
 :-set_sc(beamsize,15).
 :-set_sc(single_var,false).
 :-set_sc(neg_ex,cw).
 :-set_sc(depth_bound,false).
-:-set_sc(verbosity,1).
+:-set_sc(verbosity,15).
+
+:- table success/1, hmmf/3, tr/2.
 
 bg([]).
 

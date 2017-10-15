@@ -3394,15 +3394,26 @@ write_body3(M,A,B):-
 
 tab(M,A/B,P):-
   length(Args0,B),
-  append(Args0,[_,-,lattice(pita:orc/3)],Args),
+  (M:local_setting(depth_bound,true)->
+    ExtraArgs=[_,-,-,lattice(pita:orc/3)]
+  ;
+    ExtraArgs=[_,-,lattice(pita:orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
   P=..[A|Args],
   append(Args0,[_,_,_],ArgsT),
   PT=..[A|ArgsT],
   assert(M:tabled(PT)).
 
-zero_clause(A/B,(H:-pita:zeroc(Env,BDD))):-
-  length(Args0,B),
-  append(Args0,[_,Env,BDD],Args),
+zero_clause(M,A/B,(H:-maplist(nonvar,Args0),pita:zeroc(Env,BDD))):-
+  B1 is B+1,
+  length(Args0,B1),
+  (M:local_setting(depth_bound,true)->
+    ExtraArgs=[_,Env,BDD]
+  ;
+    ExtraArgs=[Env,BDD]
+  ),
+  append(Args0,ExtraArgs,Args),
   H=..[A|Args].
 
 user:term_expansion((:- sc), []) :-!,
@@ -3426,7 +3437,7 @@ user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   input_mod(M),!,
   list2and(L,Conj),
   maplist(tab(M),L,L1),
-  maplist(zero_clause,L,LZ),
+  maplist(zero_clause(M),L,LZ),
   assert(M:zero_clauses(LZ)),
   list2and(L1,Conj1).
 
