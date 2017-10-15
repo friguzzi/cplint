@@ -332,7 +332,7 @@ abd_prob(M:Goal,P,Delta):-
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
-  append([one(Env,BDD)],BodyList2,BodyList3),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
@@ -351,7 +351,7 @@ vit_prob(M:Goal,P,Delta):-
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
-  append([one(Env,BDD)],BodyList2,BodyList3),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
@@ -445,7 +445,7 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,(_,BDD)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
   create_dot_string(Env,BDD,Dot),
@@ -454,7 +454,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,(_,BDD)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
   ret_abd_prob(Env,BDD,P,Exp),
@@ -465,7 +465,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD0),!,
+  get_node(M:Goal,Env,(_,BDD0)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   one(Env,One),
   make_query_vars(LV,M,Env,One,Cons,LAV),
@@ -684,11 +684,11 @@ get_p(M:Goal,Env,P):-
   ret_probc(Env,BDD,P).
 
 get_abd_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,BDD),
+  get_node(M:Goal,Env,(_,BDD)),
   ret_abd_prob(Env,BDD,P,Exp).
 
 get_vit_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,BDD),
+  get_node(M:Goal,Env,(_,BDD)),
   ret_vit_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
@@ -1215,7 +1215,7 @@ tab(M,A/B,P):-
   append(Args0,ExtraArgs,Args),
   P=..[A|Args].
 
-zero_clause(M,A/B,(H:-zeroc(Env,BDD))):-
+zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(Env,BDD))):-
   length(Args0,B),
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[Env,_,BDD]
