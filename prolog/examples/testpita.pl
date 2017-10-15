@@ -128,5 +128,8 @@ test((prob(has(2),do(has(3)),P),close_to(P,0.136)),viral).
 
 test((prob(taught_by(c1,p1),P),close_to(P,0.0926040439925477)),uwcse).
 
+test((prob(path(a,e),P),close_to(P,0.22888)),path).
+test((prob(path(a,e),P),close_to(P,0.22888)),pathdb).
+
 test((prob(p,P),close_to(P,0.54)),multiple_paths_simple).
 test((prob(p,P),close_to(P,0.0636)),multiple_paths).

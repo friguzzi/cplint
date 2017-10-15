@@ -12,7 +12,7 @@ main:-
 
 t:-
 	format("Test unsuccessful.",[]).
-	
+
 test_files([]).
 
 test_files([H|T]):-
@@ -167,3 +167,5 @@ test((mc_rejection_sample(has(2),has(3),500,P),close_to(P,0.4065135474609725,0.1
 test((mc_mh_sample(has(2),has(3),500,2,P),close_to(P,0.4065135474609725,0.1)),viralmc).
 test((mc_rejection_sample(has(2),do(has(3)),500,P),close_to(P,0.136)),viralmc).
 test((mc_mh_sample(has(2),do(has(3)),500,1,P),close_to(P,0.136)),viralmc).
+
+test((mc_sample(taught_by(c1,p1),1000,P),close_to(P,0.0926040439925477)),uwcsemc).
