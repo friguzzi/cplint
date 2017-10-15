@@ -1,4 +1,4 @@
-/* 
+/*
 Viral Marketing
 */
 
@@ -7,6 +7,7 @@ Viral Marketing
 ?- prob(has(2),has(3),P).
 */
 :- use_module(library(pita)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(graphviz).
@@ -17,6 +18,8 @@ graph(digraph([rankdir="LR"|G])):-
       G).
 
 :- pita.
+
+:- table has/1, trusts/2.
 
 :- begin_lpad.
 
@@ -32,4 +35,3 @@ trusts(3,2).
 trusts(4,1).
 trusts(4,3).
 :-end_lpad.
-

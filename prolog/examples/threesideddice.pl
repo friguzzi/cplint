@@ -2,9 +2,9 @@
 A three-sided die is repeatedly thrown until the outcome is three.
 on(T,F) means that on the Tth throw the face F came out.
 From
-Riguzzi and Terrance Swift. The PITA system: Tabling and answer subsumption for 
-reasoning under uncertainty. Theory and Practice of Logic Programming, 
-27th International Conference on Logic Programming (ICLP'11) Special Issue, 
+Riguzzi and Terrance Swift. The PITA system: Tabling and answer subsumption for
+reasoning under uncertainty. Theory and Practice of Logic Programming,
+27th International Conference on Logic Programming (ICLP'11) Special Issue,
 Lexington, Kentucky 6-10 July 2011, 11(4-5):433-449, 2011
 */
 :- use_module(library(pita)).
@@ -14,6 +14,8 @@ Lexington, Kentucky 6-10 July 2011, 11(4-5):433-449, 2011
 :- endif.
 
 :- pita.
+
+:- table on/2.
 
 :- begin_lpad.
 
@@ -54,4 +56,3 @@ on(X,1):1/3;on(X,2):1/3;on(X,3):1/3:-
 ?- prob(on(2,1),on(1,1),Prob). % what is the probability that the dice lands on face 1 at time 2 given that it landed on face 1 at time 1?
 % expected result 0.333333333333333
 */
- 

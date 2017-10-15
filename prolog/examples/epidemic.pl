@@ -1,11 +1,12 @@
 /*
 Model of the development of an epidemic or a pandemic.
-From 
-E. Bellodi and F. Riguzzi. Expectation Maximization over binary decision 
-diagrams for probabilistic logic programs. Intelligent Data Analysis, 
+From
+E. Bellodi and F. Riguzzi. Expectation Maximization over binary decision
+diagrams for probabilistic logic programs. Intelligent Data Analysis,
 17(2):343-363, 2013.
 */
 :- use_module(library(pita)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -15,10 +16,13 @@ diagrams for probabilistic logic programs. Intelligent Data Analysis,
 
 :- pita.
 
+:- table epidemic/0, pandemic/0, flu/1, cold/0.
+
+
 :- begin_lpad.
 
 epidemic : 0.6; pandemic : 0.3 :- flu(_), cold.
-% if somebody has the flu and the climate is cold, there is the possibility 
+% if somebody has the flu and the climate is cold, there is the possibility
 % that an epidemic arises with probability 0.6 and the possibility that a
 % pandemic arises with probability 0.3
 

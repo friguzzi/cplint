@@ -1,17 +1,17 @@
 /* Hidden Markov Model dataset: 500 sequences of an HMM with 2 states
 and 2 output symbol.
-Used in 
-Fabrizio Riguzzi and Nicola Di Mauro. Applying the information bottleneck 
-to statistical relational learning. Machine Learning, 86(1):89-114, 2012. 
+Used in
+Fabrizio Riguzzi and Nicola Di Mauro. Applying the information bottleneck
+to statistical relational learning. Machine Learning, 86(1):89-114, 2012.
 
 The program is from
-Sato T, Kameya Y, Zhou NF (2005) Generative modeling with failure in prism. 
-In: Kaelbling LP, Saffiotti A (eds) Proceedings of the 19th International 
-Joint Conference on Artificial Intelligence, Professional Book Center, 
+Sato T, Kameya Y, Zhou NF (2005) Generative modeling with failure in prism.
+In: Kaelbling LP, Saffiotti A (eds) Proceedings of the 19th International
+Joint Conference on Artificial Intelligence, Professional Book Center,
 pp 847-852
 
 Examples generated randomly from the target program. The task is to recover
-the values of the parameters of the target program (indicated in the input 
+the values of the parameters of the target program (indicated in the input
 program). When learning, the initial parameters are randomly set.
 */
 
@@ -20,6 +20,7 @@ program). When learning, the initial parameters are randomly set.
 */
 :- use_module(library(slipcover)).
 :- use_module(library(lists)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -28,6 +29,8 @@ program). When learning, the initial parameters are randomly set.
 
 
 :-sc.
+
+:- table success/1, hmmf/3, tr/2.
 
 :-set_sc(beamsize,15).
 :-set_sc(single_var,false).
@@ -56,7 +59,7 @@ in([
 	tr(S,R2),
 	N2 is N-1,
 	hmmf(L,[R2|S],N2)),
-			
+
 (hmmf([],S,0)),
 
 (tr([r0|T],r0): 0.1 ; tr([r0|T],r1) : 0.9),

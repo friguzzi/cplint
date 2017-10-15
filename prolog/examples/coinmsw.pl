@@ -1,17 +1,20 @@
 /*
 Throwing a coin with uncertainty on its fairness, from
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
-disjunctions. In International Conference on Logic Programming, 
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
+disjunctions. In International Conference on Logic Programming,
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 PRISM syntax.
 */
 :- use_module(library(pita)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
 :- endif.
 
 :- pita.
+
+:- table res/2, toss/1, fairness/2.
 
 :- begin_lpad.
 values(throw(_),[heads,tails]).
@@ -39,4 +42,3 @@ toss(coin).
 
 
 */
- 

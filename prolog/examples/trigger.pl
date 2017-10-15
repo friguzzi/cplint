@@ -1,7 +1,7 @@
 /*
 Example showing the effect of noisy or. From
-J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP-logic: A language of 
-causal probabilistic events and its relation to logic programming. 
+J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP-logic: A language of
+causal probabilistic events and its relation to logic programming.
 Theory Pract. Log. Program., 9(3):245-308, 2009.
 */
 :- use_module(library(pita)).
@@ -11,6 +11,8 @@ Theory Pract. Log. Program., 9(3):245-308, 2009.
 :- endif.
 
 :- pita.
+
+:- table death/0, pull_trigger/1.
 
 :- begin_lpad.
 
@@ -36,4 +38,3 @@ pull_trigger(right_gun).
 ?- prob_bar(death,Prob). % what is the probability that you are dead?
 % expected result 0.3055555555555556
 */
- 

@@ -1,11 +1,11 @@
 /* Bongard dataset from
-L. De Raedt and W. Van Laer. Inductive constraint logic. 
-In Klaus P. Jantke, Takeshi Shinohara, and Thomas Zeugmann, editors, 
+L. De Raedt and W. Van Laer. Inductive constraint logic.
+In Klaus P. Jantke, Takeshi Shinohara, and Thomas Zeugmann, editors,
 Proceedings of the Sixth International Workshop on Algorithmic
-Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence, 
+Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence,
 pages 80-94. SpringerVerlag, 1995.
 
-Downloaded from 
+Downloaded from
 https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
@@ -17,6 +17,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 ?- induce([all],P).
 */
 :-use_module(library(slipcover)).
+:-use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -24,6 +25,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 :- endif.
 
 :-sc.
+:- table pos/0.
 
 :- set_sc(megaex_bottom,20).
 :- set_sc(max_iter,3).
@@ -39,7 +41,7 @@ in([
  	circle(A),
  	in(B,A)
 ),
-( 
+(
  pos:0.5 :-
  	circle(A),
  	triangle(B)
@@ -4459,4 +4461,3 @@ config(o2,down).
 circle(o1).
 in(o1,o2).
 end(model(1000)).
-

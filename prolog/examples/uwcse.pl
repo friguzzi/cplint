@@ -7,6 +7,7 @@ Reference:
 Wannes Meert, Jan Struyf, Hendrik Blockeel: CP-Logic Theory Inference with Contextual Variable Elimination and Comparison to BDD Based Inference Methods. ILP 2009:96-109
 */
 :- use_module(library(pita)).
+:- use_module(library(tabling)).
 
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -16,6 +17,11 @@ Wannes Meert, Jan Struyf, Hendrik Blockeel: CP-Logic Theory Inference with Conte
 
 :- pita.
 
+:- table course/1, professor/1, student/1, advised_by/2, position/2,
+  course_level/2, years_in_program/2, phase/2, aux1_prof_nb_publications/2.
+:- table
+  student_nb_publications/2, prof_nb_publications/2, shared_publication/2,
+  aux1_taught_by/2, aux2_taught_by/2, teaching_assistant/2, taught_by/2.
 :- begin_lpad.
 
 course(c1).
@@ -232,4 +238,3 @@ years_in_program(A,year_1):0.032258064516129; years_in_program(A,year_2):0.06451
 % draw the bdd for the query
 
 */
-

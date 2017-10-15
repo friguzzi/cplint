@@ -30,9 +30,9 @@ test_all([],_F).
 
 test_all([H|T],F):-
 	copy_term(H,NH),
-	format("~a ~q.~n",[F,NH]),
+	format("~a~n~q.~n~n",[F,NH]),
 	call(H),!,
-	%format("Result: ~a ~q.~n~n",[F,NH]),
+	%format("Result: ~a ~q.~n",[F,NH]),
 	nl,
 	test_all(T,F).
 
