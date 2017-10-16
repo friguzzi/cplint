@@ -26,8 +26,8 @@
  **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
-  induce_lm/2, sample/4,test/7,test_prob/6,
-  op(500,fx,#),op(500,fx,'-#')]).
+  induce_lm/2]).
+:-reexport(library(slipcover)).
 
 /*slipcover_lemur.pl declarations start*/
 :-use_module(library(lists)).
@@ -36,7 +36,6 @@
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
 :-use_module(library(pita)).
-:-use_module(library(slipcover)).
 
 /*
  declarations start*/
