@@ -2152,6 +2152,7 @@ get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth,DB),
   retractall(M:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
+  abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,B)
   ;
@@ -2162,6 +2163,7 @@ get_node(\+ Goal,M,Env,BDD):-
 get_node(\+ Goal,M,Env,BDD):-!,
   retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,Goal1),
+  abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,B)
   ;
@@ -2174,6 +2176,7 @@ get_node(Goal,M,Env,B):-
   M:local_setting(depth,DB),
   retractall(M:v(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
+  abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,(_,B))
   ;
@@ -2183,6 +2186,7 @@ get_node(Goal,M,Env,B):-
 get_node(Goal,M,Env,B):- %with DB=false
   retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,Goal1),
+  abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
     or_list(L,Env,(_,B))
   ;
@@ -3436,6 +3440,7 @@ user:term_expansion((:- sc), []) :-!,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3,
     query_rule/4,
     zero_clauses/1,tabled/1)),
+  retractall(M:tabled(_)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
@@ -3520,18 +3525,22 @@ user:term_expansion(end(model(_I)), []) :-
   input_mod(M),!,
   retractall(M:model(_)).
 
-user:term_expansion(output(P/A), [(:- table P1),(:- dynamic P/A1),output(P/A)]) :-
+user:term_expansion(output(P/A), [(:- dynamic P/A1),(:- table P1),output(P/A)]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
+  zero_clause(M,P/A,Z),
+  assert(M:zero_clauses([Z])),
   functor(P1,P,A1).
 
-user:term_expansion(input(P/A), [(:- table P1),(:- dynamic P/A1),input(P/A)]) :-
+user:term_expansion(input(P/A), [(:- dynamic P/A1),(:- table P1),input(P/A)]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
+  zero_clause(M,P/A,Z),
+  assert(M:zero_clauses([Z])),
   functor(P1,P,A1).
 
 user:term_expansion(At, A) :-
