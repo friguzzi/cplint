@@ -38,6 +38,8 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   exctract_type_vars/3,
   delete_one/3,
   get_next_rule_number/2,
+  tab/3,
+  zero_clause/3,
   member_eq/2,
   retract_all/1,assert_all/3,
   write2/2,write3/2,format2/3,format3/3,
@@ -263,12 +265,15 @@ make_dynamic(M):-
   maplist(to_dyn(M),L).
 
 to_dyn(M,P/A):-
+  atomic_concat(P, ' tabled',PT),
   A1 is A+1,
   M:(dynamic P/A1),
   A2 is A1+2,
   M:(dynamic P/A2),
+  M:(dynamic PT/A2),
   A3 is A2+1,
-  M:(dynamic P/A3).
+  M:(dynamic P/A3),
+  M:(dynamic PT/A3).
 
 
 
@@ -3525,23 +3530,21 @@ user:term_expansion(end(model(_I)), []) :-
   input_mod(M),!,
   retractall(M:model(_)).
 
-user:term_expansion(output(P/A), [(:- dynamic P/A1),(:- table P1),output(P/A)]) :-
+user:term_expansion(output(P/A), [(:- table P1),output(P/A)]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
-  assert(M:zero_clauses([Z])),
-  functor(P1,P,A1).
+  assert(M:zero_clauses([Z])).
 
-user:term_expansion(input(P/A), [(:- dynamic P/A1),(:- table P1),input(P/A)]) :-
+user:term_expansion(input(P/A), [(:- table P1),input(P/A)]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
-  assert(M:zero_clauses([Z])),
-  functor(P1,P,A1).
+  assert(M:zero_clauses([Z])).
 
 user:term_expansion(At, A) :-
   prolog_load_context(module, M),

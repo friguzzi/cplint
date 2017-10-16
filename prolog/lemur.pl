@@ -106,12 +106,16 @@ default_setting_lm(mcts_maxrestarts,20).
 default_setting_lm(mcts_covering,true).
 default_setting_lm(max_rules,1).
 default_setting_lm(epsilon_parsing, 1e-5).
-default_setting_lm(tabling, off).
 default_setting_lm(bagof,false).
 default_setting_lm(compiling,off).
 default_setting_lm(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
 default_setting_lm(depth,2).
 default_setting_lm(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
+default_setting_lm(tabling,auto).
+/* values:
+  auto
+  explicit
+*/
 
 :- thread_local database/1, lm_input_mod/1.
 
@@ -1085,10 +1089,22 @@ user:term_expansion((:- lemur), []) :-!,
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
-    lookahead_cons/2,lookahead_cons_var/2,prob/2,output/1,input/1,input_cw/1,
+    lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
-    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1)),
+    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,
+    query_rule/4,
+    zero_clauses/1,tabled/1)),
+  retractall(M:tabled(_)),
   style_check(-discontiguous).
+
+user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+  prolog_load_context(module, M),
+  input_mod(M),!,
+  list2and(L,Conj),
+  maplist(tab(M),L,L1),
+  maplist(zero_clause(M),L,LZ),
+  assert(M:zero_clauses(LZ)),
+  list2and(L1,Conj1).
 
 user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
@@ -1147,6 +1163,22 @@ user:term_expansion((:- end_in), []) :-
     assert(M:in(L))
   ).
 
+user:term_expansion(output(P/A), [(:- table P1),output(P/A)]) :-
+  prolog_load_context(module, M),
+  lm_input_mod(M),
+  M:local_setting(tabling,auto),!,
+  tab(M,P/A,P1),
+  zero_clause(M,P/A,Z),
+  assert(M:zero_clauses([Z])).
+
+user:term_expansion(input(P/A), [(:- table P1),input(P/A)]) :-
+  prolog_load_context(module, M),
+  lm_input_mod(M),
+  M:local_setting(tabling,auto),!,
+  tab(M,P/A,P1),
+  zero_clause(M,P/A,Z),
+  assert(M:zero_clauses([Z])).
+
 user:term_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
@@ -1171,7 +1203,7 @@ user:term_expansion(At, A) :-
     A=neg(Atom1)
   ;
     (At=prob(Pr)->
-      A=prob(Name,Pr)
+      A='$prob'(Name,Pr)
     ;
       At=..[Pred|Args],
       Atom1=..[Pred,Name|Args],
