@@ -374,7 +374,7 @@ vit_prob(M:Goal,P,Delta):-
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,(_,BDD)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   ret_vit_prob(Env,BDD,P,Exp0),
   reverse(Exp0,Exp),
@@ -418,7 +418,7 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
 bdd_dot_file(M:Goal,File,LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,(_,BDD)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot(Env,BDD,File),
   end_test(Env).
@@ -435,7 +435,7 @@ bdd_dot_file(M:Goal,File,LV):-
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
+  get_node(M:Goal,Env,(_,BDD)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
