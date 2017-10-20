@@ -817,7 +817,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
       assert(M:v(R,S,V))
     )
   ;
-    trhow(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probailities not instantiated by the body'))
   ).
 
 get_var_n(M,Env,R,S,Probs0,V):-
@@ -831,7 +831,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
       assert(M:v(R,S,V))
     )
   ;
-    trhow(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probailities not instantiated by the body'))
   ).
 
 /**
@@ -852,7 +852,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
       assert(M:av(R,S,V))
     )
   ;
-    trhow(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probailities not instantiated by the body'))
   ).
 
 /**
@@ -871,7 +871,7 @@ msw(M:A,B,Env,BDD):-
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
-    trhow(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probailities not instantiated by the body'))
   ).
 
 /**
@@ -891,7 +891,7 @@ msw(M:A,B,Env,BDD,_DB):-
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
-    trhow(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probailities not instantiated by the body'))
   ).
 
 combine(V,P,V:P).
