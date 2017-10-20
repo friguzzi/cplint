@@ -1234,12 +1234,27 @@ take_samples(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
-  discrete(V,SInd),
+  sample_part(V,SInd),
   restore_samples(M,I,SInd),
   save_samples(M,I1,S1),
-  M:value_particle(I,S1,Arg),!,
+  M:value_particle(I,SInd,Arg),!,
   assert(M:value_particle(I1,S1,Arg)),
   take_samples(M,S1,S,I,I1,W,V).
+
+sample_part(V,SInd):-
+  random(U),
+  sample_part(V,0,U,SInd).
+
+
+sample_part([I:_],_,_,I):-!.
+
+sample_part([I0:W|T],W0,U,I):-
+  W1 is W0+W,
+  (U=<W1->
+    I=I0
+  ;
+    sample_part(T,W1,U,I)
+  ).
 
 particle_sample(K,K,_Ev,_I):-!.
 
