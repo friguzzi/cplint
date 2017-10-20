@@ -1234,27 +1234,13 @@ take_samples(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
-  sample_part(V,SInd),
+  discrete(V,SInd),
   restore_samples(M,I,SInd),
   save_samples(M,I1,S1),
   M:value_particle(I,SInd,Arg),!,
   assert(M:value_particle(I1,S1,Arg)),
   take_samples(M,S1,S,I,I1,W,V).
 
-sample_part(V,SInd):-
-  random(U),
-  sample_part(V,0,U,SInd).
-
-
-sample_part([I:_],_,_,I):-!.
-
-sample_part([I0:W|T],W0,U,I):-
-  W1 is W0+W,
-  (U=<W1->
-    I=I0
-  ;
-    sample_part(T,W1,U,I)
-  ).
 
 particle_sample(K,K,_Ev,_I):-!.
 
@@ -2502,29 +2488,21 @@ sample_discrete(R,VC,D,S0):-
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
  */
-discrete(D,S0):-
-  append(D0,[LastS:_P],D),!,
-  foldl(pick_val,D0,(1,_),(_,S)),
-  (var(S)->
-    S0=LastS
-  ;
-    S0=S
-  ).
-
-pick_val(_,(P0,V0),(P0,V0)):-
-  nonvar(V0),!.
-
-pick_val(S:P,(P0,V0),(P1,V1)):-
-  var(V0),
-  PF is P/P0,
+discrete(D,S):-
   random(U),
-  (U=<PF->
-    P1=PF,
-    V1=S
+  discrete(D,0,U,S).
+
+
+discrete([S:_],_,_,S):-!.
+
+discrete([S0:W|T],W0,U,S):-
+  W1 is W0+W,
+  (U=<W1->
+    S=S0
   ;
-    P1 is P0*(1-PF),
-    V1=V0
+    discrete(T,W1,U,S)
   ).
+
 
 generate_rules_fact([],_HL,_VC,_R,_N,[]).
 
