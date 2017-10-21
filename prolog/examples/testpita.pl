@@ -8,9 +8,22 @@ main:-
 	test_files(F),
 	statistics(runtime,[_,T]),
 	T1 is T /1000,
-	format("Test successful, time ~f secs.~n",[T1]).
+	format("Test successful, time ~f secs.~n",[T1]),!.
 
-t:-
+main:-
+	format("Test unsuccessful.",[]).
+
+main_rev:-
+	format("~nTesting pita~n",[]),
+	setof(File,A^test(A,File),F0),
+	reverse(F0,F),
+	statistics(runtime,[_,_]),
+	test_files(F),
+	statistics(runtime,[_,T]),
+	T1 is T /1000,
+	format("Test successful, time ~f secs.~n",[T1]),!.
+
+main_rev:-
 	format("Test unsuccessful.",[]).
 
 test_files([]).
@@ -34,7 +47,7 @@ test_all([H|T],F):-
 	numbervars(NH),
 	format("~a ~p.~n",[F,NH]),
 	(H=(G,R)),
-	call(G),!,
+	time(call(G)),!,
 	format("\t~p.~n",[G]),
 	(setting(check,true)->
 	  call(R),!

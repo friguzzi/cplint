@@ -8,9 +8,22 @@ main:-
 	test_files(F),
 	statistics(runtime,[_,T]),
 	T1 is T /1000,
-	format("Test successful, time ~f secs.~n",[T1]).
+	format("Test successful, time ~f secs.~n",[T1]),
 
-t:-
+main:-
+	format("Test unsuccessful.",[]).
+
+main_rev:-
+	format("~nTesting mcintyre~n",[]),
+	setof(File,A^test(A,File),F0),
+	reverse(F0,F),
+	statistics(runtime,[_,_]),
+	test_files(F),
+	statistics(runtime,[_,T]),
+	T1 is T /1000,
+	format("Test successful, time ~f secs.~n",[T1]),!.
+
+main_rev:-
 	format("Test unsuccessful.",[]).
 
 test_files([]).
@@ -120,6 +133,7 @@ test((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,[E]),relatively_close_
 
 test((mc_lw_expectation(value(0,X),(value(1,9),value(2,8)),1000,X,E),relatively_close_to(E,7.166960047178755,0.2)),gauss_mean_est).
 test((mc_expectation(value(0,X),1000,X,E),relatively_close_to(E,0.9698875384639362,0.25)),gauss_mean_est).
+test((mc_particle_expectation(value(0,X),[value(1,9),value(2,8)],1000,X,E),relatively_close_to(E,7.166960047178755,0.2)),gauss_mean_est).
 
 test((mc_sample(is_word,1000,P),close_to(P,0.067222)),slp_pdcg).
 
