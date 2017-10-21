@@ -52,6 +52,7 @@ details.
   mc_lw_sample_arg_log/5,
   mc_lw_expectation/5,
   mc_particle_sample_arg/5,
+  mc_particle_expectation/5,
   gauss_density/4,
   gauss/3,
   histogram/3,
@@ -115,6 +116,7 @@ details.
 :-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
 :-meta_predicate mc_lw_expectation(:,:,+,+,-).
+:-meta_predicate mc_particle_expectation(:,:,+,+,-).
 :-meta_predicate mc_particle_sample_arg(:,:,+,+,-).
 :-meta_predicate particle_sample_arg(:,:,+,+,-).
 :-meta_predicate particle_sample_first(+,+,:,:,-).
@@ -1145,6 +1147,19 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   retractall(M:value_particle(_,_,_)),
   retractall(M:weight_particle(_,_,_)),
   maplist(norm(Norm),ValList0,ValList).
+
+/**
+ * mc_particle_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query given Evidence by
+ * particle filtering.
+ * It uses N particle and sums up the weighted value of Arg for
+ * each particle. The overall sum is divided by the sum of weights to give Exp.
+ * Arg should be a variable in Query.
+ */
+mc_particle_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  aggregate(ValList,E).
 
 particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]):- !.
 
@@ -4102,6 +4117,7 @@ sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_particle_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
