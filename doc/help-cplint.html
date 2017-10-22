@@ -415,13 +415,9 @@ mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
 <pre><code>?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>value(0,X)</code> given that <code>value(1,9)</code> and <code>value(2,8)</code> have been observed.</p>
-<p>You can compute conditional expectations using likelihood wwighting with</p>
+<p>You can compute conditional expectations using likelihood weighting with</p>
 <pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> given that <code>Evidence</code> is true. It takes <code>N</code> samples of <code>Arg</code> in <code>Query</code>, weighting each according to the evidence, and returns their weighted average.</p>
-<p>The predicate</p>
-<pre><code>mc_particle_sample(:Query:atom,:Evidence:list,
-  +Samples:int,-Prob:float)</code></pre>
-<p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> is true using particle filtering. <code>Evidence</code> is a list of goals. The predicate returns in <code>Prob</code> the probability that the query is true. For each goal of <code>Evidence</code>, <code>Samples</code> samples of <code>Query</code> are taken and weighted by the likelihood of the evidence goal. Then particles are resampled and the next element of Evidence is considered.</p>
 <p>The predicate</p>
 <pre><code>mc_particle_sample_arg(:Query:atom,+Evidence:list,
   +Samples:int,?Arg:var,-Values:list) </code></pre>
@@ -432,6 +428,13 @@ mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
 mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
   [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],100,[T1,T2,T3,T4],[F1,F2,F3,F4]).</code></pre>
 <p>from <a href="http://cplint.lamping.unife.it/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a> performs particle filtering for a Kalman filter with four observations. For each observation, the value of the state at the same time point is sampled. The list of samples is returned in <code>[F1,F2,F3,F4]</code>, with each element being the sample for a time point.</p>
+<p>The predicate</p>
+<pre><code>mc_particle_sample(:Query:atom,:Evidence:list,
+  +Samples:int,-Prob:float)</code></pre>
+<p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> is true using particle filtering. <code>Evidence</code> is a list of goals. The predicate returns in <code>Prob</code> the probability that the query is true.</p>
+<p>You can compute conditional expectations using particle filtering with</p>
+<pre><code>mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
+<p>that computes the expected value of <code>Arg</code> in <code>Query</code> given that <code>Evidence</code> is true. It uses <code>N</code> particles.</p>
 <h2 id="causal">Causal Inference</h2>
 <p><code>pita</code> and <code>mcintyre</code> support causal reasoning, i.e., computing the effect of actions using the do-calculus <span class="citation">[<a href="#ref-Pea00-book">14</a>]</span>.</p>
 <p>Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive</p>
