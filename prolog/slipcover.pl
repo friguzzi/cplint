@@ -1248,7 +1248,7 @@ get_modeb([],_Mod,B,B).
 
 get_modeb([F/AA|T],Mod,B0,B):-
   findall((R,B),(Mod:modeb(R,B),functor(B,F,AA)),BL),
-  (setting_sc(neg_literals,true)->
+  (Mod:local_setting(neg_literals,true)->
     findall((R,(\+ B)),(Mod:modeb(R,B),functor(B,F,AA),all_plus(B)),BNL)
   ;
     BNL=[]
@@ -3279,7 +3279,7 @@ compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   end_test(Env),!,
   PG1 is 1-PG,
   (PG1=:=0.0->
-    setting_sc(logzero,LZ),
+    M:local_setting(logzero,LZ),
     CLL2 is CLL0+LZ
   ;
     CLL2 is CLL0+ log(PG1)
@@ -3296,7 +3296,7 @@ compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
   ret_prob(Env,BDD,PG),
   end_test(Env),!,
   (PG=:=0.0->
-    setting_sc(logzero,LZ),
+    M:local_setting(logzero,LZ),
     CLL2 is CLL0+LZ
   ;
     CLL2 is CLL0+ log(PG)
