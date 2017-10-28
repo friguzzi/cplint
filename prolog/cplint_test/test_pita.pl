@@ -243,3 +243,115 @@ test(p):-
   run((prob(p,P),close_to(P,0.0636))).
 
 :- end_tests(multiple_paths).
+
+:- begin_tests(abd1, []).
+
+:-ensure_loaded(library(examples/abd1)).
+
+test(a):-
+  run((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[e, c])).
+test(bdd_a):-
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),Exp=[e, c])).
+
+:- end_tests(abd1).
+
+:- begin_tests(abd2, []).
+
+:-ensure_loaded(library(examples/abd2)).
+
+test(a):-
+  run((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[f, (\+g), c, d])).
+test(bdd_a):-
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
+  Exp=[f, (\+g), c, d])).
+
+:- end_tests(abd2).
+
+:- begin_tests(abd3, []).
+
+:-ensure_loaded(library(examples/abd3)).
+
+test(a):-
+  run((abd_prob(a,P,Exp),close_to(P,0.42),Exp=[f, (\+g), (\+ c)])).
+test(bdd_a):-
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.42),
+  Exp=[f, (\+g), (\+ c)])).
+
+:- end_tests(abd3).
+
+:- begin_tests(map1, []).
+
+:-ensure_loaded(library(examples/map1)).
+
+test(win):-
+  run((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
+  Exp=[
+	  rule(0, '', [red:0.4, '':0.6], true),
+		rule(2, blue, [blue:0.5, '':0.5], true),
+		rule(3, yellow, [yellow:0.6, '':0.4], true),
+	  rule(1, green, [green:0.9, '':0.09999999999999998], true)
+	 ])).
+
+:- end_tests(map1).
+
+:- begin_tests(map_es3, []).
+
+:-ensure_loaded(library(examples/map_es3)).
+
+test(ev):-
+  run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.27),
+	  Exp=[
+		  rule(2,pf(2,1),[pf(2,1):0.6,'':0.4],true),
+			rule(1,pf(1,2),[pf(1,2):0.75,'':0.25],true),
+			rule(0,pf(1,1),[pf(1,1):0.6,'':0.4],true)
+		  ])).
+
+:- end_tests(map_es3).
+
+:- begin_tests(map_es21, []).
+
+:-ensure_loaded(library(examples/map_es21)).
+
+test(ev):-
+  run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
+	  Exp=[
+		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ])).
+
+:- end_tests(map_es21).
+
+:- begin_tests(map_es2, []).
+
+:-ensure_loaded(library(examples/map_es2)).
+
+test(ev):-
+  run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.36),
+	  Exp=[
+		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
+			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ])).
+
+:- end_tests(map_es2).
+
+:- begin_tests(map_es2map, []).
+
+:-ensure_loaded(library(examples/map_es2map)).
+
+test(ev):-
+  run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.54),
+	  Exp=[
+		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)
+		  ])).
+
+:- end_tests(map_es2map).
+
+:- begin_tests(map_es2map1, []).
+
+:-ensure_loaded(library(examples/map_es2map1)).
+test(ev):-
+  run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
+	  Exp=[
+		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ])).
+
+:- end_tests(map_es2map1).
