@@ -29,8 +29,10 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   onec/2,zeroc/2,andc/4,bdd_notc/3,
   orc/3,
-  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,or_list/3,
+  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,
+  or_list/3,
   ret_probc/3,equalityc/4,
+  or_listc/3,
   em/8,randomize/1,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
@@ -718,9 +720,9 @@ get_node(M:Goal,Env,B):-
   abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+    or_listc(L,Env,B)
   ;
-    zero(Env,B)
+    zeroc(Env,B)
   ).
 
 get_node(M:Goal,Env,B):- %with DB=false
@@ -729,9 +731,9 @@ get_node(M:Goal,Env,B):- %with DB=false
   abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,B)
+    or_listc(L,Env,B)
   ;
-    zero(Env,B)
+    zeroc(Env,B)
   ).
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
@@ -741,15 +743,15 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
   abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,BG)
+    or_listc(L,Env,BG)
   ;
-    zero(Env,BG)
+    zeroc(Env,BG)
   ),
   add_bdd_arg_db(Ev,Env,BDDE,DB,M,Ev1),%DB=depth bound
   (bagof(BDDE,M:Ev1,LE)*->
-    or_list(LE,Env,BE)
+    or_listc(LE,Env,BE)
   ;
-    zero(Env,BE)
+    zeroc(Env,BE)
   ),
   andcnf(Env,BG,BE,BGE).
 
@@ -760,15 +762,15 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (bagof(BDD,M:Goal1,L)*->
-    or_list(L,Env,BG)
+    or_listc(L,Env,BG)
   ;
-    zero(Env,BG)
+    zeroc(Env,BG)
   ),
   add_bdd_arg(Ev,Env,BDDE,M,Ev1),
   (bagof(BDDE,M:Ev1,LE)*->
-    or_list(LE,Env,BE)
+    or_listc(LE,Env,BE)
   ;
-    zero(Env,BE)
+    zeroc(Env,BE)
   ),
   andcnf(Env,BG,BE,BGE).
 
@@ -1136,9 +1138,28 @@ or_list([H|T],Env,B):-
 or_list1([],_Env,B,B).
 
 or_list1([H|T],Env,B0,B1):-
-  orc(B0,H,B2),
+  or(Env,B0,H,B2),
   or_list1(T,Env,B2,B1).
 
+/**
+ * or_listc(++ListOfBDDs:list,++Environment,--BDD:int) is det
+ *
+ * Returns in BDD a couple (Env,B) with B a pointer to a
+ * BDD belonging to environment Environment
+ * representing the disjunction of all the BDDs in
+ * ListOfBDDs (a list of couples (Env,BDD))
+ */
+or_listc([H],_Env,H):-!.
+
+or_listc([H|T],Env,B):-
+  or_listc1(T,Env,H,B).
+
+
+or_listc1([],_Env,B,B).
+
+or_listc1([H|T],Env,B0,B1):-
+  orc(B0,H,B2),
+  or_listc1(T,Env,B2,B1).
 
 /**
  * set_pita(:Parameter:atom,+Value:term) is det
@@ -1277,6 +1298,7 @@ user:term_expansion(end_of_file, C) :-
 
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
+  pita_input_mod(M),!,
   list2and(L,Conj),
   maplist(act(M),L).
 
