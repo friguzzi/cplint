@@ -1,5 +1,5 @@
 :- module(test_mc,
-  [test_mc/0]).
+  [test_mc/0,test_mc_rev/0]).
 :- use_module(library(plunit)).
 
 
@@ -26,6 +26,29 @@ test_mc:-
     viralmc,
     uwcsemc
   ]).
+
+test_mc_rev:-
+	reverse([
+    coinmc,
+    threesideddicemc,
+    markov_chain,
+    prefix,
+    pre_plcg,
+    pctl_slep,
+    arithm,
+    gaussian_mixture,
+    kalman_filter,
+    gauss_mean_est,
+    slp_pdcg,
+    indian_gpa,
+    indian_gpadc,
+    nballs,
+    nballsdc,
+    simpsonmc,
+    viralmc,
+    uwcsemc
+  ],Rev),
+  run_tests(Rev).
 
 
 :- begin_tests(coinmc, []).
