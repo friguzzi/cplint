@@ -8,7 +8,7 @@
 :- mc.
 
 :- begin_lpad.
-:- action drug/0.
+:- mcaction drug/0.
 
 female:0.5.
 

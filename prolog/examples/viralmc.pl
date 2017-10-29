@@ -1,4 +1,4 @@
-/* 
+/*
 Viral Marketing
 */
 
@@ -20,7 +20,7 @@ graph(digraph([rankdir="LR"|G])):-
 
 :- begin_lpad.
 
-:- action has/1.
+:- mcaction has/1.
 
 has(_):0.1.
 
@@ -32,4 +32,3 @@ trusts(3,2).
 trusts(4,1).
 trusts(4,3).
 :-end_lpad.
-
