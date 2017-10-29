@@ -2159,7 +2159,7 @@ get_node(\+ Goal,M,Env,BDD):-
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
   abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
-    or_list(L,Env,B)
+    or_listc(L,Env,B)
   ;
     zeroc(Env,B)
   ),
@@ -2170,7 +2170,7 @@ get_node(\+ Goal,M,Env,BDD):-!,
   add_bdd_arg(Goal,Env,BDD,Goal1),
   abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
-    or_list(L,Env,B)
+    or_listc(L,Env,B)
   ;
     zeroc(Env,B)
   ),
@@ -2183,7 +2183,7 @@ get_node(Goal,M,Env,B):-
   add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
   abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
-    or_list(L,Env,(_,B))
+    or_listc(L,Env,(_,B))
   ;
     zero(Env,B)
   ).
@@ -2193,7 +2193,7 @@ get_node(Goal,M,Env,B):- %with DB=false
   add_bdd_arg(Goal,Env,BDD,Goal1),
   abolish_all_tables,
   (bagof(BDD,M:Goal1,L)->
-    or_list(L,Env,(_,B))
+    or_listc(L,Env,(_,B))
   ;
     zero(Env,B)
   ).
