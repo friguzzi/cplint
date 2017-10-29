@@ -55,7 +55,7 @@ clean:
 	rm -f *.o bddem.$(SOEXT)
 
 check:
-	swipl -g test -t halt prolog/cplint_test/test.pl
+	@echo "no check"
 
 install: all
 	mkdir -p $(LIBDIR)
