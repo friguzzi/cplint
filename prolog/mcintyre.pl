@@ -65,7 +65,7 @@ details.
   op(600,xfy,'~'),
   op(500,xfx,'~='),
   op(1200,xfy,':='),
-  op(1150,fx,action),
+  op(1150,fx,mcaction),
   ~= /2,
   swap/2,
   msw/2,
@@ -2959,8 +2959,9 @@ user:term_expansion(end_of_file, end_of_file) :-
   retractall(mc_input_mod(M)),
   style_check(+discontiguous).
 
-user:term_expansion((:- action Conj), []) :-!,
+user:term_expansion((:- mcaction Conj), []) :-!,
   prolog_load_context(module, M),
+  mc_input_mod(M),!,
   list2and(L,Conj),
   maplist(act(M),L).
 
