@@ -60,3 +60,6 @@ check:
 install: all
 	mkdir -p $(LIBDIR)
 	cp bddem.$(SOEXT) $(LIBDIR)
+
+installcheck:
+	swipl -g test -t halt prolog/cplint_test/test.pl
