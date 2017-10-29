@@ -143,7 +143,8 @@ details.
 
 :- style_check(-discontiguous).
 
-:- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,mem/3.
+:- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,mem/3,
+  samp/2.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -229,37 +230,37 @@ s(Mo:Goal,P):-
   restore_samples(Mo,Goal1).
 
 save_samples(M,I,S):-
-  recorded(R,Val,Ref),
+  samp(R,Val),
   assert(M:mem(I,S,R,Val)),
-  erase(Ref),
+  retract(samp(R,Val)),
   fail.
 
 save_samples(_M,_I,_S).
 
 save_samples(M,G):-
-  recorded(R,Val,Ref),
+  samp(R,Val),
   assert(M:mem(G,R,Val)),
-  erase(Ref),
+  erase(samp(R,Val)),
   fail.
 
 save_samples(_M,_G).
 
 restore_samples(M,I,S):-
   M:mem(I,S,R,Val),
-  recorda(R,Val),
+  assertz(samp(R,Val)),
   fail.
 
 restore_samples(_M,_I,_S).
 
 restore_samples(M,G):-
   retract(M:mem(G,R,Val)),
-  recorda(R,Val),
+  assertz(samp(R,Val)),
   fail.
 
 restore_samples(_M,_G).
 
 save_samples_copy(M,G):-
-  recorded(R,Val,_Ref),
+  samp(R,Val),
   assert(M:mem(G,R,Val)),
   fail.
 
@@ -272,29 +273,25 @@ delete_samples_copy(M,G):-
 delete_samples_copy(_M,_G).
 
 count_samples(N):-
-  findall(Ref,recorded(_Key,_Val,Ref),L),
+  findall(a,samp(_Key,_Val),L),
   length(L,N).
 
 
 resample(0):-!.
 
 resample(N):-
-  findall((Key,Val,Ref),recorded(Key,Val,Ref),L),
-  sample_one(L,(Key,Val,Ref)),
-  erase(Ref),
+  findall(samp(Key,Val),samp(Key,Val),L),
+  sample_one(L,S),
+  retract(S),
   N1 is N-1,
   resample(N1).
 
 
 erase_samples:-
-  recorded(_Key,_Val,Ref),
-  erase(Ref),
-  fail.
-
-erase_samples.
+  retractall(samp(_,_)).
 
 print_samples:-
-  recorded(Key,Val,_Ref),
+  samp(Key,Val),
   write(Key-Val),nl,
   fail.
 
@@ -762,26 +759,21 @@ initial_sample_neg_all([H|T],M):-
   initial_sample_neg_all(T,M).
 
 check(R,VC,N):-
-  recorded(R,sampled(VC,N)),!.
+  samp(R,sampled(VC,N)),!.
 
 check(R,VC,N):-
-  \+ recorded(R,sampled(VC,_N)),
-  recorda(R,sampled(VC,N)).
+  \+ samp(R,sampled(VC,_N)),
+  assertz(samp(R,sampled(VC,N))).
 
 check_neg(R,VC,_LN,N):-
-  recorded(R,sampled(VC,N1)),!,
+  samp(R,sampled(VC,N1)),!,
   N\=N1.
 
 check_neg(R,VC,LN,N):-
-  \+ recorded(R,sampled(VC,_N)),
+  \+ samp(R,sampled(VC,_N)),
   member(N1,LN),
   N1\= N,
-  (recorded(R,sampled(VC,_N1),Ref)->
-    erase(Ref)
-  ;
-    true
-  ),
-  recorda(R,sampled(VC,N1)).
+  assertz(samp(R,sampled(VC,N1))).
 
 listN(0,[]):-!.
 
@@ -2079,12 +2071,12 @@ add_mod_arg(A,_Module,A1):-
  * Internal predicates used by the transformed input program
  */
 sample_head(R,VC,_HeadList,N):-
-  recorded(R,sampled(VC,NH)),!,
+  samp(R,sampled(VC,NH)),!,
   N=NH.
 
 sample_head(R,VC,HeadList,N):-
   sample(HeadList,NH),
-  recorda(R,sampled(VC,NH)),
+  assertz(samp(R,sampled(VC,NH))),
   N=NH.
 
 sample(HeadList, HeadId) :-
@@ -2107,12 +2099,12 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_uniform(R,VC,_L,_U,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_uniform(R,VC,L,U,S):-
   random(V),
   S is L+V*(U-L),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 uniform_density(L,U,D):-
   D is 1/(U-L).
@@ -2126,11 +2118,11 @@ uniform_density(L,U,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_gauss(R,VC,_Mean,_Variance,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_gauss(R,VC,Mean,Variance,S):-
   gauss(Mean,Variance,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 /**
  * gauss(+Mean:float,+Variance:float,-S:float) is det
  *
@@ -2219,11 +2211,11 @@ gauss_density(Mean,Covariance,S,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_gamma(R,VC,_Shape,_Scale,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_gamma(R,VC,Shape,Scale,S):-
   gamma(Shape,Scale,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * gamma(+Shape:float,+Scale:float,-S:float) is det
@@ -2285,11 +2277,11 @@ gamma_density(K,Scale,S,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_beta(R,VC,_A,_B,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_beta(R,VC,A,B,S):-
   beta(A,B,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * beta(+Alpha:float,+Beta:float,-S:float) is det
@@ -2320,11 +2312,11 @@ beta_density(Alpha,Beta,X,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_poisson(R,VC,_L,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_poisson(R,VC,L,S):-
   poisson(L,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * poisson(+Lambda:float,-S:int) is det
@@ -2369,11 +2361,11 @@ fact(N,F0,F):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_binomial(R,VC,_N,_P,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_binomial(R,VC,N,P,S):-
   binomial(N,P,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * binomial(+N:int,+P:float,-S:int) is det
@@ -2413,11 +2405,11 @@ binomial_prob(N,P,X,Pr):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_dirichlet(R,VC,_Par,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_dirichlet(R,VC,Par,S):-
   dirichlet(Par,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * dirichlet(+Par:list,-S:float) is det
@@ -2452,11 +2444,11 @@ prod(X,A,P0,P0*X^(A-1)).
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_geometric(R,VC,_Par,S):-
-  recorded(R,sampled(VC,S)),!.
+  samp(R,sampled(VC,S)),!.
 
 sample_geometric(R,VC,Par,S):-
   geometric(Par,S),
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * geometric(+P:float,-I:int) is det
@@ -2489,13 +2481,13 @@ geometric_density(P,I,D):-
  * substitution VC.
  */
 sample_discrete(R,VC,_D,S):-
-  recorded(R,sampled(VC,S1)),!,
+  samp(R,sampled(VC,S1)),!,
   S=S1.
 
 sample_discrete(R,VC,D,S0):-
   discrete(D,S),
   S=S0,
-  recorda(R,sampled(VC,S)).
+  assertz(samp(R,sampled(VC,S))).
 
 /**
  * discrete(+Distribution:list,-S:float) is det
