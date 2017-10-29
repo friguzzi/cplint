@@ -1,3 +1,40 @@
+:- module(test_pita,
+  [test_pita/0]).
+:- use_module(library(plunit)).
+
+test_pita:-
+	run_tests([coin,
+    coinmsw,
+    dice,
+    epidemic,
+    earthquake,
+    sneezing,
+    trigger,
+    light,
+    threesideddice,
+    mendel,
+    coin2,
+    simpson,
+    viral,
+    uwcse,
+    path,
+    pathdb,
+    multiple_paths_simple,
+    multiple_paths,
+    abd1,
+    abd2,
+    abd3,
+    map1,
+    map_es3,
+    map_es21,
+    map_es2,
+    map_es2map,
+    map_es2map1,
+    pitavit_win,
+    pitavit_hmm,
+    pitavit_coin,
+    pitavit_mendel]).
+
 :-use_module(library(cplint_test/cplint_test)).
 
 :- begin_tests(coin, []).

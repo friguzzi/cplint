@@ -1,4 +1,16 @@
-:-use_module(library(cplint_test/cplint_test)).
+:- module(test_viterbi,
+  [test_viterbi/0]).
+:- use_module(library(plunit)).
+
+test_viterbi:-
+  run_tests([
+    vit_win,
+    vit_hmm,
+    vit_coin,
+    vit_mendel
+  ]).
+
+  :-use_module(library(cplint_test/cplint_test)).
 
 :- begin_tests(vit_win, []).
 

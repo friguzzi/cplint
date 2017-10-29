@@ -1,3 +1,14 @@
+:- module(test_kbest,
+  [test_kbest/0]).
+:- use_module(library(plunit)).
+
+test_kbest:-
+  run_tests([
+    kbest_win,
+    kbest_hmm,
+    kbest_coin,
+    kbest_mendel
+  ]).
 :-use_module(library(cplint_test/cplint_test)).
 
 :- begin_tests(kbest_win, []).

@@ -1,4 +1,17 @@
-:- begin_tests(mach, []).
+:- module(test_lemur,
+  [test_lemur/0]).
+:- use_module(library(plunit)).
+
+test_lemur:-
+  run_tests([
+    mach_lm,
+    bongard_lm,
+    bongardkeys_lm,
+    registration_lm
+  ]).
+
+
+:- begin_tests(mach_lm, []).
 :-ensure_loaded(library(examples/lemur/mach)).
 test(induce_lm):-
   induce_lm([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
@@ -11,10 +24,10 @@ test(induce_lm):-
   (class_ok:1.0;'':0.0:-none_worn),
   (class_ok:7.426381092891156e-11;'':0.9999999999257362:-not_replaceable(_120))]),
   writeln((-1.8063458978498406,1.0,1.0)).
-:- end_tests(mach).
+:- end_tests(mach_lm).
 
 
-:- begin_tests(bongard, []).
+:- begin_tests(bongard_lm, []).
 :-ensure_loaded(library(examples/lemur/bongard)).
 test(induce_lm):-
   induce_lm([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
@@ -27,9 +40,9 @@ test(induce_lm):-
   (pos:2.400626683893628e-8;'':0.9999999759937331:-square(_134))]),
   writeln((-66.18600681193735,0.9038314176245211,0.7937421909836889)).
 
-:- end_tests(bongard).
+:- end_tests(bongard_lm).
 
-:- begin_tests(bongardkeys, []).
+:- begin_tests(bongardkeys_lm, []).
 :-ensure_loaded(library(examples/lemur/bongardkeys)).
 
 
@@ -44,9 +57,9 @@ test(induce_lm):-
   (pos:2.400626683893628e-8;'':0.9999999759937331:-square(_134))]),
   writeln((-66.18600681193735,0.9038314176245211,0.7937421909836889)).
 
-:- end_tests(bongardkeys).
+:- end_tests(bongardkeys_lm).
 
-:- begin_tests(registration, []).
+:- begin_tests(registration_lm, []).
 :-ensure_loaded(library(examples/lemur/registration)).
 
 test(induce_lm):-
@@ -59,4 +72,4 @@ test(induce_lm):-
   (party(_100):0.20556786978108324;'':0.7944321302189168:-subscription(_104))]),
   writeln((-8.818022622164117,0.5,0.5)).
 
-:- end_tests(registration).
+:- end_tests(registration_lm).
