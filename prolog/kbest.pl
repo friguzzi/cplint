@@ -94,7 +94,7 @@ choice2bdd(Env,M,(N,R,S),BDD0,BDD):-
 
 compute_exp(Goals,M,K,BestK):-
   list2and(GL,Goals),
-	local_kbest_setting(prob_step, ProbStep),
+	M:local_kbest_setting(prob_step, ProbStep),
 	ProbStepLog is log(ProbStep),
 	% NB: log(1.0) == 0.0 !!!
 	main([0.0-0.0-([], [], GL)], M, K, ProbStepLog, BestK).
@@ -777,9 +777,7 @@ user:term_expansion((:- kbest), []) :-!,
   assert(kbest_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
-  M:(dynamic rule_by_num/5),
-  M:(dynamic rule/8),
-  M:(dynamic rule/4),
+  M:(dynamic rule_by_num/5, rule/8, rule/4, query_rule/4),
   retractall(M:rule_by_num(_,_,_,_,_)),
   retractall(M:rule(_,_,_,_,_,_,_,_)),
   style_check(-discontiguous).
