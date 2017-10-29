@@ -128,7 +128,7 @@ test(eval_0_2_1_3):-
 test(exp_eval_2):-
   run((mc_expectation(eval(2,Y),100,Y,E),relatively_close_to(E,3.968,1))).
 test(exp_eval_2_eval_1_3):-
-  run((mc_mh_expectation(eval(2,Y),eval(1,3),100,1,Y,E),relatively_close_to(E,2.855,1))).
+  run((mc_mh_expectation(eval(2,Y),eval(1,3),300,1,Y,E),relatively_close_to(E,2.855,1))).
 :- end_tests(arithm).
 
 :- begin_tests(gaussian_mixture, []).
@@ -150,7 +150,7 @@ test(mix_X_mix):-
 test(exp_kf):-
 	run((mc_expectation(kf(1,_O2,[T]),1000,T,E),close_to(E,0,0.1))).
 test(lw_exp_kf):-
-	run((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,[E]),relatively_close_to(E,0.6324846033555553))).
+	run((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,[E]),relatively_close_to(E,0.6324846033555553,0.2))).
 
 :- end_tests(kalman_filter).
 
