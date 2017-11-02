@@ -5,7 +5,7 @@
 test_pitaind:-
 	run_tests([uwcse_indind,
     bloodtype_indexc,
-    mendel_indexc]).
+    mendel_indexc,uwcse_indinds]).
 
 
 :-use_module(library(cplint_test/cplint_test)).
@@ -19,6 +19,16 @@ test(advisedby_harry_ben):-
   close_to(P, 0.87269376))).
 
 :- end_tests(uwcse_indind).
+
+:- begin_tests(uwcse_indinds, []).
+
+:-ensure_loaded(library(examples/uwcse_indinds)).
+
+test(advisedby_harry_ben):-
+  run((prob(advisedby(harry, ben),P),
+  close_to(P, 0.20433599999999996))).
+
+:- end_tests(uwcse_indinds).
 
 :- begin_tests(bloodtype_indexc, []).
 
