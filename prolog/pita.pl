@@ -316,12 +316,12 @@ s(M:Goal,P):-
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   ( M:local_pita_setting(depth_bound,true) *->
-      ( process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module),
-        add_bdd_arg_db(Goal1,Env,BDDAnd,DB,Module,Head1)
+      ( process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
+        add_bdd_arg_db(Goal1,Env,BDDAnd,DB,M,Head1)
       )
     ;
-      ( process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
-        add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1)
+      ( process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+        add_bdd_arg(Goal1,Env,BDDAnd,M,Head1)
       )
   ),
   append([onec(Env,BDD)],BodyList2,BodyList3),
@@ -340,10 +340,10 @@ abd_prob(M:Goal,P,Delta):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
-  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
@@ -359,10 +359,10 @@ vit_prob(M:Goal,P,Delta):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
-  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
@@ -553,10 +553,10 @@ prob(M:Goal,M:Evidence,P):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
-  add_bdd_arg(Goal1,Env,BDDAnd,Module,Head1),
+  add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   M:rule_n(NR),
   init_test(NR,Env),
@@ -580,10 +580,10 @@ deal_with_ev(Ev,M,NewEv,EvGoal,UC,CA):-
     EvGoal=true,
     UC=UC0
   ;
-    process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module),
+    process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
     append([onec(Env,BDD)],BodyList2,BodyList3),
     list2and(BodyList3,Body2),
-    add_bdd_arg(NewEv,Env,BDDAnd,Module,Head1),
+    add_bdd_arg(NewEv,Env,BDDAnd,M,Head1),
     M:(asserta((Head1 :- Body2),Ref)),
     UC=[Ref|UC0],
     EvGoal=NewEv
