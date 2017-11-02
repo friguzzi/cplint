@@ -12,6 +12,7 @@ test_pita:-
     trigger,
     light,
     threesideddice,
+    bloodtype,
     mendel,
     coin2,
     simpson,
@@ -160,6 +161,36 @@ test(on_2_1_1_1):-
  run((prob(on(2,1),on(1,1),P),close_to(P,0.333333333333333))).
 
 :- end_tests(threesideddice).
+
+:- begin_tests(bloodtype, []).
+
+:-ensure_loaded(library(examples/bloodtype)).
+
+test(pc_p_f_a):-
+  run((prob(pchrom(p_f,a),Prob),
+  close_to(Prob, 0.318))).
+
+test(p_f_a):-
+  run((prob(pchrom(p_f,a),Prob),
+  close_to(Prob, 0.3))).
+
+test(p_a):-
+  run((prob(bloodtype(p,a),Prob),
+  close_to(Prob, 0.3186942939999999))).
+
+test(p_b):-
+  run((prob(bloodtype(p,b),Prob),
+  close_to(Prob, 0.2239874943000002))).
+
+test(p_aa):-
+  run((prob(bloodtype(p,ab),Prob),
+  close_to(Prob, 0.19329257700000035))).
+
+test(p_null):-
+  run((prob(bloodtype(p,null),Prob),
+  close_to(Prob, 0.16751706690000012))).
+
+:- end_tests(bloodtype).
 
 :- begin_tests(mendel, []).
 
