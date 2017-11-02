@@ -16,8 +16,6 @@ In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 
 :- pita.
 
-:- table mother/2, father/2, cg/3, color/2.
-
 :- begin_lpad.
 
 mother(m,s).

@@ -706,11 +706,6 @@ get_cond_p(M:Goal,M:Evidence,Env,P):-
   ret_probc(Env,BDDGE,PGE),
   P is PGE/PE.
 
-load(FileIn,C1,R):-
-  open(FileIn,read,SI),
-  read_clauses_dir(SI,C),
-  close(SI),
-  process_clauses(C,[],C1,[],R).
 
 get_node(M:Goal,Env,B):-
   M:local_pita_setting(depth_bound,true),!,
