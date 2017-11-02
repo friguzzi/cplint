@@ -15,8 +15,6 @@ details.
 
 
 :- module(pitaind,[s/2, prob/2, prob_bar/2, prob/3, prob_bar/3,
-  bdd_dot_file/3,
-  bdd_dot_string/3,
   set_pitaind/2,setting_pitaind/2,
   init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
   onec/2,zeroc/2,andc/4,bdd_notc/3,andcnf/4,
@@ -353,39 +351,8 @@ s(M:Goal,P):-
   erase(Ref),
   member((Goal,P),L).
 
-/**
- * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
- *
- * The predicate builds the BDD for Query and writes its dot representation
- * to file FileName and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
- */
-bdd_dot_file(M:Goal,File,LV):-
-  M:rule_n(NR),
-  init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
-  findall([V,R,S],M:v(R,S,V),LV),
-  create_dot(Env,BDD,File),
-  end_test(Env).
 
-/**
- * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
- *
- * The predicate builds the BDD for Query and returns its dot representation
- * in DotString and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
- */
-bdd_dot_string(M:Goal,dot(Dot),LV):-
-  M:rule_n(NR),
-  init_test(NR,Env),
-  get_node(M:Goal,Env,BDD),!,
-  findall([V,R,S],M:v(R,S,V),LV),
-  create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+
 
 
 /**
@@ -582,11 +549,6 @@ get_cond_p(M:Goal,M:Evidence,Env,P):-
   ret_probc(Env,BDDGE,PGE),
   P is PGE/PE.
 
-load(FileIn,C1,R):-
-  open(FileIn,read,SI),
-  read_clauses_dir(SI,C),
-  close(SI),
-  process_clauses(C,[],C1,[],R).
 
 get_node(M:Goal,Env,B):-
   M:local_pitaind_setting(depth_bound,true),!,
