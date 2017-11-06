@@ -889,15 +889,15 @@ fold(test,[490,491,...]).</code></pre>
 <h1 id="download-query-results-through-an-api">Download Query Results through an API</h1>
 <p>The results of queries can also be downloaded programmatically by directly approaching the Pengine API. Example client code is <a href="https://github.com/friguzzi/swish/tree/master/client">available</a>. For example, the <code>swish-ask.sh</code> client can be used with bash to download the results for a query in CSV. The call below downloads a CSV file for the coin example.</p>
 <pre><code>$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \   
-  examples/inference/coin.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
+  example/inference/coin.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
 <p>The script can ask queries against Prolog scripts stored in <a href="http://cplint.lamping.unife.it" class="uri">http://cplint.lamping.unife.it</a> by specifying the script on the commandline. User defined files stored in <code>cplint</code> on SWISH (locations of type <a href="http://cplint.lamping.unife.it/p/coin_user.pl" class="uri">http://cplint.lamping.unife.it/p/coin_user.pl</a>) can be directly used, for example:</p>
 <pre><code>$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \
   coin_user.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
-<p>Example programs can be used by specifying the folder portion of the url of the example, as in the first coin example above where the url for the program is <a href="http://cplint.lamping.unife.it/examples/inference/coin.pl" class="uri">http://cplint.lamping.unife.it/examples/inference/coin.pl</a>.</p>
+<p>Example programs can be used by specifying the folder portion of the url of the example, as in the first coin example above where the url for the program is <a href="http://cplint.lamping.unife.it/example/inference/coin.pl" class="uri">http://cplint.lamping.unife.it/example/inference/coin.pl</a>.</p>
 <p>You can also use an url for the program as in</p>
 <pre><code>$ bash swish-ask.sh --server=http://cplint.lamping.unife.it \
   https://raw.githubusercontent.com/friguzzi/swish/\  
-  master/examples/inference/coin.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
+  master/example/inference/coin.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
 <p>Results can be downloaded in JSON using the option <code>--json-s</code> or <code>--json-html</code>. With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. E.g.</p>
 <pre><code>$ bash swish-ask.sh --json-s --server=http://cplint.lamping.unife.it \
   coin_user.pl Prob &quot;prob(heads(coin),Prob)&quot;</code></pre>
@@ -907,7 +907,7 @@ fold(test,[490,491,...]).</code></pre>
 ?- pengine_rpc(&#39;http://cplint.lamping.unife.it&#39;,
      prob(heads(coin),Prob),
      [ src_url(&#39;https://raw.githubusercontent.com/friguzzi/swish/\  
-master/examples/inference/coin.pl&#39;),
+master/example/inference/coin.pl&#39;),
      application(swish)
      ]).
 Prob = 0.51.
