@@ -1551,7 +1551,7 @@ lw_sample_weight(_M:sample_uniform(R,VC,L,U,S),W0,W):-!,
    ).
 
 lw_sample_weight(_M:sample_gauss(R,VC,Mean,Variance,S),W0,W):-!,
-  (var(S)->
+  (is_var(S)->
     sample_gauss(R,VC,Mean,Variance,S),
     W=W0
   ;
@@ -1745,7 +1745,11 @@ lw_sample_logweight(M:G,W0,W):-
   sample_one_back(L,(G,B)),
   lw_sample_logweight(M:B,W0,W).
 
+is_var(S):-
+  var(S),!.
 
+is_var(S):-
+  maplist(var,S).
 
 /**
  * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
