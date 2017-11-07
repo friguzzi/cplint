@@ -60,6 +60,8 @@ details.
   densities/4,
   density/5,
   density/3,
+  density2d/7,
+  density2d/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -4003,6 +4005,23 @@ density(Post0,NBins,Min,Max,Chart):-
    axis:_{ x:_{ tick:_{fit:false}}}
   }.
 
+  /**
+ * density2d(+List:list,+NBins:int,+Min:float,+Max:float,-Dist:list) is det
+ *
+ * Returns the density of a sets of two dimensional samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins. The X axis goes from Min to Max.
+ */
+density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
+  maplist(to_pair,Post0,Post),
+  DX is XMax-XMin,
+  XBinWidth is DX/NBins,
+  DY is YMax-YMin,
+  YBinWidth is DY/NBins,
+  bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D).
+
 /**
  * density(+List:list,+NBins:int,-Chart:dict) is det
  *
@@ -4019,15 +4038,64 @@ density(Post0,NBins,Chart):-
   min_list(PoK,Min),
   density(Post0,NBins,Min,Max,Chart).
 
+/**
+ * density2d(+List:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of a sets of samples.
+ * The samples are in List
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins.
+ */
+
+density2d(Post0,NBins,D):-
+  maplist(key_x_y,Post0,X,Y),
+  max_list(X,XMax),
+  min_list(X,XMin),
+  max_list(Y,YMax),
+  min_list(Y,YMin),
+  density2d(Post0,NBins,XMin,XMax,YMin,YMax,D).
 
 to_pair([E]-W,E-W):- !.
 to_pair(E-W,E-W).
 
 key(K-_,K).
 
+key_x_y([X,Y]-_,X,Y).
 y(_ - Y,Y).
 
 weight_to_prob(I,_V-W,I:W).
+
+bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D):-
+  binX(NBins,NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D).
+
+binX(0,_NBins,_Post,_XMin,_YMin,_XBinWidth,_YBinWidth,[]):-!.
+
+binX(N,NBins,L,XLower,YMin,XBW,YBW,[R|D]):-
+  V is XLower+XBW/2,
+  XUpper is XLower+XBW,
+  binY(NBins,L,V,XLower,XUpper,YMin,YBW,R),
+  N1 is N-1,
+  binX(N1,NBins,L,XUpper,YMin,XBW,YBW,D).
+
+binY(0,_Post,_XV,_XMin,_YMin,_XBinWidth,_YBinWidth,[]):-!.
+  
+binY(N,L,XV,XLower,XUpper,YLower,YBW,[[XV,YV]-Freq|D]):-
+    YV is YLower+YBW/2,
+    YUpper is YLower+YBW,
+    count_bin2d(L,XLower,XUpper,YLower,YUpper,0,Freq),
+    N1 is N-1,
+    binY(N1,L,XV,XLower,XUpper,YUpper,YBW,D).
+
+count_bin2d([],_XL,_XU,_YL,_YU,F,F).
+
+count_bin2d([[X,Y]-W|T0],XL,XU,YL,YU,F0,F):-
+  ((X>=XL,X<XU,Y>=YL,Y<YU)->
+    F1 is F0+W
+  ;
+    F1 = F0
+  ),
+  count_bin2d(T0,XL,XU,YL,YU,F1,F).
 
 bin(0,_L,_Min,_BW,[]):-!.
 
@@ -4079,7 +4147,8 @@ sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_)).
-
+sandbox:safe_primitive(mcintyre:density2d(_,_,_,_,_,_,_)).
+sandbox:safe_primitive(mcintyre:density2d(_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
