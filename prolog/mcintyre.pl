@@ -1161,8 +1161,12 @@ particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]):- !.
 
 particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
   I1 is I+1,
+  writeln(I1),
   resample_gl(M,I,I1,S),
+  retractall(M:value_particle(I,_,_)),
+  retractall(M:weight_particle(I,_,_)),
   particle_sample_gl(0,S,M:HG,M:HE,HA,I1,HV),
+  retractall(M:mem(I,_,_,_,_)),
   particle_sample_arg_gl(M:TG,M:TE,TA,I1,S,TV).
 
 resample_gl(M,I,I1,S):-
@@ -1228,7 +1232,10 @@ particle_sample_arg(M:[],_Goal,I,_S,L):-!,
 particle_sample_arg(M:[HE|TE],M:Goal,I,S,L):-
   I1 is I+1,
   resample(M,I,I1,S),
+  retractall(M:value_particle(I,_,_)),
+  retractall(M:weight_particle(I,_,_)),
   particle_sample(0,S, M:HE, I1),
+  retractall(M:mem(I,_,_,_,_)),
   particle_sample_arg(M:TE,M:Goal,I1,S,L).
 
 resample(M,I,I1,S):-
@@ -1240,6 +1247,7 @@ resample(M,I,I1,S):-
   maplist(weight_to_prob,L,V1,V2),
   W is 1.0/S,
   take_samples(M,0,S,I,I1,W,V2).
+
 
 take_samples(_M,S,S,_I,_I1,_W,_V):-!.
 
