@@ -38,7 +38,7 @@ The hexadecimal number in each node is part of its address in memory and is not 
 The table =Var= contains the associations between the rule groundings and the
 multivalued variables.
 
-For example (\href{http://cplint.lamping.unife.it/example/inference/coin.pl}{\texttt{coin.pl}})
+For example (\href{http://cplint.ml.unife.it/example/inference/coin.pl}{\texttt{coin.pl}})
 \begin{verbatim}
 ?- bdd_dot_string(heads(coin),BDD,Var).
 \end{verbatim}
@@ -79,7 +79,7 @@ An example is
 \begin{verbatim}
 ?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
 \end{verbatim}
-of \href{http://cplint.lamping.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
+of \href{http://cplint.ml.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
 
 Drawing a graph is particularly interesting when
 sampling values for continuous arguments of goals.
@@ -123,7 +123,7 @@ For example
 ?-  mc_sample_arg(value(0,X),1000,X,L0),
     histogram(L0,40,Chart).
 \end{verbatim}
-from \href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 samples of argument \verb|X| of \verb|value(0,X)| and draws the density of the samples using an histogram.
 
 Instead
@@ -133,7 +133,7 @@ Instead
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,NBins,Chart).
 \end{verbatim}
-from \href{http://cplint.lamping.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 amples of argument \verb|X| of \verb|value(0,X)| before and after observing
 \verb|(value(1,9),value(2,8)| and draws the prior and posterior densities of the samples using a line chart.
 
