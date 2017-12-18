@@ -146,7 +146,7 @@ details.
 :- style_check(-discontiguous).
 
 :- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,
-  sampled/3.
+  sampled/3, sampled_g/2, sampled_g/1.
 
 /*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
   end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
@@ -231,13 +231,35 @@ s(Mo:Goal,P):-
   erase_samples,
   restore_samples(Mo,Goal1).
 
+save_samples_tab(M,I,S):-
+  sampled(R,Sub,V),
+  assert(M:mem(I,S,R,Sub,V)),
+  retract(sampled(R,Sub,V)),
+  fail.
+
+save_samples_tab(M,I,S):-
+  sampled_g(Sub,V),
+  assert(M:mem(I,S,rw,Sub,V)),
+  retract(sampled_g(Sub,V)),
+  fail.
+
+save_samples_tab(M,I,S):-
+  sampled_g(Sub),
+  assert(M:mem(I,S,r,Sub,1)),
+  retract(sampled(Sub)),
+  fail.
+
+save_samples_tab(_M,_I,_S).
+
 save_samples(M,I,S):-
   sampled(R,Sub,V),
   assert(M:mem(I,S,R,Sub,V)),
   retract(sampled(R,Sub,V)),
   fail.
 
-save_samples(_M,_I,_S).
+save_samples(_M,_I,_S):-
+  retractall(sampled_g(_,_)),
+  retractall(sampled_g(_)).
 
 save_samples(M,G):-
   sampled(R,Sub,V),
@@ -249,10 +271,20 @@ save_samples(_M,_G).
 
 restore_samples(M,I,S):-
   M:mem(I,S,R,Sub,V),
-  assertz(sampled(R,Sub,V)),
+  assert_samp(R,Sub,V),
   fail.
 
 restore_samples(_M,_I,_S).
+
+assert_samp(r,Sub,_V):-!,
+  assertz(sampled_g(Sub)).
+
+assert_samp(rw,Sub,V):-!,
+  assertz(sampled_g(Sub,V)).
+
+assert_samp(R,Sub,V):-
+  assertz(sampled(R,Sub,V)).
+
 
 restore_samples(M,G):-
   retract(M:mem(G,R,Sub,V)),
@@ -1157,16 +1189,17 @@ mc_particle_expectation(M:Goal,M:Evidence,S,Arg,E):-
   mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
   aggregate(ValList,E).
 
-particle_sample_arg_gl(M:[],M:[],[],_I,_S,[]):- !.
+particle_sample_arg_gl(M:[],M:[],[],I,_S,[]):- !,
+  retractall(M:mem(I,_,_,_,_)).
 
 particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
   I1 is I+1,
   writeln(I1),
+  statistics,
   resample_gl(M,I,I1,S),
   retractall(M:value_particle(I,_,_)),
   retractall(M:weight_particle(I,_,_)),
   particle_sample_gl(0,S,M:HG,M:HE,HA,I1,HV),
-  retractall(M:mem(I,_,_,_,_)),
   particle_sample_arg_gl(M:TG,M:TE,TA,I1,S,TV).
 
 resample_gl(M,I,I1,S):-
@@ -1177,15 +1210,17 @@ resample_gl(M,I,I1,S):-
   numlist(1,S,L),
   maplist(weight_to_prob,L,V1,V2),
   W is 1.0/S,
-  take_samples_gl(M,0,S,I,I1,W,V2).
+  take_samples_gl(M,0,S,I,I1,W,V2),
+  retractall(M:mem(I,_,_,_,_)).  
 
 take_samples_gl(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples_gl(M,S0,S,I,I1,W,V):-
+  write(' '),writeln(S0),
   S1 is S0+1,
   discrete(V,SInd),
   restore_samples(M,I,SInd),
-  save_samples(M,I1,S1),
+  save_samples_tab(M,I1,S1),
   take_samples_gl(M,S1,S,I,I1,W,V).
 
 particle_sample_gl(K,K,M:_G,_Ev,_A,I,L):-!,
@@ -1197,7 +1232,7 @@ particle_sample_gl(K,K,M:_G,_Ev,_A,I,L):-!,
 
 particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
   K1 is K0+1,
-  restore_samples(M,K1,I),
+  restore_samples(M,I,K1),
   copy_term((Goal,Arg),(Goal1,Arg1)),
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
@@ -1265,7 +1300,7 @@ particle_sample(K,K,_Ev,_I):-!.
 
 particle_sample(K0,S,M:Evidence,I):-
   K1 is K0+1,
-  restore_samples(M,K1,I),
+  restore_samples(M,I,K1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
   save_samples(M,I,K1),
@@ -1506,10 +1541,15 @@ lw_sample(M:G):-
   builtin(G),!,
   M:call(G).
 
+lw_sample(_:G):-
+  \+ \+ sampled_g(G),!,
+  sampled_g(G).
+
 lw_sample(M:G):-
   findall((G,B),M:clause(G,B),L),
   sample_one_back(L,(G,B)),
-  lw_sample(M:B).
+  lw_sample(M:B),
+  assert(sampled(r,G,1)).
 
 
 lw_sample_weight_cycle(M:G,W):-
@@ -1639,10 +1679,17 @@ lw_sample_weight(M:G,W,W):-
   builtin(G),!,
   M:call(G).
 
+lw_sample_weight(_:G,W0,W):-
+  \+ \+ sampled_g(G,_W1),!,
+  sampled_g(G,W1),
+  W is W0*W1.
+  
 lw_sample_weight(M:G,W0,W):-
   findall((G,B),M:clause(G,B),L),
   sample_one_back(L,(G,B)),
-  lw_sample_weight(M:B,W0,W).
+  lw_sample_weight(M:B,1,W1),
+  assert(sampled(rw,G,W1)),
+  W is W0*W1.
 
 
 lw_sample_logweight_cycle(M:G,W):-
@@ -3129,6 +3176,20 @@ user:term_expansion((Head:=Body),Clause) :-
     Clause=(H1:-Body,sample_dirichlet(R,VC,Par,Var))
   ).
 
+user:term_expansion((Head:=Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~gaussian(Mean,Variance)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_gauss(H1,Body,[],R,Var,Mean,Variance,Clause)
+  ;
+    generate_clause_gauss(H1,Body,VC,R,Var,Mean,Variance,Clause)
+  ).
+
 user:term_expansion((Head:=Body),(H1:-Body)) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
@@ -3271,7 +3332,7 @@ user:term_expansion((Head:-Body),Clause) :-
     Clause=(H:-Body,sample_discrete(R,VC,D,Var))
   ).
 
-user:term_expansion((Head:=Body),Clause) :-
+user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with uniform discrete distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3593,6 +3654,19 @@ user:term_expansion(Head,Clause) :-
     Clause=(H1:-maplist(swap,D0,D),sample_discrete(R,VC,D,Var))
   ).
 
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with guassia distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~gaussian(Mean,Variance)), !,
+  extract_vars_list([Head],[],VC),
+  add_arg(H,Var,H1),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_gauss(H1,true,[],R,Var,Mean,Variance,Clause)
+  ;
+    generate_clause_gauss(H1,true,VC,R,Var,Mean,Variance,Clause)
+  ).
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
