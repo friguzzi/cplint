@@ -143,6 +143,7 @@ details.
 :-use_module(library(clpr)).
 :-use_module(library(clpfd)).
 :-use_module(library(matrix)).
+:-use_module(library(option)).
 
 :- style_check(-discontiguous).
 
