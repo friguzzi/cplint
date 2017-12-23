@@ -56,6 +56,7 @@ details.
   gauss_density/4,
   gauss/3,
   histogram/3,
+  histogram/4,
   histogram/5,
   densities/4,
   density/5,
@@ -4009,6 +4010,22 @@ histogram(L0,NBins,Chart):-
   histogram(L0,NBins,Min,Max,Chart).
 
 /**
+ * histogram(+List:list,+NBins:int,-Chart:dict,+Options) is det
+ *
+ * Draws a histogram of the samples in List dividing the domain in
+ * NBins bins. List must be a list of couples of the form [V]-W or V-W
+ * where V is a sampled value and W is its weight.
+ */
+histogram(L0,NBins,Chart,Options):-
+  maplist(to_pair,L0,L1),
+  maplist(key,L1,L2),
+  max_list(L2,_max),
+  min_list(L2,_min),
+  option(max(Max),Options,_max),
+  option(min(Min),Options,_min),
+  histogram(L0,NBins,Min,Max,Chart).
+
+/**
  * histogram(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
  *
  * Draws a histogram of the samples in List dividing the domain in
@@ -4225,6 +4242,7 @@ swap(A:B,B:A).
 
 
 sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
+sandbox:safe_primitive(mcintyre:histogram(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
