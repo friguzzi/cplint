@@ -83,7 +83,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % P = 1.
 
 
-?-  mc_rejection_sample(eval(2,4),eval(1,3),100,T,F,P).
+?-  Options=[successes(S),failures(F)],mc_rejection_sample(eval(2,4),eval(1,3),100,P,Options).
 % perform rejection sampling of eval(2,4) given that eval(1,3) is true
 % expected result
 % T = 10,

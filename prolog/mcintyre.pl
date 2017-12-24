@@ -17,8 +17,7 @@ details.
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2,
   mc_sample/5,
-  mc_rejection_sample/6,
-  mc_rejection_sample/4,
+  mc_rejection_sample/5,
   mc_sample/3,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/8,
@@ -84,7 +83,7 @@ details.
 :-meta_predicate mc_prob_bar(:,-).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
-:-meta_predicate mc_rejection_sample(:,:,+,-).
+:-meta_predicate mc_rejection_sample(:,:,+,-,+).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-).
@@ -503,7 +502,7 @@ mc_sample(M:Goal,S,T,F,P):-
   restore_samples(M,Goal1).
 
 /**
- * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
@@ -512,8 +511,10 @@ mc_sample(M:Goal,S,T,F,P):-
  * sample is discarded.
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
-mc_rejection_sample(M:Goal,M:Evidence,S,P):-
-  mc_rejection_sample(M:Goal,M:Evidence,S,_T,_F,P).
+mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
+  option(successes(T),Options,_T),
+  option(failures(F),Options,_F),
+  mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
  /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -4257,7 +4258,7 @@ sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_), []).

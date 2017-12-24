@@ -241,29 +241,29 @@ test(drawn_1_1_wood_black):-
 
 :-ensure_loaded(library(examples/simpsonmc)).
 test(rec_drug):-
-	run((mc_rejection_sample(recovery,drug,500,P),close_to(P,0.5))).
+	run((mc_rejection_sample(recovery,drug,500,P,[]),close_to(P,0.5))).
 test(rec_n_drug):-
-  run((mc_rejection_sample(recovery,\+ drug,500,P),close_to(P,0.4))).
+  run((mc_rejection_sample(recovery,\+ drug,500,P,[]),close_to(P,0.4))).
 test(rec_drug_f):-
-  run((mc_rejection_sample(recovery,(drug,female),500,P),close_to(P,0.2))).
+  run((mc_rejection_sample(recovery,(drug,female),500,P,[]),close_to(P,0.2))).
 test(rec_n_drug_f):-
-  run((mc_rejection_sample(recovery,(\+drug,female),500,P),close_to(P,0.3))).
+  run((mc_rejection_sample(recovery,(\+drug,female),500,P,[]),close_to(P,0.3))).
 test(rec_drug_m):-
-  run((mc_rejection_sample(recovery,(drug,\+female),500,P),close_to(P,0.6))).
+  run((mc_rejection_sample(recovery,(drug,\+female),500,P,[]),close_to(P,0.6))).
 test(rec_n_drug_m):-
-  run((mc_rejection_sample(recovery,(\+ drug,\+female),500,P),close_to(P,0.7))).
+  run((mc_rejection_sample(recovery,(\+ drug,\+female),500,P,[]),close_to(P,0.7))).
 test(rec_d_drug):-
-  run((mc_rejection_sample(recovery,do(drug),500,P),close_to(P,0.4))).
+  run((mc_rejection_sample(recovery,do(drug),500,P,[]),close_to(P,0.4))).
 test(rec_d_n_drug):-
-  run((mc_rejection_sample(recovery,do(\+ drug),500,P),close_to(P,0.5))).
+  run((mc_rejection_sample(recovery,do(\+ drug),500,P,[]),close_to(P,0.5))).
 test(rec_d_drug_f):-
-  run((mc_rejection_sample(recovery,(do(drug),female),500,P),close_to(P,0.2))).
+  run((mc_rejection_sample(recovery,(do(drug),female),500,P,[]),close_to(P,0.2))).
 test(rec_d_n_drug_f):-
-  run((mc_rejection_sample(recovery,(do(\+drug),female),500,P),close_to(P,0.3))).
+  run((mc_rejection_sample(recovery,(do(\+drug),female),500,P,[]),close_to(P,0.3))).
 test(rec_d_drug_m):-
-  run((mc_rejection_sample(recovery,(do(drug),\+ female),500,P),close_to(P,0.6))).
+  run((mc_rejection_sample(recovery,(do(drug),\+ female),500,P,[]),close_to(P,0.6))).
 test(rec_d_n_drug_m):-
-  run((mc_rejection_sample(recovery,(do(\+ drug),\+ female),500,P),close_to(P,0.7))).
+  run((mc_rejection_sample(recovery,(do(\+ drug),\+ female),500,P,[]),close_to(P,0.7))).
 
 test(mh_rec_drug):-
   run((mc_mh_sample(recovery,drug,500,2,P),close_to(P,0.5))).
@@ -295,9 +295,9 @@ test(mh_rec_d_n_drug_m):-
 
 :-ensure_loaded(library(examples/viralmc)).
 test(has_2_has_3):-
-  run((mc_rejection_sample(has(2),has(3),500,P),close_to(P,0.4065135474609725,0.1))).
+  run((mc_rejection_sample(has(2),has(3),500,P,[]),close_to(P,0.4065135474609725,0.1))).
 test(has_2_d_has_3):-
-  run((mc_rejection_sample(has(2),do(has(3)),500,P),close_to(P,0.136))).
+  run((mc_rejection_sample(has(2),do(has(3)),500,P,[]),close_to(P,0.136))).
 test(mh_has_2_d_has_3):-
   run((mc_mh_sample(has(2),do(has(3)),500,1,P),close_to(P,0.136))).
 :- end_tests(viralmc).

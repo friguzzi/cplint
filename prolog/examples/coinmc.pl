@@ -57,7 +57,7 @@ toss(coin).
 % take 1000 sample of tails(coin) and chart the number of successes and 
 % faliures
 
-?- mc_rejection_sample(heads(coin),biased(coin),1000,S,F,P).
+?- Options=[successes(S),failures(F)],mc_rejection_sample(heads(coin),biased(coin),1000,P,Options).
 % take 1000 sample of heads(coin) given that biasdd(coin) is true
 % Use rejection sampling
 % F = 387,

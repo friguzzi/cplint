@@ -198,12 +198,11 @@ number of samples.
 
 You can take a given number of sample with rejection sampling using
 \begin{verbatim}
-mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Successes:int,-Failures:int,-Probability:float).
+mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list).
 \end{verbatim}
 as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
-?- mc_rejection_sample(heads(coin),biased(coin),1000,S,F,P).
+?- Options=[successes(S),failures(F)], mc_rejection_sample(heads(coin),biased(coin),1000,P,Options).
 \end{verbatim}
 that takes 1000 samples where \verb|biased(coin)| is true and returns in \verb|S| the number of samples where 
 \verb|heads(coin)| is true, in \verb|F| the number of samples where \verb|heads(coin)| is false and in \verb|P| the

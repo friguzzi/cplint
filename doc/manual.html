@@ -367,10 +367,9 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>A successor sample is obtained by deleting a fixed number (parameter <code>Lag</code>) of sampled probabilistic choices. Then the evidence is queried using regular MCINTYRE starting with the undeleted choices. If the query succeeds, the goal is queried using regular MCINTYRE. The sample is accepted with a probability of <span class="math inline">\(\min\{1,\frac{N_0}{N_1}\}\)</span> where <span class="math inline">\(N_0\)</span> is the number of choices sampled in the previous sample and <span class="math inline">\(N_1\)</span> is the number of choices sampled in the current sample. In <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> the lag is always 1 but the proof in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> that the above acceptance probability yields a valid Metropolis-Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in <code>cplint</code>.</p>
 <p>Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample. The final probability is given by the number of successes over the total number of samples.</p>
 <p>You can take a given number of sample with rejection sampling using</p>
-<pre><code>mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Successes:int,-Failures:int,-Probability:float).</code></pre>
+<pre><code>mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list).</code></pre>
 <p>as in (<a href="http://cplint.lamping.unife.it/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
-<pre><code>?- mc_rejection_sample(heads(coin),biased(coin),1000,S,F,P).</code></pre>
+<pre><code>?- Options=[successes(S),failures(F)], mc_rejection_sample(heads(coin),biased(coin),1000,P,Options).</code></pre>
 <p>that takes 1000 samples where <code>biased(coin)</code> is true and returns in <code>S</code> the number of samples where <code>heads(coin)</code> is true, in <code>F</code> the number of samples where <code>heads(coin)</code> is false and in <code>P</code> the estimated probability (<code>S/1000</code>).</p>
 <p>The query and the evidence can be conjunctions of literals.</p>
 <p>You can take a given number of sample with Metropolis-Hastings MCMC using</p>
