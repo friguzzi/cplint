@@ -19,12 +19,11 @@ mc_prob(:Query:atom,-Probability:float).
 \end{verbatim}
 With \verb|mcintyre|, you can also take a given number of sample with
 \begin{verbatim}
-mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,
-  -Probability:float).
+mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).
 \end{verbatim}
 as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
-?- mc_sample(heads(coin),1000,S,F,P).
+?- Options=[successes(S),failures(F)], mc_sample(heads(coin),1000,P).
 \end{verbatim}
 that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
 estimated probability (\verb|S/1000|).
@@ -33,11 +32,11 @@ Differently from exact inference, in approximate inference the query can be a co
 
 If you are just interested in the probability, you can use
 \begin{verbatim}
-mc_sample(:Query:atom,+Samples:int,-Probability:float) 
+mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list) 
 \end{verbatim}
 as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
-?- mc_sample(heads(coin),1000,Prob).
+?- mc_sample(heads(coin),1000,Prob,[]).
 \end{verbatim}
 that samples \verb|heads(coin)| 1000 times and returns the
 estimated probability that a sample is true (i.e., that a sample succeeds).

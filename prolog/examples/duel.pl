@@ -76,7 +76,7 @@ write(best_strategy(A,Rest,L,T,S,P)),nl,
 %    max_member(P-S,LP).
 
 ev_action(A,Rest,T,L,S,P-S):-
-    mc_sample(survives_rest(A,Rest,T,L,S),5,P).
+    mc_sample(survives_rest(A,Rest,T,L,S),5,P,[]).
 
 %ev_action(A,Rest,T,L,S,P-S):-
 %    mc_sample(survives_rest1(A,Rest,T,L,S),5,P).

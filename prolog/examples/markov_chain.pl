@@ -66,7 +66,7 @@ markov_chain(digraph(G)):-
 ?- mc_prob(reach(s1,0,s0),P).
 % expected result ~ 0.
 
-?- mc_sample(reach(s0,0,s1),1000,T,F,P).
+?- Options=[successes(S),failures(F)], mc_sample(reach(s0,0,s1),1000,P,Options).
 % expected result ~ 0.5984054054054054.
 
 ?- mc_sample_bar(reach(s0,0,s1),1000,Chart).

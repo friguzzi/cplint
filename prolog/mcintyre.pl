@@ -16,9 +16,8 @@ details.
 
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2,
-  mc_sample/5,
   mc_rejection_sample/5,
-  mc_sample/3,mc_sample_bar/3,
+  mc_sample/4,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
   mc_mh_sample/8,
   mc_mh_sample/7,
@@ -88,7 +87,7 @@ details.
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,-).
-:-meta_predicate mc_sample(:,+,-).
+:-meta_predicate mc_sample(:,+,-,+).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
 :-meta_predicate mc_sample_arg_bar(:,+,+,-).
@@ -474,14 +473,16 @@ mc_prob_bar(M:Goal,Chart):-
 	          legend:_{show: false}}.
 
 /**
- * mc_sample(:Query:atom,+Samples:int,-Probability:float) is det
+ * mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times and returns
  * the resulting Probability (Successes/Samples)
  * If Query is not ground, it considers it as an existential query
  */
-mc_sample(M:Goal,S,P):-
-  mc_sample(M:Goal,S,_T,_F,P).
+mc_sample(M:Goal,S,P,Options):-
+  option(successes(T),Options,_T),
+  option(failures(F),Options,_F),
+  mc_sample(M:Goal,S,T,F,P).
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
@@ -3975,7 +3976,7 @@ builtin(G):-
 
 builtin_int(average(_L,_Av)).
 builtin_int(mc_prob(_,_)).
-builtin_int(mc_sample(_,_,_)).
+builtin_int(mc_sample(_,_,_,_)).
 builtin_int(db(_)).
 builtin_int(G):-
   predicate_property(G,built_in).

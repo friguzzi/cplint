@@ -317,16 +317,15 @@ female(cathy).</code></pre>
 <p>as in</p>
 <pre><code>?- mc_prob(heads(coin),P).</code></pre>
 <p>With <code>mcintyre</code>, you can also take a given number of sample with</p>
-<pre><code>mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,
-  -Probability:float).</code></pre>
+<pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list).</code></pre>
 <p>as in (<a href="http://cplint.lamping.unife.it/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
-<pre><code>?- mc_sample(heads(coin),1000,S,F,P).</code></pre>
+<pre><code>?- Options=[successes(S),failures(F)], mc_sample(heads(coin),1000,P,Options).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns in <code>S</code> the number of successes, in <code>F</code> the number of failures and in <code>P</code> the estimated probability (<code>S/1000</code>).</p>
 <p>Differently from exact inference, in approximate inference the query can be a conjunction of atoms.</p>
 <p>If you are just interested in the probability, you can use</p>
-<pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float) </code></pre>
+<pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) </code></pre>
 <p>as in (<a href="http://cplint.lamping.unife.it/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
-<pre><code>?- mc_sample(heads(coin),1000,Prob).</code></pre>
+<pre><code>?- mc_sample(heads(coin),1000,Prob,[]).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns the estimated probability that a sample is true (i.e., that a sample succeeds).</p>
 <p>Moreover, you can sample arguments of queries with</p>
 <pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).</code></pre>
