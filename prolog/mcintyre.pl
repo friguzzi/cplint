@@ -22,13 +22,11 @@ details.
   mc_mh_sample/6,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
-  mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
   mc_mh_sample_arg/7,mc_mh_sample_arg_bar/7,
   mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
   mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
   mc_sample_arg_raw/4,
   mc_expectation/4,
-  mc_mh_expectation/6,
   mc_mh_expectation/7,
   mc_rejection_expectation/5,
   set_mc/2,setting_mc/2,
@@ -50,14 +48,10 @@ details.
   mc_particle_expectation/5,
   gauss_density/4,
   gauss/3,
-  histogram/3,
   histogram/4,
-  histogram/5,
   densities/4,
-  density/5,
-  density/3,
-  density2d/7,
-  density2d/3,
+  density/4,
+  density2d/4,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -87,18 +81,19 @@ details.
 :-meta_predicate mc_sample_arg_bar(:,+,+,-).
 :-meta_predicate mc_rejection_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_rejection_sample_arg_bar(:,:,+,+,-).
-:-meta_predicate mc_mh_sample_arg(:,:,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg(:,:,+,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg(:,:,+,+,+,-,+).
+:-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,-,+).
+:-meta_predicate mc_mh_sample_arg_bar0(:,:,+,+,+,-).
+:-meta_predicate mc_mh_sample_arg_bar0(:,:,+,+,+,+,-).
 :-meta_predicate mc_sample_arg_first(:,+,+,-).
 :-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_one(:,+,+,-).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_raw(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
-:-meta_predicate mc_mh_expectation(:,:,+,+,+,-).
-:-meta_predicate mc_mh_expectation(:,:,+,+,+,+,-).
+:-meta_predicate mc_mh_expectation(:,:,+,+,+,-,+).
 :-meta_predicate mc_rejection_expectation(:,:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
@@ -897,7 +892,7 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
 	          legend:_{show: false}}.
 
 /**
- * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -909,7 +904,28 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  */
-mc_mh_sample_arg(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
+mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList,Options):-
+  option(mix(Mix),Options,_Mix),
+  (var(Mix)->
+    mc_mh_sample_arg0(M:Goal,M:Evidence,S,L,Arg,ValList)
+  ;
+    mc_mh_sample_arg0(M:Goal,M:Evidence,S,Mix,L,Arg,ValList)
+  ).
+
+/**
+ * mc_mh_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability.
+ */
+mc_mh_sample_arg0(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   empty_assoc(Values0),
@@ -928,7 +944,7 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
   maplist(M:assertz,ClausesToReAdd).
 
 /**
- * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_mh_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -940,7 +956,7 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  */
-mc_mh_sample_arg(M:Goal,M:Evidence0,S,L,Arg,ValList):-
+mc_mh_sample_arg0(M:Goal,M:Evidence0,S,L,Arg,ValList):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   empty_assoc(Values0),
@@ -957,9 +973,9 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,L,Arg,ValList):-
   maplist(M:assertz,ClausesToReAdd).
 
 /**
- * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
+ * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict,+Options:list) is det
  *
- * The predicate call mc_mh_sample_arg/7 and build a c3 graph
+ * The predicate call mc_mh_sample_arg0/7 and build a c3 graph
  * of the results.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each possible value of L,
@@ -968,8 +984,28 @@ mc_mh_sample_arg(M:Goal,M:Evidence0,S,L,Arg,ValList):-
  * The size of the bar is the number of samples
  * returning that list of values.
  */
-mc_mh_sample_arg_bar(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
-  mc_mh_sample_arg(M:Goal,M:Ev,S,Mix,L,Arg,ValList0),
+mc_mh_sample_arg_bar(M:Goal,M:Ev,S,L,Arg,Chart,Options):-
+  option(mix(Mix),Options,_Mix),
+  (var(Mix)->
+    mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,Mix,L,Arg,Chart)
+  ;
+    mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,L,Arg,Chart)
+  ).
+
+/**
+ * mc_mh_sample_arg_bar0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
+ *
+ * The predicate call mc_mh_sample_arg0/7 and build a c3 graph
+ * of the results.
+ * The predicate returns in Chart a dict for rendering with c3 as a bar chart
+ * with a bar for each possible value of L,
+ * the list of values of Arg for which Query succeeds in
+ * a world sampled at random.
+ * The size of the bar is the number of samples
+ * returning that list of values.
+ */
+mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
+  mc_mh_sample_arg(M:Goal,M:Ev,S,L,Arg,ValList0,[mix(Mix)]),
   maplist(to_atom,ValList0,ValList),
   Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
           axis:_{x:_{type:category}, rotated: true,
@@ -979,9 +1015,9 @@ mc_mh_sample_arg_bar(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
 
 
 /**
- * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict) is det
+ * mc_mh_sample_arg_bar0(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict) is det
  *
- * The predicate call mc_mh_sample_arg/6 and build a c3 graph
+ * The predicate call mc_mh_sample_arg0/6 and build a c3 graph
  * of the results.
  * The predicate returns in Chart a dict for rendering with c3 as a bar chart
  * with a bar for each possible value of L,
@@ -990,8 +1026,8 @@ mc_mh_sample_arg_bar(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
  * The size of the bar is the number of samples
  * returning that list of values.
  */
-mc_mh_sample_arg_bar(M:Goal,M:Ev,S,L,Arg,Chart):-
-  mc_mh_sample_arg(M:Goal,M:Ev,S,L,Arg,ValList0),
+mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,L,Arg,Chart):-
+  mc_mh_sample_arg(M:Goal,M:Ev,S,L,Arg,ValList0,[]),
   maplist(to_atom,ValList0,ValList),
   Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
           axis:_{x:_{type:category}, rotated: true,
@@ -1996,23 +2032,9 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
  * each sample. The overall sum is divided by N to give Exp.
  * Arg should be a variable in Query.
  */
-mc_mh_expectation(M:Goal,M:Evidence,S,Mix,L,Arg,E):-
-  mc_mh_sample_arg(M:Goal,M:Evidence,S,Mix,L,Arg,ValList),
-  foldl(value_cont,ValList,0,Sum),
-  erase_samples,
-  E is Sum/S.
-
-/**
- * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Lag:int,?Arg:var,-Exp:float) is det
- *
- * The predicate computes the expected value of Arg in Query by
- * sampling.
- * It takes N samples of Query and sums up the value of Arg for
- * each sample. The overall sum is divided by N to give Exp.
- * Arg should be a variable in Query.
- */
-mc_mh_expectation(M:Goal,M:Evidence,S,L,Arg,E):-
-  mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList),
+mc_mh_expectation(M:Goal,M:Evidence,S,L,Arg,E,Options):-
+  option(mix(Mix),Options,_Mix),
+  mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList,[mix(Mix)]),
   foldl(value_cont,ValList,0,Sum),
   erase_samples,
   E is Sum/S.
@@ -3977,19 +3999,6 @@ average(L,Av):-
         sum_list(L,Sum),
         length(L,N),
         Av is Sum/N.
-/**
- * histogram(+List:list,+NBins:int,-Chart:dict) is det
- *
- * Draws a histogram of the samples in List dividing the domain in
- * NBins bins. List must be a list of couples of the form [V]-W or V-W
- * where V is a sampled value and W is its weight.
- */
-histogram(L0,NBins,Chart):-
-  maplist(to_pair,L0,L1),
-  maplist(key,L1,L2),
-  max_list(L2,Max),
-  min_list(L2,Min),
-  histogram(L0,NBins,Min,Max,Chart).
 
 /**
  * histogram(+List:list,+NBins:int,-Chart:dict,+Options) is det
@@ -4104,7 +4113,7 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
   bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D).
 
 /**
- * density(+List:list,+NBins:int,-Chart:dict) is det
+ * density(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
@@ -4113,14 +4122,21 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
  * NBins bins.
  */
 
-density(Post0,NBins,Chart):-
+density(Post0,NBins,Chart,Options):-
+  % write("density"),nl,
   maplist(key,Post0,PoK),
-  max_list(PoK,Max),
-  min_list(PoK,Min),
+  % write(PoK),nl,
+  max_list(PoK,_max),
+  % write(PoK),nl,
+  min_list(PoK,_min),
+  % write(PoK),nl,
+  % write(_max),nl,write(_min),nl,
+  option(max(Max),Options,_max),
+  option(min(Min),Options,_min),
   density(Post0,NBins,Min,Max,Chart).
 
 /**
- * density2d(+List:list,+NBins:int,-Chart:dict) is det
+ * density2d(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
@@ -4129,12 +4145,16 @@ density(Post0,NBins,Chart):-
  * NBins bins.
  */
 
-density2d(Post0,NBins,D):-
+density2d(Post0,NBins,D,Options):-
   maplist(key_x_y,Post0,X,Y),
-  max_list(X,XMax),
-  min_list(X,XMin),
-  max_list(Y,YMax),
-  min_list(Y,YMin),
+  max_list(X,_xMax),
+  min_list(X,_xMin),
+  max_list(Y,_yMax),
+  min_list(Y,_yMin),
+  option(xmax(XMax),Options,_xMax),
+  option(xmin(XMin),Options,_xMin),
+  option(ymax(YMax),Options,_yMax),
+  option(ymin(YMin),Options,_yMin),
   density2d(Post0,NBins,XMin,XMax,YMin,YMax,D).
 
 to_pair([E]-W,E-W):- !.
@@ -4223,14 +4243,13 @@ swap(A:B,B:A).
 :- multifile sandbox:safe_primitive/1.
 
 
-sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density(_,_,_)).
+sandbox:safe_primitive(mcintyre:density(_,_,_,_)).
 sandbox:safe_primitive(mcintyre:density2d(_,_,_,_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density2d(_,_,_)).
+sandbox:safe_primitive(mcintyre:density2d(_,_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
@@ -4254,13 +4273,14 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_raw(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar0(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar0(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_expectation(_,_,_,_,_), []).
 
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
