@@ -143,9 +143,9 @@ test(exp_eventually_elect):-
 :-ensure_loaded(library(examples/arithm)).
 
 test(eval_1_3):-
-	run((mc_mh_sample(eval(2,4),eval(1,3),500,1,P),close_to(P,0.1151,0.3))).
+	run((mc_mh_sample(eval(2,4),eval(1,3),500,1,P,[]),close_to(P,0.1151,0.3))).
 test(eval_0_2_1_3):-
-  run((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),200,1,P),close_to(P,1))).
+  run((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),200,1,P,[]),close_to(P,1))).
 %test((mc_rejection_sample(eval(2,4),eval(1,3),1000,P),close_to(P,0.1151)),arithm).
 %test((mc_rejection_sample(eval(2,4),(eval(0,2),eval(1,3)),1000,P),close_to(P,1)),arithm).
 test(exp_eval_2):-
@@ -266,29 +266,29 @@ test(rec_d_n_drug_m):-
   run((mc_rejection_sample(recovery,(do(\+ drug),\+ female),500,P,[]),close_to(P,0.7))).
 
 test(mh_rec_drug):-
-  run((mc_mh_sample(recovery,drug,500,2,P),close_to(P,0.5))).
+  run((mc_mh_sample(recovery,drug,500,2,P,[]),close_to(P,0.5))).
 test(mh_rec_n_drug):-
-  run((mc_mh_sample(recovery,\+ drug,500,2,P),close_to(P,0.4))).
+  run((mc_mh_sample(recovery,\+ drug,500,2,P,[]),close_to(P,0.4))).
 test(mh_rec_drug_f):-
-  run((mc_mh_sample(recovery,(drug,female),500,2,P),close_to(P,0.2))).
+  run((mc_mh_sample(recovery,(drug,female),500,2,P,[]),close_to(P,0.2))).
 test(mh_rec_n_drug_f):-
-  run((mc_mh_sample(recovery,(\+drug,female),500,2,P),close_to(P,0.3))).
+  run((mc_mh_sample(recovery,(\+drug,female),500,2,P,[]),close_to(P,0.3))).
 test(mh_rec_drug_m):-
-  run((mc_mh_sample(recovery,(drug,\+female),500,2,P),close_to(P,0.6))).
+  run((mc_mh_sample(recovery,(drug,\+female),500,2,P,[]),close_to(P,0.6))).
 test(mh_rec_n_drug_m):-
-  run((mc_mh_sample(recovery,(\+ drug,\+female),500,2,P),close_to(P,0.7))).
+  run((mc_mh_sample(recovery,(\+ drug,\+female),500,2,P,[]),close_to(P,0.7))).
 test(mh_rec_d_drug):-
-  run((mc_mh_sample(recovery,do(drug),500,2,P),close_to(P,0.4))).
+  run((mc_mh_sample(recovery,do(drug),500,2,P,[]),close_to(P,0.4))).
 test(mh_rec_d_n_drug):-
-  run((mc_mh_sample(recovery,do(\+ drug),500,2,P),close_to(P,0.5))).
+  run((mc_mh_sample(recovery,do(\+ drug),500,2,P,[]),close_to(P,0.5))).
 test(mh_rec_d_drug_f):-
-  run((mc_mh_sample(recovery,(do(drug),female),500,2,P),close_to(P,0.2))).
+  run((mc_mh_sample(recovery,(do(drug),female),500,2,P,[]),close_to(P,0.2))).
 test(mh_rec_d_n_drug_f):-
-  run((mc_mh_sample(recovery,(do(\+drug),female),500,2,P),close_to(P,0.3))).
+  run((mc_mh_sample(recovery,(do(\+drug),female),500,2,P,[]),close_to(P,0.3))).
 test(mh_rec_d_drug_m):-
-  run((mc_mh_sample(recovery,(do(drug),\+ female),500,2,P),close_to(P,0.6))).
+  run((mc_mh_sample(recovery,(do(drug),\+ female),500,2,P,[]),close_to(P,0.6))).
 test(mh_rec_d_n_drug_m):-
-  run((mc_mh_sample(recovery,(do(\+ drug),\+ female),500,2,P),close_to(P,0.7))).
+  run((mc_mh_sample(recovery,(do(\+ drug),\+ female),500,2,P,[]),close_to(P,0.7))).
 :- end_tests(simpsonmc).
 
 :- begin_tests(viralmc, []).
@@ -299,7 +299,7 @@ test(has_2_has_3):-
 test(has_2_d_has_3):-
   run((mc_rejection_sample(has(2),do(has(3)),500,P,[]),close_to(P,0.136))).
 test(mh_has_2_d_has_3):-
-  run((mc_mh_sample(has(2),do(has(3)),500,1,P),close_to(P,0.136))).
+  run((mc_mh_sample(has(2),do(has(3)),500,1,P,[]),close_to(P,0.136))).
 :- end_tests(viralmc).
 
 :- begin_tests(uwcsemc, []).

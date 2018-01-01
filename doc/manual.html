@@ -83,10 +83,10 @@ fabrizio.riguzzi@unife.it</h2>
 <p>stands for</p>
 <pre><code>h1:1 :- Body.</code></pre>
 <p>The coin example of <span class="citation">[<a href="#ref-VenVer04-ICLP04-IC">24</a>]</span> is represented as (file <a href="http://cplint.lamping.unife.it/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
-<pre><code>heads(Coin):1/2 ; tails(Coin):1/2 :- 
+<pre><code>heads(Coin):1/2 ; tails(Coin):1/2 :-
   toss(Coin),\+biased(Coin).
 
-heads(Coin):0.6 ; tails(Coin):0.4 :- 
+heads(Coin):0.6 ; tails(Coin):0.4 :-
   toss(Coin),biased(Coin).
 
 fair(Coin):0.9 ; biased(Coin):0.1.
@@ -209,7 +209,7 @@ agpa(A): beta(A,8,2) :- is_density_A.
 
 american_gpa(G) : finite(G,[4.0:0.85,0.0:0.15]) :- is_discrete_A.
 % the GPA of American students is 4.0 with probability 0.85 and 0.0
-% with 
+% with
 % probability 0.15 if the
 % distribution is discrete
 american_gpa(A):- agpa(A0), A is A0*4.0.
@@ -218,7 +218,7 @@ american_gpa(A):- agpa(A0), A is A0*4.0.
 % to the (0.0,4.0) interval
 is_density_I : 0.99; is_discrete_I:0.01.
 % the probability distribution of GPA scores for Indian students is
-% continuous with probability 0.99 and discrete with probability 
+% continuous with probability 0.99 and discrete with probability
 % 0.01
 igpa(I): beta(I,5,5) :- is_density_I.
 % the GPA of Indian students follows a beta distribution if the
@@ -229,17 +229,17 @@ indian_gpa(I): finite(I,[0.0:0.1,10.0:0.9]):-  is_discrete_I.
 % probability 0.1 if the
 % distribution is discrete
 indian_gpa(I) :- igpa(I0), I is I0*10.0.
-% the GPA of Indian students is obtained by rescaling the value 
+% the GPA of Indian students is obtained by rescaling the value
 % of igpa
 % to the (0.0,4.0) interval
 nation(N) : finite(N,[a:0.25,i:0.75]).
-% the nation is America with probability 0.25 and India with 
+% the nation is America with probability 0.25 and India with
 % probability 0.75
 student_gpa(G):- nation(a),american_gpa(G).
-% the GPA of the student is given by american_gpa if the nation is 
+% the GPA of the student is given by american_gpa if the nation is
 % America
 student_gpa(G) :- nation(i),indian_gpa(G).
-% the GPA of the student is given by indian_gpa if the nation 
+% the GPA of the student is given by indian_gpa if the nation
 %is India</code></pre>
 <p>See</p>
 <h1 id="semantics">Semantics</h1>
@@ -252,10 +252,10 @@ student_gpa(G) :- nation(i),indian_gpa(G).
 <pre><code>:- use_module(library(pita)).
 :- pita.
 :- begin_lpad.
-heads(Coin):1/2 ; tails(Coin):1/2:- 
+heads(Coin):1/2 ; tails(Coin):1/2:-
 toss(Coin),\+biased(Coin).
 
-heads(Coin):0.6 ; tails(Coin):0.4:- 
+heads(Coin):0.6 ; tails(Coin):0.4:-
 toss(Coin),biased(Coin).
 
 fair(Coin):0.9 ; biased(Coin):0.1.
@@ -266,10 +266,10 @@ toss(coin).
 <pre><code>:- use_module(library(mcintyre)).
 :- mc.
 :- begin_lpad.
-heads(Coin):1/2 ; tails(Coin):1/2:- 
+heads(Coin):1/2 ; tails(Coin):1/2:-
 toss(Coin),\+biased(Coin).
 
-heads(Coin):0.6 ; tails(Coin):0.4:- 
+heads(Coin):0.6 ; tails(Coin):0.4:-
 toss(Coin),biased(Coin).
 
 fair(Coin):0.9 ; biased(Coin):0.1.
@@ -373,13 +373,13 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>The query and the evidence can be conjunctions of literals.</p>
 <p>You can take a given number of sample with Metropolis-Hastings MCMC using</p>
 <pre><code>mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,
-  -Successes:int,-Failures:int,-Probability:float).</code></pre>
+  -Probability:float,+Options:list).</code></pre>
 <p>where <code>Lag</code> is the number of sampled choices to forget before taking a new sample. For example (<a href="http://cplint.lamping.unife.it/example/inference/arithm.pl"><code>arithm.pl</code></a>)</p>
-<pre><code>?- mc_mh_sample(eval(2,4),eval(1,3),10000,1,T,F,P).</code></pre>
+<pre><code>?- mc_mh_sample(eval(2,4),eval(1,3),10000,1,P,[successes(T), failures(F)]).</code></pre>
 <p>takes 10000 accepted samples and returns in <code>T</code> the number of samples where <code>eval(2,4)</code> is true, in <code>F</code> the number of samples where <code>eval(2,4)</code> is false and in <code>P</code> the estimated probability (<code>T/10000</code>).</p>
 <p>You can allow for mixing time with</p>
-<pre><code>mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,
-  -Successes:int,-Failures:int,-Probability:float).</code></pre>
+<pre><code>mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,
+  -Probability:float,+Options:list).</code></pre>
 <p>that takes <code>Mix+Samples</code> samples and discards the first <code>Mix</code>.</p>
 <p>Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using</p>
 <pre><code>mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
@@ -650,7 +650,7 @@ component(C):-
        in(B,A)),
     (pos:0.000303421 :-
        circle(A),
-       triangle(B)), 
+       triangle(B)),
     (pos:0.000448807 :-
        triangle(A),
        circle(B))]).</code></pre>

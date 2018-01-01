@@ -19,10 +19,7 @@ details.
   mc_rejection_sample/5,
   mc_sample/4,mc_sample_bar/3,
   mc_sample_arg/4,mc_sample_arg_bar/4,
-  mc_mh_sample/8,
-  mc_mh_sample/7,
   mc_mh_sample/6,
-  mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
   mc_mh_sample_arg/6,mc_mh_sample_arg_bar/6,
@@ -83,10 +80,7 @@ details.
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,+).
-:-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
-:-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
-:-meta_predicate mc_mh_sample(:,:,+,+,+,-).
-:-meta_predicate mc_mh_sample(:,:,+,+,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,+,+).
 :-meta_predicate mc_sample(:,+,-,+).
 :-meta_predicate mc_sample_bar(:,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-).
@@ -598,6 +592,17 @@ get_pred_const(do(Do0),AP0,AP):-
 
 ac(do(_)).
 nac(do(\+ _)).
+
+mc_mh_sample(M:Goal,M:Evidence,S,L,P,Options):-
+  option(mix(Mix),Options,_Mix),
+  option(successes(T),Options,_T),
+  option(failures(F),Options,_F),
+  (var(Mix)->
+    mc_mh_sample(M:Goal,M:Evidence,S,L,T,F,P)
+  ;
+    mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P)
+  ).
+
 /**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -631,32 +636,6 @@ mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-
-/**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Probability:float) is det
- *
- * The predicate samples Query  a number of Mix+Samples times given that Evidence
- * is true and returns the
- * Probability of the query. The first Mix samples are discarded (mixing time).
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability.
- * If Query/Evidence are not ground, it considers them as existential queries.
- */
-mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,P):-
-  mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,_T,_F,P).
-
-/**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Probability:float) is det
- *
- * The predicate samples Query  a number of Samples times given that Evidence
- * is true and returns the
- * Probability of the query.
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
- * choices are forgotten and each sample is accepted with a certain probability.
- * If Query/Evidence are not ground, it considers them as existential queries.
- */
-mc_mh_sample(M:Goal,M:Evidence,S,L,P):-
-  mc_mh_sample(M:Goal,M:Evidence,S,L,_T,_F,P).
 
 /**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
@@ -1215,7 +1194,7 @@ resample_gl(M,I,I1,S):-
   maplist(weight_to_prob,L,V1,V2),
   W is 1.0/S,
   take_samples_gl(M,0,S,I,I1,W,V2),
-  retractall(M:mem(I,_,_,_,_)).  
+  retractall(M:mem(I,_,_,_,_)).
 
 take_samples_gl(_M,S,S,_I,_I1,_W,_V):-!.
 
@@ -1687,7 +1666,7 @@ lw_sample_weight(_:G,W0,W):-
   \+ \+ sampled_g(G,_W1),!,
   sampled_g(G,W1),
   W is W0*W1.
-  
+
 lw_sample_weight(M:G,W0,W):-
   findall((G,B),M:clause(G,B),L),
   sample_one_back(L,(G,B)),
@@ -4181,7 +4160,7 @@ binX(N,NBins,L,XLower,YMin,XBW,YBW,[R|D]):-
   binX(N1,NBins,L,XUpper,YMin,XBW,YBW,D).
 
 binY(0,_Post,_XV,_XMin,_YMin,_XBinWidth,_YBinWidth,[]):-!.
-  
+
 binY(N,L,XV,XLower,XUpper,YLower,YBW,[[XV,YV]-Freq|D]):-
     YV is YLower+YBW/2,
     YUpper is YLower+YBW,

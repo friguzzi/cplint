@@ -58,7 +58,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 
 /** <examples>
 
-?- mc_mh_sample(eval(2,4),eval(1,3),100,100,3,T,F,P).
+?- mc_mh_sample(eval(2,4),eval(1,3),100,3,P,[mix(100),successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
 % eval(1,3) is true (100 samples, 100 mixing samples)
 % expected result
@@ -66,7 +66,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % F = 83,
 % P = 0.17.
 
-?- mc_mh_sample(eval(2,4),eval(1,3),100,3,T,F,P).
+?- mc_mh_sample(eval(2,4),eval(1,3),100,3,P,[successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
 % eval(1,3) is true
 % expected result
@@ -74,7 +74,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % F = 83,
 % P = 0.17.
 
-?- mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),100,3,T,F,P).
+?- mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),100,3,P,[successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
 % eval(0,2) and eval(1,3) are true
 % expected result
@@ -91,7 +91,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % P = 0.1.
 
 ?- mc_mh_sample_arg(eval(2,Y),(eval(0,2),eval(1,3)),100,100,3,Y,V).
-% sample arg Y of eval(2,Y) given that 
+% sample arg Y of eval(2,Y) given that
 % eval(0,2) and eval(1,3) are true
 % Sample using Metropolis Hastings
 % exected result
@@ -99,7 +99,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 ?- mc_mh_sample_arg_bar(eval(2,Y),(eval(0,2),eval(1,3)),100,100,3,Y,V).
 
 ?- mc_mh_sample_arg(eval(2,Y),eval(1,3),100,100,3,Y,V).
-% sample arg Y of eval(2,Y) given that 
+% sample arg Y of eval(2,Y) given that
 % eval(1,3) is true
 % Sample using Metropolis Hastings
 % exected result
@@ -108,7 +108,7 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 
 
 ?- mc_rejection_sample_arg(eval(2,Y),eval(1,3),100,Y,V).
-% sample argument Y of eval(2,Y) given that 
+% sample argument Y of eval(2,Y) given that
 % eval(1,3) is true
 % Sample using rejection sampling
 % exected result
@@ -129,4 +129,3 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % expected result
 % E = 3.06
 */
- 
