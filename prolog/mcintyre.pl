@@ -4123,14 +4123,9 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
  */
 
 density(Post0,NBins,Chart,Options):-
-  % write("density"),nl,
   maplist(key,Post0,PoK),
-  % write(PoK),nl,
   max_list(PoK,_max),
-  % write(PoK),nl,
   min_list(PoK,_min),
-  % write(PoK),nl,
-  % write(_max),nl,write(_min),nl,
   option(max(Max),Options,_max),
   option(min(Min),Options,_min),
   density(Post0,NBins,Min,Max,Chart).

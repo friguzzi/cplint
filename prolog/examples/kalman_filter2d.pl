@@ -147,7 +147,6 @@ filter_par(Samples,O,St,C):-
   NBins=20,
   mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
   [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],Samples,[T1,T2,T3,T4],[F1,F2,F3,F4]),
-  % write(F1),nl,write(NBins),nl,write(C1),nl,
   density(F1,NBins,C1,[]),
   density(F2,NBins,C2,[]),
   density(F3,NBins,C3,[]),
