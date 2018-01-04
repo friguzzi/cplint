@@ -15,16 +15,16 @@ details.
 */
 
 
-:- module(mcintyre,[mc_prob/2, mc_prob_bar/2,
+:- module(mcintyre,[mc_prob/3,
   mc_rejection_sample/5,
   mc_sample/4,
   mc_sample_arg/5,
   mc_mh_sample/6,
   mc_lw_sample/4,
-  mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
-  mc_mh_sample_arg/7,mc_mh_sample_arg_bar/7,
-  mc_sample_arg_first/4,mc_sample_arg_first_bar/4,
-  mc_sample_arg_one/4,mc_sample_arg_one_bar/4,
+  mc_rejection_sample_arg/6,
+  mc_mh_sample_arg/7,
+  mc_sample_arg_first/5,
+  mc_sample_arg_one/5,
   mc_sample_arg_raw/4,
   mc_expectation/4,
   mc_mh_expectation/7,
@@ -68,26 +68,23 @@ details.
   bin/5,
   to_atom/2
   ]).
+
 :-meta_predicate s(:,-).
-:-meta_predicate mc_prob(:,-).
-:-meta_predicate mc_prob_bar(:,-).
+:-meta_predicate mc_prob(:,-,+).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,+).
-:-meta_predicate mc_mh_sample(:,:,+,+,+,+).
+:-meta_predicate mc_mh_sample(:,:,+,+,-,+).
+:-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
+:-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
 :-meta_predicate mc_sample(:,+,-,+).
 :-meta_predicate mc_sample_arg(:,+,+,-,+).
-:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-).
-:-meta_predicate mc_rejection_sample_arg_bar(:,:,+,+,-).
+:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+,+).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,-).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,+,-).
 :-meta_predicate mc_mh_sample_arg(:,:,+,+,+,-,+).
-:-meta_predicate mc_mh_sample_arg_bar(:,:,+,+,+,-,+).
-:-meta_predicate mc_mh_sample_arg_bar0(:,:,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg_bar0(:,:,+,+,+,+,-).
-:-meta_predicate mc_sample_arg_first(:,+,+,-).
-:-meta_predicate mc_sample_arg_first_bar(:,+,+,-).
-:-meta_predicate mc_sample_arg_one(:,+,+,-).
+:-meta_predicate mc_sample_arg_first(:,+,+,-,+).
+:-meta_predicate mc_sample_arg_one(:,+,+,-,+).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_raw(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
@@ -120,6 +117,7 @@ details.
 :-meta_predicate mh_sample_arg(+,+,+,:,:,-,+,-,+,-).
 :-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
 :-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
+
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
@@ -129,6 +127,21 @@ details.
 :-use_module(library(clpfd)).
 :-use_module(library(matrix)).
 :-use_module(library(option)).
+:-use_module(library(predicate_options)).
+
+:-predicate_options(mc_prob/3,3,[bar(-)]).
+:-predicate_options(mc_sample/4,4,[successes(-),failures(-),bar(-)]).
+:-predicate_options(mc_mh_sample/6,6,[successes(-),failures(-),mix(+)]).
+:-predicate_options(mc_rejection_sample/5,5,[successes(-),failures(-)]).
+:-predicate_options(mc_sample_arg/5,5,[bar(-)]).
+:-predicate_options(mc_rejection_sample_arg/6,6,[bar(-)]).
+:-predicate_options(mc_mh_sample_arg/7,7,[mix(+),bar(-)]).
+:-predicate_options(mc_sample_arg_first/5,5,[bar(-)]).
+:-predicate_options(mc_sample_arg_one/5,5,[bar(-)]).
+:-predicate_options(mc_mh_expectation/7,7,[mix(+)]).
+:-predicate_options(histogram/4,4,[max(+),min(+)]).
+:-predicate_options(density/4,4,[max(+),min(+)]).
+:-predicate_options(density2d/4,4,[xmax(+),xmin(+),ymax(+),ymin(+)]).
 
 :- style_check(-discontiguous).
 
@@ -428,36 +441,28 @@ accept(NC1,NC2):-
   P>P0.
 
 /**
- * mc_prob(:Query:atom,-Probability:float) is det
+ * mc_prob(:Query:atom,-Probability:float,+Options:list) is det
+ * * bar(Chart)
  *
  * The predicate computes the probability of the query Query
  * If Query is not ground, it considers it as an existential query
  * and returns the probability that there is a satisfying assignment to
  * the query.
  */
-mc_prob(M:Goal,P):-
-  s(M:Goal,P).
-
-/**
- * mc_prob_bar(:Query:atom,-Probability:dict) is det
- *
- * The predicate computes the probability of the ground query Query
- * and returns it as a dict for rendering with c3 as a bar chart with
- * a bar for the probability of Query true and a bar for the probability of
- * Query false.
- * If Query is not ground, it considers it as an existential query
- * and returns the probability that there is a satisfying assignment to
- * the query.
- */
-mc_prob_bar(M:Goal,Chart):-
+mc_prob(M:Goal,P,Options):-
   s(M:Goal,P),
-  PF is 1.0-P,
-  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
-	           size:_{height: 100},
-	          legend:_{show: false}}.
+  oprion(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    PF is 1.0-P,
+    Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+               tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+               size:_{height: 100},
+              legend:_{show: false}}
+  ).
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -602,6 +607,28 @@ get_pred_const(do(Do0),AP0,AP):-
 ac(do(_)).
 nac(do(\+ _)).
 
+/**
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Probability:float,+Options:list) is det
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
+ * The predicate samples Query  a number of Mix+Samples times given that
+ * Evidence
+ * is true and returns
+ * the number of Successes, of Failures and the
+ * Probability (Successes/Samples).
+ * The first Mix samples are discarded (mixing time).
+ * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * choices are forgotten and each sample is accepted with a certain probability.
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ */
 mc_mh_sample(M:Goal,M:Evidence,S,L,P,Options):-
   option(mix(Mix),Options,_Mix),
   option(successes(T),Options,_T),
@@ -847,7 +874,7 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
  * returning that list of values.
  * Rejection sampling is performed.
  */
-mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   empty_assoc(Values0),
   rejection_sample_arg(S,M:Goal,M:Evidence,Arg, Values0,Values),
@@ -855,28 +882,18 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList),
   maplist(erase,UpdatedClausesRefs),
-  maplist(M:assertz,ClausesToReAdd).
-
-/**
- * mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate call mc_rejection_sample_arg/5 and build a c3 graph
- * of the results.
- * It returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds
- * given that Evidence is true
- * The size of the bar is the number of samples
- * returning that list of values.
- */
-mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
-  mc_rejection_sample_arg(M:Goal,M:Ev,S,Arg,ValList0),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
+  maplist(M:assertz,ClausesToReAdd),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    maplist(to_atom,ValList,ValList1),
+    Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+             %  size:_{height: 100},
+              legend:_{show: false}}
+  ).
 
 /**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list,+Options:list) is det
@@ -893,10 +910,21 @@ mc_rejection_sample_arg_bar(M:Goal,M:Ev,S,Arg,Chart):-
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList,Options):-
   option(mix(Mix),Options,_Mix),
+  option(bar(Chart),Options,no),
   (var(Mix)->
     mc_mh_sample_arg0(M:Goal,M:Evidence,S,L,Arg,ValList)
   ;
     mc_mh_sample_arg0(M:Goal,M:Evidence,S,Mix,L,Arg,ValList)
+  ),
+  (nonvar(Chart)->
+    true
+  ;
+    maplist(to_atom,ValList,ValList1),
+    Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+             %  size:_{height: 100},
+              legend:_{show: false}}
   ).
 
 /**
@@ -958,72 +986,6 @@ mc_mh_sample_arg0(M:Goal,M:Evidence0,S,L,Arg,ValList):-
   sort(2, @>=,ValList0,ValList),
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
-
-/**
- * mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict,+Options:list) is det
- *
- * The predicate call mc_mh_sample_arg0/7 and build a c3 graph
- * of the results.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in
- * a world sampled at random.
- * The size of the bar is the number of samples
- * returning that list of values.
- */
-mc_mh_sample_arg_bar(M:Goal,M:Ev,S,L,Arg,Chart,Options):-
-  option(mix(Mix),Options,_Mix),
-  (var(Mix)->
-    mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,Mix,L,Arg,Chart)
-  ;
-    mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,L,Arg,Chart)
-  ).
-
-/**
- * mc_mh_sample_arg_bar0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate call mc_mh_sample_arg0/7 and build a c3 graph
- * of the results.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in
- * a world sampled at random.
- * The size of the bar is the number of samples
- * returning that list of values.
- */
-mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,Mix,L,Arg,Chart):-
-  mc_mh_sample_arg(M:Goal,M:Ev,S,L,Arg,ValList0,[mix(Mix)]),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
-
-
-/**
- * mc_mh_sample_arg_bar0(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate call mc_mh_sample_arg0/6 and build a c3 graph
- * of the results.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in
- * a world sampled at random.
- * The size of the bar is the number of samples
- * returning that list of values.
- */
-mc_mh_sample_arg_bar0(M:Goal,M:Ev,S,L,Arg,Chart):-
-  mc_mh_sample_arg(M:Goal,M:Ev,S,L,Arg,ValList0,[]),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
-
-
-
 
 to_atom(A0-N,A-N):-
   term_to_atom(A0,A).
@@ -1825,33 +1787,23 @@ is_var(S):-
  * returning that value.
  * V is failure if the query fails.
  */
-mc_sample_arg_first(M:Goal,S,Arg,ValList):-
+mc_sample_arg_first(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
   sample_arg_first(S,M:Goal,Arg, Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
-
-/**
- * mc_sample_arg_first_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate samples Query Samples times. Arg should be a variable
- * in Query.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each value of Arg returned as a first answer by Query in
- * a world sampled at random.
- * The size of the bar is the number of samples that returned that value.
- * The value is failure if the query fails.
- */
-mc_sample_arg_first_bar(M:Goal,S,Arg,Chart):-
-  mc_sample_arg_first(M:Goal,S,Arg,ValList0),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
-
+  sort(2, @>=,ValList0,ValList),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    maplist(to_atom,ValList,ValList1),
+    Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+             %  size:_{height: 100},
+              legend:_{show: false}}
+  ).
 
 sample_arg_first(0,_Goals,_Arg,V,V):-!.
 
@@ -1884,34 +1836,23 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  * returning that value.
  * V is failure if the query fails.
  */
-mc_sample_arg_one(M:Goal,S,Arg,ValList):-
+mc_sample_arg_one(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
   sample_arg_one(S,M:Goal,Arg, Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
-
-/**
- * mc_sample_arg_one_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate samples Query Samples times. Arg should be a variable
- * in Query.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each value of Arg returned by sampling with uniform
- * probabability one answer from those returned by Query in a world sampled
- * at random.
- * The size of the bar is the number of samples.
- * The value is failure if the query fails.
- */
-mc_sample_arg_one_bar(M:Goal,S,Arg,Chart):-
-  mc_sample_arg_one(M:Goal,S,Arg,ValList0),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
-
+  sort(2, @>=,ValList0,ValList),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    maplist(to_atom,ValList,ValList1),
+    Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+             %  size:_{height: 100},
+              legend:_{show: false}}
+  ).
 
 sample_arg_one(0,_Goals,_Arg,V,V):-!.
 
@@ -2005,7 +1946,7 @@ mc_expectation(M:Goal,S,Arg,E):-
  * Arg should be a variable in Query.
  */
 mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
-  mc_rejection_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
+  mc_rejection_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[]),
   foldl(value_cont,ValList,0,Sum),
   erase_samples,
   E is Sum/S.
@@ -3963,7 +3904,7 @@ builtin(G):-
   builtin_int(G),!.
 
 builtin_int(average(_L,_Av)).
-builtin_int(mc_prob(_,_)).
+builtin_int(mc_prob(_,_,_)).
 builtin_int(mc_sample(_,_,_,_)).
 builtin_int(db(_)).
 builtin_int(G):-
@@ -4235,30 +4176,22 @@ sandbox:safe_primitive(mcintyre:density2d(_,_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
-sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
-sandbox:safe_meta(mcintyre:mc_prob_bar(_,_), []).
+sandbox:safe_meta(mcintyre:mc_prob(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg_one_bar(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_raw(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_rejection_sample_arg_bar(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar(_,_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar0(_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg_bar0(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_expectation(_,_,_,_,_), []).
