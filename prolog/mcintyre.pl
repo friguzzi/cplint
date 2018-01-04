@@ -17,8 +17,8 @@ details.
 
 :- module(mcintyre,[mc_prob/2, mc_prob_bar/2,
   mc_rejection_sample/5,
-  mc_sample/4,mc_sample_bar/3,
-  mc_sample_arg/4,mc_sample_arg_bar/4,
+  mc_sample/4,
+  mc_sample_arg/5,
   mc_mh_sample/6,
   mc_lw_sample/4,
   mc_rejection_sample_arg/5,mc_rejection_sample_arg_bar/5,
@@ -76,9 +76,7 @@ details.
 :-meta_predicate mc_rejection_sample(:,:,+,-,+).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,+).
 :-meta_predicate mc_sample(:,+,-,+).
-:-meta_predicate mc_sample_bar(:,+,-).
-:-meta_predicate mc_sample_arg(:,+,+,-).
-:-meta_predicate mc_sample_arg_bar(:,+,+,-).
+:-meta_predicate mc_sample_arg(:,+,+,-,+).
 :-meta_predicate mc_rejection_sample_arg(:,:,+,+,-).
 :-meta_predicate mc_rejection_sample_arg_bar(:,:,+,+,-).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,-).
@@ -463,7 +461,13 @@ mc_prob_bar(M:Goal,Chart):-
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
- *
+ * * successes(-Successes:int)
+ *   Number of successes
+ * * failures(-Failures:int)
+ *   Number of failures
+ * * bar(-BarChart:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with a bar for the
+ *   number of successes and a bar for the number of failures.
  * The predicate samples Query a number of Samples times and returns
  * the resulting Probability (Successes/Samples)
  * If Query is not ground, it considers it as an existential query
@@ -471,7 +475,17 @@ mc_prob_bar(M:Goal,Chart):-
 mc_sample(M:Goal,S,P,Options):-
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
-  mc_sample(M:Goal,S,T,F,P).
+  mc_sample(M:Goal,S,T,F,P),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-T,'F' -F], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+               size:_{height: 100},
+              legend:_{show: false}}
+  ).
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
@@ -794,23 +808,6 @@ listN(N,[N1|T]):-
   listN(N1,T).
 
 /**
- * mc_sample_bar(:Query:atom,+Samples:int,-Chart:dict) is det
- *
- * The predicate samples Query a number of Samples times and returns
- * a dict for rendering with c3 as a bar chart with
- * a bar for the number of successes and a bar for the number
- * of failures.
- * If Query is not ground, it considers it as an existential query
- */
-mc_sample_bar(M:Goal,S,Chart):-
-  mc_sample(M:Goal,S,T,F,_P),
-  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-T,'F' -F], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	           size:_{height: 100},
-	          legend:_{show: false}}.
-
-/**
  * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query a number of Samples times.
@@ -820,33 +817,23 @@ mc_sample_bar(M:Goal,S,Chart):-
  * a world sampled at random and N is the number of samples
  * returning that list of values.
  */
-mc_sample_arg(M:Goal,S,Arg,ValList):-
+mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
   sample_arg(S,M:Goal,Arg, Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
-  sort(2, @>=,ValList0,ValList).
-
-/**
- * mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict) is det
- *
- * The predicate samples Query Samples times. Arg should be a variable
- * in Query.
- * The predicate returns in Chart a dict for rendering with c3 as a bar chart
- * with a bar for each possible value of L,
- * the list of values of Arg for which Query succeeds in
- * a world sampled at random.
- * The size of the bar is the number of samples
- * returning that list of values.
- */
-mc_sample_arg_bar(M:Goal,S,Arg,Chart):-
-  mc_sample_arg(M:Goal,S,Arg,ValList0),
-  maplist(to_atom,ValList0,ValList),
-  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,padding:_{bottom:0.0}}},
-	         %  size:_{height: 100},
-	          legend:_{show: false}}.
+  sort(2, @>=,ValList0,ValList),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    maplist(to_atom,ValList,ValList1),
+    Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+            axis:_{x:_{type:category}, rotated: true,
+                   y:_{min:0.0,padding:_{bottom:0.0}}},
+            % size:_{height: 100},
+            legend:_{show: false}}
+  ).
 
 /**
  * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
@@ -4258,9 +4245,7 @@ sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_bar(_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_sample_arg_bar(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_first_bar(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
