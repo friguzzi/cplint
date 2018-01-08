@@ -512,7 +512,14 @@ mc_sample(M:Goal,S,T,F,P):-
 
 /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
- *
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
  * the Probability of Query.
@@ -524,6 +531,7 @@ mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
   mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
+
  /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -836,7 +844,14 @@ listN(N,[N1|T]):-
 
 /**
  * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
- *
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
  * The predicate returns in Values a list of couples L-N where
@@ -864,7 +879,15 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
 
 /**
  * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
- *
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for each possible value of L,
+ *   the list of value of Arg for which Query succeeds in
+ *   a world sampled at random.
  * The predicate samples Query a number of Samples times given that
  * Evidence is true.
  * Arg should be a variable in Query.
@@ -897,7 +920,16 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
 
 /**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list,+Options:list) is det
- *
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
  * Arg should be a variable in Query.
@@ -1777,8 +1809,11 @@ is_var(S):-
   maplist(var,S).
 
 /**
- * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
- *
+ * mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
  * The predicate returns in Values a list of couples V-N where
@@ -1827,7 +1862,10 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
 
 /**
  * mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
- *
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for the number of successes and a bar for the number
+ *   of failures.
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
  * The predicate returns in Values a list of couples V-N where
@@ -1953,7 +1991,8 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
 
 /**
  * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,+Lag:int,?Arg:var,-Exp:float) is det
- *
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
  * The predicate computes the expected value of Arg in Query by
  * sampling.
  * It takes N samples of Query and sums up the value of Arg for
@@ -3929,8 +3968,11 @@ average(L,Av):-
         Av is Sum/N.
 
 /**
- * histogram(+List:list,+NBins:int,-Chart:dict,+Options) is det
- *
+ * histogram(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
+ * * min(+Min:float)
+ *   the minimum value of domain, default value the minimum in List
+ * * max(+Max:float)
+ *   the maximum value of domain, default value the maximum in List
  * Draws a histogram of the samples in List dividing the domain in
  * NBins bins. List must be a list of couples of the form [V]-W or V-W
  * where V is a sampled value and W is its weight.
@@ -4002,7 +4044,6 @@ densities(Pri0,Post0,NBins,Chart):-
 
 /**
  * density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
- *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
@@ -4025,7 +4066,6 @@ density(Post0,NBins,Min,Max,Chart):-
 
   /**
  * density2d(+List:list,+NBins:int,+Min:float,+Max:float,-Dist:list) is det
- *
  * Returns the density of a sets of two dimensional samples.
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
@@ -4042,14 +4082,16 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
 
 /**
  * density(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
- *
+ * * min(+Min:float)
+ *   the minimum value of domain, default value the minimum in List
+ * * max(+Max:float)
+ *   the maximum value of domain, default value the maximum in List
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
  * NBins bins.
  */
-
 density(Post0,NBins,Chart,Options):-
   maplist(key,Post0,PoK),
   max_list(PoK,_max),
@@ -4060,6 +4102,14 @@ density(Post0,NBins,Chart,Options):-
 
 /**
  * density2d(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
+ * * xmin(+XMin:float)
+ *   the minimum value of the X domain, default value the minimum in List
+ * * xmax(-XMax:float)
+ *   the maximum value of the X domain, default value the maximum in List
+ * * ymin(-YMin:float)
+ *   the minimum value of the Y domain, default value the minimum in List
+ * * ymax(-YMax:float)
+ *   the maximum value of the Y domain, default value the maximum in List
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
@@ -4067,7 +4117,6 @@ density(Post0,NBins,Chart,Options):-
  * The lines are drawn dividing the domain in
  * NBins bins.
  */
-
 density2d(Post0,NBins,D,Options):-
   maplist(key_x_y,Post0,X,Y),
   max_list(X,_xMax),
