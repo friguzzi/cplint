@@ -19,15 +19,15 @@ details.
   mc_rejection_sample/5,
   mc_sample/4,
   mc_sample_arg/5,
-  mc_mh_sample/6,
+  mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/6,
-  mc_mh_sample_arg/7,
+  mc_mh_sample_arg/6,
   mc_sample_arg_first/5,
   mc_sample_arg_one/5,
   mc_sample_arg_raw/4,
   mc_expectation/4,
-  mc_mh_expectation/7,
+  mc_mh_expectation/6,
   mc_rejection_expectation/5,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
@@ -74,7 +74,7 @@ details.
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,+).
-:-meta_predicate mc_mh_sample(:,:,+,+,-,+).
+:-meta_predicate mc_mh_sample(:,:,+,-,+).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
 :-meta_predicate mc_sample(:,+,-,+).
@@ -82,13 +82,13 @@ details.
 :-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+,+).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,-).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg(:,:,+,+,+,-,+).
+:-meta_predicate mc_mh_sample_arg(:,:,+,+,-,+).
 :-meta_predicate mc_sample_arg_first(:,+,+,-,+).
 :-meta_predicate mc_sample_arg_one(:,+,+,-,+).
 :-meta_predicate mc_sample_arg_one_bar(:,+,+,-).
 :-meta_predicate mc_sample_arg_raw(:,+,+,-).
 :-meta_predicate mc_expectation(:,+,+,-).
-:-meta_predicate mc_mh_expectation(:,:,+,+,+,-,+).
+:-meta_predicate mc_mh_expectation(:,:,+,+,-,+).
 :-meta_predicate mc_rejection_expectation(:,:,+,+,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
@@ -131,14 +131,14 @@ details.
 
 :-predicate_options(mc_prob/3,3,[bar(-)]).
 :-predicate_options(mc_sample/4,4,[successes(-),failures(-),bar(-)]).
-:-predicate_options(mc_mh_sample/6,6,[successes(-),failures(-),mix(+)]).
+:-predicate_options(mc_mh_sample/5,5,[successes(-),failures(-),mix(+),lag(+)]).
 :-predicate_options(mc_rejection_sample/5,5,[successes(-),failures(-)]).
 :-predicate_options(mc_sample_arg/5,5,[bar(-)]).
 :-predicate_options(mc_rejection_sample_arg/6,6,[bar(-)]).
-:-predicate_options(mc_mh_sample_arg/7,7,[mix(+),bar(-)]).
+:-predicate_options(mc_mh_sample_arg/6,6,[mix(+),lag(+),bar(-)]).
 :-predicate_options(mc_sample_arg_first/5,5,[bar(-)]).
 :-predicate_options(mc_sample_arg_one/5,5,[bar(-)]).
-:-predicate_options(mc_mh_expectation/7,7,[mix(+)]).
+:-predicate_options(mc_mh_expectation/6,6,[mix(+),lag(+)]).
 :-predicate_options(histogram/4,4,[max(+),min(+)]).
 :-predicate_options(density/4,4,[max(+),min(+)]).
 :-predicate_options(density2d/4,4,[xmax(+),xmin(+),ymax(+),ymin(+)]).
@@ -616,9 +616,11 @@ ac(do(_)).
 nac(do(\+ _)).
 
 /**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Probability:float,+Options:list) is det
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,-Probability:float,+Options:list) is det
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
+ * * lag(+Lag:int)
+ *   lag between each sample, Lag sampled choices are forgotten, default value 1
  * * successes(-Successes:int)
  *   Number of succeses
  * * failures(-Failures:int)
@@ -637,7 +639,8 @@ nac(do(\+ _)).
  * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
-mc_mh_sample(M:Goal,M:Evidence,S,L,P,Options):-
+mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
+  option(lag(L),Options,1),
   option(mix(Mix),Options,_Mix),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
@@ -919,9 +922,11 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
   ).
 
 /**
- * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,+Lag:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
+ * * lag(+Lag:int)
+ *   lag between each sample, Lag sampled choices are forgotten, default value 1
  * * successes(-Successes:int)
  *   Number of succeses
  * * failures(-Failures:int)
@@ -940,8 +945,9 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
  * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  */
-mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList,Options):-
+mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
   option(mix(Mix),Options,_Mix),
+  option(lag(L),Options,1),
   option(bar(Chart),Options,no),
   (var(Mix)->
     mc_mh_sample_arg0(M:Goal,M:Evidence,S,L,Arg,ValList)
@@ -1990,18 +1996,21 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
   E is Sum/S.
 
 /**
- * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,+Lag:int,?Arg:var,-Exp:float) is det
+ * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,?Arg:var,-Exp:float) is det
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
+ * * lag(+Lag:int)
+ *   lag between each sample, Lag sampled choices are forgotten, default value 1
  * The predicate computes the expected value of Arg in Query by
  * sampling.
  * It takes N samples of Query and sums up the value of Arg for
  * each sample. The overall sum is divided by N to give Exp.
  * Arg should be a variable in Query.
  */
-mc_mh_expectation(M:Goal,M:Evidence,S,L,Arg,E,Options):-
+mc_mh_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
   option(mix(Mix),Options,_Mix),
-  mc_mh_sample_arg(M:Goal,M:Evidence,S,L,Arg,ValList,[mix(Mix)]),
+  option(lag(L),Options,1),
+  mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[mix(Mix),lag(L)]),
   foldl(value_cont,ValList,0,Sum),
   erase_samples,
   E is Sum/S.
@@ -4229,7 +4238,7 @@ sandbox:safe_meta(mcintyre:mc_prob(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_), []).
@@ -4238,11 +4247,11 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_first(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_raw(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg0(_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_expectation(_,_,_,_,_), []).
 
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
