@@ -26,7 +26,7 @@ c.
 
 /** <examples>
 
-?- mc_prob(a,Prob).
+?- mc_prob(a,Prob,[]).
 % expected result 0.2
 
 ?- mc_sample(a,10,Prob,[]).

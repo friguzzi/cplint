@@ -1,6 +1,6 @@
 /*
-Model checking of a Markov chain: we want to know what is the likelihood 
-that on an execution of the chain from a start state s, a final state t 
+Model checking of a Markov chain: we want to know what is the likelihood
+that on an execution of the chain from a start state s, a final state t
 will be reached?
 From
 Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
@@ -48,22 +48,22 @@ markov_chain(digraph(G)):-
 
 /** <examples>
 
-?- mc_prob(reach(s0,0,s0),P).
+?- mc_prob(reach(s0,0,s0),P,[]).
 % expected result ~ 1.
 
-?- mc_prob(reach(s0,0,s1),P).
+?- mc_prob(reach(s0,0,s1),P,[]).
 % expected result ~ 0.5984054054054054.
 
-?- mc_prob(reach(s0,0,s2),P).
+?- mc_prob(reach(s0,0,s2),P,[]).
 % expected result ~ 0.4025135135135135.
 
-?- mc_prob(reach(s0,0,s3),P).
+?- mc_prob(reach(s0,0,s3),P,[]).
 % expected result ~ 0.5998378378378378.
 
-?- mc_prob(reach(s0,0,s4),P).
+?- mc_prob(reach(s0,0,s4),P,[]).
 % expected result ~ 0.49948717948717947.
 
-?- mc_prob(reach(s1,0,s0),P).
+?- mc_prob(reach(s1,0,s0),P,[]).
 % expected result ~ 0.
 
 ?- Options=[successes(S),failures(F)], mc_sample(reach(s0,0,s1),1000,P,Options).
@@ -71,13 +71,13 @@ markov_chain(digraph(G)):-
 
 ?- mc_sample_bar(reach(s0,0,s1),1000,Chart).
 
-?- mc_sample_arg(reach(s0,0,S),50,S,Values). 
+?- mc_sample_arg(reach(s0,0,S),50,S,Values).
 % take 50 samples of L in findall(S,reach(s0,0,S),L)
 
-?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
+?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart).
 % take 50 samples of L in findall(S,reach(s0,0,S),L)
 
-?- mc_sample_arg_first(reach(s0,0,S),50,S,Values). 
+?- mc_sample_arg_first(reach(s0,0,S),50,S,Values).
 % take 50 samples of the first value returned for S in reach(s0,0,S)
 
 ?- mc_sample_arg_first_bar(reach(s0,0,S),50,S,Chart).
@@ -86,4 +86,3 @@ markov_chain(digraph(G)):-
 ?- markov_chain(G).
 % draw the Markov chain
 */
-
