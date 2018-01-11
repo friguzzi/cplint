@@ -68,7 +68,7 @@ rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3;
 
 ?- Options=[successes(S),failures(F)], mc_sample(pcfg([a,a]),1000,Prob,Options). % take 1000 samples of pcfg([a,a])
 
-?- mc_sample_bar(pcfg([a,a]),1000,Chart). % take 1000 samples of pcfg([a,a])
+?- mc_sample_bar(pcfg([a,a]),1000,Prob,[bar(BarChart)]). % take 1000 samples of pcfg([a,a])
 
 ?- mc_sample_arg(pcfg(S),20,S,Values). % take 20 samples of S in
 % findall(S,pcfg(S),L)

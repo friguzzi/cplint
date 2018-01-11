@@ -69,7 +69,7 @@ markov_chain(digraph(G)):-
 ?- Options=[successes(S),failures(F)], mc_sample(reach(s0,0,s1),1000,P,Options).
 % expected result ~ 0.5984054054054054.
 
-?- mc_sample_bar(reach(s0,0,s1),1000,Chart).
+?- mc_sample_bar(reach(s0,0,s1),1000,Prob,[bar(BarChart)]).
 
 ?- mc_sample_arg(reach(s0,0,S),50,S,Values).
 % take 50 samples of L in findall(S,reach(s0,0,S),L)

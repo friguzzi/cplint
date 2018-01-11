@@ -69,10 +69,10 @@ rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3;
 ?- mc_prob(pre_pcfg([b,a]),P,[bar(BarChart)]).
 % expected result ~ 0.1014.
 
-?- mc_sample(pre_pcfg([b,a]),1000,T,F,P).
+?- mc_sample(pre_pcfg([b,a]),1000,P,[successes(T),failures(F)]).
 % expected result ~ 0.1014.
 
-?- mc_sample_bar(pre_pcfg([b,a]),1000,P).
+?- mc_sample(pre_pcfg([b,a]),1000,P,[bar(BarChart)]).
 % expected result ~ 0.1014.
 
 

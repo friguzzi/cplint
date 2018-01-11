@@ -49,11 +49,11 @@ toss(coin).
 ?- mc_sample(tails(coin),1000,Prob,[]).
 % take 1000 sample of tails(coin) and return the probability
 
-?- mc_sample_bar(heads(coin),1000,Chart).
+?- mc_sample(heads(coin),1000,Prob,[bar(BarChart)]).
 % take 1000 sample of heads(coin) and chart the number of successes and
 % faliures
 
-?- mc_sample_bar(tails(coin),1000,Chart).
+?- mc_sample(tails(coin),1000,Prob,[bar(BarChart)]).
 % take 1000 sample of tails(coin) and chart the number of successes and
 % faliures
 

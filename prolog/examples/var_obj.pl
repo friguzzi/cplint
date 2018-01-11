@@ -51,8 +51,8 @@ obj(I):-
 % expected result ~ 0.0656
 ?- mc_prob(numObj(0,5),P,[]). % what is the probability that there are 5 objects?
 % expected result ~ 0.0014
-?- mc_sample(obj(5),1000,T,F,P). % take 1000 samples of obj(5)
-?- mc_sample_bar(obj(5),1000,Chart). % take 1000 samples of obj(5)
+?- mc_sample(obj(5),1000,P,[successes(T),failures(F)]). % take 1000 samples of obj(5)
+?- mc_sample(obj(5),1000,P,[bar(BarChart)]). % take 1000 samples of obj(5)
 ?- mc_sample_arg_bar(numObj(0,N),100,N,Chart). % take 100 samples of L in
 % findall(N,numObj(0,N),L)
 ?- mc_sample_arg_bar(obj(I),100,I,Chart). % take 100 samples of L in

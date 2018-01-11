@@ -151,7 +151,7 @@ is_word :- word([_,_,_,_,_]).
 
 
 /** <examples>
-?- mc_sample(is_word,1000,P).
+?- mc_sample(is_word,1000,P,[]).
 % the probability of getting a word of length 3/4/5
 % Expected result 0.067222
 ?- mc_mh_sample_arg(word([A,B,C]),word([_,_,_]),10,1,[A,B,C],V).
@@ -164,4 +164,3 @@ is_word :- word([_,_,_,_,_]).
 % 3, 5 or 5
 %
 */
- 
