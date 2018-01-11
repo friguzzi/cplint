@@ -34,14 +34,14 @@ value(_,M,X): gaussian(X,M, 2.0).
 :- end_lpad.
 
 hist_uncond(Samples,NBins,Chart):-
-  mc_sample_arg(value(0,X),Samples,X,L0),
-  histogram(L0,NBins,Chart).
+  mc_sample_arg(value(0,X),Samples,X,L0,[]),
+  histogram(L0,NBins,Chart,[]).
 % plot an histogram of the density of the random variable before any
 % observations by taking Samples samples and by dividing the domain
 % in NBins bins
 
 dens_lw(Samples,NBins,Chart):-
-  mc_sample_arg(value(0,Y),Samples,Y,L0),
+  mc_sample_arg(value(0,Y),Samples,Y,L0,[]),
   mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),Samples,X,L),
   densities(L0,L,NBins,Chart).
 % plot the densities of the random variable before and after
@@ -50,7 +50,7 @@ dens_lw(Samples,NBins,Chart):-
 % in NBins bins
 
 dens_part(Samples,NBins,Chart):-
-  mc_sample_arg(value(0,Y),Samples,Y,L0),
+  mc_sample_arg(value(0,Y),Samples,Y,L0,[]),
   mc_particle_sample_arg(value(0,X),[value(1,9),value(2,8)],Samples,X,L),
   densities(L0,L,NBins,Chart).
 % plot the densities of the random variable before and after

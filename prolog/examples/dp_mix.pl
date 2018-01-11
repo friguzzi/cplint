@@ -75,9 +75,9 @@ pick_portion(_,_,P):P;neg_pick_portion(_,_,P):1-P.
 obs([-1,7,3]).
 
 prior(Samples,NBins,Chart):-
-  mc_sample_arg_first(dp_n_values(0,Samples,10.0,V),1,V,L),
+  mc_sample_arg_first(dp_n_values(0,Samples,10.0,V),1,V,L,[]),
   L=[Vs-_],
-  histogram(Vs,NBins,Chart).
+  histogram(Vs,NBins,Chart,[]).
 
 post(Samples,NBins,Chart):-
   obs(O),

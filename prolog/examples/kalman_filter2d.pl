@@ -102,20 +102,20 @@ obs_err(_,E):gaussian(E,[0,0],[[1,0],[0,1]]).
 % Plots a histogram of the density of the state at time 1 in case of
 % no observation
 hist(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
-  histogram(L0,NBins,Chart).
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
+  histogram(L0,NBins,Chart,[]).
 
 %! dens_lw(+S:int,+Bins:int,-C:dict) is det
 % Plots the density of the state at time 1 in case of no observation (prior)
 % and in case of observing 2.5.
 % Observation as in Russel and Norvig 2010, Fig 15.10
 dens_lw(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
   mc_lw_sample_arg(kf_fin(1,_O2,T),kf_fin(1,[2.5],_T),Samples,T,L),
   densities(L0,L,NBins,Chart).
 
 dens_par(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
   mc_particle_sample_arg(kf_fin(1,_O2,T),[kf_fin(1,[2.5],_T)],Samples,T,L),
   densities(L0,L,NBins,Chart).
 
@@ -236,7 +236,7 @@ filter(Samples,O,St,C):-
 separate([S1,S2,S3,S4]-W,S1-W,S2-W,S3-W,S4-W).
 
 sample_trajectory(N,Ob,St):-
-  mc_sample_arg(kf(N,O,T),1,(O,T),L),
+  mc_sample_arg(kf(N,O,T),1,(O,T),L,[]),
   L=[[(Ob,St)]-_].
 
   % Considers a sampled trajectory for 4 time points and performs particle filtering

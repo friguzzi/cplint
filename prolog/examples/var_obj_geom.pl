@@ -50,11 +50,11 @@ obj(I):-
 % expected result ~ 0.0014
 ?- Options=[successes(S),failures(F)], mc_sample(obj(5),1000,P,Options). % take 1000 samples of obj(5)
 ?- mc_sample(obj(5),1000,Prob,[bar(BarChart)]). % take 1000 samples of obj(5)
-?- mc_sample_arg_bar(numObj(N),100,N,Chart). % take 100 samples of L in
+?- mc_sample_arg(numObj(N),100,N,Values,[bar(Chart)]). % take 100 samples of L in
 % findall(N,numObj(N),L)
-?- mc_sample_arg_bar(obj(I),100,I,Chart). % take 100 samples of L in
+?- mc_sample_arg(obj(I),100,I,Values,[bar(Chart)]). % take 100 samples of L in
 % findall(I,obj(I),L)
-??- mc_sample_arg(obj(I),100,I,Values). % take 100 samples of L in
+??- mc_sample_arg(obj(I),100,I,Values,[]). % take 100 samples of L in
 % findall(I,obj(I),L)
 
 */

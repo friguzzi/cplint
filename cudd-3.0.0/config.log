@@ -583,7 +583,7 @@ configure:16445: gcc -o conftest -Wall -Wextra -g -O3 -fPIC   conftest.c  >&5
 conftest.c:30:6: warning: conflicting types for built-in function 'pow'
  char pow ();
       ^
-/tmp/cc5q7eba.o: In function `main':
+/tmp/ccJ5fy1c.o: In function `main':
 /home/nick/lib/swipl/pack/cplint/cudd-3.0.0/conftest.c:34: undefined reference to `pow'
 collect2: error: ld returned 1 exit status
 configure:16445: $? = 1
@@ -637,7 +637,7 @@ configure:16495: $? = 0
 configure:16504: result: yes
 configure:16521: checking for library containing WSAStartup
 configure:16552: gcc -o conftest -Wall -Wextra -g -O3 -fPIC   conftest.c -lm  >&5
-/tmp/ccaRFXto.o: In function `main':
+/tmp/cc5uL0uj.o: In function `main':
 /home/nick/lib/swipl/pack/cplint/cudd-3.0.0/conftest.c:34: undefined reference to `WSAStartup'
 collect2: error: ld returned 1 exit status
 configure:16552: $? = 1
@@ -724,7 +724,7 @@ configure: failed program was:
 configure:16569: result: no
 configure:16577: checking for library containing GetProcessMemoryInfo
 configure:16608: gcc -o conftest -Wall -Wextra -g -O3 -fPIC   conftest.c -lm  >&5
-/tmp/ccAZpPot.o: In function `main':
+/tmp/ccQGYQto.o: In function `main':
 /home/nick/lib/swipl/pack/cplint/cudd-3.0.0/conftest.c:34: undefined reference to `GetProcessMemoryInfo'
 collect2: error: ld returned 1 exit status
 configure:16608: $? = 1

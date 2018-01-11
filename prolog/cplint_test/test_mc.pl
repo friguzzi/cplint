@@ -98,9 +98,9 @@ test(reach_s0_0_s4):-
 test(reach_s1_0_s0):-
 	run((mc_sample(reach(s1,0,s0),1000,P,[]),close_to(P,0))).
 test(reach_s0_0_S_s0):-
-	run((mc_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values))).
+	run((mc_sample_arg(reach(s0,0,S),50,S,Values,[]),\+ member([s0]-_,Values))).
 test(reach_s0_0_s0_s3_s2,[nondet]):-
-	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values),member(s3-_,Values),member(s2-_,Values))).
+	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values,[]),member(s3-_,Values),member(s2-_,Values))).
 :- end_tests(markov_chain).
 
 :- begin_tests(prefix, []).
@@ -143,15 +143,15 @@ test(exp_eventually_elect):-
 :-ensure_loaded(library(examples/arithm)).
 
 test(eval_1_3):-
-	run((mc_mh_sample(eval(2,4),eval(1,3),500,1,P,[]),close_to(P,0.1151,0.3))).
+	run((mc_mh_sample(eval(2,4),eval(1,3),500,P,[]),close_to(P,0.1151,0.3))).
 test(eval_0_2_1_3):-
-  run((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),200,1,P,[]),close_to(P,1))).
-%test((mc_rejection_sample(eval(2,4),eval(1,3),1000,P),close_to(P,0.1151)),arithm).
-%test((mc_rejection_sample(eval(2,4),(eval(0,2),eval(1,3)),1000,P),close_to(P,1)),arithm).
+  run((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),200,P,[]),close_to(P,1))).
+%test((mc_rejection_sample(eval(2,4),eval(1,3),1000,P,[]),close_to(P,0.1151)),arithm).
+%test((mc_rejection_sample(eval(2,4),(eval(0,2),eval(1,3)),1000,P,[]),close_to(P,1)),arithm).
 test(exp_eval_2):-
   run((mc_expectation(eval(2,Y),100,Y,E),relatively_close_to(E,3.968,1))).
 test(exp_eval_2_eval_1_3):-
-  run((mc_mh_expectation(eval(2,Y),eval(1,3),300,1,Y,E,[]),relatively_close_to(E,2.855,1))).
+  run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E,[]),relatively_close_to(E,2.855,1))).
 :- end_tests(arithm).
 
 :- begin_tests(gaussian_mixture, []).
@@ -161,9 +161,9 @@ test(exp_eval_2_eval_1_3):-
 test(mix_X):-
 	run((mc_expectation(mix(X),1000,X,E),relatively_close_to(E,2.017964749114414,0.1))).
 test(mix_X_heads):-
-	run((mc_mh_expectation(mix(X),heads,1000,1,X,E,[]),close_to(E,0,1))).
+	run((mc_mh_expectation(mix(X),heads,1000,X,E,[]),close_to(E,0,1))).
 test(mix_X_mix):-
-	run((mc_mh_expectation(mix(X),(mix(Y),Y>2),1000,1,X,E,[]),relatively_close_to(E,5.00202846171105,0.25))).
+	run((mc_mh_expectation(mix(X),(mix(Y),Y>2),1000,X,E,[]),relatively_close_to(E,5.00202846171105,0.25))).
 :- end_tests(gaussian_mixture).
 
 :- begin_tests(kalman_filter, []).
@@ -266,29 +266,29 @@ test(rec_d_n_drug_m):-
   run((mc_rejection_sample(recovery,(do(\+ drug),\+ female),500,P,[]),close_to(P,0.7))).
 
 test(mh_rec_drug):-
-  run((mc_mh_sample(recovery,drug,500,2,P,[]),close_to(P,0.5))).
+  run((mc_mh_sample(recovery,drug,500,P,[lag(2)]),close_to(P,0.5))).
 test(mh_rec_n_drug):-
-  run((mc_mh_sample(recovery,\+ drug,500,2,P,[]),close_to(P,0.4))).
+  run((mc_mh_sample(recovery,\+ drug,500,P,[lag(2)]),close_to(P,0.4))).
 test(mh_rec_drug_f):-
-  run((mc_mh_sample(recovery,(drug,female),500,2,P,[]),close_to(P,0.2))).
+  run((mc_mh_sample(recovery,(drug,female),500,P,[lag(2)]),close_to(P,0.2))).
 test(mh_rec_n_drug_f):-
-  run((mc_mh_sample(recovery,(\+drug,female),500,2,P,[]),close_to(P,0.3))).
+  run((mc_mh_sample(recovery,(\+drug,female),500,P,[lag(2)]),close_to(P,0.3))).
 test(mh_rec_drug_m):-
-  run((mc_mh_sample(recovery,(drug,\+female),500,2,P,[]),close_to(P,0.6))).
+  run((mc_mh_sample(recovery,(drug,\+female),500,P,[lag(2)]),close_to(P,0.6))).
 test(mh_rec_n_drug_m):-
-  run((mc_mh_sample(recovery,(\+ drug,\+female),500,2,P,[]),close_to(P,0.7))).
+  run((mc_mh_sample(recovery,(\+ drug,\+female),500,P,[lag(2)]),close_to(P,0.7))).
 test(mh_rec_d_drug):-
-  run((mc_mh_sample(recovery,do(drug),500,2,P,[]),close_to(P,0.4))).
+  run((mc_mh_sample(recovery,do(drug),500,P,[lag(2)]),close_to(P,0.4))).
 test(mh_rec_d_n_drug):-
-  run((mc_mh_sample(recovery,do(\+ drug),500,2,P,[]),close_to(P,0.5))).
+  run((mc_mh_sample(recovery,do(\+ drug),500,P,[lag(2)]),close_to(P,0.5))).
 test(mh_rec_d_drug_f):-
-  run((mc_mh_sample(recovery,(do(drug),female),500,2,P,[]),close_to(P,0.2))).
+  run((mc_mh_sample(recovery,(do(drug),female),500,P,[lag(2)]),close_to(P,0.2))).
 test(mh_rec_d_n_drug_f):-
-  run((mc_mh_sample(recovery,(do(\+drug),female),500,2,P,[]),close_to(P,0.3))).
+  run((mc_mh_sample(recovery,(do(\+drug),female),500,P,[lag(2)]),close_to(P,0.3))).
 test(mh_rec_d_drug_m):-
-  run((mc_mh_sample(recovery,(do(drug),\+ female),500,2,P,[]),close_to(P,0.6))).
+  run((mc_mh_sample(recovery,(do(drug),\+ female),500,P,[lag(2)]),close_to(P,0.6))).
 test(mh_rec_d_n_drug_m):-
-  run((mc_mh_sample(recovery,(do(\+ drug),\+ female),500,2,P,[]),close_to(P,0.7))).
+  run((mc_mh_sample(recovery,(do(\+ drug),\+ female),500,P,[lag(2)]),close_to(P,0.7))).
 :- end_tests(simpsonmc).
 
 :- begin_tests(viralmc, []).
@@ -299,7 +299,7 @@ test(has_2_has_3):-
 test(has_2_d_has_3):-
   run((mc_rejection_sample(has(2),do(has(3)),500,P,[]),close_to(P,0.136))).
 test(mh_has_2_d_has_3):-
-  run((mc_mh_sample(has(2),do(has(3)),500,1,P,[]),close_to(P,0.136))).
+  run((mc_mh_sample(has(2),do(has(3)),500,P,[]),close_to(P,0.136))).
 :- end_tests(viralmc).
 
 :- begin_tests(uwcsemc, []).
