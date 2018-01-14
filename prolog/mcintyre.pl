@@ -1,20 +1,3 @@
-/** <module> mcintyre
-
-This module performs reasoning over Logic Programs with Annotated
-Disjunctions and CP-Logic programs.
-It reads probabilistic program and computes the probability of queries
-using sampling.
-
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
-details.
-
-@author Fabrizio Riguzzi
-@license Artistic License 2.0
-@copyright Fabrizio Riguzzi
-*/
-
-
 :- module(mcintyre,[mc_prob/3,
   mc_rejection_sample/5,
   mc_sample/4,
@@ -144,6 +127,22 @@ details.
 :-predicate_options(density2d/4,4,[xmax(+),xmin(+),ymax(+),ymin(+)]).
 
 :- style_check(-discontiguous).
+
+/** <module> mcintyre
+
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries
+using sampling.
+
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+details.
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0
+@copyright Fabrizio Riguzzi
+*/
 
 :- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,
   sampled/3, sampled_g/2, sampled_g/1.
@@ -448,7 +447,7 @@ accept(NC1,NC2):-
  * and returns the probability that there is a satisfying assignment to
  * the query.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_prob/3:
  * * bar(-BarChart:dict)
  *
  */
@@ -474,7 +473,7 @@ mc_prob(M:Goal,P,Options):-
  * the resulting Probability (Successes/Samples)
  * If Query is not ground, it considers it as an existential query
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_sample/4:
  * * successes(-Successes:int)
  *   Number of successes
  * * failures(-Failures:int)
@@ -526,7 +525,7 @@ mc_sample(M:Goal,S,T,F,P):-
  * sample is discarded.
  * If Query/Evidence are not ground, it considers them an existential queries.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_rejection_sample/5:
  * * successes(-Successes:int)
  *   Number of succeses
  * * failures(-Failures:int)
@@ -625,19 +624,19 @@ ac(do(_)).
 nac(do(\+ _)).
 
 /**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,-Probability:float,+Options:list) is det
+ * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
- * The predicate samples Query  a number of Mix+Samples times given that
+ * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) times given that
  * Evidence
  * is true and returns
  * the number of Successes, of Failures and the
  * Probability (Successes/Samples).
- * The first Mix samples are discarded (mixing time).
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+ * It performs Metropolis/Hastings sampling: between each sample, Lag (that is set with the options, default value 1) sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  * If Query/Evidence are not ground, it considers them as existential queries.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_mh_sample/5:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * lag(+Lag:int)
@@ -858,7 +857,7 @@ listN(N,[N1|T]):-
   listN(N1,T).
 
 /**
- * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
@@ -867,7 +866,7 @@ listN(N,[N1|T]):-
  * a world sampled at random and N is the number of samples
  * returning that list of values.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_sample_arg/5:
  * * successes(-Successes:int)
  *   Number of succeses
  * * failures(-Failures:int)
@@ -896,7 +895,7 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
   ).
 
 /**
- * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times given that
  * Evidence is true.
@@ -907,7 +906,7 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
  * returning that list of values.
  * Rejection sampling is performed.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_rejection_sample_arg/6:
  * * successes(-Successes:int)
  *   Number of succeses
  * * failures(-Failures:int)
@@ -949,10 +948,10 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
  * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
- * It performs Metropolis/Hastings sampling: between each sample, Lag sampled
+ * It performs Metropolis/Hastings sampling: between each sample, Lag (that is set with the options, default value 1) sampled
  * choices are forgotten and each sample is accepted with a certain probability.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * lag(+Lag:int)
@@ -1846,7 +1845,7 @@ is_var(S):-
  * returning that value.
  * V is failure if the query fails.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_sample_arg_first/5:
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
  *   a bar for the number of successes and a bar for the number
@@ -1891,7 +1890,7 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
   sample_arg_first(K2,M:Goals,Arg,V1,V).
 
 /**
- * mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
@@ -1901,7 +1900,7 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  * returning that value.
  * V is failure if the query fails.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_sample_arg_one/5:
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
  *   a bar for the number of successes and a bar for the number
@@ -2023,7 +2022,7 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
   E is Sum/S.
 
 /**
- * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,+Mix:int,?Arg:var,-Exp:float) is det
+ * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
  *
  * The predicate computes the expected value of Arg in Query by
  * sampling.
@@ -2031,7 +2030,7 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
  * each sample. The overall sum is divided by N to give Exp.
  * Arg should be a variable in Query.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by mc_mh_expectation/6:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * lag(+Lag:int)
@@ -4013,7 +4012,7 @@ average(L,Av):-
  * NBins bins. List must be a list of couples of the form [V]-W or V-W
  * where V is a sampled value and W is its weight.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by histogram/4:
  * * min(+Min:float)
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
@@ -4133,7 +4132,7 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
  * The lines are drawn dividing the domain in
  * NBins bins.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by density/4:
  * * min(+Min:float)
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
@@ -4156,7 +4155,7 @@ density(Post0,NBins,Chart,Options):-
  * The lines are drawn dividing the domain in
  * NBins bins.
  *
- * These are the Options:
+ * Options is a list of options, the following are recognised by density2d/4:
  * * xmin(+XMin:float)
  *   the minimum value of the X domain, default value the minimum in List
  * * xmax(-XMax:float)
