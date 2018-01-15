@@ -25,7 +25,7 @@ doi:10.1017/S1471068413000562.
 % S->b
 pre_plc(Ws) :- g_call(['S'] ,Ws,[], [],_Der).
 
-g_call([],L,L,Der,Der). 
+g_call([],L,L,Der,Der).
 
 g_call([G|R], [G|L],L2,Der0,Der) :- % shift
   terminal(G),
@@ -47,13 +47,13 @@ lc_call(G,B,L,L1,Der0,Der) :- % attach
   attach_or_project(G,Der0,attach),
   g_call(RHS2,L,L1,[lc(G,B,rule(G, [B|RHS2])),attach|Der0],Der).
 
-lc_call(G,B,L,L2,Der0,Der) :- % project 
+lc_call(G,B,L,L2,Der0,Der) :- % project
   lc(G,B,Der0,rule(A, [B|RHS2])),
   attach_or_project(G,Der0,project),
   g_call(RHS2,L,L1,[lc(G,B,rule(A, [B|RHS2])),project|Der0],Der1),
   lc_call(G,A,L1,L2,Der1,Der).
 
-lc_call(G,B,L,L2,Der0,Der) :- 
+lc_call(G,B,L,L2,Der0,Der) :-
   \+ lc(G,B,Der0,rule(G,[B|_])),
   lc(G,B,Der0,rule(A, [B|RHS2])),
   g_call(RHS2,L,L1,[lc(G,B,rule(A, [B|RHS2]))|Der0],Der1),
@@ -68,11 +68,11 @@ attach_or_project(A,Der,attach) :-
   \+ lc(A,A,Der,_).
 
 
-lc('S','S',_Der,rule('S',['S','S'])). 
+lc('S','S',_Der,rule('S',['S','S'])).
 
 lc('S',a,_Der,rule('S',[a])).
 
-lc('S',b,_Der,rule('S',[b])). 
+lc('S',b,_Der,rule('S',[b])).
 
 first('S',Der,a):0.5; first('S',Der,b):0.5.
 
@@ -90,9 +90,8 @@ terminal(b).
 
 /** <examples>
 
-?- mc_prob(pre_plc([a,b]),P). what is the probability of sentence [a,b]?
+?- mc_prob(pre_plc([a,b]),P,[]). what is the probability of sentence [a,b]?
 % expecte result ~ 0.0326
 
 
 */
-

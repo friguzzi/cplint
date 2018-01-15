@@ -18,22 +18,22 @@ Martin Shubik, Game Theory and Related Approaches to Social Behavior, 1964, page
 ?- best_strategy(a,[a,b,c],S).
 % What is the best action for a?
 % S= sky
-?- mc_sample(survives_action(a,[a,b,c],0,b),1000,P).
+?- mc_sample(survives_action(a,[a,b,c],0,b),1000,P,[]).
 % What is the probability that a survives if it aims at b?
 % P = 50/189=0.26455026455
-?- mc_sample(survives_action(a,[a,b,c],0,c),1000,P).
+?- mc_sample(survives_action(a,[a,b,c],0,c),1000,P,[]).
 % What is the probability that a survives if it aims at c?
 % P = 59/189=0.31216931216
-?- mc_sample(survives_action(a,[a,b,c],0,sky),1000,P).
+?- mc_sample(survives_action(a,[a,b,c],0,sky),1000,P,[]).
 % What is the probability that a survives if it aims at the sky?
 % P =25/63= 0.39682539682
-?- mc_sample(survives([a,c],a,0),1000,P).
+?- mc_sample(survives([a,c],a,0),1000,P,[]).
 % What is the probability that a survives against c?
 % P =1/3
-?- mc_sample(survives([a,b],a,0),1000,P).
+?- mc_sample(survives([a,b],a,0),1000,P,[]).
 % What is the probability that a survives against b?
 % P=3/7=0.42857142857
-?- mc_sample(survives_round([b],[a,b],a,0),1000,P).
+?- mc_sample(survives_round([b],[a,b],a,0),1000,P,[]).
 % What is the probability that a survives against b when it's b's turn?
 %P=1/7=0.14285714285
 */
@@ -71,7 +71,7 @@ best_strategy(A,L,S):-
  *
  */
 ev_action(A,L,T,S,P-S):-
-  mc_sample(survives_action(A,L,T,S),1000,P).
+  mc_sample(survives_action(A,L,T,S),1000,P,[]).
 
 /**
  * survives_action(+A:atom,+L0:list,+T:term,+S:atom)

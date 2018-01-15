@@ -4,7 +4,7 @@ duello a tre, vedi libro di federico peiretti il grande gioco dei numeri
 
 /** <examples>
 ?- survives([a,b,c],a,0).
-?- mc_sample(survives([a,b,c],a,0),5,P).
+?- mc_sample(survives([a,b,c],a,0),5,P,[]).
 best_strategy(A,Rest,L,T,S,P):-
 ?- best_strategy(a,[b,c],[a,b,c],0,S,P).
 % expected result 1
@@ -62,7 +62,7 @@ survives_round_bounded([H|Rest],L0,A,T,L):-
     write(shoot(H,S,Rest,L0,T,Rest1,L1)),nl,
     member(A,L1),
     survives_round_bounded(Rest1,L1,A,T,L).
-      
+
 
 best_strategy(A,Rest,L,T,S,P):-
 write(best_strategy(A,Rest,L,T,S,P)),nl,
@@ -76,10 +76,10 @@ write(best_strategy(A,Rest,L,T,S,P)),nl,
 %    max_member(P-S,LP).
 
 ev_action(A,Rest,T,L,S,P-S):-
-    mc_sample(survives_rest(A,Rest,T,L,S),5,P).
+    mc_sample(survives_rest(A,Rest,T,L,S),5,P,[]).
 
 %ev_action(A,Rest,T,L,S,P-S):-
-%    mc_sample(survives_rest1(A,Rest,T,L,S),5,P).
+%    mc_sample(survives_rest1(A,Rest,T,L,S),5,P,[]).
 
 survives_rest1(A,Rest0,T,L0,S):-
     shoot(A,S,Rest0,L0,T,Rest,L1),
@@ -94,14 +94,14 @@ survives_rest(A,Rest0,T,L0,S):-
     survives_bounded(L,A,s(T)).
 
 shoot(H,S,Rest0,L0,T,Rest,L):-
-    (S=sky ->  
+    (S=sky ->
       L=L0,
       Rest=Rest0
     ;
       (hit(T,H) ->
         delete(L0,S,L),
         delete(Rest0,S,Rest)
-      ;   
+      ;
         L=L0,
         Rest=Rest0
       )
@@ -121,11 +121,8 @@ hit(_,b):2/3.
 
 hit(_,c):1.
 
-    
+
 
 :- end_lpad.
 
 :- retractall(tabled(_)).
-
-
-
