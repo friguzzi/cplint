@@ -12,10 +12,10 @@ by Fabrizio Riguzzi.
 */
 
 /** <examples>
-?- mc_sample(models(en(0), form(x), []),20,P).
+?- mc_sample(models(en(0), form(x), []),20,P,[]).
 % expected result 1
 % The values for en can be 0+.
-?- mc_sample(models(en(1), form(x), []),1, P).
+?- mc_sample(models(en(1), form(x), []),1,P,[]).
 % expected result 1
 */
 :- use_module(library(mcintyre)).

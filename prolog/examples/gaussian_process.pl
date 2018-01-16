@@ -70,7 +70,7 @@ draw_fun(Kernel,C):-
 %  X=[-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1.00,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5],
   X=[-3,-2,-1,0,1,2,3],
   compute_cov(X,Kernel,K),
-  mc_sample_arg_first(gp(K,Y),5,Y,L),
+  mc_sample_arg_first(gp(K,Y),5,Y,L,[]),
   numlist(1,5,LD),
   maplist(name_s,L,LD,L1),
   C = c3{data:_{x:x, columns:[[x|X]|L1] },

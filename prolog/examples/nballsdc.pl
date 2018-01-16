@@ -1,10 +1,10 @@
 /*
 Distributional Clauses example.
-From Example 4 of 
+From Example 4 of
 Davide Nitti, Tinne De Laet, and Luc De Raedt. Probabilistic logic programming for hybrid relational domains. Machine Learning 103(3), 407-449, 2016.
 http://link.springer.com/article/10.1007/s10994-016-5558-8/fulltext.html
-"We have an urn, where the number of balls n is a random variable and each ball 
-X has a color, material, and size with a known distribution. 
+"We have an urn, where the number of balls n is a random variable and each ball
+X has a color, material, and size with a known distribution.
 The i-th ball drawn with replacement from the
 urn is named drawn(i)."
 See also
@@ -39,30 +39,29 @@ size(X) ~ beta(4,2) := material(X) ~= wood.
 :- end_lpad.
 
 /** <examples>
-?- mc_sample(drawn(1,1),1000,T,F,P).
+?- mc_sample(drawn(1,1),1000,P,[successes(T),failures(F)]).
 %T = 285,
 %F = 715,
 %P = 0.285.
 
-?- mc_sample(drawn(1,1),1000,T,F,P).
+?- mc_sample(drawn(1,1),1000,P,[successes(T),failures(F)]).
 %T = 290,
 %F = 710,
 %P = 0.29.
 
-?- mc_sample(drawn(1,1),1000,T,F,P).
+?- mc_sample(drawn(1,1),1000,P,[successes(T),failures(F)]).
 %T = 283,
 %F = 717,
 %P = 0.283.
 
-?- mc_sample((drawn(1,1),material(1,wood)),1000,T,F,P).
+?- mc_sample((drawn(1,1),material(1,wood)),1000,P,[successes(T),failures(F)]).
 %T = 86,
 %F = 914,
 %P = 0.086.
 
-?- mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,T,F,P).
+?- mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,P,[successes(T),failures(F)]).
 %T = 44,
 %F = 956,
 %P = 0.044.
 
 */
- 

@@ -3,12 +3,12 @@
 
 In \texttt{cplint} on SWISH you can draw graphs
 for visualizing the results either with \href{http://www.c3js.org/}{C3.js} or with \href{https://www.r-project.org/}{R}. Similar predicates are avaiiable for the two methods.
- There are two types  
-of graphs: those that represent individual probability values with a bar chart and those that 
+ There are two types
+of graphs: those that represent individual probability values with a bar chart and those that
 visualize the results of sampling arguments.
 
 \subsubsection{Using C3.js}
-You can draw the probability of a query being true and 
+You can draw the probability of a query being true and
 being false as a bar chart with \verb|prob_bar(:Query:atom,-Probability:dict)| as in
 \begin{verbatim}
 ?- prob_bar(heads(coin),P).
@@ -29,7 +29,7 @@ if you include
 \begin{verbatim}
 :- use_rendering(graphviz).
 \end{verbatim}
-before \verb|:- pita.| 
+before \verb|:- pita.|
 Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
 edges indicate 0-children with negation applied to the sub BDD.
 Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
@@ -47,37 +47,34 @@ multivalued variables.
 
 When using \verb|mcintyre|, you can use
 \begin{verbatim}
-mc_prob_bar(:Query:atom,-Probability:dict).
+mc_prob(:Query:atom,-Probability:dict,+Options:list).
 \end{verbatim}
 as in
 \begin{verbatim}
-?- mc_prob_bar(heads(coin),P).
+?- mc_prob(heads(coin),P,[bar(Chart)]).
 \end{verbatim}
 to obtain a chart representation of the probability.
 
 You can obtain a bar chart of the samples with
 \begin{verbatim}
-?- mc_sample_bar(heads(coin),1000,Chart).
+?- mc_sample(heads(coin),1000,P,[bar(Chart)]).
 \end{verbatim}
-that returns in \verb|Chart| a diagram with one bar for the number of successes and 
+that returns in \verb|Chart| a diagram with one bar for the number of successes and
 one bar for the number of failures.
 
 For visualizing the results of sampling arguments you can use
 \begin{verbatim}
-mc_sample_arg_bar(:Query:atom,+Samples:int,?Arg:var,-Chart:dict).
-mc_sample_arg_first_bar(:Query:atom,+Samples:int,
-  ?Arg:var,-Chart:dict).
-mc_rejection_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
-  ?Arg:var,-Chart:dict).
-mc_mh_sample_arg_bar(:Query:atom,:Evidence:atom,+Samples:int,
-  +Lag:int,?Arg:var,-Chart:dict).
-\end{verbatim} 
-that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
+mc_sample(:Query:atom,+Samples:int,?Arg:var,+Probability:float,+Options:list).
+mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+\end{verbatim}
+with option \verb|bar(Chart)| that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
 returning that value.
 
 An example is
 \begin{verbatim}
-?- mc_sample_arg_bar(reach(s0,0,S),50,S,Chart). 
+?- mc_sample_arg(reach(s0,0,S),50,S,ValList,[bar(Chart)]).
 \end{verbatim}
 of \href{http://cplint.ml.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
 
@@ -87,7 +84,7 @@ In this case, you can use the samples to draw the
 probability density function of the argument.
 The predicate
 \begin{verbatim}
-histogram(+List:list,+NBins:int,-Chart:dict) 
+histogram(+List:list,+NBins:int,-Chart:dict,+Options:list)
 \end{verbatim}
 draws a histogram of the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
@@ -96,17 +93,20 @@ where \verb|V| is a sampled value and \verb|W| is its weight. This is the format
 
 The predicate
 \begin{verbatim}
-density(+List:list,+NBins:int,-Chart:dict) 
+density(+List:list,+NBins:int,-Chart:dict,+Options:list)
 \end{verbatim}
 draws a line chart of the density the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
-\verb|List| must be as for \verb|histogram/3|.
+\verb|List| must be as for \verb|histogram/4|.
 
-The predicate
-\begin{verbatim}
-density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) 
-\end{verbatim}
-is similar to \verb|density/3| except that you can specify the limits of the $X$ axis.
+\verb|Options| is a list of options, the following are recognised by \verb|density/4|:
+\begin{itemize}
+\item \verb|min(+Min:float)|
+the minimum value of domain, default value the minimum in List
+\item \verb|max(+Max:float)|
+the maximum value of domain, default value the maximum in List
+\end{itemize}
+In this way you can specify the limits of the $X$ axis.
 
 The predicate
 \begin{verbatim}
@@ -117,18 +117,18 @@ draws a line chart of the density of two sets of samples, usually
 can be either couples \verb|[V]-W| or \verb|V-W| where \verb|V| is a value and \verb|W| its weight.
  The lines are drawn dividing the domain in
  \verb|NBins| bins.
- 
+
 For example
 \begin{verbatim}
-?-  mc_sample_arg(value(0,X),1000,X,L0),
-    histogram(L0,40,Chart).
+?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
+    histogram(L0,40,Chart,[]).
 \end{verbatim}
 from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 samples of argument \verb|X| of \verb|value(0,X)| and draws the density of the samples using an histogram.
 
 Instead
 \begin{verbatim}
-?- mc_sample_arg(value(0,Y),1000,Y,L0),
+?- mc_sample_arg(value(0,Y),1000,Y,L0,[]),
    mc_lw_sample_arg(value(0,X),
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,NBins,Chart).
@@ -142,10 +142,10 @@ You have to load library \texttt{cplint\_r}  (a SWI-Prolog pack) with
 \begin{verbatim}
 :- use_module(library(cplint_r)).
 \end{verbatim}
-Then you can use predicates 
+Then you can use predicates
 \begin{verbatim}
 prob_bar_r/1, prob_bar_r/2
-mc_prob_bar_r/2
+mc_prob_bar_r/3
 mc_sample_bar_r/2
 mc_sample_arg_bar_r/3
 mc_sample_arg_first_bar_r/3
@@ -155,7 +155,7 @@ mc_mh_sample_arg_bar_r/6
 \end{verbatim}
 as direct analogues of those for C3.js.
 
-You also have 
+You also have
 \begin{verbatim}
 histogram_r(+List:list,+NBins:int) is det
 \end{verbatim}
