@@ -14,7 +14,7 @@ Probabilities computation in the body of probabilistic clauses.
 :- begin_lpad.
 
 a:0.2:-
-  mc_sample(b,20,P),
+  mc_sample(b,20,P,[]),
   P>0.2.
 
 b:0.5:-
@@ -26,10 +26,10 @@ c.
 
 /** <examples>
 
-?- mc_prob(a,Prob).
+?- mc_prob(a,Prob,[]).
 % expected result 0.2
 
-?- mc_sample(a,10,Prob).
+?- mc_sample(a,10,Prob,[]).
 % expected result 0.2
 
 

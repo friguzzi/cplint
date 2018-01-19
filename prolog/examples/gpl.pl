@@ -1,17 +1,17 @@
 /*
 Model checker for fuzzy formulas in generalized probabilistic logic (GPL).
-GPL is an expressive logic based on the modal mu-calculus for probabilistic 
+GPL is an expressive logic based on the modal mu-calculus for probabilistic
 systems.
-GPL is designed for model checking reactive probabilistic transition systems 
+GPL is designed for model checking reactive probabilistic transition systems
 (RPLTS).
 From
 Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
-This program was kindly provided by Andrey Gorlin and adapted to MCINTYRE 
+This program was kindly provided by Andrey Gorlin and adapted to MCINTYRE
 by Fabrizio Riguzzi.
 */
 
 /** <examples>
-?- mc_sample(models(s1(3), form(x(2)), []),10,P).
+?- mc_sample(models(s1(3), form(x(2)), []),10,P,[]).
 % expected result 1
 % The values for s1 can be 0+, and for x from 2 to 7.
 */
@@ -96,7 +96,7 @@ msw(SW,H,V):-
   set_sw(SW,PH),
   append(PH0,[_LastP],PH),
   foldl(pick_value(SW,H),PH0,L0,(1,_),(_,V)),
-  (var(V)->  
+  (var(V)->
     V=LastV
   ;
     true
@@ -156,4 +156,3 @@ fdef(t(F), or(box(a, form(F)), diam(b, form(n(F))))).
 fdef(n(F), box(a, form(F))).
 
 :-end_lpad.
-

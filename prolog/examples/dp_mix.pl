@@ -31,7 +31,7 @@ dp_n_values(N0,N,Alpha,[[V]-1|Vs]):-
   dp_value(N0,Alpha,V),
   N1 is N0+1,
   dp_n_values(N1,N,Alpha,Vs).
-  
+
 dp_value(NV,Alpha,V):-
   dp_stick_index(NV,Alpha,I),
   dp_pick_value(I,NV,V).
@@ -54,7 +54,7 @@ dp_stick_index(NV,Alpha,I):-
 dp_stick_index(N,NV,Alpha,V):-
   stick_proportion(N,Alpha,P),
   choose_prop(N,NV,Alpha,P,V).
-  
+
 choose_prop(N,NV,_Alpha,P,N):-
   pick_portion(N,NV,P).
 
@@ -62,7 +62,7 @@ choose_prop(N,NV,Alpha,P,V):-
   neg_pick_portion(N,NV,P),
   N1 is N+1,
   dp_stick_index(N1,NV,Alpha,V).
- 
+
 
 
 stick_proportion(_,Alpha,P):beta(P,1,Alpha).
@@ -75,9 +75,9 @@ pick_portion(_,_,P):P;neg_pick_portion(_,_,P):1-P.
 obs([-1,7,3]).
 
 prior(Samples,NBins,Chart):-
-  mc_sample_arg_first(dp_n_values(0,Samples,10.0,V),1,V,L),
+  mc_sample_arg_first(dp_n_values(0,Samples,10.0,V),1,V,L,[]),
   L=[Vs-_],
-  histogram(Vs,NBins,Chart).
+  histogram(Vs,NBins,Chart,[]).
 
 post(Samples,NBins,Chart):-
   obs(O),
@@ -87,12 +87,10 @@ post(Samples,NBins,Chart):-
   maplist(keys,L,LW),
   min_list(LW,Min),
   maplist(exp(Min),L,L1),
-  density(L1,NBins,-8,15,Chart).
+  density(L1,NBins,Chart,[min(-8),max(15)]).
 
 keys(_-W,W).
 
 exp(Min,L-W,L-W1):- W1 is exp(W-Min).
 
 to_val(V,[V]-1).
-
-

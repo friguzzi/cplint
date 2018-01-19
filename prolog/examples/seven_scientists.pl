@@ -2,7 +2,7 @@
 Seven scientists, posterior estimation in Bayesian models.
 Suppose seven scientists all go and perform the same experiment, each collecting
 a measurement xi for i=1,..,7.
-These scientists are varyingly good at their job, and while we can assume each 
+These scientists are varyingly good at their job, and while we can assume each
 scientist would estimate x correctly on average, some of them may have much more
 error in their measurements than others.
 They come back with the following seven observations:
@@ -12,7 +12,7 @@ of the measurements each of the 7 scientists.
 For the mean, we use a Gaussian prior with mean 0 and variance 50^2.
 For the standard deviation, we use a uniform prior between 0 and 25.
 Given the above measurements, what is the posterior distribution of x?
-What distribution over noise levels do we infer for each of these scientists' 
+What distribution over noise levels do we infer for each of these scientists'
 estimates?
 From
 http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=gaussian-posteriors
@@ -25,7 +25,7 @@ http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=gaussian-p
 :- mc.
 :- begin_lpad.
 
-value(I,X) :- 
+value(I,X) :-
   std_dev(I,Sigma),
   mean(M),
   measurement(I,M,Sigma,X).
@@ -33,7 +33,7 @@ value(I,X) :-
 % Sigma
 
 std_dev(_,S): uniform(S,0,25).
-% the standard deviation is sampled for all scientists between 0 and 25 
+% the standard deviation is sampled for all scientists between 0 and 25
 % uniformly
 
 mean(M): gaussian(M,0, 2500).
@@ -46,20 +46,20 @@ measurement(_,M,Sigma,X): gaussian(X,M,Sigma*Sigma).
 :- end_lpad.
 
 hist_uncond(Samples,NBins,Chart):-
-  mc_sample_arg(value(0,X),Samples,X,L0),
-  histogram(L0,NBins,Chart).
+  mc_sample_arg(value(0,X),Samples,X,L0,[]),
+  histogram(L0,NBins,Chart,[]).
 % take Samples samples of X for index 0 (X in val(0,X) and draw a
 % histogram of the distribution with NBins bins
 
 dens_lw(Samples,NBins,Chart,E):-
-  mc_sample_arg(value(0,Y),Samples,Y,L0),
+  mc_sample_arg(value(0,Y),Samples,Y,L0,[]),
   mc_lw_sample_arg(mean(X),(value(1,-27.020),value(2,3.570),
   value(3,8.191),value(4,9.898),value(5,9.603),value(6,9.945),
   value(7,10.056)),Samples,X,L),
   exp(L,Samples,E),
   densities(L0,L,NBins,Chart).
 % take Samples samples of X for index 0 (X in val(0,X)) before and after
-% having observed the scientists' measurements and draw curves of the 
+% having observed the scientists' measurements and draw curves of the
 % densities using NBins bins
 
 chart_lw_noise(Samples,Chart,E):-
@@ -99,7 +99,7 @@ agg(V-W,S,S+V*W).
 /** <examples>
 ?- dens_lw(1000,40,G,E).
 % take Samples samples of X for index 0 (X in val(0,X)) before and after
-% having observed the scientists' measurements and draw curves of the 
+% having observed the scientists' measurements and draw curves of the
 % densities using NBins bins
 
 ?- chart_lw_noise(1000,Chart,E).
@@ -114,4 +114,3 @@ agg(V-W,S,S+V*W).
 
 
 */
- 

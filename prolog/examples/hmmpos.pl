@@ -1,4 +1,4 @@
-/* 
+/*
 Hidden Markov model for part-of-speech tagging.
 The states represent parts-of-speech, and the symbols emitted by the states are words. The assumption is that a word depends probabilistically on just its own part-of-speech (i.e. its tag) which in turn depends on the part-of-speech of the preceding word (or on the start state in case there is no preceding word).
 From
@@ -16,13 +16,13 @@ Original program by Torbjorn Lager, adapted to MCINTYRE by Fabrizio Riguzzi
 
 :- begin_lpad.
 
-% hmm(O): O is the output sequence 
+% hmm(O): O is the output sequence
 % hmm1(S,O): O is the output sequence and S is the sequence of states
 % hmm(Q,S0,S,O):  from state Q and previous state S0, generates output O and
 % sequence of states S
 
 hmm(O):-hmm(_,O).
-% O is an output sequence if there is a state seuqnece S such that hmm1(S,O) 
+% O is an output sequence if there is a state seuqnece S such that hmm1(S,O)
 % holds
 
 hmm(S,O):-trans(start,Q0,[]),hmm(Q0,[],S0,O),reverse(S0,S).
@@ -33,7 +33,7 @@ hmm(Q,S0,S,[L|O]):-
 	trans(Q,Q1,S0),
 	out(L,Q,S0),
 	hmm(Q1,[Q|S0],S,O).
-% an HMM in state Q goes in state Q1, emits the word L 
+% an HMM in state Q goes in state Q1, emits the word L
 % and continues the chain
 
 hmm(_,S,S,[]).
@@ -112,12 +112,11 @@ nodelab(N,node(N,[label=Lab])):-
 
 ?- mc_sample_arg(hmm(S,[he,can,can,a,can]),20,S,O).
 % sample the state sequence corresonding to the phrase "he can can a can"
-% the most frequent state sequence is an approximate POS tagging for the 
+% the most frequent state sequence is an approximate POS tagging for the
 % sentence. It corresponds to the Viterbi path of the HMM.
 % expected result: the most frequent tagging should be [pron, aux, v, det, n]
-?- mc_sample_arg_bar(hmm(S,[he,can,can,a,can]),20,S,O).
+?- mc_sample_arg_bar(hmm(S,[he,can,can,a,can]),20,S,ValList,[bar(BarChart)]).
 
 ?- state_diagram(G).
 % show the state diagram
 */
- 
