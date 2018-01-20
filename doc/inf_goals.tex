@@ -14,13 +14,28 @@ When using \verb|mcintyre|, the predicate for querying is
 \begin{verbatim}
 mc_prob(:Query:atom,-Probability:float,+Options:list).
 \end{verbatim} as in
+\verb|Options| is a list of options, the following are recognised by \verb|mc_prob/3|:
+\begin{itemize}
+\item \verb|bar(-BarChar:dict)|
+BarChart is a dict for rendering with c3 as a bar chart with
+a bar for the number of successes and a bar for the number
+of failures.
+\end{itemize}
 \begin{verbatim}
 ?- mc_prob(heads(coin),P,[]).
 \end{verbatim}
+
 With \verb|mcintyre|, you can also take a given number of sample with
 \begin{verbatim}
 mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).
 \end{verbatim}
+\verb|Options| is a list of options, the following are recognised by \verb|mc_sample/4|:
+\begin{itemize}
+\item \verb|successes(-Successes:int)|
+Number of succeses
+\item \verb|failures(-Failures:int)|
+Number of failueres
+\end{itemize}
 as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
 ?- mc_sample(heads(coin),1000,P,[successes(S),failures(F)]).
@@ -44,7 +59,7 @@ estimated probability that a sample is true (i.e., that a sample succeeds).
 
 Moreover, you can sample arguments of queries with
 \begin{verbatim}
-mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
 \end{verbatim}
 The predicate samples \verb|Query| a number of \verb|Samples| times.
 \verb|Arg| should be a variable in \verb|Query|.
@@ -229,6 +244,13 @@ You can take a given number of sample with rejection sampling using
 \begin{verbatim}
 mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list).
 \end{verbatim}
+\verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg/5|:
+\begin{itemize}
+\item \verb|successes(-Successes:int)|
+Number of succeses
+\item \verb|failures(-Failures:int)|
+Number of failueres
+\end{itemize}
 as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
 ?- mc_rejection_sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).
@@ -340,7 +362,7 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 To compute conditional expectations, use
 \begin{verbatim}
 mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-  +Lag:int,?Arg:var,-Exp:float).
+	?Arg:var,-Exp:float,+Options:list).
 \end{verbatim}
 \verb|Options| is a list of options, the following are recognised by \verb|mc_mh_expectation/6|:
 \begin{itemize}
@@ -355,7 +377,7 @@ mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
 \end{verbatim}
 as in
 \begin{verbatim}
-?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,1,Y,E).
+?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).
 \end{verbatim}
 of \href{http://cplint.ml.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}
 that computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that

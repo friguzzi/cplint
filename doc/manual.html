@@ -323,10 +323,18 @@ female(cathy).</code></pre>
 <p>If the query is non-ground, <code>prob/2</code> returns in backtracking the succesful instantiations together with their probability.</p>
 <p>When using <code>mcintyre</code>, the predicate for querying is</p>
 <pre><code>mc_prob(:Query:atom,-Probability:float,+Options:list).</code></pre>
-<p>as in</p>
+<p>as in <code>Options</code> is a list of options, the following are recognised by <code>mc_prob/3</code>:</p>
+<ul>
+<li><p><code>bar(-BarChar:dict)</code> BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
+</ul>
 <pre><code>?- mc_prob(heads(coin),P,[]).</code></pre>
 <p>With <code>mcintyre</code>, you can also take a given number of sample with</p>
 <pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).</code></pre>
+<p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample/4</code>:</p>
+<ul>
+<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+</ul>
 <p>as in (<a href="http://cplint.ml.unife.it/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
 <pre><code>?- mc_sample(heads(coin),1000,P,[successes(S),failures(F)]).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns in <code>S</code> the number of successes, in <code>F</code> the number of failures and in <code>P</code> the estimated probability (<code>S/1000</code>).</p>
@@ -337,7 +345,7 @@ female(cathy).</code></pre>
 <pre><code>?- mc_sample(heads(coin),1000,Prob,[]).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns the estimated probability that a sample is true (i.e., that a sample succeeds).</p>
 <p>Moreover, you can sample arguments of queries with</p>
-<pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list).</code></pre>
+<pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).</code></pre>
 <p>The predicate samples <code>Query</code> a number of <code>Samples</code> times. <code>Arg</code> should be a variable in <code>Query</code>. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random and <code>N</code> is the number of samples returning that list of values. If <code>L</code> is the empty list, it means that for that sample the query failed. If <code>L</code> is a list with a single element, it means that for that sample the query is determinate. If, in all couples <code>L-N</code>, <code>L</code> is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. This is one of the assumptions taken for programs of the PRISM system <span class="citation" data-cites="DBLP:journals/jair/SatoK01">[<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>. For example <a href="http://cplint.ml.unife.it/example/inference/pcfglr.pl"><code>pcfglr.pl</code></a> and <a href="http://cplint.ml.unife.it/example/inference/plcg.pl"><code>plcg.pl</code></a> satisfy this constraint while <a href="http://cplint.ml.unife.it/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> and <a href="http://cplint.ml.unife.it/example/inference/var_obj.pl"><code>var_obj.pl</code></a> don’t.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
@@ -390,6 +398,11 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample. The final probability is given by the number of successes over the total number of samples.</p>
 <p>You can take a given number of sample with rejection sampling using</p>
 <pre><code>mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list).</code></pre>
+<p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
+<ul>
+<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+</ul>
 <p>as in (<a href="http://cplint.ml.unife.it/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
 <pre><code>?- mc_rejection_sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).</code></pre>
 <p>that takes 1000 samples where <code>biased(coin)</code> is true and returns in <code>S</code> the number of samples where <code>heads(coin)</code> is true, in <code>F</code> the number of samples where <code>heads(coin)</code> is false and in <code>P</code> the estimated probability (<code>S/1000</code>).</p>
@@ -441,7 +454,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>of <a href="http://cplint.ml.unife.it/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <p>To compute conditional expectations, use</p>
 <pre><code>mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-  +Lag:int,?Arg:var,-Exp:float).</code></pre>
+	?Arg:var,-Exp:float,+Options:list).</code></pre>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_mh_expectation/6</code>:</p>
 <ul>
 <li><p><code>mix(+Mix:int)</code> The first Mix samples are discarded (mixing time), default value 0</p></li>
@@ -450,7 +463,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <pre><code>mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
   ?Arg:var,-Exp:float).</code></pre>
 <p>as in</p>
-<pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,1,Y,E).</code></pre>
+<pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).</code></pre>
 <p>of <a href="http://cplint.ml.unife.it/example/inference/arithm.pl"><code>arithm.pl</code></a> that computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
@@ -526,8 +539,10 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
 <p>For visualizing the results of sampling arguments you can use</p>
 <pre><code>mc_sample(:Query:atom,+Samples:int,?Arg:var,+Probability:float,+Options:list).
 mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
-mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
-mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).</code></pre>
+mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
+	?Arg:var,-Values:list,+Options:list).
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
+	?Arg:var,-Values:list,+Options:list).</code></pre>
 <p>with option <code>bar(Chart)</code> that return in <code>Chart</code> a bar chart with a bar for each possible sampled value whose size is the number of samples returning that value.</p>
 <p>An example is</p>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,ValList,[bar(Chart)]).</code></pre>
