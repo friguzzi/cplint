@@ -66,8 +66,10 @@ For visualizing the results of sampling arguments you can use
 \begin{verbatim}
 mc_sample(:Query:atom,+Samples:int,?Arg:var,+Probability:float,+Options:list).
 mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
-mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
-mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
+	?Arg:var,-Values:list,+Options:list).
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
+	?Arg:var,-Values:list,+Options:list).
 \end{verbatim}
 with option \verb|bar(Chart)| that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
 returning that value.
