@@ -243,7 +243,7 @@ default_setting_pita(depth_bound,false).  %if true, it limits the derivation of 
 default_setting_pita(depth,5).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-default_setting_pita(tabling,no).
+default_setting_pita(tabling,auto).
 /* values:
   auto
   explicit
@@ -317,22 +317,24 @@ s(M:Goal,P):-
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
   ( M:local_pita_setting(depth_bound,true) *->
-      ( process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
+      ( process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,ClNeg,Env,M),
         add_bdd_arg_db(Goal1,Env,BDDAnd,DB,M,Head1)
       )
     ;
-      ( process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+      ( process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
         add_bdd_arg(Goal1,Env,BDDAnd,M,Head1)
       )
   ),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   M:(asserta((Head1 :- Body2),Ref)),
+  assert_all(ClNeg,M,ClNegRef),
   M:rule_n(NR),
   init_test(NR,Env),
   findall((Goal,P),get_p(M:Goal1,Env,P),L),
   end_test(Env),
   erase(Ref),
+  retract_all(ClNegRef),
   member((Goal,P),L).
 
 abd_prob(M:Goal,P,Delta):-
@@ -341,16 +343,18 @@ abd_prob(M:Goal,P,Delta):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
+  assert_all(ClNeg,M,ClNegRef),
   M:rule_n(NR),
   init_test(NR,Env),
   findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
+  retract_all(ClNegRef),
   member((Goal,P,Exp),L),
   from_assign_to_exp(Exp,M,Delta).
 
@@ -360,16 +364,18 @@ vit_prob(M:Goal,P,Delta):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
+  assert_all(ClNeg,M,ClNegRef),
   M:rule_n(NR),
   init_test(NR,Env),
   findall((Goal,P,Exp),get_vit_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
+  retract_all(ClNegRef),
   member((Goal,P,Exp0),L),
   reverse(Exp0,Exp),
   from_assign_to_vit_exp(Exp,M,Delta).
@@ -554,11 +560,12 @@ prob(M:Goal,M:Evidence,P):-
   atomic_concat('$goal',GN,NewGoal),
   Goal1=..[NewGoal|VG],
   list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
+  assert_all(ClNeg,M,ClNegRef),
   M:rule_n(NR),
   init_test(NR,Env),
   (EvNoAct=true->
@@ -570,6 +577,7 @@ prob(M:Goal,M:Evidence,P):-
   retractall(M:NewEv),
   maplist(erase,UpdatedClausesRefs),
   erase(Ref),
+  retract_all(ClNegRef),
   maplist(M:assertz,ClausesToReAdd),
   member((Goal,P),L).
 
@@ -581,12 +589,14 @@ deal_with_ev(Ev,M,NewEv,EvGoal,UC,CA):-
     EvGoal=true,
     UC=UC0
   ;
-    process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+    process_body(EvNoActL,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
     append([onec(Env,BDD)],BodyList2,BodyList3),
     list2and(BodyList3,Body2),
     add_bdd_arg(NewEv,Env,BDDAnd,M,Head1),
     M:(asserta((Head1 :- Body2),Ref)),
-    UC=[Ref|UC0],
+    assert_all(ClNeg,M,ClNegRef),
+    append([[Ref],UC0,ClNegRef],UC),
+%    UC=[Ref|UC0],
     EvGoal=NewEv
   ).
 
@@ -772,6 +782,9 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
   ),
   andcnf(Env,BG,BE,BGE).
 
+get_next_goal(M,NewGoal):-
+  get_next_goal_number(M,GN),
+  atomic_concat('$goal',GN,NewGoal).
 
 get_next_goal_number(PName,R):-
   retract(PName:goal_n(R)),
@@ -998,63 +1011,73 @@ generate_rules_db([Head:_P|T],Env,Body,VC,R,Probs,DB,BDDAnd,N,[Clause|Clauses],M
 
 
 
-process_body([],BDD,BDD,Vars,Vars,[],_Env,_Module).
+process_body([],BDD,BDD,Vars,Vars,[],[],_Env,_Module).
 
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
+process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Cl,Env,Module):-
   builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
+process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Cl,Env,Module):-
   !,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDDL,L,BDD2|Vars1],
-[(findall(BDDH,H1,L)*->or_listc(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
-  andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
+  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
+%,(Aux:- \+ HT1,onec(Env,BDDN))
+%[(Aux:- (H1*->bdd_notc(Env,BDDH,BDDN);onec(Env,BDDN)))
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
+[Aux,andc(Env,BDD,BDDN,BDD2)|Rest],[(Aux:- H1,bdd_notc(Env,BDDH,BDDN))|Cl],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
+  get_next_goal(Module,NewGoal),
+  H=..[P|Args],
+  Aux0 =..[NewGoal|Args],
+  add_bdd_arg(Aux0,Env,BDDN,Module,Aux),
+%  atomic_concat(P,' tabled',P1),
+%  HT=..[P1|Args],
+%  add_bdd_arg(HT,Env,BDDN,Module,HT1),
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
+process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Cl,Env,Module):-
   builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body([db(H)|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
+process_body([db(H)|T],BDD,BDD1,Vars,Vars1,[H|Rest],Cl,Env,Module):-
   !,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
 
 process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-[H1,andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-
+[H1,andc(Env,BDD,BDDH,BDD2)|Rest],Cl,Env,Module):-
   add_bdd_arg(H,Env,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
+  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
+process_body_db([],BDD,BDD,_DB,Vars,Vars,[],[],_Env,_Module):-!.
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Cl,Env,Module):-
   builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
+process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Cl,Env,Module):-
   !,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(findall(BDDH,H1,L)*->or_listc(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
-  andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
+[Aux,andc(Env,BDD,BDDN,BDD2)|Rest],[(Aux:- H1,!,bdd_notc(Env,BDDH,BDDN)),(Aux:- onec(Env,BDDN))|Cl],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  get_next_goal(Module,NewGoal),
+  H=..[_|Args],
+  Aux0 =..[NewGoal|Args],
+  add_bdd_arg_db(Aux0,Env,BDDN,DB,Module,Aux),
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
+process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Cl,Env,Module):-
   builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
-process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
+process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Cl,Env,Module):-
   !,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
+[H1,andc(Env,BDD,BDDH,BDD2)|Rest],Cl,Env,Module):-!, %agg. cut
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Cl,Env,Module).
 
 
 process_head(HeadList, GroundHeadList) :-
@@ -1411,7 +1434,7 @@ user:term_expansion((Head :- Body),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,M),
+  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
@@ -1425,7 +1448,7 @@ user:term_expansion((Head :- Body),
   ),
   to_table(M,HeadList,TabDir,HeadList1),
   generate_rules_db(HeadList1,Env,Body1,VC1,R,Probs,DB,BDDAnd,0,Clauses0,M),
-  append(TabDir,Clauses0,Clauses).
+  append([TabDir,Clauses0,ClNeg],Clauses).
 
 
 user:term_expansion((Head :- Body),
@@ -1436,7 +1459,7 @@ user:term_expansion((Head :- Body),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
@@ -1450,7 +1473,7 @@ user:term_expansion((Head :- Body),
   ),
   to_table(M,HeadList,TabDir,HeadList1),
   generate_rules(HeadList1,Env,Body1,VC1,R,Probs,BDDAnd,0,Clauses0,M),
-  append(TabDir,Clauses0,Clauses).
+  append([TabDir,Clauses0,ClNeg],Clauses).
 
 user:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
@@ -1469,12 +1492,12 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[_H:_],!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH -1|BodyList3],Body1),
   to_table(M,HeadList,TabDir,[H1:_]),
   add_bdd_arg_db(H1,Env,BDDAnd,DBH,M,Head1),
-  append(TabDir,[(Head1 :- Body1)],Clauses).
+  append([TabDir,[(Head1 :- Body1)],ClNeg],Clauses).
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -1484,12 +1507,12 @@ user:term_expansion((Head :- Body), Clauses) :-
   process_head(HeadListOr, HeadList),
   HeadList=[_H:_],!,
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   to_table(M,HeadList,TabDir,[H1:_]),
   add_bdd_arg(H1,Env,BDDAnd,M,Head1),
-  append(TabDir,[(Head1 :- Body1)],Clauses).
+  append([TabDir,[(Head1 :- Body1)],ClNeg],Clauses).
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
@@ -1500,7 +1523,7 @@ user:term_expansion((Head :- Body), Clauses) :-
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
@@ -1512,9 +1535,9 @@ user:term_expansion((Head :- Body), Clauses) :-
   ;
     VC1 = VC
   ),
-  to_table(M,HeadList,TabDir,[H1:_]),
+  to_table(M,HeadList,TabDir,[H1:_|_]),
   generate_clause_db(H1,Env,Body2,VC1,R,Probs,DB,BDDAnd,0,Clauses0,M),
-  append(TabDir,[Clauses0],Clauses).
+  append([TabDir,[Clauses0],ClNeg],Clauses).
 
 user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clauses]) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
@@ -1524,7 +1547,7 @@ user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clause
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
@@ -1536,9 +1559,9 @@ user:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clause
   ;
     VC1 = VC
   ),
-  to_table(M,HeadList,TabDir,[H1:_]),
+  to_table(M,HeadList,TabDir,[H1:_|_]),
   generate_clause(H1,Env,Body2,VC1,R,Probs,BDDAnd,0,Clauses0,M),
-  append(TabDir,[Clauses0],Clauses).
+  append([TabDir,[Clauses0],ClNeg],Clauses).
 
 /*user:term_expansion((Head :- Body),Clauses) :-
 % definite clause for db facts
@@ -1553,24 +1576,24 @@ user:term_expansion((Head :- Body),Clauses) :-
   M:local_pita_setting(depth_bound,true),
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH-1|BodyList3],Body1),
   to_table(M,[Head:_],TabDir,[Head1:_]),
   add_bdd_arg_db(Head1,Env,BDDAnd,DBH,M,Head2),
-  append(TabDir,[(Head2 :- Body1)],Clauses).
+  append([TabDir,[(Head2 :- Body1)],ClNeg],Clauses).
 
 user:term_expansion((Head :- Body),Clauses) :-
 % definite clause senza DB
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,ClNeg,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   to_table(M,[Head:_],TabDir,[Head1:_]),
   add_bdd_arg(Head1,Env,BDDAnd,M,Head2),
-  append(TabDir,[(Head2 :- Body2)],Clauses).
+  append([TabDir,[(Head2 :- Body2)],ClNeg],Clauses).
 
 user:term_expansion(Head,
   [rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
@@ -1705,7 +1728,7 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
-  to_table(M,HeadList,TabDir,[H1:_]),
+  to_table(M,HeadList,TabDir,[H1:_|_]),
   add_bdd_arg_db(H1,Env,BDD,_DB,M,Head1),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
@@ -1725,7 +1748,7 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
-  to_table(M,HeadList,TabDir,[H1:_]),
+  to_table(M,HeadList,TabDir,[H1:_|_]),
   add_bdd_arg(H1,Env,BDD,M,Head1),%***test single_var
   (M:local_pita_setting(single_var,true)->
     VC1 = []
