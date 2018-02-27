@@ -592,19 +592,13 @@ deal_with_ev(Ev,M,NewEv,EvGoal,UC,CA):-
 
 deal_with_actions(ActL,M,UC,CA):-
   empty_assoc(AP0),
-  foldl(get_pred_const,ActL,AP0,AP),
+  foldl(get_pred_const(M),ActL,AP0,AP),
   assoc_to_list(AP,LP),
   maplist(update_clauses(M),LP,UCL,CAL),
   partition(nac,ActL,_NActL,PActL),
   maplist(assert_actions(M),PActL,ActRefs),
   append([ActRefs|UCL],UC),
   append(CAL,CA).
-
-zero_clauses_actions(M,do(\+ A),Ref):-
-  A=..[P|Args],
-  append(Args,[Env,BDD],Args1),
-  A1=..[P|Args1],
-  M:assertz((A1:-zeroc(Env,BDD)),Ref).
 
 assert_actions(M,do(A),Ref):-
   A=..[P|Args],
@@ -652,7 +646,7 @@ get_const(Args,Constants,Constraint):-
 
 constr(V,C,dif(V,C)).
 
-get_pred_const(do(Do0),AP0,AP):-
+get_pred_const(M,do(Do0),AP0,AP):-
   (Do0= (\+ Do)->
     true
   ;
@@ -660,7 +654,11 @@ get_pred_const(do(Do0),AP0,AP):-
   ),
   functor(Do,F,A),
   Do=..[_|Args],
-  atomic_concat(F,' tabled',F1),
+  (M:local_pita_setting(tabling,no)->
+    F1=F
+  ;
+    atomic_concat(F,' tabled',F1)
+  ),
   (get_assoc(F1/A,AP0,V)->
     put_assoc(F1/A,AP0,[Args|V],AP)
   ;
@@ -1299,11 +1297,15 @@ user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
-  findall(LZ,M:zero_clauses(LZ),L0),
-  append(L0,_L),
+  (M:local_pita_setting(tabling,no)->
+    L=[]
+  ;
+    findall(LZ,M:zero_clauses(LZ),L0),
+    append(L0,L)
+  ),
   retractall(M:zero_clauses(_)),
   retractall(M:tabled(_)),
-  append([],[(:- style_check(+discontiguous)),end_of_file],C).
+  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
