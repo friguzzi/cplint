@@ -243,10 +243,11 @@ default_setting_pita(depth_bound,false).  %if true, it limits the derivation of 
 default_setting_pita(depth,5).
 default_setting_pita(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
 
-default_setting_pita(tabling,auto).
+default_setting_pita(tabling,no).
 /* values:
   auto
   explicit
+  no
 */
 /**
  * load(++File:atom) is det
@@ -608,7 +609,11 @@ zero_clauses_actions(M,do(\+ A),Ref):-
 assert_actions(M,do(A),Ref):-
   A=..[P|Args],
   append(Args,[Env,BDD],Args1),
-  atomic_concat(P,' tabled',P1),
+  (M:local_pita_setting(tabling,no)->
+    P1=P
+  ;
+    atomic_concat(P,' tabled',P1)
+  ),
   A1=..[P1|Args1],
   M:assertz((A1:-onec(Env,BDD)),Ref).
 
@@ -1005,8 +1010,8 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1,bdd_notc(Env,BDDH,BDDN)),
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDDL,L,BDD2|Vars1],
+[(findall(BDDH,H1,L)*->or_listc(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -1034,8 +1039,8 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1,bdd_notc(Env,BDDH,BDDN)),
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
+[(findall(BDDH,H1,L)*->or_listc(L,Env,BDDL),bdd_notc(Env,BDDL,BDDN);onec(Env,BDDN)),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -1229,8 +1234,13 @@ act(M,A/B):-
   ;
     B1 is B + 2
   ),
-  atomic_concat(A,' tabled',A1),
-  M:(dynamic A1/B1).
+  ((M:local_pita_setting(tabling,auto);M:local_pita_setting(tabling,explicit))->
+    atomic_concat(A,' tabled',A1),
+    M:(dynamic A1/B1)
+  ;
+    M:(dynamic A/B1)
+  ).
+
 
 tab(M,A/B,P):-
   length(Args0,B),
@@ -1256,6 +1266,10 @@ zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(Env,BDD))):-
 
 to_table(M,Heads,[],Heads):-
   M:local_pita_setting(tabling,explicit),!.
+
+
+to_table(M,Heads,[],Heads):-
+  M:local_pita_setting(tabling,no),!.
 
 to_table(M,Heads,ProcTabDir,Heads1):-
   maplist(tab_dir(M),Heads,TabDirList,Heads1L),
@@ -1286,10 +1300,10 @@ user:term_expansion(end_of_file, C) :-
   pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
   findall(LZ,M:zero_clauses(LZ),L0),
-  append(L0,L),
+  append(L0,_L),
   retractall(M:zero_clauses(_)),
   retractall(M:tabled(_)),
-  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
+  append([],[(:- style_check(+discontiguous)),end_of_file],C).
 
 user:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
