@@ -453,7 +453,7 @@ accept(NC1,NC2):-
  */
 mc_prob(M:Goal,P,Options):-
   s(M:Goal,P),
-  oprion(bar(Chart),Options,no),
+  option(bar(Chart),Options,no),
   (nonvar(Chart)->
     true
   ;
