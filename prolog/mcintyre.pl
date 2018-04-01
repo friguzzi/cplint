@@ -208,11 +208,11 @@ default_setting_mc(single_var,false). %false:1 variable for every grounding of a
 mc_load(File):-
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
-    load_file(FileLPAD)
+    mc_load_file(FileLPAD)
   ;
     atomic_concat(File,'.cpl',FileCPL),
     (exists_file(FileCPL)->
-      load_file(FileCPL)
+      mc_load_file(FileCPL)
     )
   ).
 
@@ -2062,13 +2062,6 @@ sample_val(K1, M:Goals,Arg,Sum0,Sum):-
   ),
   K2 is K1-1,
   sample_val(K2,M:Goals,Arg,Sum1,Sum).
-
-
-load(FileIn,C1,R):-
-  open(FileIn,read,SI),
-  read_clauses_dir(SI,C),
-  close(SI),
-  process_clauses(C,[],C1,[],R).
 
 
 get_next_rule_number(PName,R):-
