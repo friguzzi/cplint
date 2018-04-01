@@ -66,6 +66,12 @@ test(tails):-
 	close_to(P,0.49)
 	)).
 
+test(tails):-
+	run((
+	mc_sample(tails(coin),1000,P,[successes(S),failures(F),bar(B)]),
+	close_to(P,0.49), close_to(S,490), close_to(F,510), is_dict(B,c3)
+	)).
+
 :- end_tests(coinmc).
 
 :- begin_tests(threesideddicemc, []).
