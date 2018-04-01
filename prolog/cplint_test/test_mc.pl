@@ -66,10 +66,10 @@ test(tails):-
 	close_to(P,0.49)
 	)).
 
-test(tails):-
+test(tails_o):-
 	run((
 	mc_sample(tails(coin),1000,P,[successes(S),failures(F),bar(B)]),
-	close_to(P,0.49), close_to(S,490), close_to(F,510), is_dict(B,c3)
+	close_to(P,0.49), close_to(S,490,50), close_to(F,510,50), is_dict(B,c3)
 	)).
 
 :- end_tests(coinmc).
@@ -107,6 +107,10 @@ test(reach_s0_0_S_s0):-
 	run((mc_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values))).
 test(reach_s0_0_s0_s3_s2,[nondet]):-
 	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values),member(s3-_,Values),member(s2-_,Values))).
+test(reach_s0_0_S_s0_o):-
+	run((mc_sample_arg(reach(s0,0,S),50,S,Values,[bar(B)]),\+ member([s0]-_,Values),is_dict(B,c3))).
+test(reach_s0_0_s0_s3_s2_o,[nondet]):-
+	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values,[bar(B)]),member(s3-_,Values),member(s2-_,Values),is_dict(B,c3))).
 :- end_tests(markov_chain).
 
 :- begin_tests(prefix, []).
@@ -149,7 +153,10 @@ test(exp_eventually_elect):-
 :-ensure_loaded(library(examples/arithm)).
 
 test(eval_1_3):-
-	run((mc_mh_sample(eval(2,4),eval(1,3),500,P),close_to(P,0.1151,0.3))).
+	run((mc_mh_sample(eval(2,4),eval(1,3),500,P),close_to(P,0.1151,0.4))).
+test(eval_1_3_o):-
+	run((mc_mh_sample(eval(2,4),eval(1,3),500,P,[mix(10),lag(2),successes(S),failures(F)]),
+  close_to(P,0.1151,0.4),close_to(S,51,100),close_to(F,449,100))).
 test(eval_0_2_1_3):-
   run((mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),200,P),close_to(P,1))).
 %test((mc_rejection_sample(eval(2,4),eval(1,3),1000,P),close_to(P,0.1151)),arithm).
@@ -158,6 +165,8 @@ test(exp_eval_2):-
   run((mc_expectation(eval(2,Y),100,Y,E),relatively_close_to(E,3.968,1))).
 test(exp_eval_2_eval_1_3):-
   run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E),relatively_close_to(E,2.855,1))).
+test(exp_eval_2_eval_1_3_o):-
+  run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10),lag(2)]),relatively_close_to(E,2.855,1))).
 :- end_tests(arithm).
 
 :- begin_tests(gaussian_mixture, []).
@@ -248,6 +257,9 @@ test(drawn_1_1_wood_black):-
 :-ensure_loaded(library(examples/simpsonmc)).
 test(rec_drug):-
 	run((mc_rejection_sample(recovery,drug,500,P),close_to(P,0.5))).
+test(rec_drug_o):-
+	run((mc_rejection_sample(recovery,drug,500,P,[successes(S),failures(F)]),
+  close_to(P,0.5),close_to(S,250,50),close_to(F,250,50))).
 test(rec_n_drug):-
   run((mc_rejection_sample(recovery,\+ drug,500,P),close_to(P,0.4))).
 test(rec_drug_f):-
