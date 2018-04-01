@@ -42,10 +42,10 @@
   mc_particle_expectation/5,
   gauss_density/4,
   gauss/3,
-  histogram/4,
+  histogram/3,
   densities/4,
-  density/4,
-  density2d/4,
+  density/3,
+  density2d/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -140,9 +140,9 @@
 :-predicate_options(mc_sample_arg_first/5,5,[bar(-)]).
 :-predicate_options(mc_sample_arg_one/5,5,[bar(-)]).
 :-predicate_options(mc_mh_expectation/6,6,[mix(+),lag(+)]).
-:-predicate_options(histogram/4,4,[max(+),min(+)]).
-:-predicate_options(density/4,4,[max(+),min(+)]).
-:-predicate_options(density2d/4,4,[xmax(+),xmin(+),ymax(+),ymin(+)]).
+:-predicate_options(histogram/3,3,[max(+),min(+),nbins(+)]).
+:-predicate_options(density/3,3,[max(+),min(+),nbins(+]).
+:-predicate_options(density2d/3,3,[xmax(+),xmin(+),ymax(+),ymin(+),nbins(+]).
 
 :- style_check(-discontiguous).
 
@@ -468,7 +468,8 @@ accept(NC1,NC2):-
  *
  * Options is a list of options, the following are recognised by mc_prob/3:
  * * bar(-BarChart:dict)
- *
+ *   BarChart is a dict for rendering with c3 as a bar chart with a bar for the
+ *   number of successes and a bar for the number of failures.
  */
 mc_prob(M:Goal,P,Options):-
   s(M:Goal,P),
@@ -878,8 +879,9 @@ listN(N,[N1|T]):-
  * Options is a list of options, the following are recognised by mc_sample_arg/5:
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
- *   a bar for the number of successes and a bar for the number
- *   of failures.
+ *   a bar for each possible value of L,
+ *   the list of value of Arg for which Query succeeds in
+ *   a world sampled at random.
  */
 mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
@@ -1837,8 +1839,9 @@ is_var(S):-
  * Options is a list of options, the following are recognised by mc_sample_arg_first/5:
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
- *   a bar for the number of successes and a bar for the number
- *   of failures.
+ *   with a bar for each value of Arg returned as a first answer by Query in
+ *   a world sampled at random.
+ *   The size of the bar is the number of samples that returned that value.
  */
 mc_sample_arg_first(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
@@ -1899,9 +1902,11 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  *
  * Options is a list of options, the following are recognised by mc_sample_arg_one/5:
  * * bar(-BarChar:dict)
- *   BarChart is a dict for rendering with c3 as a bar chart with
- *   a bar for the number of successes and a bar for the number
- *   of failures.
+ *   BarChart is a dict for rendering with c3 as a bar chart 
+ *   with a bar for each value of Arg returned by sampling with uniform
+ *   probability one answer from those returned by Query in a world sampled
+ *   at random.
+ *   The size of the bar is the number of samples.
  */
 mc_sample_arg_one(M:Goal,S,Arg,ValList,Options):-
   empty_assoc(Values0),
@@ -4011,10 +4016,9 @@ average(L,Av):-
         Av is Sum/N.
 
 /**
- * histogram(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
+ * histogram(+List:list,-Chart:dict,+Options:list) is det
  *
- * Draws a histogram of the samples in List dividing the domain in
- * NBins bins. List must be a list of couples of the form [V]-W or V-W
+ * Draws a histogram of the samples in List. List must be a list of couples of the form [V]-W or V-W
  * where V is a sampled value and W is its weight.
  *
  * Options is a list of options, the following are recognised by histogram/4:
@@ -4022,14 +4026,17 @@ average(L,Av):-
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
  *   the maximum value of domain, default value the maximum in List
+ * * nbins(+NBins:int)
+ *   the number of bins for dividing the domain, default value 40
  */
-histogram(L0,NBins,Chart,Options):-
+histogram(L0,Chart,Options):-
   maplist(to_pair,L0,L1),
   maplist(key,L1,L2),
-  max_list(L2,_max),
-  min_list(L2,_min),
-  option(max(Max),Options,_max),
-  option(min(Min),Options,_min),
+  max_list(L2,DMax),
+  min_list(L2,DMin),
+  option(max(Max),Options,DMax),
+  option(min(Min),Options,DMin),
+  option(nbins(NBins),Options,40),
   histogram(L0,NBins,Min,Max,Chart).
 
 /**
@@ -4089,6 +4096,38 @@ densities(Pri0,Post0,NBins,Chart):-
   }.
 
 /**
+ * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
+ *
+ * Draws a line chart of the density of two sets of samples, usually
+ * prior and post observations. The samples from the prior are in PriorList
+ * while the samples from the posterior are in PostList
+ * as couples [V]-W or V-W where V is a value and W its weigth.
+ * The lines are drawn dividing the domain in
+ * NBins bins.
+ */
+densities(Pri0,Post0,NBins,Chart):-
+  maplist(to_pair,Pri0,Pri1),
+  maplist(to_pair,Post0,Post1),
+  maplist(key,Pri1,Pri),
+  maplist(key,Post1,Post),
+  append(Pri,Post,All),
+  max_list(All,Max),
+  min_list(All,Min),
+  D is Max-Min,
+  BinWidth is D/NBins,
+  keysort(Pri1,Pr),
+  keysort(Post1,Po),
+  bin(NBins,Pr,Min,BinWidth,LPr),
+  bin(NBins,Po,Min,BinWidth,LPo),
+  maplist(key,LPr,X),
+  maplist(y,LPr,YPr),
+  maplist(y,LPo,YPo),
+  Chart = c3{data:_{x: x,
+  columns: [[x|X],
+    [pre|YPr],[post|YPo]]},
+   axis:_{ x:_{ tick:_{fit:false}}}
+  }.
+/**
  * density(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
  *
  * Draws a line chart of the density of a sets of samples.
@@ -4112,7 +4151,7 @@ density(Post0,NBins,Min,Max,Chart):-
   }.
 
   /**
- * density2d(+List:list,+NBins:int,+Min:float,+Max:float,-Dist:list) is det
+ * density2d(+List:list,+NBins:int,+XMin:float,+XMax:float,+YMin:float,+YMax:float,-Dist:list) is det
  *
  * Returns the density of a sets of two dimensional samples.
  * The samples are in List
@@ -4129,36 +4168,35 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
   bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D).
 
 /**
- * density(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
+ * density(+List:list,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
- * The lines are drawn dividing the domain in
- * NBins bins.
  *
  * Options is a list of options, the following are recognised by density/4:
  * * min(+Min:float)
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
  *   the maximum value of domain, default value the maximum in List
+ * * nbins(+NBins:int)
+ *   the number of bins for dividing the domain, default value 40
  */
-density(Post0,NBins,Chart,Options):-
+density(Post0,Chart,Options):-
   maplist(key,Post0,PoK),
-  max_list(PoK,_max),
-  min_list(PoK,_min),
-  option(max(Max),Options,_max),
-  option(min(Min),Options,_min),
+  max_list(PoK,DMax),
+  min_list(PoK,DMin),
+  option(max(Max),Options,DMax),
+  option(min(Min),Options,DMin),
+  option(nbins(NBins),Options,40),
   density(Post0,NBins,Min,Max,Chart).
 
 /**
- * density2d(+List:list,+NBins:int,-Chart:dict,+Options:list) is det
+ * density2d(+List:list,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
- * The lines are drawn dividing the domain in
- * NBins bins.
  *
  * Options is a list of options, the following are recognised by density2d/4:
  * * xmin(+XMin:float)
@@ -4169,17 +4207,20 @@ density(Post0,NBins,Chart,Options):-
  *   the minimum value of the Y domain, default value the minimum in List
  * * ymax(-YMax:float)
  *   the maximum value of the Y domain, default value the maximum in List
+ * * nbins(+NBins:int)
+ *   the number of bins for dividing the X and Y domains, default value 40
  */
-density2d(Post0,NBins,D,Options):-
+density2d(Post0,D,Options):-
   maplist(key_x_y,Post0,X,Y),
-  max_list(X,_xMax),
-  min_list(X,_xMin),
-  max_list(Y,_yMax),
-  min_list(Y,_yMin),
-  option(xmax(XMax),Options,_xMax),
-  option(xmin(XMin),Options,_xMin),
-  option(ymax(YMax),Options,_yMax),
-  option(ymin(YMin),Options,_yMin),
+  max_list(X,DxMax),
+  min_list(X,DxMin),
+  max_list(Y,DyMax),
+  min_list(Y,DyMin),
+  option(xmax(XMax),Options,DxMax),
+  option(xmin(XMin),Options,DxMin),
+  option(ymax(YMax),Options,DyMax),
+  option(ymin(YMin),Options,DyMin),
+  option(nbins(NBins),Options,40),
   density2d(Post0,NBins,XMin,XMax,YMin,YMax,D).
 
 to_pair([E]-W,E-W):- !.
@@ -4268,13 +4309,10 @@ swap(A:B,B:A).
 :- multifile sandbox:safe_primitive/1.
 
 
-sandbox:safe_primitive(mcintyre:histogram(_,_,_,_)).
-sandbox:safe_primitive(mcintyre:histogram(_,_,_,_,_)).
+sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
 sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density(_,_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density(_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density2d(_,_,_,_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density2d(_,_,_,_)).
+sandbox:safe_primitive(mcintyre:density(_,_,_)).
+sandbox:safe_primitive(mcintyre:density2d(_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
