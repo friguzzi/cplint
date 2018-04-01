@@ -22,12 +22,12 @@ The preamble must come first, the order of the other parts can be changed.
 
 For example, consider the Bongard problems of \cite{RaeLae95-ALT95}. 
 %The \texttt{pack/cplint/ prolog/examples/learning} folder in SWI-Prolog home contains some example learning files. 
-\href{http://cplint.ml.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.ml.unife.it/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for SLIPCOVER.
-\href{http://cplint.ml.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.ml.unife.it/example/lemur/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for LEMUR.
+\href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.eu/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for SLIPCOVER.
+\href{http://cplint.eu/example/lemur/bongard.pl}{\texttt{bongard.pl}} and \href{http://cplint.eu/example/lemur/bongardkeys.pl}{\texttt{bongardkeys.pl}} represent a Bongard problem for LEMUR.
 
 
 \subsubsection{Preamble}
-In the preamble, the SLIPCOVER library is loaded with (see \href{http://cplint.ml.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}}):
+In the preamble, the SLIPCOVER library is loaded with (see \href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}}):
 \begin{verbatim}
 :- use_module(library(slipcover)).
 \end{verbatim}
@@ -53,7 +53,7 @@ At this point you can start setting parameters for SLIPCOVER such as for example
 We will see later the list of available parameters.
 
 
-In the preamble, the LEMUR library is loaded with (see \href{http://cplint.ml.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}}):
+In the preamble, the LEMUR library is loaded with (see \href{http://cplint.eu/example/lemur/bongard.pl}{\texttt{bongard.pl}}):
 \begin{verbatim}
 :- use_module(library(lemur)).
 \end{verbatim}
@@ -103,7 +103,7 @@ component(C):-
   not_replaceable(C).
 :- end_bg.
 \end{verbatim}
-from the \href{http://cplint.ml.unife.it/example/learning/mach.pl}{\texttt{mach.pl}} example.
+from the \href{http://cplint.eu/example/learning/mach.pl}{\texttt{mach.pl}} example.
 If you specify both a \verb|bg/1| fact and a section, the clauses of the two will be combined.
 
 
@@ -115,7 +115,7 @@ The initial program is used in parameter learning for providing
 the structure. The indicated parameters do not matter as they are first randomized.
 Remember to enclose each clause in parentheses because \verb|:-| has the highest precedence.
 
-For example, \href{http://cplint.ml.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}} has the initial program 
+For example, \href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}} has the initial program 
 \begin{verbatim}
 in([(pos:0.197575 :-
        circle(A),
@@ -281,7 +281,7 @@ one_worn:-
 none_worn:-
   \+ one_worn.
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/learning/mach.pl}{\texttt{mach.pl}} and add the new predicate in a \verb|modeb/2| fact
+from \href{http://cplint.eu/example/learning/mach.pl}{\texttt{mach.pl}} and add the new predicate in a \verb|modeb/2| fact
 \begin{verbatim}
 modeb(*,not_worn(-comp)).
 modeb(*,none_worn).
@@ -300,7 +300,7 @@ lookahead(<literal>,<list of literals>).
 \end{verbatim}
 In this case when a literal matching \verb|<literal>| is added to the body of clause during refinement, then also
 the literals matching \verb|<list of literals>| will be added.
-An example of such declaration (from \href{http://cplint.ml.unife.it/example/learning/muta.pl}{\texttt{muta.pl}}) is
+An example of such declaration (from \href{http://cplint.eu/example/learning/muta.pl}{\texttt{muta.pl}}) is
 \begin{verbatim}
 lookahead(logp(_),[(_=_))]).
 \end{verbatim}
@@ -384,7 +384,7 @@ in(2,o2,o3).
 triangle(2,o1).
 config(2,o1,up).
 \end{verbatim}
-which is contained in the \href{http://cplint.ml.unife.it/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}}
+which is contained in the \href{http://cplint.eu/example/learning/bongardkeys.pl}{\texttt{bongardkeys.pl}}
 This is also how model \verb|2| above is stored in SWI-Prolog database.
 The two modalities, models and keys, can be mixed in the same file.
 Facts for \verb|int/1| are not asserted for interpretations in the key
@@ -404,7 +404,7 @@ symbond(Mod,A,B,T):- bond(Mod,B,A,T).
 \end{verbatim}
 where the first argument of all the atoms is the model.
 
-Example \href{http://cplint.ml.unife.it/example/learning/registration.pl}{\texttt{registration.pl}} contains for example
+Example \href{http://cplint.eu/example/learning/registration.pl}{\texttt{registration.pl}} contains for example
 \begin{verbatim}
 party(M,P):-
   participant(M,_, _, P, _).
@@ -426,7 +426,7 @@ As the input file is a Prolog program, you can define intensionally the folds as
 fold(all,F):-
   findall(I,int(I),F).
 \end{verbatim}
-\verb|fold/2| is dynamic so you can also write (\href{http://cplint.ml.unife.it/example/learning/registration.pl}{\texttt{registration.pl}})
+\verb|fold/2| is dynamic so you can also write (\href{http://cplint.eu/example/learning/registration.pl}{\texttt{registration.pl}})
 \begin{verbatim}
 :- fold(all,F),
    sample(4,F,FTr,FTe),
@@ -447,7 +447,7 @@ and call
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the input program with updated parameters.
 
-For example \href{http://cplint.ml.unife.it/example/bongard.pl}{\texttt{bongard.pl}}, you can 
+For example \href{http://cplint.eu/example/bongard.pl}{\texttt{bongard.pl}}, you can 
 perform parameter learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce_par([train],P).
@@ -464,7 +464,7 @@ and call
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
-For example \href{http://cplint.ml.unife.it/example/learning/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
+For example \href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce([train],P).
 \end{verbatim}
@@ -483,7 +483,7 @@ and call
 where \verb|<list of folds>| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
-For example \href{http://cplint.ml.unife.it/example/lemur/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
+For example \href{http://cplint.eu/example/lemur/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
 \begin{verbatim}
 ?- induce_lm([train],P).
 \end{verbatim}

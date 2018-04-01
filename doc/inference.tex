@@ -5,7 +5,7 @@ using a different program transformation technique and is described in \cite{Rig
 random variables.
 
 For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \verb|pita|), initialize it with a directive (for example \verb|:- pita|) and then enclose the LPAD
-clauses in \verb|:-begin_lpad.| or \verb|:-begin_plp.| and \verb|:-end_lpad.| or \verb|:-end_plp.| For example, the coin program above can be stored in \href{http://cplint.ml.unife.it/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference
+clauses in \verb|:-begin_lpad.| or \verb|:-begin_plp.| and \verb|:-end_lpad.| or \verb|:-end_plp.| For example, the coin program above can be stored in \href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}} for performing inference
 with \verb|pita| as follows
 \begin{verbatim}
 :- use_module(library(pita)).
@@ -40,7 +40,7 @@ toss(coin).
 \end{verbatim}
 You can have also (non-probabilistic) clauses outside \verb|:-begin/end_lpad.| These are considered as database clauses.
 In \verb|pita| subgoals in the body of probabilistic clauses can query them by enclosing the query in \verb|db/1|.
-For example (\href{http://cplint.ml.unife.it/example/inference/testdb.pl}{\texttt{testdb.pl}})
+For example (\href{http://cplint.eu/example/inference/testdb.pl}{\texttt{testdb.pl}})
 \begin{verbatim}
 :- use_module(library(pita)).
 :- pita.
@@ -52,7 +52,7 @@ male(john).
 male(david).
 \end{verbatim}
 You can also use \verb|findall/3| on subgoals defined by database clauses
-(\href{http://cplint.ml.unife.it/example/inference/persons.pl}{\texttt{persons.pl}})
+(\href{http://cplint.eu/example/inference/persons.pl}{\texttt{persons.pl}})
 \begin{verbatim}
 :- use_module(library(pita)).
 :- pita.
