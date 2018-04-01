@@ -1,4 +1,6 @@
-:- module(mcintyre,[mc_prob/3,
+:- module(mcintyre,[
+  mc_prob/2,
+  mc_prob/3,
   mc_rejection_sample/5,
   mc_rejection_sample/4,
   mc_sample/3,
@@ -482,6 +484,13 @@ mc_prob(M:Goal,P,Options):-
                size:_{height: 100},
               legend:_{show: false}}
   ).
+/**
+ * mc_prob(:Query:atom,-Probability:float) is det
+ *
+ * Equivalent to mc_prob/2 with an empty option list.
+ */
+mc_prob(M:Goal,P):-
+  mc_prob(M:Goal,P,[]).
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -3977,6 +3986,7 @@ builtin(G):-
 
 builtin_int(average(_L,_Av)).
 builtin_int(mc_prob(_,_,_)).
+builtin_int(mc_prob(_,_)).
 builtin_int(mc_sample(_,_,_,_)).
 builtin_int(db(_)).
 builtin_int(G):-
@@ -4269,6 +4279,7 @@ sandbox:safe_primitive(mcintyre:density2d(_,_,_,_)).
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob(_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_prob(_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
