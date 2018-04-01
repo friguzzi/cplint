@@ -555,10 +555,6 @@ mc_sample(M:Goal,S,T,F,P):-
  *   Number of succeses
  * * failures(-Failures:int)
  *   Number of failueres
- * * bar(-BarChar:dict)
- *   BarChart is a dict for rendering with c3 as a bar chart with
- *   a bar for the number of successes and a bar for the number
- *   of failures.
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
   option(successes(T),Options,_T),
@@ -677,10 +673,6 @@ nac(do(\+ _)).
  *   Number of succeses
  * * failures(-Failures:int)
  *   Number of failueres
- * * bar(-BarChar:dict)
- *   BarChart is a dict for rendering with c3 as a bar chart with
- *   a bar for the number of successes and a bar for the number
- *   of failures.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
   option(lag(L),Options,1),
@@ -875,10 +867,6 @@ listN(N,[N1|T]):-
  * returning that list of values.
  *
  * Options is a list of options, the following are recognised by mc_sample_arg/5:
- * * successes(-Successes:int)
- *   Number of succeses
- * * failures(-Failures:int)
- *   Number of failueres
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
  *   a bar for the number of successes and a bar for the number
