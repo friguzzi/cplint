@@ -36,26 +36,26 @@ approaching the Pengine API. Example client code is
 can be used with bash to download the results for a query in CSV.  The call
 below downloads a CSV file for the coin example.
 \begin{verbatim}
-$ bash swish-ask.sh --server=http://cplint.ml.unife.it \   
+$ bash swish-ask.sh --server=http://cplint.eu \   
   example/inference/coin.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
 The script can ask queries against Prolog scripts stored in 
-\url{http://cplint.ml.unife.it} by specifying
+\url{http://cplint.eu} by specifying
 the script on the commandline.  User defined files stored
 in \texttt{cplint} on SWISH (locations of type
-\url{http://cplint.ml.unife.it/p/coin_user.pl}) can
+\url{http://cplint.eu/p/coin_user.pl}) can
 be directly used, for example:
 \begin{verbatim}
-$ bash swish-ask.sh --server=http://cplint.ml.unife.it \
+$ bash swish-ask.sh --server=http://cplint.eu \
   coin_user.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
 Example programs can be used by specifying the folder portion of the url of the example,
 as in the first coin example above where the url for the program is 
-\url{http://cplint.ml.unife.it/example/inference/coin.pl}.
+\url{http://cplint.eu/example/inference/coin.pl}.
 
 You can also use an url for the program as in 
 \begin{verbatim}
-$ bash swish-ask.sh --server=http://cplint.ml.unife.it \
+$ bash swish-ask.sh --server=http://cplint.eu \
   https://raw.githubusercontent.com/friguzzi/swish/\  
   master/example/inference/coin.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
@@ -63,7 +63,7 @@ Results can be downloaded in JSON using the option \verb|--json-s| or
 \verb|--json-html|.
 With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. E.g.
 \begin{verbatim}
-$ bash swish-ask.sh --json-s --server=http://cplint.ml.unife.it \
+$ bash swish-ask.sh --json-s --server=http://cplint.eu \
   coin_user.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
 The JSON format can also be modified. See
@@ -73,7 +73,7 @@ Prolog can exploit the Pengine API directly.  For example, the above can
 be called as:
 \begin{verbatim}
 ?- [library(pengines)].
-?- pengine_rpc('http://cplint.ml.unife.it',
+?- pengine_rpc('http://cplint.eu',
      prob(heads(coin),Prob),
      [ src_url('https://raw.githubusercontent.com/friguzzi/swish/\  
 master/example/inference/coin.pl'),

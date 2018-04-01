@@ -8,12 +8,12 @@ as in
 \begin{verbatim}
 ?- prob(heads(coin),P).
 \end{verbatim}
-If the query is non-ground, \verb|prob/2| returns in backtracking the succesful instantiations together with their probability.
+If the query is non-ground, \verb|prob/2| returns in backtracking the successful instantiations together with their probability.
 
 When using \verb|mcintyre|, the predicate for querying is
 \begin{verbatim}
 mc_prob(:Query:atom,-Probability:float,+Options:list).
-\end{verbatim} as in
+\end{verbatim} where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_prob/3|:
 \begin{itemize}
 \item \verb|bar(-BarChar:dict)|
@@ -21,45 +21,52 @@ BarChart is a dict for rendering with c3 as a bar chart with
 a bar for the number of successes and a bar for the number
 of failures.
 \end{itemize}
+For example
 \begin{verbatim}
 ?- mc_prob(heads(coin),P,[]).
 \end{verbatim}
+You can also use
+\begin{verbatim}
+mc_prob(:Query:atom,-Probability:float).
+\end{verbatim}
+which is equivalent to \verb|mc_prob/3| with an empty option list. In general, all the predicates that admit
+a list of options as an argument have a corresponding version without the list of options that is equivalent
+to calling the first with an empty option list.
 
 With \verb|mcintyre|, you can also take a given number of sample with
 \begin{verbatim}
 mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).
 \end{verbatim}
+where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample/4|:
 \begin{itemize}
 \item \verb|successes(-Successes:int)|
 Number of succeses
 \item \verb|failures(-Failures:int)|
 Number of failueres
+\item \verb|bar(-BarChar:dict)|
+\verb|BarChart| is a dict for rendering with c3 as a bar chart with
+a bar for the number of successes and a bar for the number
+of failures.
 \end{itemize}
-as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+For example (\href{http://cplint.eu/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
 ?- mc_sample(heads(coin),1000,P,[successes(S),failures(F)]).
 \end{verbatim}
 that samples \verb|heads(coin)| 1000 times and returns in \verb|S| the number of successes, in \verb|F| the number of failures and in \verb|P| the
 estimated probability (\verb|S/1000|).
-
-Differently from exact inference, in approximate inference the query can be a conjunction of atoms.
-
-If you are just interested in the probability, you can use
+As another example, the call
 \begin{verbatim}
-mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list)
+?- mc_sample(heads(coin),1000,Prob).
 \end{verbatim}
-as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
-\begin{verbatim}
-?- mc_sample(heads(coin),1000,Prob,[]).
-\end{verbatim}
-that samples \verb|heads(coin)| 1000 times and returns the
-estimated probability that a sample is true (i.e., that a sample succeeds).
+samples \verb|heads(coin)| 1000 times and returns the
+estimated probability that a sample is true.
 
 
 Moreover, you can sample arguments of queries with
 \begin{verbatim}
-mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,
+  -Values:list,+Options:list).
 \end{verbatim}
 The predicate samples \verb|Query| a number of \verb|Samples| times.
 \verb|Arg| should be a variable in \verb|Query|.
@@ -79,9 +86,9 @@ are mutually exclusive, i.e., that in every sample, only
 one clause for each subgoal has the body true. This is one
 of the assumptions taken for programs of the PRISM system \cite{DBLP:journals/jair/SatoK01}.
 For example
-\href{http://cplint.ml.unife.it/example/inference/pcfglr.pl}{\texttt{pcfglr.pl}} and \href{http://cplint.ml.unife.it/example/inference/plcg.pl}{\texttt{plcg.pl}} satisfy this constraint while
- \href{http://cplint.ml.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}} and \href{http://cplint.ml.unife.it/example/inference/var_obj.pl}{\texttt{var\_obj.pl}} don't.
- 
+\href{http://cplint.eu/example/inference/pcfglr.pl}{\texttt{pcfglr.pl}} and \href{http://cplint.eu/example/inference/plcg.pl}{\texttt{plcg.pl}} satisfy this constraint while
+ \href{http://cplint.eu/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}} and \href{http://cplint.eu/example/inference/var_obj.pl}{\texttt{var\_obj.pl}} doesn't.
+
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg/5|:
 \begin{itemize}
 \item \verb|successes(-Successes:int)|
@@ -89,17 +96,19 @@ Number of succeses
 \item \verb|failures(-Failures:int)|
 Number of failueres
 \item \verb|bar(-BarChar:dict)|
-BarChart is a dict for rendering with c3 as a bar chart with
-a bar for the number of successes and a bar for the number
-of failures.
+\verb|BarChart| is a dict for rendering with c3 as a bar chart with
+ with a bar for each possible value of \verb|L|, the list of values of 
+ \verb|Arg| for which the query succeeds in a world sampled at random. 
+ The size of the bar is the number of samples
+returning that list of values.
 \end{itemize}
 
 
-An example of use of the above predicate is
+An example of use of \verb|mc_sample_arg/4| is
 \begin{verbatim}
-?- mc_sample_arg(reach(s0,0,S),50,S,Values,[]).
+?- mc_sample_arg(reach(s0,0,S),50,S,Values).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
+of \href{http://cplint.eu/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
 that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
 
 You can sample arguments of queries also with
@@ -114,7 +123,8 @@ The value is \verb|failure| if the query fails.
 
 The predicate
 \begin{verbatim}
-mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
+mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,
+  -Values:list,+Options:list).
 \end{verbatim}
 samples \verb|Query| a number of \verb|Samples| times
 and returns in \verb|Values| a list of couples \verb|V-N| where
@@ -128,15 +138,15 @@ answer of the query for each sampled world.
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg_first/5|:
 \begin{itemize}
 \item \verb|bar(-BarChar:dict)|
-BarChart is a dict for rendering with c3 as a bar chart with
-a bar for the number of successes and a bar for the number
-of failures.
+  \verb|BarChart| has a bar for each value of \verb|Arg| returned as a first answer for the query in
+   a world sampled at random.
+   The size of the bar is the number of samples that returned that value.
 \end{itemize}
-
 
 The predicate
 \begin{verbatim}
-mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list)
+mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,
+  -Values:list,+Options:list)
 \end{verbatim}
  samples \verb|Query| a number of \verb|Samples| times
 and returns in \verb|Values| a list of couples \verb|V-N| where
@@ -148,9 +158,10 @@ returning that value.
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg_one/5|:
 \begin{itemize}
 \item \verb|bar(-BarChar:dict)|
-BarChart is a dict for rendering with c3 as a bar chart with
-a bar for the number of successes and a bar for the number
-of failures.
+\verb|BarChart| has a bar for each value of \verb|Arg| returned by sampling with uniform
+    probability one answer from those returned by the query in a world sampled
+    at random.
+    The size of the bar is the number of samples.
 \end{itemize}
 
 
@@ -167,7 +178,7 @@ An example of use of the above predicate is
 \begin{verbatim}
 ?- mc_expectation(eventually(elect,T),1000,T,E).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
+of \href{http://cplint.eu/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
 that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 \subsubsection{Drawing BDDs}
@@ -242,8 +253,10 @@ number of samples.
 
 You can take a given number of sample with rejection sampling using
 \begin{verbatim}
-mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list).
+mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Probability:float,+Options:list).
 \end{verbatim}
+where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg/5|:
 \begin{itemize}
 \item \verb|successes(-Successes:int)|
@@ -251,9 +264,10 @@ Number of succeses
 \item \verb|failures(-Failures:int)|
 Number of failueres
 \end{itemize}
-as in (\href{http://cplint.ml.unife.it/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
+as in (\href{http://cplint.eu/example/inference/coinmc.pl}{\texttt{coinmc.pl}})
 \begin{verbatim}
-?- mc_rejection_sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).
+?- mc_rejection_sample(heads(coin),biased(coin),1000,P,
+  [successes(S),failures(F)]).
 \end{verbatim}
 that takes 1000 samples where \verb|biased(coin)| is true and returns in \verb|S| the number of samples where
 \verb|heads(coin)| is true, in \verb|F| the number of samples where \verb|heads(coin)| is false and in \verb|P| the
@@ -285,9 +299,10 @@ of failures.
 \end{itemize}
 With \verb|Mix| specified it takes \verb|Mix+Samples| samples and discards the first \verb|Mix|.
 
-For example (\href{http://cplint.ml.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}})
+For example (\href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}})
 \begin{verbatim}
-?- mc_mh_sample(eval(2,4),eval(1,3),10000,P,[successes(T), failures(F)]).
+?- mc_mh_sample(eval(2,4),eval(1,3),10000,P,
+  [successes(T), failures(F)]).
 \end{verbatim}
 takes 10000 accepted samples and returns in \verb|T| the number of samples where
 \verb|eval(2,4)| is true, in \verb|F| the number of samples where \verb|eval(2,4)| is false and in \verb|P| the
@@ -306,32 +321,27 @@ Number of succeses
 \item \verb|failures(-Failures:int)|
 Number of failueres
 \item \verb|bar(-BarChar:dict)|
-BarChart is a dict for rendering with c3 as a bar chart with
-a bar for the number of successes and a bar for the number
-of failures.
+    \verb|BarChart| is a bar chart of the possible values
 \end{itemize}
 \begin{verbatim}
 mc_mh_sample_arg(:Query:atom,:Evidence:atom,
   +Samples:int,?Arg:var,-Values:list,+Options:list).
 \end{verbatim}
+that returns the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
+\verb|Query| given that \verb|Evidence| is true.
 \verb|Options| is a list of options, the following are recognised by \verb|mc_mh_sample_arg/6|:
 \begin{itemize}
 \item \verb|mix(+Mix:int)|
-The first Mix samples are discarded (mixing time), default value 0
+The first  \verb|Mix| samples are discarded (mixing time), default value 0
 \item \verb|lag(+Lag:int)|
-lag between each sample, Lag sampled choices are forgotten, default value 1
+lag between each sample, \verb|Lag| sampled choices are forgotten, default value 1
 \item \verb|successes(-Successes:int)|
 Number of succeses
 \item \verb|failures(-Failures:int)|
 Number of failueres
 \item \verb|bar(-BarChar:dict)|
-BarChart is a dict for rendering with c3 as a bar chart with
-a bar for the number of successes and a bar for the number
-of failures.
+    \verb|BarChart| is a bar chart of the possible values
 \end{itemize}
-that return the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
-\verb|Query| given that \verb|Evidence| is true. \verb|Mix| indicates the
-number of mixing samples.
 The predicate returns in \verb|Values| a list of couples \verb|L-N| where
 \verb|L| is the list of values of \verb|Arg| for which \verb|Query|
 succeeds in a world sampled at random where \verb|Evidence| is true and \verb|N|
@@ -341,7 +351,7 @@ An example of use of the above predicates is
 \begin{verbatim}
 ?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,Y,V,[]).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}.
+of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}.
 
 Finally, you can compute expectations with
 \begin{verbatim}
@@ -356,7 +366,7 @@ An example of use of the above predicate is
 \begin{verbatim}
 ?- mc_expectation(eventually(elect,T),1000,T,E).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
+of \href{http://cplint.eu/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
 that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 To compute conditional expectations, use
@@ -364,13 +374,14 @@ To compute conditional expectations, use
 mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
 	?Arg:var,-Exp:float,+Options:list).
 \end{verbatim}
-\verb|Options| is a list of options, the following are recognised by \verb|mc_mh_expectation/6|:
+where \verb|Options| is a list of options, the following are recognised by \verb|mc_mh_expectation/6|:
 \begin{itemize}
 \item \verb|mix(+Mix:int)|
-The first Mix samples are discarded (mixing time), default value 0
+The first  \verb|Mix| samples are discarded (mixing time), default value 0
 \item \verb|lag(+Lag:int)|
-lag between each sample, Lag sampled choices are forgotten, default value 1
+lag between each sample, \verb|Lag| sampled choices are forgotten, default value 1
 \end{itemize}
+You can also use
 \begin{verbatim}
 mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
   ?Arg:var,-Exp:float).
@@ -379,7 +390,7 @@ as in
 \begin{verbatim}
 ?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/arithm.pl}{\texttt{arithm.pl}}
+of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}
 that computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that
 \verb|eval(1,3)| is true by taking 1000 samples using Metropolis-Hastings MCMC.
 
@@ -395,9 +406,9 @@ arguments.
 
 For example
 \begin{verbatim}
-?- mc_sample_arg(value(0,X),1000,X,L,[]).
+?- mc_sample_arg(value(0,X),1000,X,L).
 \end{verbatim}
-from (\href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}})) samples 1000 values for \verb|X| in
+from (\href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}})) samples 1000 values for \verb|X| in
 \verb|value(0,X)| and returns them in \verb|L|.
 
 When you have evidence on ground atoms that have continuous values as
@@ -443,9 +454,9 @@ It performs likelihood weighting: each sample is weighted by the
 likelihood of evidence in the sample.
 For example
 \begin{verbatim}
-?- mc_lw_sample(nation(a),student_gpa(4.0),1000,PPost).
+?- mc_lw_sample(nation(a),student_gpa(4.0),1000,P).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/indian_gpa.pl}{\texttt{indian\_gpa.pl}} samples 1000 the query
+from \href{http://cplint.eu/example/inference/indian_gpa.pl}{\texttt{indian\_gpa.pl}} samples 1000 the query
 \verb|nation(a)| given that \verb|student_gpa(4.0)| has been observed.
 
 
@@ -461,7 +472,7 @@ For example
 \begin{verbatim}
 ?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}} samples 100 values for \verb|X| in
+from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}} samples 100 values for \verb|X| in
 \verb|value(0,X)| given that \verb|value(1,9)| and \verb|value(2,8)| have been observed.
 
 You can compute conditional expectations using likelihood weighting with
@@ -505,10 +516,12 @@ in each current particle and weighting the particle by the likelihood of the evi
 For example
 \begin{verbatim}
 ?-[O1,O2,O3,O4]=[-0.133, -1.183, -3.212, -4.586],
-mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
-  [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],100,[T1,T2,T3,T4],[F1,F2,F3,F4]).
+mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
+  kf_fin(4,T4)],
+  [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],100,
+  [T1,T2,T3,T4],[F1,F2,F3,F4]).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}} performs
+from \href{http://cplint.eu/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}} performs
 particle filtering for a Kalman filter with four observations. For each observation, the value of the state
 at the same time point is sampled. The list of samples is returned in \verb|[F1,F2,F3,F4]|, with each element
 being the sample for a time point.
@@ -525,7 +538,8 @@ The predicate returns in \verb|Prob| the probability that the query is true.
 
 You can compute conditional expectations using particle filtering with
 \begin{verbatim}
-mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).
+mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float).
 \end{verbatim}
 that computes the expected value of \verb|Arg| in \verb|Query| given that
 \verb|Evidence| is true.
@@ -550,6 +564,6 @@ For example
 \begin{verbatim}
 ?- prob(recovery,do(drug),P).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/simpson.swinb}{\texttt{simpson.swinb}}
+from \href{http://cplint.eu/example/inference/simpson.swinb}{\texttt{simpson.swinb}}
 computes the probability of recovery of a patient given that the action of administering a drug has
 been performed.

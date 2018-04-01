@@ -242,7 +242,7 @@ Continuous random variables are represented in this case by term whose distribut
 \begin{verbatim}
 T~Density' := Body.
 \end{verbatim}
-Here \verb|:=| replaces the implication symbol, \verb|T| is a term and \verb|Density'| is one of the density atoms above witthout the \verb|Var| argument, because \verb|T|
+Here \verb|:=| replaces the implication symbol, \verb|T| is a term and \verb|Density'| is one of the density atoms above without the \verb|Var| argument, because \verb|T|
 itself represents a random variables. In the body of clauses you can use the infix operator \verb|~=| to equate a term representing a random variable with a logical variable or
 a constant as in \verb|T ~= X|. Internally \verb|cplint| transforms the terms representing random variables into atoms with an extra argument for holding the variable.
 DC can be used to represent also discrete distributions using

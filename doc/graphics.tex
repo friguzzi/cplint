@@ -38,14 +38,14 @@ The hexadecimal number in each node is part of its address in memory and is not 
 The table =Var= contains the associations between the rule groundings and the
 multivalued variables.
 
-For example (\href{http://cplint.ml.unife.it/example/inference/coin.pl}{\texttt{coin.pl}})
+For example (\href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
 \begin{verbatim}
 ?- bdd_dot_string(heads(coin),BDD,Var).
 \end{verbatim}
 returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
 multivalued variables.
 
-When using \verb|mcintyre|, you can use
+When using \verb|mcintyre|, you can use the \verb|bar/1| option of
 \begin{verbatim}
 mc_prob(:Query:atom,-Probability:dict,+Options:list).
 \end{verbatim}
@@ -62,23 +62,17 @@ You can obtain a bar chart of the samples with
 that returns in \verb|Chart| a diagram with one bar for the number of successes and
 one bar for the number of failures.
 
-For visualizing the results of sampling arguments you can use
-\begin{verbatim}
-mc_sample(:Query:atom,+Samples:int,?Arg:var,+Probability:float,+Options:list).
-mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list).
-mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
-	?Arg:var,-Values:list,+Options:list).
-mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,
-	?Arg:var,-Values:list,+Options:list).
-\end{verbatim}
-with option \verb|bar(Chart)| that return in \verb|Chart| a bar chart with a bar for each possible sampled value whose size is the number of samples
+For visualizing the results of sampling arguments you can similarly use the  \verb|bar/1| option of
+\verb|mc_sample_arg/5|, \verb|mc_sample_arg_first/5|,  \verb|mc_rejection_sample_arg/6|, 
+ \verb|mc_mh_sample_arg/6|.
+By using option \verb|bar(Chart)|, \verb|Chart| will be instantiated to a bar chart with a bar for each possible sampled value whose size is the number of samples
 returning that value.
 
 An example is
 \begin{verbatim}
 ?- mc_sample_arg(reach(s0,0,S),50,S,ValList,[bar(Chart)]).
 \end{verbatim}
-of \href{http://cplint.ml.unife.it/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
+of \href{http://cplint.eu/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
 
 Drawing a graph is particularly interesting when
 sampling values for continuous arguments of goals.
@@ -86,7 +80,7 @@ In this case, you can use the samples to draw the
 probability density function of the argument.
 The predicate
 \begin{verbatim}
-histogram(+List:list,+NBins:int,-Chart:dict,+Options:list)
+histogram(+List:list,-Chart:dict,+Options:list)
 \end{verbatim}
 draws a histogram of the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
@@ -95,37 +89,38 @@ where \verb|V| is a sampled value and \verb|W| is its weight. This is the format
 
 The predicate
 \begin{verbatim}
-density(+List:list,+NBins:int,-Chart:dict,+Options:list)
+density(+List:list,-Chart:dict,+Options:list)
 \end{verbatim}
 draws a line chart of the density the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
 \verb|List| must be as for \verb|histogram/4|.
 
-\verb|Options| is a list of options, the following are recognised by \verb|density/4|:
-\begin{itemize}
+In  \verb|histogram/4| and  \verb|density/4| \verb|Options| is a list of options, the following are recognised: \begin{itemize}
 \item \verb|min(+Min:float)|
-the minimum value of domain, default value the minimum in List
+the minimum value of domain, default value the minimum in \verb|List|
 \item \verb|max(+Max:float)|
-the maximum value of domain, default value the maximum in List
+the maximum value of domain, default value the maximum in  \verb|List|
+\item \verb|nbins(+NBins:int)|
+  the number of bins for dividing the domain, default value 40
 \end{itemize}
-In this way you can specify the limits of the $X$ axis.
+In this way you can specify the limits and the number of intervals of the $X$.
+
 
 The predicate
 \begin{verbatim}
-densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict)
+densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list)
 \end{verbatim}
 draws a line chart of the density of two sets of samples, usually
  prior and post observations. The samples in \verb|PriorList| and \verb|PostList|
 can be either couples \verb|[V]-W| or \verb|V-W| where \verb|V| is a value and \verb|W| its weight.
- The lines are drawn dividing the domain in
- \verb|NBins| bins.
+The same options as for \verb|histogram/4| and  \verb|density/4|  are recognized.
 
 For example
 \begin{verbatim}
 ?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
-    histogram(L0,40,Chart,[]).
+    histogram(L0,Chart,[]).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 samples of argument \verb|X| of \verb|value(0,X)| and draws the density of the samples using an histogram.
 
 Instead
@@ -133,9 +128,9 @@ Instead
 ?- mc_sample_arg(value(0,Y),1000,Y,L0,[]),
    mc_lw_sample_arg(value(0,X),
     (value(1,9),value(2,8)),1000,X,L),
-   densities(L0,L,NBins,Chart).
+   densities(L0,L,Chart).
 \end{verbatim}
-from \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 amples of argument \verb|X| of \verb|value(0,X)| before and after observing
 \verb|(value(1,9),value(2,8)| and draws the prior and posterior densities of the samples using a line chart.
 
@@ -175,4 +170,4 @@ is like \texttt{densities/4} but does not require the number of bins in input.
 
 See \url{https://frnmst.github.io/cplint_r/cplint_r.html} for a more detailed manual.
 
-See \href{http://cplint.ml.unife.it/example/inference/gauss_mean_est_R.pl}{\texttt{gauss\_mean\_est\_R.pl}} for an example of use of these predicates.
+See \href{http://cplint.eu/example/inference/gauss_mean_est_R.pl}{\texttt{gauss\_mean\_est\_R.pl}} for an example of use of these predicates.
