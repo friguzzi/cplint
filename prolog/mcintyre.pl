@@ -1,5 +1,6 @@
 :- module(mcintyre,[mc_prob/3,
   mc_rejection_sample/5,
+  mc_rejection_sample/4,
   mc_sample/3,
   mc_sample/4,
   mc_sample_arg/4,
@@ -8,6 +9,7 @@
   mc_mh_sample/5,
   mc_lw_sample/4,
   mc_rejection_sample_arg/6,
+  mc_rejection_sample_arg/5,
   mc_mh_sample_arg/5,
   mc_mh_sample_arg/6,
   mc_sample_arg_first/4,
@@ -64,6 +66,7 @@
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,+).
+:-meta_predicate mc_rejection_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,-,+).
 :-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
@@ -73,6 +76,7 @@
 :-meta_predicate mc_sample_arg(:,+,+,-).
 :-meta_predicate mc_sample_arg(:,+,+,-,+).
 :-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+,+).
+:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+).
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,+,-).
 :-meta_predicate mc_mh_sample_arg(:,:,+,+,-,+).
 :-meta_predicate mc_mh_sample_arg(:,:,+,+,-).
@@ -561,6 +565,13 @@ mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
   option(failures(F),Options,_F),
   mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
 
+/**
+ * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ *
+ * Equivalent to mc_rejection_sample/5 with an empty option list.
+ */
+mc_rejection_sample(M:Goal,M:Evidence,S,P):-
+  mc_rejection_sample(M:Goal,M:Evidence,S,P,[]).
  /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -897,6 +908,7 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
  */
 mc_sample_arg(M:Goal,S,Arg,ValList):-
   mc_sample_arg(M:Goal,S,Arg,ValList,[]).
+
 /**
  * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
@@ -910,10 +922,6 @@ mc_sample_arg(M:Goal,S,Arg,ValList):-
  * Rejection sampling is performed.
  *
  * Options is a list of options, the following are recognised by mc_rejection_sample_arg/6:
- * * successes(-Successes:int)
- *   Number of succeses
- * * failures(-Failures:int)
- *   Number of failueres
  * * bar(-BarChar:dict)
  *   BarChart is a dict for rendering with c3 as a bar chart with
  *   a bar for each possible value of L,
@@ -940,6 +948,14 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
              %  size:_{height: 100},
               legend:_{show: false}}
   ).
+
+/**
+ * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * Equivalent to mc_rejection_sample_arg/6 with an empty option list.
+ */
+mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,[]).
 
 /**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
@@ -4273,8 +4289,8 @@ sandbox:safe_primitive(mcintyre:density2d(_,_,_,_)).
 sandbox:safe_meta(mcintyre:s(_,_), []).
 sandbox:safe_meta(mcintyre:mc_prob(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_,_), []).
-sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
@@ -4286,6 +4302,7 @@ sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_one(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg_raw(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
