@@ -9,7 +9,7 @@ http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
 details.
 
 @author Fabrizio Riguzzi
-@license Artistic License 2.0
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
 @copyright Fabrizio Riguzzi
 */
 
@@ -18,8 +18,6 @@ details.
   abd_prob/3,
   vit_prob/3,
   prob/3,
-  bar/2,
-  bar2/2,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
@@ -45,6 +43,7 @@ details.
   msw/5
     ]).
 :- reexport(library(tabling)).
+:- reexport(library(cplint_util)).
 
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
@@ -515,34 +514,7 @@ from_assign_to_map([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
 prob(M:Goal,P):-
   s(M:Goal,P).
 
-/**
- * bar2(+Probability,float,-Chart:dict) is nondet
- *
- * The predicate returns a dict for rendering with c3 as a bar chart with
- * a bar for the probability and a bar for one minus the probability.
- */
-bar2(P,Chart):-
-  PF is 1.0-P,
-  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
-	           size:_{height: 100},
-	          legend:_{show: false}}.
 
-/**
- * bar(+Probability,float,-Chart:dict) is nondet
- *
- * The predicate returns a dict for rendering with c3 as a bar chart with
- * a bar for the probability
- */
-bar(P,Chart):-
-  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
-	           size:_{height: 100},
-	          legend:_{show: false}}.
 /**
  * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
  *
@@ -1818,6 +1790,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
 
-:- multifile sandbox:safe_primitive/1.
-sandbox:safe_primitive(mcintyre:bar(_,_)).
-sandbox:safe_primitive(mcintyre:bar2(_,_)).
+
+
+
+:- license(artisticv2).
