@@ -3,6 +3,7 @@ Throwing a coin with uncertainty on its fairness, from
 J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
 disjunctions. In International Conference on Logic Programming,
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
+
 */
 :- use_module(library(pita)).
 
@@ -36,10 +37,12 @@ toss(coin).
 % expected result 0.51
 ?- prob(tails(coin),Prob).  % what is the probability that coin lands tails?
 % expected result 0.49
-?- prob_bar(heads(coin),Prob).  % what is the probability that coin lands heads?
-% expected result 0.51
-?- prob_bar(tails(coin),Prob).  % what is the probability that coin lands tails?
-% expected result 0.49
+?- prob(heads(coin),Prob),bar(Prob,C).  % draw a bar representing 
+% the probability that coin lands heads
+?- prob(heads(coin),Prob),bar2(Prob,C).  % draw two bars representing 
+% the probabilities that coin lands heads and that it doesn't land heads
+?- prob(tails(coin),Prob),bar(Prob,C).  % draw a bar representing 
+% the probability that coin lands tails
 
 ?- prob(heads(coin),biased(coin),Prob).
 % what is the probability that coin lands heads given the coin is biased?
@@ -53,4 +56,10 @@ toss(coin).
 % The table Var contains the associations between the rule groundings and the
 % multivalued variables.
 
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0
+@copyright Fabrizio Riguzzi
 */
+
+:- license(artisticv2).
