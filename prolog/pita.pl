@@ -14,10 +14,12 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, prob_bar/2,
+:- module(pita,[s/2, prob/2, 
   abd_prob/3,
   vit_prob/3,
-  prob/3, prob_bar/3,
+  prob/3,
+  bar/2,
+  bar2/2,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
@@ -46,11 +48,9 @@ details.
 
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
-:-meta_predicate prob_bar(:,-).
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
 :-meta_predicate prob(:,:,-).
-:-meta_predicate prob_bar(:,:,-).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
@@ -516,18 +516,12 @@ prob(M:Goal,P):-
   s(M:Goal,P).
 
 /**
- * prob_bar(:Query:atom,-Probability:dict) is nondet
+ * bar2(+Probability,float,-Chart:dict) is nondet
  *
- * The predicate computes the probability of Query
- * and returns it as a dict for rendering with c3 as a bar chart with
- * a bar for the probability of Query true and a bar for the probability of
- * Query false.
- * If Query is not ground, it returns in backtracking all ground
- * instantiations of
- * Query together with their probabilities
+ * The predicate returns a dict for rendering with c3 as a bar chart with
+ * a bar for the probability and a bar for one minus the probability.
  */
-prob_bar(M:Goal,Chart):-
-  s(M:Goal,P),
+bar2(P,Chart):-
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
           axis:_{x:_{type:category}, rotated: true,
@@ -536,6 +530,19 @@ prob_bar(M:Goal,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 
+/**
+ * bar(+Probability,float,-Chart:dict) is nondet
+ *
+ * The predicate returns a dict for rendering with c3 as a bar chart with
+ * a bar for the probability
+ */
+bar(P,Chart):-
+  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
+             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+	           size:_{height: 100},
+	          legend:_{show: false}}.
 /**
  * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
  *
@@ -665,27 +672,6 @@ get_pred_const(do(Do0),AP0,AP):-
 
 ac(do(_)).
 nac(do(\+ _)).
-
-/**
- * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
- *
- * The predicate computes the probability of the Query given Evidence
- * and returns it as a dict for rendering with c3 as a bar chart with
- * a bar for the probability of Query true and a bar for the probability of
- * Query false given Evidence.
- * If Query /Evidence are not ground, it returns in backtracking all
- * ground instantiations of
- * Query/Evidence together with their probabilities
- */
-prob_bar(M:Goal,M:Evidence,Chart):-
-  prob(M:Goal,M:Evidence,P),
-  PF is 1.0-P,
-  Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
-          axis:_{x:_{type:category}, rotated: true,
-                 y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
-             tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
-	           size:_{height: 100},
-	          legend:_{show: false}}.
 
 
 get_p(M:Goal,Env,P):-
@@ -1818,11 +1804,9 @@ sandbox:safe_primitive(pita:equality(_,_,_,_)).
 
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
-sandbox:safe_meta(pita:prob_bar(_,_), []).
 sandbox:safe_meta(pita:abd_prob(_,_,_), []).
 sandbox:safe_meta(pita:vit_prob(_,_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
-sandbox:safe_meta(pita:prob_bar(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
@@ -1833,3 +1817,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
+
+:- multifile sandbox:safe_primitive/1.
+sandbox:safe_primitive(mcintyre:bar(_,_)).
+sandbox:safe_primitive(mcintyre:bar2(_,_)).
