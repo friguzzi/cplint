@@ -150,7 +150,7 @@ http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
 details.
 
 @author Fabrizio Riguzzi
-@license Artistic License 2.0
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
 @copyright Fabrizio Riguzzi
 */
 
@@ -967,7 +967,7 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
 /**
  * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
  *
- * Equivalent to mc_sample_arg/6 with an empty option list.
+ * Equivalent to mc_mh_sample_arg/6 with an empty option list.
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[]).
@@ -4039,3 +4039,5 @@ sandbox:safe_meta(mcintyre:msw(_,_), []).
 sandbox:safe_meta(mcintyre:set_mc(_,_), []).
 sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
 sandbox:safe_meta(mcintyre:set_sw(_,_) ,[]).
+
+:- license(artisticv2).

@@ -88,7 +88,7 @@ to_atom(A0-N,A-N):-
  * Draws a histogram of the samples in List. List must be a list of couples of the form [V]-W or V-W
  * where V is a sampled value and W is its weight.
  *
- * Options is a list of options, the following are recognised by histogram/4:
+ * Options is a list of options, the following are recognised by histogram/3:
  * * min(+Min:float)
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
@@ -128,39 +128,6 @@ histogram(L0,NBins,Min,Max,Chart):-
      bar:_{
      width:_{ ratio: 1.0 }},
      legend:_{show: false}}.
-
-/**
- * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
- *
- * Draws a line chart of the density of two sets of samples, usually
- * prior and post observations. The samples from the prior are in PriorList
- * while the samples from the posterior are in PostList
- * as couples [V]-W or V-W where V is a value and W its weigth.
- * The lines are drawn dividing the domain in
- * NBins bins.
- */
-densities(Pri0,Post0,NBins,Chart):-
-  maplist(to_pair,Pri0,Pri1),
-  maplist(to_pair,Post0,Post1),
-  maplist(key,Pri1,Pri),
-  maplist(key,Post1,Post),
-  append(Pri,Post,All),
-  max_list(All,Max),
-  min_list(All,Min),
-  D is Max-Min,
-  BinWidth is D/NBins,
-  keysort(Pri1,Pr),
-  keysort(Post1,Po),
-  bin(NBins,Pr,Min,BinWidth,LPr),
-  bin(NBins,Po,Min,BinWidth,LPo),
-  maplist(key,LPr,X),
-  maplist(y,LPr,YPr),
-  maplist(y,LPo,YPo),
-  Chart = c3{data:_{x: x,
-  columns: [[x|X],
-    [pre|YPr],[post|YPo]]},
-   axis:_{ x:_{ tick:_{fit:false}}}
-  }.
 
 /**
  * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
@@ -241,7 +208,7 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  *
- * Options is a list of options, the following are recognised by density/4:
+ * Options is a list of options, the following are recognised by density/3:
  * * min(+Min:float)
  *   the minimum value of domain, default value the minimum in List
  * * max(+Max:float)
@@ -265,7 +232,7 @@ density(Post0,Chart,Options):-
  * The samples are in List
  * as couples [V]-W or V-W where V is a value and W its weigth.
  *
- * Options is a list of options, the following are recognised by density2d/4:
+ * Options is a list of options, the following are recognised by density2d/3:
  * * xmin(+XMin:float)
  *   the minimum value of the X domain, default value the minimum in List
  * * xmax(-XMax:float)
