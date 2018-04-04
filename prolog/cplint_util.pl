@@ -20,7 +20,8 @@ Utility module for cplint
   key/2,
   value/2,
   bin/5,
-  beta/2]).
+  beta/2,
+  to_atom/2]).
 
 /**
  * bar(+Probability:float,-Chart:dict) is nondet
@@ -69,7 +70,8 @@ bar(S,F,Chart):-
  * V is the value and N is the number of samples
  * returning that value.
  * The predicate returns a dict for rendering with c3 as a bar chart with
- * a bar each value.
+ * a bar each value V.
+ * The size of the bar is given by N.
  */
 argbar(ValList,Chart):-
         maplist(to_atom,ValList,ValList1),
@@ -80,6 +82,12 @@ argbar(ValList,Chart):-
               legend:_{show: false}}.
 
 
+/**
+ * to_atom(+In:pair,-Out:pair) is nondet
+ *
+ * Given In=A0-N, to_atom/2 returns Out=A-N
+ * where A is an atom representing A0
+ */
 to_atom(A0-N,A-N):-
   term_to_atom(A0,A).
 
@@ -365,9 +373,6 @@ comp_lgamma(X,LnG):-
   LnG is lgamma(X).
 
 :- multifile sandbox:safe_primitive/1.
-sandbox:safe_primitive(mcintyre:bar1(_,_)).
-sandbox:safe_primitive(mcintyre:bar(_,_)).
-sandbox:safe_primitive(mcintyre:bar(_,_,_)).
 
 :- multifile license:license/3.
 
