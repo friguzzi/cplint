@@ -76,10 +76,6 @@ details.
 
 :- thread_local rule_n/1,goal_n/1,pita_input_mod/1,local_pita_setting/2.
 
-/*:- multifile one/2,zero/2,and/4,or/4,bdd_not/3,init/3,init_bdd/2,init_test/1,
-  end/1,end_bdd/1,end_test/0,ret_prob/3,em/9,randomize/1,
-  get_var_n/6,add_var/5,equality/4.*/
-%  remove/3.
 
 
 /**
@@ -228,6 +224,13 @@ details.
  * to file FileName
  */
 
+/**
+ * rand_seed(+Seed:int) is det
+ *
+ * The pseudo-random number generator is initialized using the argument passed as Seed.
+ * It calls the C function srand
+ */
+
 default_setting_pita(epsilon_parsing, 1e-5).
 /* on, off */
 
@@ -263,14 +266,42 @@ load(File):-
     )
   ).
 
+/**
+ * orc(++A:couple,++B:couple,--AorB:couple) is det
+ *
+ * A and B are couples (Environment, BDDA) and  (Environment, BDDB) respectively
+ * Returns in AorB a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
+ * representing the disjunction of BDDs BDDA and BDDB.
+ */
 orc((Env,A),(_,B),(Env,C)):-
   or(Env,A,B,C).
 
+/**
+ * onec(++Environment:int,--One:couple) is det
+ *
+ * Returns in One a couple (Environment,BDD) where BDD is pointer to a BDD belonging to environment Environment
+ * representing the one Boolean function
+ */
 onec(Env,(Env,One)):-
   one(Env,One).
+
+/**
+ * zeroc(++Environment:int,--Zero:couple) is det
+ *
+ * Returns in Zero a couple (Environment,BDD) where BDD is pointer to a BDD belonging to environment Environment
+ * representing the zero Boolean function
+ */
 zeroc(Env,(Env,Zero)):-
   zero(Env,Zero).
 
+/**
+ * andc(++Environment:int,++A:couple,++B:couple,--AandB:couple) is semidet
+ * 
+ * A and B are couples (Environment, BDDA) and  (Environment, BDDB) respectively
+ * Returns in AandB a couple (Environment, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment Environment
+ * representing the conjunction of BDDs BDDA and BDDB.
+ * fails if BDDB represents the zero function
+ */
 andc(Env,(_,A),(_,B),(Env,C)):-
   (zero(Env,B)->
     fail
@@ -280,13 +311,33 @@ andc(Env,(_,A),(_,B),(Env,C)):-
 
 andcnf(Env,(_,A),(_,B),(Env,C)):-
   and(Env,A,B,C).
-
+/**
+ * bdd_notc(++Environment:int,++EBDD:couple,--NotEBDD:couple) is det
+ *
+ * EBDD is a couple (Environment,A)
+ * Returns in NotEBDD a couple  (Environment,NotA) where NotA is
+ * pointer to a BDD belonging to environment Environment
+ * representing the negation of BDD A
+ */
 bdd_notc(Env,(_,A),(Env,NA)):-
   bdd_not(Env,A,NA).
 
+/**
+ * equalityc(++Environment:int,++Variable:int,++Value:int,--EBDD:couple) is det
+ *
+ * Returns in EBDD a couple (Environment,BDD) where BDD belongs to environment Environment
+ * and represents the equation Variable=Value.
+ */
 equalityc(Env,V,N,(Env,B)):-
   equality(Env,V,N,B).
 
+/**
+ * ret_probc(++Environment:int,++EBDD:couple,-Probability:float) is det
+ * 
+ * EBDD is a couple (Environment,BDD)
+ * Returns the Probability of BDD belonging to environment Environment
+ * Uses 
+ */
 ret_probc(Env,(_,BDD),P):-
   ret_prob(Env,BDD,P).
 
@@ -333,6 +384,12 @@ s(M:Goal,P):-
   erase(Ref),
   member((Goal,P),L).
 
+/**
+ * abd_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the most probable abductive explanation of the ground query Query.
+ * It returns the explanation in Delta together with its Probability
+ */
 abd_prob(M:Goal,P,Delta):-
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
@@ -352,6 +409,12 @@ abd_prob(M:Goal,P,Delta):-
   member((Goal,P,Exp),L),
   from_assign_to_exp(Exp,M,Delta).
 
+/**
+ * vit_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the most probable explanation (MPE) of the ground query Query.
+ * It returns the explanation in Delta together with its Probability
+ */
 vit_prob(M:Goal,P,Delta):-
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
@@ -372,6 +435,18 @@ vit_prob(M:Goal,P,Delta):-
   reverse(Exp0,Exp),
   from_assign_to_vit_exp(Exp,M,Delta).
 
+/**
+ * vit_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the most probable explanation (MPE) of the ground query Query.
+ * It returns the explanation in Delta together with its Probability
+ * The predicate builds the BDD for Query and returns its dot representation
+ * in DotString and a list in LV with the association of variables to rules.
+ * LV is a list of list, each sublist has three elements:
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
+
+ */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
@@ -442,11 +517,13 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
   end_test(Env).
 
 /**
- * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
+ * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list) is det
  *
- * The predicate builds the BDD for Query and returns its dot representation
- * in DotString and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements:
+ * The predicate builds the BDD for the abductive explanations for Query
+ * and returns its dot representation
+ * in DotString and lists LV and LAV, the association of variables to rules
+ * and to abductive variables to rules respectively.
+ * LV and LAV are lists of list, each sublist has three elements:
  * the mutlivalued variable number,
  * the rule number and the grounding substituion.
  */
@@ -459,6 +536,18 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
+/**
+ * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is det
+ *
+ * The predicate builds the BDD for the abductive explanations for Query
+ * It returns the explanation in Delta together with its Probability.
+ * The predicate builds the BDD for Query and returns its dot representation
+ * in DotString and lists LV and LAV, the association of variables to rules
+ * and to abductive variables to rules respectively.
+ * LV and LAV are lists of list, each sublist has three elements:
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
+ */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   M:rule_n(NR),
   init_test(NR,Env),
@@ -470,6 +559,19 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
 
+/**
+ * map_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the explanation of the ground query Query
+ *  with Maximum A Posteriori (MAP) probability.
+ * It returns the explanation in Delta together with its Probability
+ * The predicate builds the BDD for Query and returns its dot representation
+ * in DotString and lists LV and LAV, the association of variables to rules
+ * and to query variables to rules respectively.
+ * LV and LAV are lists of list, each sublist has three elements:
+ * the mutlivalued variable number,
+ * the rule number and the grounding substituion.
+ */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
