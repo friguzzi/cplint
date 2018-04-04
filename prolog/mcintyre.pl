@@ -1177,8 +1177,6 @@ particle_sample_arg_gl(M:[],M:[],[],I,_S,[]):- !,
 
 particle_sample_arg_gl(M:[HG|TG],M:[HE|TE],[HA|TA],I,S,[HV|TV]):-
   I1 is I+1,
-  writeln(I1),
-  statistics,
   resample_gl(M,I,I1,S),
   retractall(M:value_particle(I,_,_)),
   retractall(M:weight_particle(I,_,_)),
@@ -1201,7 +1199,6 @@ weight_to_prob(I,_V-W,I:W).
 take_samples_gl(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples_gl(M,S0,S,I,I1,W,V):-
-  write(' '),writeln(S0),
   S1 is S0+1,
   discrete(V,SInd),
   restore_samples(M,I,SInd),
@@ -1222,7 +1219,7 @@ particle_sample_gl(K0,S,M:Goal,M:Evidence,Arg,I,L):-
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(M,I,K1),
+  save_samples_tab(M,I,K1),
   assert(M:weight_particle(I,K1,W)),
   assert(M:value_particle(I,K1,Arg1)),
   particle_sample_gl(K1,S,M:Goal,M:Evidence,Arg,I,L).
@@ -1240,7 +1237,7 @@ particle_sample_first_gl(K0,S,M:Goal, M:Evidence, Arg,V):-
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(M,1,K1),
+  save_samples_tab(M,1,K1),
   assert(M:weight_particle(1,K1,W)),
   assert(M:value_particle(1,K1,Arg1)),
   particle_sample_first_gl(K1,S,M:Goal,M:Evidence,Arg,V).
@@ -1275,7 +1272,7 @@ take_samples(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
   discrete(V,SInd),
   restore_samples(M,I,SInd),
-  save_samples(M,I1,S1),
+  save_samples_tab(M,I1,S1),
   M:value_particle(I,SInd,Arg),!,
   assert(M:value_particle(I1,S1,Arg)),
   take_samples(M,S1,S,I,I1,W,V).
@@ -1288,7 +1285,7 @@ particle_sample(K0,S,M:Evidence,I):-
   restore_samples(M,I,K1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(M,I,K1),
+  save_samples_tab(M,I,K1),
   assert(M:weight_particle(I,K1,W)),
   particle_sample(K1,S,M:Evidence,I).
 
@@ -1300,7 +1297,7 @@ particle_sample_first(K0,S,M:Goal, M:Evidence, Arg):-
   lw_sample_cycle(M:Goal1),
   copy_term(Evidence,Ev1),
   lw_sample_weight_cycle(M:Ev1,W),
-  save_samples(M,1,K1),
+  save_samples_tab(M,1,K1),
   assert(M:weight_particle(1,K1,W)),
   assert(M:value_particle(1,K1,Arg1)),
   particle_sample_first(K1,S,M:Goal,M:Evidence,Arg).
