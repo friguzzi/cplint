@@ -18,7 +18,7 @@ Utility module for cplint
   density2d/3,
   to_pair/2,
   key/2,
-  y/2,
+  value/2,
   bin/5,
   beta/2]).
 
@@ -122,7 +122,7 @@ histogram(L0,NBins,Min,Max,Chart):-
   BinWidth is D/NBins,
   bin(NBins,L,Min,BinWidth,LB),
   maplist(key,LB,X),
-  maplist(y,LB,Y),
+  maplist(value,LB,Y),
   Chart = c3{data:_{x:x,
     columns:[[x|X],[freq|Y]], type:bar},
     axis:_{ x:_{ tick:_{fit:false}}},
@@ -155,8 +155,8 @@ densities(Pri0,Post0,NBins,Chart):-
   bin(NBins,Pr,Min,BinWidth,LPr),
   bin(NBins,Po,Min,BinWidth,LPo),
   maplist(key,LPr,X),
-  maplist(y,LPr,YPr),
-  maplist(y,LPo,YPo),
+  maplist(value,LPr,YPr),
+  maplist(value,LPo,YPo),
   Chart = c3{data:_{x: x,
   columns: [[x|X],
     [pre|YPr],[post|YPo]]},
@@ -178,7 +178,7 @@ density(Post0,NBins,Min,Max,Chart):-
   keysort(Post,Po),
   bin(NBins,Po,Min,BinWidth,LPo),
   maplist(key,LPo,X),
-  maplist(y,LPo,YPo),
+  maplist(value,LPo,YPo),
   Chart = c3{data:_{x: x,
   columns: [[x|X],
     [dens|YPo]]},
@@ -258,13 +258,30 @@ density2d(Post0,D,Options):-
   option(nbins(NBins),Options,40),
   density2d(Post0,NBins,XMin,XMax,YMin,YMax,D).
 
+/**
+ * to_pair(+Pair:pair,-FlattenedPair:pair) is det
+ *
+ * Given a pair E-W, returns a pair Ep-W where
+ * Ep=EE if E=[EE], otherwise Ep=E 
+ */
 to_pair([E]-W,E-W):- !.
 to_pair(E-W,E-W).
 
+/**
+ * key(+Pair:pair,-Key:term) is det
+ *
+ * Given a pair Key-Vaule, returns its first element Key
+ */
 key(K-_,K).
 
+/**
+ * value(+Pair:pair,-Value:term) is det
+ *
+ * Given a pair Key-Vaule, returns its second element Value
+ */
+value(_ - Y,Y).
+
 key_x_y([X,Y]-_,X,Y).
-y(_ - Y,Y).
 
 
 bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D):-
@@ -298,6 +315,14 @@ count_bin2d([[X,Y]-W|T0],XL,XU,YL,YU,F0,F):-
   ),
   count_bin2d(T0,XL,XU,YL,YU,F1,F).
 
+/**
+ * bin(+N:int,+Values:list,+Lower:number,+BinWidth:number,-Couples:list) is det
+ *
+ * Given a list of numeric Values, a Lower value and BinWidth, returns in Couples
+ * a list of N pairs V-Freq where V is the midpoint of a bin and Freq is the number
+ * of values that are inside the bin interval [V-BinWidth/2,V+BinWidth/2)
+ * starting with the bin where V-BinWidth/2=Lower
+ */
 bin(0,_L,_Min,_BW,[]):-!.
 
 bin(N,L,Lower,BW,[V-Freq|T]):-
