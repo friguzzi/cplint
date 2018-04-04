@@ -5,6 +5,7 @@
 :- use_module(test_viterbi).
 :- use_module(test_sc).
 :- use_module(test_lemur).
+:- use_module(test_cplint_util).
 
 :- format(user_error,
 	  'cplint test suite.  To run all tests run ?- test.~n~n', []).
@@ -14,4 +15,5 @@ test:-
   test_kbest,
   test_viterbi,
   test_sc,
-  test_lemur.
+  test_lemur,
+  test_util.
