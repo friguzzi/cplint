@@ -10,7 +10,7 @@ Utility module for cplint
 :- module(cplint_util,[
   bar/2,
   bar/3,
-  bar2/2,
+  bar1/2,
   argbar/2,
   histogram/3,
   densities/4,
@@ -19,15 +19,16 @@ Utility module for cplint
   to_pair/2,
   key/2,
   y/2,
-  bin/5]).
+  bin/5,
+  beta/2]).
 
 /**
- * bar2(+Probability:float,-Chart:dict) is nondet
+ * bar(+Probability:float,-Chart:dict) is nondet
  *
  * The predicate returns a dict for rendering with c3 as a bar chart with
  * a bar for the probability and a bar for one minus the probability.
  */
-bar2(P,Chart):-
+bar(P,Chart):-
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
           axis:_{x:_{type:category}, rotated: true,
@@ -37,12 +38,12 @@ bar2(P,Chart):-
 	          legend:_{show: false}}.
 
 /**
- * bar(+Probability:float,-Chart:dict) is nondet
+ * bar1(+Probability:float,-Chart:dict) is nondet
  *
  * The predicate returns a dict for rendering with c3 as a bar chart with
  * a bar for the probability
  */
-bar(P,Chart):-
+bar1(P,Chart):-
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P], type:bar},
           axis:_{x:_{type:category}, rotated: true,
                  y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
@@ -321,9 +322,27 @@ count_bin([H-W|T0],L,U,F0,F,T):-
     count_bin(T0,L,U,F1,F,T)
   ).
 
+/**
+ * beta(+Alphas:list,-Beta:float) is det
+ *
+ * Computes the value of the multivariate beta function for vector Alphas
+ * https://en.wikipedia.org/wiki/Beta_function#Multivariate_beta_function
+ * Alphas is a list of floats
+ */
+beta(Par,B):-
+  sumlist(Par,Sum),
+  maplist(comp_lgamma,Par,LnGPar),
+  LnG is lgamma(Sum),
+  sumlist([-LnG|LnGPar],Exp),
+  B is exp(Exp).
+
+comp_lgamma(X,LnG):-
+  LnG is lgamma(X).
+
 :- multifile sandbox:safe_primitive/1.
+sandbox:safe_primitive(mcintyre:bar1(_,_)).
 sandbox:safe_primitive(mcintyre:bar(_,_)).
-sandbox:safe_primitive(mcintyre:bar2(_,_)).
+sandbox:safe_primitive(mcintyre:bar(_,_,_)).
 
 :- multifile license:license/3.
 
