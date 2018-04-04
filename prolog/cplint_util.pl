@@ -365,9 +365,22 @@ comp_lgamma(X,LnG):-
   LnG is lgamma(X).
 
 :- multifile sandbox:safe_primitive/1.
-sandbox:safe_primitive(mcintyre:bar1(_,_)).
-sandbox:safe_primitive(mcintyre:bar(_,_)).
-sandbox:safe_primitive(mcintyre:bar(_,_,_)).
+sandbox:safe_primitive(cplint_util:bar(_,_)).
+sandbox:safe_primitive(cplint_util:bar(_,_,_)).
+sandbox:safe_primitive(cplint_util:bar1(_,_)).
+sandbox:safe_primitive(cplint_util:argbar(_,_)).
+sandbox:safe_primitive(cplint_util:histogram(_,_,_)).
+sandbox:safe_primitive(cplint_util:densities(_,_,_,_)).
+sandbox:safe_primitive(cplint_util:density(_,_,_)).
+sandbox:safe_primitive(cplint_util:density2d(_,_,_)).
+sandbox:safe_primitive(cplint_util:to_pair(_,_)).
+sandbox:safe_primitive(cplint_util:key(_,_)).
+sandbox:safe_primitive(cplint_util:value(_,_)).
+sandbox:safe_primitive(cplint_util:value(_,_)).
+sandbox:safe_primitive(cplint_util:bin(_,_,_,_,_)).
+sandbox:safe_primitive(cplint_util:beta(_,_)).
+
+
 
 :- multifile license:license/3.
 
