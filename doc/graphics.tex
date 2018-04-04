@@ -9,64 +9,54 @@ visualize the results of sampling arguments.
 
 \subsubsection{Using C3.js}
 You can draw the probability of a query being true and
-being false as a bar chart with \verb|prob_bar(:Query:atom,-Probability:dict)| as in
+being false as a bar chart using the predicates
 \begin{verbatim}
-?- prob_bar(heads(coin),P).
+bar1(+Probability:float,-Chart:dict) is nondet
+bar(+Probability:float,-Chart:dict) is nondet
+bar(+Successes:int,+Failures:int,-Chart:dict) is nondet
+argbar(+Values:list,-Chart:dict) is nondet
 \end{verbatim}
-if you include
+They return  a dict for rendering with C3.js as a bar chart:
+the first  returns bar chart with
+a single bar for the probability,  the second a chart with
+bar for the probability and a bar for one minus the probability,
+the third a  chart with
+a bar for the number of successes and a bar for the number of failures, and
+the fourth a  chart with
+a bar each value, where \verb|Values| is a list of couples \verb|V-N| where
+  \verb|V| is the value and \verb|N| is the number of samples
+  returning that value.
+ 
+To render C3.js charts  you have to include
 \begin{verbatim}
 :- use_rendering(c3).
 \end{verbatim}
-before \verb|:- pita.| \verb|P| will be instantiated with a
-dict for rendering with \verb|c3|. It will be shown as a bar chart with
-a bar for the probability of \verb|heads(coin)| true and a bar for the probability of \verb|heads(coin)| false.
+before \verb|:- pita.| 
 
-You can obtain the BDD for a query with the predicate
-\begin{verbatim}
-bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
-\end{verbatim}
-if you include
-\begin{verbatim}
-:- use_rendering(graphviz).
-\end{verbatim}
-before \verb|:- pita.|
-Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
-edges indicate 0-children with negation applied to the sub BDD.
-Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
-I indicates the  multivalued variable index and J the index of the Boolean variable of rule I.
-The hexadecimal number in each node is part of its address in memory and is not significant.
-The table =Var= contains the associations between the rule groundings and the
-multivalued variables.
-
-For example (\href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
-\begin{verbatim}
-?- bdd_dot_string(heads(coin),BDD,Var).
-\end{verbatim}
-returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
-multivalued variables.
-
-When using \verb|mcintyre|, you can use the \verb|bar/1| option of
-\begin{verbatim}
-mc_prob(:Query:atom,-Probability:dict,+Options:list).
-\end{verbatim}
+You can also use the  \verb|bar(-Chart:dict)| option of many predicates
 as in
+\begin{verbatim}
+?- prob(heads(coin),biased(coin),P,[bar(Chart)]).
+\end{verbatim}
+\verb|P| will be instantiated with a
+ chart with
+a bar for the probability of \verb|heads(coin)| true and a bar for the probability of \verb|heads(coin)| false,
+given that \verb|biased(coin)| is true.
+
+Another example is
 \begin{verbatim}
 ?- mc_prob(heads(coin),P,[bar(Chart)]).
 \end{verbatim}
-to obtain a chart representation of the probability.
-
-You can obtain a bar chart of the samples with
+that returns a chart representation of the probability.
 \begin{verbatim}
 ?- mc_sample(heads(coin),1000,P,[bar(Chart)]).
 \end{verbatim}
-that returns in \verb|Chart| a diagram with one bar for the number of successes and
+returns in \verb|Chart| a diagram with one bar for the number of successes and
 one bar for the number of failures.
 
-For visualizing the results of sampling arguments you can similarly use the  \verb|bar/1| option of
-\verb|mc_sample_arg/5|, \verb|mc_sample_arg_first/5|,  \verb|mc_rejection_sample_arg/6|, 
- \verb|mc_mh_sample_arg/6|.
-By using option \verb|bar(Chart)|, \verb|Chart| will be instantiated to a bar chart with a bar for each possible sampled value whose size is the number of samples
-returning that value.
+The options of
+\verb|mc_sample_arg/5|, \verb|mc_sample_arg_first/5|,   \verb|mc_mh_sample_arg/6|,  \verb|mc_rejection_sample_arg/6|, 
+can be used for visualizing the results of sampling arguments.
 
 An example is
 \begin{verbatim}
@@ -74,6 +64,10 @@ An example is
 \end{verbatim}
 of \href{http://cplint.eu/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}.
 
+The same result can be achieved with
+\begin{verbatim}
+?- mc_sample_arg(reach(s0,0,S),50,S,ValList),argbar(ValList,Chart)
+\end{verbatim}
 Drawing a graph is particularly interesting when
 sampling values for continuous arguments of goals.
 In this case, you can use the samples to draw the
@@ -134,6 +128,30 @@ from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_
 takes 1000 amples of argument \verb|X| of \verb|value(0,X)| before and after observing
 \verb|(value(1,9),value(2,8)| and draws the prior and posterior densities of the samples using a line chart.
 
+You can obtain the BDD for a query with the predicate
+\begin{verbatim}
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
+\end{verbatim}
+if you include
+\begin{verbatim}
+:- use_rendering(graphviz).
+\end{verbatim}
+before \verb|:- pita.|
+Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
+edges indicate 0-children with negation applied to the sub BDD.
+Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
+I indicates the  multivalued variable index and J the index of the Boolean variable of rule I.
+The hexadecimal number in each node is part of its address in memory and is not significant.
+The table \verb|Var| contains the associations between the rule groundings and the
+multivalued variables.
+
+For example (\href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
+\begin{verbatim}
+?- bdd_dot_string(heads(coin),BDD,Var).
+\end{verbatim}
+returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
+multivalued variables.
+
 \subsubsection{Using R}
 You have to load library \texttt{cplint\_r}  (a SWI-Prolog pack) with
 \begin{verbatim}
@@ -170,3 +188,5 @@ is like \texttt{densities/4} but does not require the number of bins in input.
 See \url{https://frnmst.github.io/cplint_r/cplint_r.html} for a more detailed manual.
 
 See \href{http://cplint.eu/example/inference/gauss_mean_est_R.pl}{\texttt{gauss\_mean\_est\_R.pl}} for an example of use of these predicates.
+
+

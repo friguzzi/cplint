@@ -209,15 +209,31 @@ The BDD can be drawn in \verb|cplint| on SWISH by using the \verb|graphviz| rend
 \label{condq}
 The conditional probability of an atom query given another atom evidence can be asked using \verb|pita| with the predicate
 \begin{verbatim}
-prob(:Query:atom,:Evidence:atom,-Probability:float).
+prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
 \end{verbatim}
 as in
 \begin{verbatim}
 ?- prob(heads(coin),biased(coin),P).
 \end{verbatim}
-If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability.
+If the query/evidence are non-ground, \verb|prob/3| returns in backtracking ground instantiations together with their probability. The query and the evidence can be conjunctions of literals (positive or negative).
 
-The query and the evidence can be conjunctions of literals (positive or negative).
+
+You also have
+\begin{verbatim}
+prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet
+\end{verbatim}
+where \verb|Options| is a list of options, the following are recognised by \verb|prob/4|:
+\begin{itemize}
+\item \verb|bar(-BarChar:dict)|
+\verb|BarChart| is a dict for rendering with c3 as a bar chart with
+a bar for the number of successes and a bar for the number
+of failures.
+\end{itemize}
+as in
+\begin{verbatim}
+?- prob(heads(coin),biased(coin),P,[bar(Chart)}).
+\end{verbatim}
+\verb|prob/3| is equivalent to \verb|prob/4| with an empty option list. 
 
 When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
 In rejection sampling \cite{von195113}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
