@@ -174,7 +174,7 @@ test(exp_eval_2_eval_1_3_o):-
 :-ensure_loaded(library(examples/gaussian_mixture)).
 
 test(mix_X):-
-	run((mc_expectation(mix(X),1000,X,E),relatively_close_to(E,2.017964749114414,0.1))).
+	run((mc_expectation(mix(X),1000,X,E),relatively_close_to(E,2.250340770862126,0.1))).
 test(mix_X_heads):-
 	run((mc_mh_expectation(mix(X),heads,1000,X,E),close_to(E,0,1))).
 test(mix_X_mix):-

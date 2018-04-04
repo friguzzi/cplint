@@ -63,26 +63,25 @@
 :-meta_predicate mc_rejection_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,-,+).
-:-meta_predicate mc_mh_sample(:,:,+,+,-,-,-).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample(:,+,-,+).
-:-meta_predicate mc_sample_arg(:,+,+,-).
-:-meta_predicate mc_sample_arg(:,+,+,-,+).
-:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+,+).
-:-meta_predicate mc_rejection_sample_arg(:,:,+,+,-,+).
-:-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,+,-).
-:-meta_predicate mc_mh_sample_arg(:,:,+,+,-,+).
-:-meta_predicate mc_mh_sample_arg(:,:,+,+,-).
-:-meta_predicate mc_sample_arg_first(:,+,+,-).
-:-meta_predicate mc_sample_arg_first(:,+,+,-,+).
-:-meta_predicate mc_sample_arg_one(:,+,+,-,+).
-:-meta_predicate mc_sample_arg_one(:,+,+,-).
-:-meta_predicate mc_sample_arg_raw(:,+,+,-).
-:-meta_predicate mc_expectation(:,+,+,-).
-:-meta_predicate mc_mh_expectation(:,:,+,+,-).
-:-meta_predicate mc_mh_expectation(:,:,+,+,-,+).
-:-meta_predicate mc_rejection_expectation(:,:,+,+,-).
+:-meta_predicate mc_sample_arg(:,+,?,-).
+:-meta_predicate mc_sample_arg(:,+,?,-,+).
+:-meta_predicate mc_rejection_sample_arg(:,:,+,?,-,+).
+:-meta_predicate mc_rejection_sample_arg(:,:,+,?,-).
+:-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,?,-).
+:-meta_predicate mc_mh_sample_arg(:,:,+,?,-,+).
+:-meta_predicate mc_mh_sample_arg(:,:,+,?,-).
+:-meta_predicate mc_sample_arg_first(:,+,?,-).
+:-meta_predicate mc_sample_arg_first(:,+,?,-,+).
+:-meta_predicate mc_sample_arg_one(:,+,?,-,+).
+:-meta_predicate mc_sample_arg_one(:,+,?,-).
+:-meta_predicate mc_sample_arg_raw(:,+,?,-).
+:-meta_predicate mc_expectation(:,+,?,-).
+:-meta_predicate mc_mh_expectation(:,:,+,?,-).
+:-meta_predicate mc_mh_expectation(:,:,+,?,-,+).
+:-meta_predicate mc_rejection_expectation(:,:,+,?,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-meta_predicate initial_sample_cycle(:).
@@ -91,13 +90,13 @@
 :-meta_predicate initial_sample_neg(:).
 
 :-meta_predicate mc_lw_sample(:,:,+,-).
-:-meta_predicate mc_lw_sample_arg(:,:,+,+,-).
-:-meta_predicate mc_lw_sample_arg_log(:,:,+,+,-).
-:-meta_predicate mc_lw_expectation(:,:,+,+,-).
-:-meta_predicate mc_particle_expectation(:,:,+,+,-).
-:-meta_predicate mc_particle_sample_arg(:,:,+,+,-).
-:-meta_predicate particle_sample_arg(:,:,+,+,-).
-:-meta_predicate particle_sample_first(+,+,:,:,-).
+:-meta_predicate mc_lw_sample_arg(:,:,+,?,-).
+:-meta_predicate mc_lw_sample_arg_log(:,:,+,?,-).
+:-meta_predicate mc_lw_expectation(:,:,+,?,-).
+:-meta_predicate mc_particle_expectation(:,:,+,?,-).
+:-meta_predicate mc_particle_sample_arg(:,:,+,?,-).
+:-meta_predicate particle_sample_arg(:,:,+,?,-).
+:-meta_predicate particle_sample_first(+,+,:,:,?).
 :-meta_predicate particle_sample_arg_gl(:,:,+,+,+,-).
 :-meta_predicate particle_sample_first_gl(+,+,:,:,-,-).
 :-meta_predicate particle_sample(+,+,:,-).
@@ -107,7 +106,7 @@
 :-meta_predicate msw(:,-).
 :-meta_predicate set_sw(:,+).
 
-:-meta_predicate mh_sample_arg(+,+,+,:,:,-,+,-,+,-).
+:-meta_predicate mh_sample_arg(+,+,+,:,:,?,+,-,+,-).
 :-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
 :-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
 
@@ -469,7 +468,7 @@ mc_prob(M:Goal,P,Options):-
   (nonvar(Chart)->
     true
   ;
-    bar2(P,Chart)
+    bar(P,Chart)
   ).
 /**
  * mc_prob(:Query:atom,-Probability:float) is det
@@ -753,7 +752,7 @@ initial_sample(_M:sample_poisson(R,VC,Lambda,S)):-!,
   sample_poisson(R,VC,Lambda,S).
 
 initial_sample(_M:sample_binomial(R,VC,N,P,S)):-!,
-  sample_poisson(R,VC,N,P,S).
+  sample_binomial(R,VC,N,P,S).
 
 initial_sample(_M:sample_beta(R,VC,Alpha,Beta,S)):-!,
   sample_beta(R,VC,Alpha,Beta,S).
@@ -1775,8 +1774,8 @@ lw_sample_logweight(M:(G1;G2),W0,W):-!,
   lw_sample_logweight(M:G2,W0,W).
 
 lw_sample_logweight(M:(\+ G),W0,W):-!,
-  lw_sample(M:G,0,W1),
-  W is W0-log(W1).
+  lw_sample_logweight(M:G,0,W1),
+  W is W0-W1.
 
 
 lw_sample_logweight(M:G,W,W):-
@@ -2056,49 +2055,7 @@ retract_all([H|T]):-
   erase(H),
   retract_all(T).
 
-/**
- * get_var_n(++Mod:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
- *
- * Returns the index Variable of the random variable associated to rule with
- * index Rule, grouding substitution Substitution and head distribution
- * Probabilities in environment Environment.
- */
-get_var_n(M,Env,R,S,Probs0,V):-
-  (ground(Probs0)->
-    maplist(is,Probs,Probs0),
-    (M:v(R,S,V)->
-      true
-    ;
-      length(Probs,L),
-      add_var(Env,L,Probs,R,V),
-      assert(M:v(R,S,V))
-    )
-  ;
-    trhow(error('Non ground probailities not instantiated by the body'))
-  ).
 
-add_bdd_arg(M:A,Env,BDD,M:A1):-
-  A=..[P|Args],
-  append(Args,[Env,BDD],Args1),
-  A1=..[P|Args1].
-
-
-add_bdd_arg_db(M:A,Env,BDD,DB,M:A1):-
-  A=..[P|Args],
-  append(Args,[Env,DB,BDD],Args1),
-  A1=..[P|Args1].
-
-
-add_bdd_arg(A,Env,BDD,_Module,A1):-
-  A=..[P|Args],
-  append(Args,[Env,BDD],Args1),
-  A1=..[P|Args1].
-
-
-add_bdd_arg_db(A,Env,BDD,DB,_Module,A1):-
-  A=..[P|Args],
-  append(Args,[Env,DB,BDD],Args1),
-  A1=..[P|Args1].
 
 add_mod_arg(A,_Module,A1):-
   A=..[P|Args],
@@ -2476,6 +2433,7 @@ dirichlet_density(Par,S,D):-
 
 prod(X,A,P0,P0*X^(A-1)).
 
+
 /**
  * sample_geometric(+R:int,+VC:list,+P:float,-S:int) is det
  *
@@ -2563,18 +2521,6 @@ generate_rules_fact([Head:_P|T],HeadList,VC,R,N,[Clause|Clauses]):-
   generate_rules_fact(T,HeadList,VC,R,N1,Clauses).
 
 
-generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module).
-
-generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module):-!,
-  add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))).
-
-generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
-  add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,BDD))),
-  N1 is N+1,
-  generate_rules_fact_db(T,Env,VC,R,Probs,N1,Clauses,Module).
-
 
 generate_clause(Head,Body,HeadList,VC,R,N,Clause):-
   Clause=(Head:-(Body,sample_head(R,VC,HeadList,N))).
@@ -2585,11 +2531,6 @@ generate_clause_gauss(Head,Body,VC,R,Var,Mean,Variance,Clause):-
 generate_clause_uniform(Head,Body,VC,R,Var,L,U,Clause):-
   Clause=(Head:-(Body,sample_uniform(R,VC,L,U,Var))).
 
-
-
-generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module):-
-  add_bdd_arg_db(Head,Env,BDD,DBH,Module,Head1),
-  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,get_var_n(Module,Env,R,VC,Probs,V),equality(Env,V,N,B),and(Env,BDDAnd,B,BDD))).
 
 
 generate_rules([],_Body,_HeadList,_VC,_R,_N,[]).
@@ -2603,193 +2544,8 @@ generate_rules([Head:_P|T],Body,HeadList,VC,R,N,[Clause|Clauses]):-
   generate_rules(T,Body,HeadList,VC,R,N1,Clauses).
 
 
-generate_rules_db([],_Env,_Body,_VC,_R,_Probs,_DB,_BDDAnd,_N,[],_Module):-!.
-
-generate_rules_db([Head:_P1,'':_P2],Env,Body,VC,R,Probs,DB,BDDAnd,N,[Clause],Module):-!,
-  generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module).
-
-generate_rules_db([Head:_P|T],Env,Body,VC,R,Probs,DB,BDDAnd,N,[Clause|Clauses],Module):-
-  generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module),!,%agg.cut
-  N1 is N+1,
-  generate_rules_db(T,Env,Body,VC,R,Probs,DB,BDDAnd,N1,Clauses,Module).
 
 
-
-process_body([],BDD,BDD,Vars,Vars,[],_Env,_Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  db(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
-  and(Env,BDD,BDDN,BDD2)
-  |Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg(H,Env,BDDH,Module,H2),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-  neg(H1)|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
-  and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
-  add_bdd_arg(H,Env,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
-  db(H),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,
-[((H1,one(Env,BDDH));H2),and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg(H,Env,BDDH,Module,H2),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,
-[H1|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,Vars1,[H1|Rest],Env,Module):-
-  add_mod_arg(H,Module,H1),
-  db(H1),!,
-  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-[H1,and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-
-  add_bdd_arg(H,Env,BDDH,Module,H1),
-  process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
-  and(Env,BDD,BDDN,BDD2)
-  |Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-  neg(H1)|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
-  and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module):-!.
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),one(Env,BDDN));(bagof(BDDH,H2,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN))),
-  and(Env,BDD,BDDN,BDD2)
-  |Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-  neg(H1)|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)->or_list(L,Env,BDDL),bdd_not(Env,BDDL,BDDN);one(Env,BDDN)),
-  and(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[((H1,one(Env,BDDH));H2),and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[H1|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[((H1,one(Env,BDDH));H2),and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-
-  given(H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[H1|Rest],Env,Module):-
-  given_cw(H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,and(Env,BDD,BDDH,BDD2)|Rest],Env,Module):-!, %agg. cut
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 
 process_head(HeadList, GroundHeadList) :-
@@ -2850,30 +2606,6 @@ ground_prob([ProbHead::_Head|Tail]) :-
 get_probs(Head, PL):-
   maplist(prob_ann,Head,PL).
 
-/*get_probs([], []).
-
-get_probs([_H:P|T], [P1|T1]) :-
-  P1 is P,
-  get_probs(T, T1).
-*/
-
-/**
- * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
- *
- * Returns in BDD a pointer to a BDD belonging to environment Environment
- * representing the disjunction of all the BDDs in ListOfBDDs
- */
-or_list([H],_Env,H):-!.
-
-or_list([H|T],Env,B):-
-  or_list1(T,Env,H,B).
-
-
-or_list1([],_Env,B,B).
-
-or_list1([H|T],Env,B0,B1):-
-  or(Env,B0,H,B2),
-  or_list1(T,Env,B2,B1).
 
 
 /**
@@ -3377,26 +3109,6 @@ user:term_expansion((Head:-Body),Clause) :-
   ).
 
 
-user:term_expansion((Head :- Body), Clauses):-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-% disjunctive clause with more than one head atom e depth_bound
-  Head = (_;_), !,
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,M),
-  append([one(Env,BDD)],BodyList1,BodyList2),
-  list2and(BodyList2,Body1),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  get_next_rule_number(M,R),
-  get_probs(HeadList,Probs),
-  (M:local_mc_setting(single_var,true)->
-    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,M)
-  ;
-    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
-   ).
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3420,56 +3132,8 @@ user:term_expansion((Head :- Body), []) :-
   ground(P),
   P=:=0.0, !.
 
-user:term_expansion((Head :- Body), Clauses) :-
-% disjunctive clause with a single head atom e depth_bound
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  HeadList=[H:_],!,
-  list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
-  append([one(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body1),
-  add_bdd_arg_db(H,Env,BDDAnd,DB,M,Head1),
-  Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :-
-% disjunctive clause with a single head atom senza depth_bound con prob =1
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  HeadList=[H:_],!,
-  list2and(BodyList, Body),
-  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
-  append([one(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body1),
-  add_bdd_arg(H,Env,BDDAnd,M,Head1),
-  Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :-
-% disjunctive clause with a single head atom e DB, con prob. diversa da 1
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
-  (Head = (H:_);Head=(_::H)), !,
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
-  append([one(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body2),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  get_next_rule_number(M,R),
-  get_probs(HeadList,Probs),%***test single_var
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,M)
-  ;
-    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
-  ).
 
 user:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
@@ -3486,33 +3150,6 @@ user:term_expansion((Head :- Body), Clauses) :-
     generate_clause(H,Body,HeadList,VC,R,0,Clauses)
   ).
 
-user:term_expansion((Head :- Body),Clauses) :-
-% definite clause with depth_bound
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
-  list2and(BodyList, Body),
-  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
-  append([one(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body1),
-  add_bdd_arg_db(Head,Env,BDDAnd,DB,M,Head1),
-  Clauses=(Head1 :- Body1).
-
-user:term_expansion(Head,Clauses) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-% disjunctive FACT with more than one head atom e db
-  Head=(_;_), !,
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  get_probs(HeadList,Probs),
-  (M:local_mc_setting(single_var,true)->
-    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,M)
-  ;
-    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,M)
-  ).
 
 user:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3854,14 +3491,6 @@ user:term_expansion(Head,[]) :-
   ground(P),
   P=:=0.0, !.
 
-user:term_expansion(Head,H) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-% disjunctive fact with a single head atom con prob.1 e db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head = (H:P);Head = (P::H)),
-  ground(P),
-  P=:=1.0, !.
 
 user:term_expansion(Head,H) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3871,21 +3500,6 @@ user:term_expansion(Head,H) :-
   ground(P),
   P=:=1.0, !.
 
-user:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  M:local_mc_setting(depth_bound,true),
-% disjunctive fact with a single head atom e prob. generiche, con db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
-  (Head=(H:_);Head=(_::H)), !,
-  list2or(HeadListOr, Head),
-  process_head(HeadListOr, HeadList),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause(H,true,HeadList,[],R,0,Clause)
-  ;
-    generate_clause(H,true,HeadList,VC,R,0,Clause)
-  ).
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
