@@ -254,7 +254,7 @@ save_samples_tab(M,I,S):-
 save_samples_tab(M,I,S):-
   sampled_g(Sub),
   assert(M:mem(I,S,r,Sub,1)),
-  retract(sampled(Sub)),
+  retract(sampled_g(Sub)),
   fail.
 
 save_samples_tab(_M,_I,_S).
@@ -3608,13 +3608,6 @@ swap(A:B,B:A).
   A1=..L1,
   M:A1.
 
-:- multifile sandbox:safe_primitive/1.
-
-
-sandbox:safe_primitive(mcintyre:histogram(_,_,_)).
-sandbox:safe_primitive(mcintyre:densities(_,_,_,_)).
-sandbox:safe_primitive(mcintyre:density(_,_,_)).
-sandbox:safe_primitive(mcintyre:density2d(_,_,_)).
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(mcintyre:s(_,_), []).
