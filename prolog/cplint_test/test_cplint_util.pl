@@ -38,5 +38,18 @@ test(beta_03_03):-
   run((beta([0.3,0.3],B),
   close_to(B,6.009623683731014))).
 
+test(bar1):-
+  bar1(0.5,C),C=c3{axis:_4862{rotated:true,x:_4878{type:category},
+  y:_4886{max:1.0,min:0.0,padding:_4918{bottom:0.0,top:0.0},
+  tick:_4942{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+  data:_4822{rows:[elem-prob,'T'-0.50],type:bar,x:elem},
+  legend:_5082{show:false},size:_4814{height:100}}.
+test(bar):-
+  bar(0.5,C),C=c3{axis:_4862{rotated:true,x:_4878{type:category},
+  y:_4886{max:1.0,min:0.0,padding:_4918{bottom:0.0,top:0.0},
+  tick:_4942{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}}},
+  data:_4822{rows:[elem-prob,'T'-0.50,'F'-0.50],type:bar,x:elem},
+  legend:_5082{show:false},size:_4814{height:100}}.
+
 :- end_tests(beta).
 
