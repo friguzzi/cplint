@@ -139,16 +139,18 @@ histogram(L0,NBins,Min,Max,Chart):-
      legend:_{show: false}}.
 
 /**
- * densities(+PriorList:list,+PostList:list,+NBins:int,-Chart:dict) is det
+ * densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of two sets of samples, usually
  * prior and post observations. The samples from the prior are in PriorList
  * while the samples from the posterior are in PostList
  * as couples [V]-W or V-W where V is a value and W its weigth.
- * The lines are drawn dividing the domain in
- * NBins bins.
- */
-densities(Pri0,Post0,NBins,Chart):-
+ * Options is a list of options, the following are recognised by histogram/3:
+ * * nbins(+NBins:int)
+ *   the number of bins for dividing the domain, default value 40
+ * */
+densities(Pri0,Post0,Chart,Options):-
+  option(nbins(NBins),Options,40),
   maplist(to_pair,Pri0,Pri1),
   maplist(to_pair,Post0,Post1),
   maplist(key,Pri1,Pri),
