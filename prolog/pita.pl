@@ -50,6 +50,7 @@ details.
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
 :-meta_predicate prob(:,:,-).
+:-meta_predicate prob(:,:,-,+).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
@@ -620,11 +621,7 @@ prob(M:Goal,P):-
 /**
  * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of Query given
- * Evidence
- * If Query/Evidence are not ground, it returns in backtracking all
- * ground instantiations of
- * Query/Evidence together with their probabilities
+ * Equivalent to prob/4 with an empty option list.
  */
 prob(M:Goal,M:Evidence,P):-
   get_next_goal_number(M,GN),
@@ -652,6 +649,30 @@ prob(M:Goal,M:Evidence,P):-
   erase(Ref),
   maplist(M:assertz,ClausesToReAdd),
   member((Goal,P),L).
+
+
+/**
+ * prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet
+ *
+ * The predicate computes the probability of Query given
+ * Evidence
+ * If Query/Evidence are not ground, it returns in backtracking all
+ * ground instantiations of
+ * Query/Evidence together with their probabilities
+ * Options is a list of options, the following are recognised by mc_prob/3:
+ * * bar(-BarChart:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with a bar for the
+ *   probability of success and a bar for the probability of failure.
+ */
+prob(M:Goal,M:Evidence,P,Options):-
+  prob(M:Goal,M:Evidence,P),
+  option(bar(Chart),Options,no),
+  (nonvar(Chart)->
+    true
+  ;
+    bar(P,Chart)
+  ).
+
 
 deal_with_ev(Ev,M,NewEv,EvGoal,UC,CA):-
   list2and(EvL,Ev),
@@ -1881,6 +1902,7 @@ sandbox:safe_meta(pita:prob(_,_), []).
 sandbox:safe_meta(pita:abd_prob(_,_,_), []).
 sandbox:safe_meta(pita:vit_prob(_,_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
+sandbox:safe_meta(pita:prob(_,_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
