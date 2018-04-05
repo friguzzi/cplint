@@ -34,7 +34,11 @@ test_pita:-
     pitavit_win,
     pitavit_hmm,
     pitavit_coin,
-    pitavit_mendel]).
+    pitavit_mendel,
+    meta,
+    pcfg,
+    var_objdb
+    ]).
 
 :-use_module(library(cplint_test/cplint_test)).
 
@@ -513,3 +517,41 @@ test(s_w):-
 	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])])).
 
 :- end_tests(pitavit_mendel).
+
+:- begin_tests(meta, []).
+
+:-ensure_loaded(library(examples/meta)).
+
+test(meta):-
+  run((prob(a,Prob),close_to(Prob,0.2)
+  )).
+
+:- end_tests(meta).
+
+
+:- begin_tests(var_objdb, []).
+
+:-ensure_loaded(library(examples/var_objdb)).
+
+test(obj):-
+  run((prob(obj(2),Prob),close_to(Prob, 0.08190000000000008)
+  )).
+
+test(nobj):-
+  run((prob(numObj(0,2),Prob),close_to(Prob,0.06300000000000006)
+  )).
+
+:- end_tests(var_objdb).
+
+
+:- begin_tests(pcfg, []).
+
+:-ensure_loaded(library(examples/pcfg)).
+
+test(pcfg):-
+  run((prob(pcfg([a,b,a,a]),Prob),close_to(Prob,0.0024)
+  )).
+
+:- end_tests(pcfg).
+
+
