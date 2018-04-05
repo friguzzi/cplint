@@ -56,6 +56,7 @@
 :- reexport(library(cplint_util)).
 
 :-meta_predicate s(:,-).
+:-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob(:,-,+).
 :-meta_predicate mc_sample(:,+,-,-,-).
 :-meta_predicate mc_rejection_sample(:,:,+,-,-,-).
