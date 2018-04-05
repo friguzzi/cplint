@@ -331,8 +331,9 @@ resample(N):-
 
 
 erase_samples:-
-  retractall(sampled(_,_,_)).
-
+  retractall(sampled(_,_,_)),
+  retractall(sampled_g(_,_)),
+  retractall(sampled_g(_)).
 print_samples:-
   sampled(Key,Sub,Val),
   write(Key-(Sub,Val)),nl,
