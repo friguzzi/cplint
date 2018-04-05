@@ -382,11 +382,19 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer.</p>
 <h2 id="condq">Conditional Queries on Discrete Variables</h2>
 <p>The conditional probability of an atom query given another atom evidence can be asked using <code>pita</code> with the predicate</p>
-<pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float).</code></pre>
+<pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet</code></pre>
 <p>as in</p>
 <pre><code>?- prob(heads(coin),biased(coin),P).</code></pre>
-<p>If the query/evidence are non-ground, <code>prob/3</code> returns in backtracking ground instantiations together with their probability.</p>
-<p>The query and the evidence can be conjunctions of literals (positive or negative).</p>
+<p>If the query/evidence are non-ground, <code>prob/3</code> returns in backtracking ground instantiations together with their probability. The query and the evidence can be conjunctions of literals (positive or negative).</p>
+<p>You also have</p>
+<pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet</code></pre>
+<p>where <code>Options</code> is a list of options, the following are recognised by <code>prob/4</code>:</p>
+<ul>
+<li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
+</ul>
+<p>as in</p>
+<pre><code>?- prob(heads(coin),biased(coin),P,[bar(Chart)}).</code></pre>
+<p><code>prob/3</code> is equivalent to <code>prob/4</code> with an empty option list.</p>
 <p>When using <code>mcintyre</code>, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo. In rejection sampling <span class="citation">[<a href="#ref-von195113">25</a>]</span>, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded. In Metropolis-Hastings MCMC, <code>mcintyre</code> follows the algorithm proposed in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> (the non adaptive version). A Markov chain is built by building an initial sample and by generating successor samples.</p>
 <p>The initial sample is built by randomly sampling choices so that the evidence is true. This is done with a backtracking meta-interpreter that starts with the goal and randomizes the order in which clauses are selected during the search so that the initial sample is unbiased. Each time the meta-interpreter encounters a probabilistic choice, it first checks whether a value has already been sampled, if not, it takes a sample and records it. If a failure is obtained, the meta-interpreter backtracks to other clauses but without deleting samples. Then the goal is queries using regular MCINTYRE.</p>
 <p>A successor sample is obtained by deleting a fixed number (parameter <code>Lag</code>) of sampled probabilistic choices. Then the evidence is queried using regular MCINTYRE starting with the undeleted choices. If the query succeeds, the goal is queried using regular MCINTYRE. The sample is accepted with a probability of <span class="math inline">\(\min\{1,\frac{N_0}{N_1}\}\)</span> where <span class="math inline">\(N_0\)</span> is the number of choices sampled in the previous sample and <span class="math inline">\(N_1\)</span> is the number of choices sampled in the current sample. In <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> the lag is always 1 but the proof in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> that the above acceptance probability yields a valid Metropolis-Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in <code>cplint</code>.</p>
@@ -517,38 +525,36 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
 <h2 id="graphing">Graphing the Results</h2>
 <p>In <code>cplint</code> on SWISH you can draw graphs for visualizing the results either with <a href="http://www.c3js.org/">C3.js</a> or with <a href="https://www.r-project.org/">R</a>. Similar predicates are avaiiable for the two methods. There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.</p>
 <h3 id="using-c3.js">Using C3.js</h3>
-<p>You can draw the probability of a query being true and being false as a bar chart with <code>prob_bar(:Query:atom,-Probability:dict)</code> as in</p>
-<pre><code>?- prob_bar(heads(coin),P).</code></pre>
-<p>if you include</p>
+<p>You can draw the probability of a query being true and being false as a bar chart using the predicates</p>
+<pre><code>bar1(+Probability:float,-Chart:dict) is det
+bar(+Probability:float,-Chart:dict) is det
+bar(+Successes:int,+Failures:int,-Chart:dict) is det
+argbar(+Values:list,-Chart:dict) is det</code></pre>
+<p>They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a bar each value, where <code>Values</code> is a list of couples <code>V-N</code> where <code>V</code> is the value and <code>N</code> is the number of samples returning that value.</p>
+<p>To render C3.js charts you have to include</p>
 <pre><code>:- use_rendering(c3).</code></pre>
-<p>before <code>:- pita.</code> <code>P</code> will be instantiated with a dict for rendering with <code>c3</code>. It will be shown as a bar chart with a bar for the probability of <code>heads(coin)</code> true and a bar for the probability of <code>heads(coin)</code> false.</p>
-<p>You can obtain the BDD for a query with the predicate</p>
-<pre><code>bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
-<p>if you include</p>
-<pre><code>:- use_rendering(graphviz).</code></pre>
-<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table =Var= contains the associations between the rule groundings and the multivalued variables.</p>
-<p>For example (<a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
-<pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
-<p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
-<p>When using <code>mcintyre</code>, you can use the <code>bar/1</code> option of</p>
-<pre><code>mc_prob(:Query:atom,-Probability:dict,+Options:list).</code></pre>
-<p>as in</p>
+<p>before <code>:- pita.</code></p>
+<p>You can also use the <code>bar(-Chart:dict)</code> option of many predicates as in</p>
+<pre><code>?- prob(heads(coin),biased(coin),P,[bar(Chart)]).</code></pre>
+<p><code>P</code> will be instantiated with a chart with a bar for the probability of <code>heads(coin)</code> true and a bar for the probability of <code>heads(coin)</code> false, given that <code>biased(coin)</code> is true.</p>
+<p>Another example is</p>
 <pre><code>?- mc_prob(heads(coin),P,[bar(Chart)]).</code></pre>
-<p>to obtain a chart representation of the probability.</p>
-<p>You can obtain a bar chart of the samples with</p>
+<p>that returns a chart representation of the probability.</p>
 <pre><code>?- mc_sample(heads(coin),1000,P,[bar(Chart)]).</code></pre>
-<p>that returns in <code>Chart</code> a diagram with one bar for the number of successes and one bar for the number of failures.</p>
-<p>For visualizing the results of sampling arguments you can similarly use the <code>bar/1</code> option of <code>mc_sample_arg/5</code>, <code>mc_sample_arg_first/5</code>, <code>mc_rejection_sample_arg/6</code>, <code>mc_mh_sample_arg/6</code>. By using option <code>bar(Chart)</code>, <code>Chart</code> will be instantiated to a bar chart with a bar for each possible sampled value whose size is the number of samples returning that value.</p>
+<p>returns in <code>Chart</code> a diagram with one bar for the number of successes and one bar for the number of failures.</p>
+<p>The options of <code>mc_sample_arg/5</code>, <code>mc_sample_arg_first/5</code>, <code>mc_mh_sample_arg/6</code>, <code>mc_rejection_sample_arg/6</code>, can be used for visualizing the results of sampling arguments.</p>
 <p>An example is</p>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,ValList,[bar(Chart)]).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a>.</p>
+<p>The same result can be achieved with</p>
+<pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,ValList),argbar(ValList,Chart)</code></pre>
 <p>Drawing a graph is particularly interesting when sampling values for continuous arguments of goals. In this case, you can use the samples to draw the probability density function of the argument. The predicate</p>
 <pre><code>histogram(+List:list,-Chart:dict,+Options:list)</code></pre>
 <p>draws a histogram of the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be a list of couples of the form <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a sampled value and <code>W</code> is its weight. This is the format of the list of samples returned by argument sampling predicates.</p>
 <p>The predicate</p>
 <pre><code>density(+List:list,-Chart:dict,+Options:list)</code></pre>
 <p>draws a line chart of the density the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be as for <code>histogram/4</code>.</p>
-<p>In <code>histogram/4</code> and <code>density/4</code> <code>Options</code> is a list of options, the following are recognised:</p>
+<p>In <code>histogram/3</code> and <code>density/4</code> <code>Options</code> is a list of options, the following are recognised:</p>
 <ul>
 <li><p><code>min(+Min:float)</code> the minimum value of domain, default value the minimum in <code>List</code></p></li>
 <li><p><code>max(+Max:float)</code> the maximum value of domain, default value the maximum in <code>List</code></p></li>
@@ -557,7 +563,7 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
 <p>In this way you can specify the limits and the number of intervals of the <span class="math inline">\(X\)</span>.</p>
 <p>The predicate</p>
 <pre><code>densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list)</code></pre>
-<p>draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in <code>PriorList</code> and <code>PostList</code> can be either couples <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a value and <code>W</code> its weight. The same options as for <code>histogram/4</code> and <code>density/4</code> are recognized.</p>
+<p>draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in <code>PriorList</code> and <code>PostList</code> can be either couples <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a value and <code>W</code> its weight. The same options as for <code>histogram/3</code> and <code>density/4</code> are recognized.</p>
 <p>For example</p>
 <pre><code>?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
     histogram(L0,Chart,[]).</code></pre>
@@ -568,26 +574,29 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,Chart).</code></pre>
 <p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 amples of argument <code>X</code> of <code>value(0,X)</code> before and after observing <code>(value(1,9),value(2,8)</code> and draws the prior and posterior densities of the samples using a line chart.</p>
+<p>You can obtain the BDD for a query with the predicate</p>
+<pre><code>bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
+<p>if you include</p>
+<pre><code>:- use_rendering(graphviz).</code></pre>
+<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table <code>Var</code> contains the associations between the rule groundings and the multivalued variables.</p>
+<p>For example (<a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
+<pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
+<p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
 <h3 id="using-r">Using R</h3>
 <p>You have to load library <code>cplint_r</code> (a SWI-Prolog pack) with</p>
 <pre><code>:- use_module(library(cplint_r)).</code></pre>
 <p>Then you can use predicates</p>
-<pre><code>prob_bar_r/1, prob_bar_r/2
-mc_prob_bar_r/3
-mc_sample_bar_r/2
-mc_sample_arg_bar_r/3
-mc_sample_arg_first_bar_r/3
-mc_rejection_sample_arg_bar_r/4
-mc_mh_sample_arg_bar_r/5
-mc_mh_sample_arg_bar_r/6</code></pre>
+<pre><code>bar_r/1
+bar_r/2
+argbar_r/1</code></pre>
+<p>that work as their C3.js counterpart but do not return the graph as an argument as the graph is printed with a different mechanism.</p>
 <p>You also have</p>
-<pre><code>histogram_r(+List:list,+NBins:int) is det</code></pre>
-<p>that works as <code>histogram/3</code> but does not return the graph as an argument as the graph is printed with a different mechanism.</p>
+<pre><code>histogram_r(+List:list,+Options:list) is det</code></pre>
+<p>that works as <code>histogram/3</code>.</p>
 <pre><code>density_r(+List:list) is det</code></pre>
-<p>is like <code>density/3</code> but does not require the number of bins in input, they are determined by R.</p>
+<p>is like <code>density/3</code> with the number of bins is determined by R.</p>
 <pre><code>densities_r(+PriorList:list,+PostList:list) is det</code></pre>
-<p>is like <code>densities/4</code> but does not require the number of bins in input.</p>
-<p>See <a href="https://frnmst.github.io/cplint_r/cplint_r.html" class="uri">https://frnmst.github.io/cplint_r/cplint_r.html</a> for a more detailed manual.</p>
+<p>is like <code>densities/3</code> with the number of bins is determined by R.</p>
 <p>See <a href="http://cplint.eu/example/inference/gauss_mean_est_R.pl"><code>gauss_mean_est_R.pl</code></a> for an example of use of these predicates.</p>
 <p>ml</p>
 <h2 id="parameters">Parameters</h2>

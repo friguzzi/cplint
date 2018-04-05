@@ -11,10 +11,10 @@ visualize the results of sampling arguments.
 You can draw the probability of a query being true and
 being false as a bar chart using the predicates
 \begin{verbatim}
-bar1(+Probability:float,-Chart:dict) is nondet
-bar(+Probability:float,-Chart:dict) is nondet
-bar(+Successes:int,+Failures:int,-Chart:dict) is nondet
-argbar(+Values:list,-Chart:dict) is nondet
+bar1(+Probability:float,-Chart:dict) is det
+bar(+Probability:float,-Chart:dict) is det
+bar(+Successes:int,+Failures:int,-Chart:dict) is det
+argbar(+Values:list,-Chart:dict) is det
 \end{verbatim}
 They return  a dict for rendering with C3.js as a bar chart:
 the first  returns bar chart with
@@ -89,7 +89,7 @@ draws a line chart of the density the samples in \verb|List| dividing the domain
  \verb|NBins| bins.
 \verb|List| must be as for \verb|histogram/4|.
 
-In  \verb|histogram/4| and  \verb|density/4| \verb|Options| is a list of options, the following are recognised: \begin{itemize}
+In  \verb|histogram/3| and  \verb|density/4| \verb|Options| is a list of options, the following are recognised: \begin{itemize}
 \item \verb|min(+Min:float)|
 the minimum value of domain, default value the minimum in \verb|List|
 \item \verb|max(+Max:float)|
@@ -107,7 +107,7 @@ densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list)
 draws a line chart of the density of two sets of samples, usually
  prior and post observations. The samples in \verb|PriorList| and \verb|PostList|
 can be either couples \verb|[V]-W| or \verb|V-W| where \verb|V| is a value and \verb|W| its weight.
-The same options as for \verb|histogram/4| and  \verb|density/4|  are recognized.
+The same options as for \verb|histogram/3| and  \verb|density/4|  are recognized.
 
 For example
 \begin{verbatim}
@@ -159,33 +159,28 @@ You have to load library \texttt{cplint\_r}  (a SWI-Prolog pack) with
 \end{verbatim}
 Then you can use predicates
 \begin{verbatim}
-prob_bar_r/1, prob_bar_r/2
-mc_prob_bar_r/3
-mc_sample_bar_r/2
-mc_sample_arg_bar_r/3
-mc_sample_arg_first_bar_r/3
-mc_rejection_sample_arg_bar_r/4
-mc_mh_sample_arg_bar_r/5
-mc_mh_sample_arg_bar_r/6
+bar_r/1
+bar_r/2
+argbar_r/1
 \end{verbatim}
+that work as their C3.js counterpart but do not return the graph as an argument as the graph is
+printed with a different mechanism.
 
 You also have
 \begin{verbatim}
-histogram_r(+List:list,+NBins:int) is det
+histogram_r(+List:list,+Options:list) is det
 \end{verbatim}
-that works as \texttt{histogram/3} but does not return the graph as an argument as the graph is
-printed with a different mechanism.
+that works as \texttt{histogram/3}.
 \begin{verbatim}
 density_r(+List:list) is det
 \end{verbatim}
-is like \texttt{density/3} but does not require the number of bins in input, they are determined
+is like \texttt{density/3} with the number of bins  is determined
 by R.
 \begin{verbatim}
 densities_r(+PriorList:list,+PostList:list) is det
 \end{verbatim}
-is like \texttt{densities/4} but does not require the number of bins in input.
-
-See \url{https://frnmst.github.io/cplint_r/cplint_r.html} for a more detailed manual.
+is like \texttt{densities/3} with the number of bins  is determined
+by R.
 
 See \href{http://cplint.eu/example/inference/gauss_mean_est_R.pl}{\texttt{gauss\_mean\_est\_R.pl}} for an example of use of these predicates.
 
