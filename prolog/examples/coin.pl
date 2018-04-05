@@ -37,11 +37,11 @@ toss(coin).
 % expected result 0.51
 ?- prob(tails(coin),Prob).  % what is the probability that coin lands tails?
 % expected result 0.49
-?- prob(heads(coin),Prob),bar(Prob,C).  % draw a bar representing 
+?- prob(heads(coin),Prob),bar1(Prob,C).  % draw a bar representing 
 % the probability that coin lands heads
-?- prob(heads(coin),Prob),bar2(Prob,C).  % draw two bars representing 
+?- prob(heads(coin),Prob),bar(Prob,C).  % draw two bars representing 
 % the probabilities that coin lands heads and that it doesn't land heads
-?- prob(tails(coin),Prob),bar(Prob,C).  % draw a bar representing 
+?- prob(tails(coin),Prob),bar1(Prob,C).  % draw a bar representing 
 % the probability that coin lands tails
 
 ?- prob(heads(coin),biased(coin),Prob).
@@ -57,9 +57,5 @@ toss(coin).
 % multivalued variables.
 
 
-@author Fabrizio Riguzzi
-@license Artistic License 2.0
-@copyright Fabrizio Riguzzi
 */
 
-:- license(artisticv2).

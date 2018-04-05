@@ -1,7 +1,7 @@
 /*
 Example showing the use of negation.  From
-J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP-logic: A language
-of causal probabilistic events and its relation to logic programming.
+J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP-logic: A language 
+of causal probabilistic events and its relation to logic programming. 
 Theory Pract. Log. Program., 9(3):245-308, 2009.
 */
 :- use_module(library(pita)).
@@ -11,8 +11,6 @@ Theory Pract. Log. Program., 9(3):245-308, 2009.
 :- endif.
 
 :- pita.
-
-:- table push/0, light/0, replace/0.
 
 :- begin_lpad.
 
@@ -33,10 +31,11 @@ replace :- \+ light.
 % expected result 0.6
 ?- prob(light,Prob).   % what is the probability that the light is on?
 % expected result 0.4
-?- prob_bar(replace,Prob). % what is the probability that we replace the bulb?
+?- prob(replace,Prob),bar(Prob,C). % what is the probability that we replace the bulb?
 % expected result 0.6
-?- prob_bar(light,Prob).   % what is the probability that the light is on?
+?- prob_bar(light,Prob),bar(Prob,C).   % what is the probability that the light is on?
 % expected result 0.4
 
 
 */
+ 

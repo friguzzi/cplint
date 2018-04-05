@@ -1,10 +1,10 @@
-/* 
-Hidden Markov model for modeling DNA sequences. 
-The model has three states, q1, q2 and end, and four output symbols, 
+/*
+Hidden Markov model for modeling DNA sequences.
+The model has three states, q1, q2 and end, and four output symbols,
 a, c, g, and t, corresponding to the four nucleotides (letter).
 From
-Christiansen, H. and Gallagher, J. P. 2009. Non-discriminating arguments and 
-their uses. In International Conference on Logic Programming. LNCS, 
+Christiansen, H. and Gallagher, J. P. 2009. Non-discriminating arguments and
+their uses. In International Conference on Logic Programming. LNCS,
 vol. 5649. Springer, 55-69.
 
 */
@@ -19,13 +19,13 @@ vol. 5649. Springer, 55-69.
 
 :- begin_lpad.
 
-% hmm(O): O is the output sequence 
+% hmm(O): O is the output sequence
 % hmm1(S,O): O is the output sequence and S is the sequence of states
 % hmm(Q,S0,S,O):  from state Q and previous state S0, generates output O and
 % sequence of states S
 
 hmm(O):-hmm1(_,O).
-% O is an output sequence if there is a state seuqnece S such that hmm1(S,O) 
+% O is an output sequence if there is a state seuqnece S such that hmm1(S,O)
 % holds
 
 hmm1(S,O):-hmm(q1,[],S,O).
@@ -40,7 +40,7 @@ hmm(Q,S0,S,[L|O]):-
 	next_state(Q,Q1,S0),
 	letter(Q,L,S0),
 	hmm(Q1,[Q|S0],S,O).
-% an HMM in state Q different from end goes in state Q1, emits the letter L 
+% an HMM in state Q different from end goes in state Q1, emits the letter L
 % and continues the chain
 
 next_state(q1,q1,S):1/3;next_state(q1,q2,S):1/3;next_state(q1,end,S):1/3.
@@ -61,19 +61,18 @@ letter(q2,a,S):0.25;letter(q2,c,S):0.25;letter(q2,g,S):0.25;letter(q2,t,S):0.25.
 
 state_diagram(digraph(G)):-
     findall(edge(A -> B,[label=P]),
-      (clause(next_state(A,B,_,_,_),
-        (get_var_n(_,_,_,Probs,_),equality(_,_,N,_))),
+      (clause('next_state tabled'(A,B,_,_,_),
+        (get_var_n(_,_,_,_,Probs,_),equalityc(_,_,N,_))),
         nth0(N,Probs,P)),
       G).
 /** <examples>
 
 ?- prob(hmm([a,c]),Prob). % what is the probability that the model emits the sequence [a,c])
 % expected result 0.01388888888888889
-?- prob_bar(hmm([a,c]),Prob). % what is the probability that the model emits the sequence [a,c])
+?- prob(hmm([a,c]),Prob),bar(Prob,C). % what is the probability that the model emits the sequence [a,c])
 % expected result 0.01388888888888889
 
 ?- state_diagram(G).
 % show the state diagram
 
 */
- 

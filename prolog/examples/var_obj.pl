@@ -1,11 +1,11 @@
 /*
 Existence uncertainty/unknown objects.
 This programs models a domain where the number of objects is uncertain.
-In particular, the number of objects follows a geometric distribution
+In particular, the number of objects follows a geometric distribution 
 with parameter 0.7.
 We can ask what is the probability that the object number n exists.
 From
-Poole, David. "The independent choice logic and beyond." Probabilistic
+Poole, David. "The independent choice logic and beyond." Probabilistic 
 inductive logic programming. Springer Berlin Heidelberg, 2008. 222-243.
 */
 
@@ -39,25 +39,27 @@ obj(I):-
 
 /** <examples>
 
-?- mc_prob(obj(2),P,[]). % what is the probability that object 2 exists?
+?- mc_prob(obj(2),P). % what is the probability that object 2 exists?
 % expected result ~ 0.08992307692307693
-?- mc_prob_bar(obj(2),P). % what is the probability that object 2 exists?
+?- mc_prob(obj(2),P),bar(P,C). % what is the probability that object 2 exists?
 % expected result ~ 0.08992307692307693
-?- mc_prob(obj(5),P,[]). % what is the probability that object 5 exists?
+?- mc_prob(obj(5),P). % what is the probability that object 5 exists?
 % expected result ~ 0.002666
-?- mc_prob_bar(obj(5),P). % what is the probability that object 5 exists?
+?- mc_prob(obj(5),P),bar(P,C). % what is the probability that object 5 exists?
 % expected result ~ 0.002666
-?- mc_prob(numObj(0,2),P,[]). % what is the probability that there are 2 objects?
+?- mc_prob(numObj(0,2),P). % what is the probability that there are 2 objects?
 % expected result ~ 0.0656
-?- mc_prob(numObj(0,5),P,[]). % what is the probability that there are 5 objects?
+?- mc_prob(numObj(0,5),P). % what is the probability that there are 5 objects?
 % expected result ~ 0.0014
 ?- mc_sample(obj(5),1000,P,[successes(T),failures(F)]). % take 1000 samples of obj(5)
-?- mc_sample(obj(5),1000,P,[bar(BarChart)]). % take 1000 samples of obj(5)
-?- mc_sample_arg(numObj(0,N),100,N,Values,[bar(Chart)]). % take 100 samples of L in
-% findall(N,numObj(0,N),L)
-?- mc_sample_arg(obj(I),100,I,Values,[bar(Chart)]). % take 100 samples of L in
+?- mc_sample(obj(5),1000,P),bar(P,C). % take 1000 samples of obj(5)
+?- mc_sample_arg(numObj(0,N),100,N,O),argbar(O,C). % take 100 samples of L in
+% findall(N,numObj(N),L)
+?- mc_sample_arg(obj(I),100,I,O),argbar(O,C). % take 100 samples of L in
 % findall(I,obj(I),L)
-??- mc_sample_arg(obj(I),100,I,Values,[]). % take 100 samples of L in
+??- mc_sample_arg(obj(I),100,I,Values). % take 100 samples of L in 
 % findall(I,obj(I),L)
 
+
 */
+

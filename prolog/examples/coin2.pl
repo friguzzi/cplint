@@ -1,7 +1,7 @@
 /*
 Throwing two coins with uncertainty on their fairness.
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
-disjunctions. In International Conference on Logic Programming,
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(pita)).
@@ -31,22 +31,23 @@ toss(coin2).
 
 /** <examples>
 
-?- prob(heads(coin2),Prob).  % what is the probability that coin1 lands heads?
+?- prob(heads(coin2),Prob).  % what is the probability that coin1 lands heads? 
 % expected result 0.51
 ?- prob(tails(coin2),Prob).  % what is the probability that coin1 lands tails?
 % expected result 0.49
-?- prob(heads(coin1),Prob).  % what is the probability that coin2 lands heads?
+?- prob(heads(coin1),Prob).  % what is the probability that coin2 lands heads? 
 % expected result 0.51
 ?- prob(tails(coin1),Prob).  % what is the probability that coin2 lands tails?
 % expected result 0.49
-?- prob_bar(heads(coin2),Prob).  % what is the probability that coin1 lands heads?
+?- prob(heads(coin2),Prob),bar(Prob,C).  % what is the probability that coin1 lands heads? 
 % expected result 0.51
-?- prob_bar(tails(coin2),Prob).  % what is the probability that coin1 lands tails?
+?- prob(tails(coin2),Prob),bar(Prob,C).  % what is the probability that coin1 lands tails?
 % expected result 0.49
-?- prob_bar(heads(coin1),Prob).  % what is the probability that coin2 lands heads?
+?- prob(heads(coin1),Prob),bar(Prob,C).  % what is the probability that coin2 lands heads? 
 % expected result 0.51
-?- prob_bar(tails(coin1),Prob).  % what is the probability that coin2 lands tails?
+?- prob(tails(coin1),Prob),bar(Prob,C).  % what is the probability that coin2 lands tails?
 % expected result 0.49
 
 
 */
+ 

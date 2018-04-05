@@ -44,7 +44,7 @@ obj(I):-
 
 ?- prob(obj(2),P). what is the probability that object 2 exists?
 % expected result 0.08189999999999999
-?- prob_bar(obj(2),P). what is the probability that object 2 exists?
+?- prob(obj(2),P),bar(P,C). what is the probability that object 2 exists?
 % expected result 0.08189999999999999
 ?- prob(numObj(0,2),P). % what is the probability that there are 2 objects?
 % expected result 0.063

@@ -1,7 +1,7 @@
 /*
 Throwing a coin with uncertainty on its fairness, from
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
-disjunctions. In International Conference on Logic Programming,
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 PRISM syntax.
 */
@@ -32,10 +32,11 @@ toss(coin).
 % expected result 0.51
 ?- prob(res(coin,tails),Prob).  % what is the probability that coin lands tails?
 % expected result 0.49
-?- prob_bar(res(coin,heads),Prob).  % what is the probability that coin lands heads?
+?- prob(res(coin,heads),Prob),bar(Prob,C).  % what is the probability that coin lands heads?
 % expected result 0.51
-?- prob_bar(res(coin,tails),Prob).  % what is the probability that coin lands tails?
+?- prob(res(coin,tails),Prob),bar(Prob,C).  % what is the probability that coin lands tails?
 % expected result 0.49
 
 
 */
+ 

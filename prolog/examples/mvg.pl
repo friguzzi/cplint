@@ -19,7 +19,7 @@ mvg3(G):gaussian(G,[0,0,0],[[2,-1,0],[-1,2,-1],[0,-1,2]]).
 :- end_lpad.
 
 chart(Chart):-
-  mc_sample_arg_first(mvg(G),1000,G,V,[]),
+  mc_sample_arg_first(mvg(G),1000,G,V),
   maplist(val,V,ValList),
   Chart = c3{data:_{x:x, rows:[x-y|ValList], type:scatter},
   legend:_{show: false},
@@ -31,7 +31,7 @@ obs(L):-
   mc_lw_sample_arg(mvg1(1,G),mvg1(1,[1,1]),2,G,L).
 
 gv3(L):-
-  mc_sample_arg_first(mvg3(G),10,G,L,[]).
+  mc_sample_arg_first(mvg3(G),10,G,L).
 
 /** <examples>
 ?- chart(G).

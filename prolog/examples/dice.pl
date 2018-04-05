@@ -2,8 +2,8 @@
 A six-sided die is repeatedly thrown until the outcome is six.
 on(T,F) means that on the Tth throw the face F came out.
 From
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
-disjunctions. In International Conference on Logic Programming,
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(pita)).
@@ -48,17 +48,18 @@ evidence:-
 ?- prob(on(2,1),evidence,Prob).
 % what is the probability that the die lands on face 1 at time 2 given that it landed on face 1 at times 0 and 1?
 % expected result 0.16666666666666666
-?- prob_bar(on(0,1),Prob). % what is the probability that the die lands on face 1 at time 0?
+?- prob(on(0,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 0?
 % expected result 0.16666666666666666
-?- prob_bar(on(1,1),Prob). % what is the probability that the die lands on face 1 at time 1?
+?- prob(on(1,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 1?
 % expected result 0.13888888888888887
-?- prob_bar(on(2,1),Prob). % what is the probability that the die lands on face 1 at time 2?
+?- prob(on(2,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 2?
 % expected result 0.11574074074074071
 
-?- prob_bar(on(2,1),on(0,1),Prob). % what is the probability that the die lands on face 1 at time 2 given that it landed on face 1 at time 0?
+?- prob(on(2,1),on(0,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 2 given that it landed on face 1 at time 0?
 % expected result 0.13888888888888887
-?- prob_bar(on(2,1),on(1,1),Prob). % what is the probability that the die lands on face 1 at time 2 given that it landed on face 1 at time 1?
+?- prob(on(2,1),on(1,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 2 given that it landed on face 1 at time 1?
 % expected result 0.16666666666666666
 
 
 */
+ 

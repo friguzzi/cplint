@@ -1,7 +1,7 @@
 /*
 Throwing a coin with uncertainty on its fairness, from
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
-disjunctions. In International Conference on Logic Programming,
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(mcintyre)).
@@ -27,40 +27,41 @@ toss(coin).
 
 /** <examples>
 
-?- mc_prob(heads(coin),Prob,[]).  % what is the probability that coin lands heads?
+?- mc_prob(heads(coin),Prob).  % what is the probability that coin lands heads?
 % expected result 0.51
-?- mc_prob(tails(coin),Prob,[]).  % what is the probability that coin lands tails?
+?- mc_prob(tails(coin),Prob).  % what is the probability that coin lands tails?
 % expected result 0.49
-?- mc_prob_bar(heads(coin),Prob).  % what is the probability that coin lands heads?
+?- mc_prob(heads(coin),Prob,[bar(C)]).  % what is the probability that coin lands heads?
 % expected result 0.51
-?- mc_prob_bar(tails(coin),Prob).  % what is the probability that coin lands tails?
+?- mc_prob(tails(coin),Prob),bar(Prob,C).  % what is the probability that coin lands tails?
 % expected result 0.49
-?- Options=[successes(T),failures(F)],mc_sample(heads(coin),1000,Prob,Options).
+?- mc_sample(heads(coin),1000,Prob,[successes(T),failures(F)]),bar(T,F,C). 
 % take 1000 sample of heads(coin) and return the number of successes (T),
 % the number of failures (F) and the probability
 
-?- Options=[successes(T),failures(F)],mc_sample(tails(coin),1000,Prob,Options).
+?- mc_sample(tails(coin),1000,Prob,[successes(T),failures(F)]).  
 % take 1000 sample of tails(coin) and return the number of successes (T),
 % the number of failures (F) and the probability
 
-?- mc_sample(heads(coin),1000,Prob,[]).
+?- mc_sample(heads(coin),1000,Prob).  
 % take 1000 sample of heads(coin) and return the probability
 
-?- mc_sample(tails(coin),1000,Prob,[]).
+?- mc_sample(tails(coin),1000,Prob).  
 % take 1000 sample of tails(coin) and return the probability
 
-?- mc_sample(heads(coin),1000,Prob,[bar(BarChart)]).
-% take 1000 sample of heads(coin) and chart the number of successes and
+?- mc_sample(heads(coin),1000,Prob),bar(Prob,C).  
+% take 1000 sample of heads(coin) and chart the number of successes and 
 % faliures
 
-?- mc_sample(tails(coin),1000,Prob,[bar(BarChart)]).
-% take 1000 sample of tails(coin) and chart the number of successes and
+?- mc_sample(tails(coin),1000,Prob),bar(Prob,C).  
+% take 1000 sample of tails(coin) and chart the number of successes and 
 % faliures
 
-?- Options=[successes(S),failures(F)],mc_rejection_sample(heads(coin),biased(coin),1000,P,Options).
+?- mc_rejection_sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).
 % take 1000 sample of heads(coin) given that biasdd(coin) is true
 % Use rejection sampling
 % F = 387,
 % P = 0.613,
 % S = 613
 */
+ 

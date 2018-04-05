@@ -151,16 +151,17 @@ is_word :- word([_,_,_,_,_]).
 
 
 /** <examples>
-?- mc_sample(is_word,1000,P,[]).
+?- mc_sample(is_word,1000,P).
 % the probability of getting a word of length 3/4/5
 % Expected result 0.067222
-?- mc_mh_sample_arg(word([A,B,C]),word([_,_,_]),10,[A,B,C],V,[]).
+?- mc_mh_sample_arg(word([A,B,C]),word([_,_,_]),10,[A,B,C],V,[lag(1)]).
 % take 10 samples of 3 token words given that the lenght of the word is 3
-?- mc_mh_sample_arg(word([A,B,C]),word([_,_,_]),10,[A,B,C],V,[bar(Chart)]).
+?- mc_mh_sample_arg(word([A,B,C]),word([_,_,_]),10,[A,B,C],V,[lag(1)]),argbar(V,C).
 % take 10 samples of 3 token words given that the lenght of the word is 3
 % and draw a bar chart of the results
-?- mc_mh_sample_arg(query(X),is_word,10,X,V,[]).
+?- mc_mh_sample_arg(query(X),is_word,10,X,V,[lag(1)]).
 % take 10 samples of 3, 4 or 5 token words given that the lenght of the word is
 % 3, 5 or 5
 %
 */
+ 

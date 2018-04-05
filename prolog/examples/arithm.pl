@@ -58,15 +58,17 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 
 /** <examples>
 
-?- mc_mh_sample(eval(2,4),eval(1,3),100,P,[lag(3),mix(100),successes(T),failures(F)]).
+?- mc_mh_sample(eval(2,4),eval(1,3),100,P,
+  [mix(100),lag(3),successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
-% eval(1,3) is true (100 samples, 100 mixing samples)
+% eval(1,3) is true (100 samples, 100 mixing samplesi, lag 3)
 % expected result
 % T = 17,
 % F = 83,
 % P = 0.17.
 
-?- mc_mh_sample(eval(2,4),eval(1,3),100,P,[lag(3),successes(T),failures(F)]).
+?- mc_mh_sample(eval(2,4),eval(1,3),100,P,
+  [lag(3),successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
 % eval(1,3) is true
 % expected result
@@ -74,7 +76,8 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % F = 83,
 % P = 0.17.
 
-?- mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),100,P,[lag(3),successes(T),failures(F)]).
+?- mc_mh_sample(eval(2,4),(eval(0,2),eval(1,3)),100,P,
+  [lag(3),successes(T),failures(F)]).
 % perform Metropolis Hastings sampling of eval(2,Y) given that
 % eval(0,2) and eval(1,3) are true
 % expected result
@@ -83,44 +86,50 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % P = 1.
 
 
-?-  Options=[successes(S),failures(F)],mc_rejection_sample(eval(2,4),eval(1,3),100,P,Options).
+?-  mc_rejection_sample(eval(2,4),eval(1,3),100,P,
+  [successes(T),failures(F)]).
 % perform rejection sampling of eval(2,4) given that eval(1,3) is true
 % expected result
 % T = 10,
 % F = 90,
 % P = 0.1.
 
-?- mc_mh_sample_arg(eval(2,Y),(eval(0,2),eval(1,3)),100,Y,V,[mix(100),lag(3)]).
-% sample arg Y of eval(2,Y) given that
+?- mc_mh_sample_arg(eval(2,Y),(eval(0,2),eval(1,3)),100,Y,V,
+  [mix(100),lag(3)]).
+% sample arg Y of eval(2,Y) given that 
 % eval(0,2) and eval(1,3) are true
 % Sample using Metropolis Hastings
 % exected result
 % V = [[4]-100].
-?- mc_mh_sample_arg(eval(2,Y),(eval(0,2),eval(1,3)),100,Y,V,[mix(100),lag(3),bar(Chart)]).
+?- mc_mh_sample_arg(eval(2,Y),(eval(0,2),eval(1,3)),100,Y,V,
+  [mix(100),lag(3)]),argbar(V,C).
 
-?- mc_mh_sample_arg(eval(2,Y),eval(1,3),100,Y,V,[mix(100),lag(3)]).
-% sample arg Y of eval(2,Y) given that
+?- mc_mh_sample_arg(eval(2,Y),eval(1,3),100,Y,V,
+  [mix(100),lag(3)]).
+% sample arg Y of eval(2,Y) given that 
 % eval(1,3) is true
 % Sample using Metropolis Hastings
 % exected result
 % V = [[3]-52, [6]-20, [5]-16, [4]-12]
-?- mc_mh_sample_arg(eval(2,Y),eval(1,3),100,Y,V,[mix(100),lag(3),bar(Chart)]).
+?- mc_mh_sample_arg(eval(2,Y),eval(1,3),100,Y,V,
+  [mix(100),lag(3)]),argbar(V,C).
 
 
-?- mc_rejection_sample_arg(eval(2,Y),eval(1,3),100,Y,V,[]).
-% sample argument Y of eval(2,Y) given that
+?- mc_rejection_sample_arg(eval(2,Y),eval(1,3),100,Y,V).
+% sample argument Y of eval(2,Y) given that 
 % eval(1,3) is true
 % Sample using rejection sampling
 % exected result
 % V = [[3]-79, [4]-8, [6]-8, [2]-5].
-?- mc_rejection_sample_arg(eval(2,Y),eval(1,3),100,Y,V,[bar(Chart)]).
+?- mc_rejection_sample_arg(eval(2,Y),eval(1,3),100,Y,V),argbar(V,C).
 
 ?- mc_expectation(eval(2,Y),100,Y,E).
 % what is the expected value of Y in eval(2,Y)?
 % expected result
 % E = 3.48
 
-?- mc_mh_expectation(eval(2,Y),eval(1,3),100,Y,E,[mix(100),lag(3)]).
+?- mc_mh_expectation(eval(2,Y),eval(1,3),100,Y,E,
+  [mix(100),lag(3)]).
 % what is the expected value of Y in eval(2,Y) given that eval(1,3) is true?
 % expected result
 % E = 3.52
@@ -129,3 +138,4 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % expected result
 % E = 3.06
 */
+ 

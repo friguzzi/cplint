@@ -3,26 +3,26 @@ One-dimensional  Kalman filter. Hidden Markov model with a real
 value as state and a real value as output. The next state is given by
 the current state plus Gaussian noise (mean 0 and variance 2 in this example)
 and the output is given by the current state plus Gaussian noise (mean
-0 and variance 1 in this example).
-This example can be considered as modeling a random walk of a single continuous
-state variable with noisy observations.
+0 and variance 1 in this example). 
+This example can be considered as modeling a random walk of a single continuous 
+state variable with noisy observations. 
 Given that at time 0 the value 2.5 was
 observed, what is the distribution of the state at time 1 (filtering problem)?
-The distribution of the state is plotted in the case of having (posterior) or
+The distribution of the state is plotted in the case of having (posterior) or 
 not having the observation (prior).
 Liklihood weighing is used to condition the distribution on evidence on
 a continuous random variable (evidence with probability 0).
 CLP(R) constraints allow both sampling and weighing samples with the same
 program.
 Filtering can be used to estimate the sequence of state variables
-given a sequence of observations. Either likelihood weighting or particle
+given a sequence of observations. Either likelihood weighting or particle 
 filtering can be used for this purpose.
 From
-Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan.
-"Inference in probabilistic logic programs with continuous random variables."
+Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan. 
+"Inference in probabilistic logic programs with continuous random variables." 
 Theory and Practice of Logic Programming 12.4-5 (2012): 505-523.
 http://arxiv.org/pdf/1112.2681v3.pdf
-Russell, S. and Norvig, P. 2010. Arficial Intelligence: A Modern Approach.
+Russell, S. and Norvig, P. 2010. Arficial Intelligence: A Modern Approach. 
 Third Edition, Prentice Hall, Figure 15.10 page 587
 
 */
@@ -43,7 +43,7 @@ Third Edition, Prentice Hall, Figure 15.10 page 587
 % in 40 bins
 
 */
- :- use_module(library(mcintyre)).
+:- use_module(library(mcintyre)).
 :- use_module(library(clpr)).
 :- if(current_predicate(use_rendering/1)).
 :- use_rendering(c3).
@@ -70,7 +70,7 @@ kf_o(N,ON):-
   emit(T,N,ON).
 
 kf_part(I, N, S, [V|RO], [S|LS], T) :-
-  I < N,
+  I < N, 
   NextI is I+1,
   trans(S,I,NextS),
   emit(NextS,I,V),
@@ -96,25 +96,25 @@ obs_err(_,E):gaussian(E,0,1).
 :- end_lpad.
 
 %! hist(+S:int,+Bins:int,-C:dict) is det
-% Plots a histogram of the density of the state at time 1 in case of
+% Plots a histogram of the density of the state at time 1 in case of 
 % no observation
 hist(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
-  histogram(L0,NBins,Chart,[]).
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
+  histogram(L0,Chart,[nbins(NBins)]).
 
 %! dens_lw(+S:int,+Bins:int,-C:dict) is det
 % Plots the density of the state at time 1 in case of no observation (prior)
 % and in case of observing 2.5.
 % Observation as in Russel and Norvig 2010, Fig 15.10
 dens_lw(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
   mc_lw_sample_arg(kf_fin(1,_O2,T),kf_fin(1,[2.5],_T),Samples,T,L),
-  densities(L0,L,NBins,Chart).
+  densities(L0,L,Chart,[nbins(NBins)]).
 
 dens_par(Samples,NBins,Chart):-
-  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0,[]),
+  mc_sample_arg(kf_fin(1,_O1,Y),Samples,Y,L0),
   mc_particle_sample_arg(kf_fin(1,_O2,T),[kf_fin(1,[2.5],_T)],Samples,T,L),
-  densities(L0,L,NBins,Chart).
+  densities(L0,L,Chart,[nbins(NBins)]).
 
 
 %! filter_par(+S:int,-C:dict) is det
@@ -131,23 +131,23 @@ filter_sampled_par(Samples,C):-
   filter_par(Samples,O,St,C).
 
 %! filter_par(+S:int,+O:list,+St:list,-C:dict) is det
-% Takes observations O and true states St for 4 time points
+% Takes observations O and true states St for 4 time points 
 % and performs filtering on the trajectory: given O, computes the
 % distribution of the state for each time point.
 % It uses particle filtering with S particles.
-% Returns a graph C with the distributions of the state variable
-% at time 1, 2, 3 and 4
-% (S1, S2, S3, S4, density on the left y axis)
+% Returns a graph C with the distributions of the state variable 
+% at time 1, 2, 3 and 4 
+% (S1, S2, S3, S4, density on the left y axis) 
 % and with O and St (time on the right y axis).
 filter_par(Samples,O,St,C):-
   O=[O1,O2,O3,O4],
   NBins=20,
   mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),kf_fin(4,T4)],
   [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],Samples,[T1,T2,T3,T4],[F1,F2,F3,F4]),
-  density(F1,NBins,C1,[]),
-  density(F2,NBins,C2,[]),
-  density(F3,NBins,C3,[]),
-  density(F4,NBins,C4,[]),
+  density(F1,C1,[nbins(NBins)]),
+  density(F2,C2,[nbins(NBins)]),
+  density(F3,C3,[nbins(NBins)]),
+  density(F4,C4,[nbins(NBins)]),
   [[x|X1],[dens|S1]]=C1.data.columns,
   [[x|X2],[dens|S2]]=C2.data.columns,
   [[x|X3],[dens|S3]]=C3.data.columns,
@@ -190,22 +190,22 @@ o([-0.13382010096024688, -1.1832019975321675, -3.2127809027386567, -4.5862595110
 st([-0.18721387460211258, -2.187978176930458, -1.5472275345566668, -2.9840114021132713]).
 
 %! filter(+S:int,+O:list,+St:list,-C:dict) is det
-% Takes observations O and true states St for 4 time points
+% Takes observations O and true states St for 4 time points 
 % and performs filtering on the trajectory: given O, computes the
 % distribution of the state for each time point by taking S samples
 % using likelihood weighting.
-% Returns a graph C with the distributions of the state variable
-% at time 1, 2, 3 and 4
-% (S1, S2, S3, S4, density on the left y axis)
+% Returns a graph C with the distributions of the state variable 
+% at time 1, 2, 3 and 4 
+% (S1, S2, S3, S4, density on the left y axis) 
 % and with O and St (time on the right y axis).
 filter(Samples,O,St,C):-
   mc_lw_sample_arg(kf(4,_O,T),kf_fin(4,O,_T),Samples,T,L),
   maplist(separate,L,T1,T2,T3,T4),
   NBins=20,
-  density(T1,NBins,C1,[]),
-  density(T2,NBins,C2,[]),
-  density(T3,NBins,C3,[]),
-  density(T4,NBins,C4,[]),
+  density(T1,C1,[nbins(NBins)]),
+  density(T2,C2,[nbins(NBins)]),
+  density(T3,C3,[nbins(NBins)]),
+  density(T4,C4,[nbins(NBins)]),
   [[x|X1],[dens|S1]]=C1.data.columns,
   [[x|X2],[dens|S2]]=C2.data.columns,
   [[x|X3],[dens|S3]]=C3.data.columns,
@@ -233,5 +233,6 @@ filter(Samples,O,St,C):-
 separate([S1,S2,S3,S4]-W,S1-W,S2-W,S3-W,S4-W).
 
 sample_trajectory(N,Ob,St):-
-  mc_sample_arg(kf(N,O,T),1,(O,T),L,[]),
+  mc_sample_arg(kf(N,O,T),1,(O,T),L),
   L=[[(Ob,St)]-_].
+

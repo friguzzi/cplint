@@ -39,9 +39,9 @@ edge(a,e):0.1.
 
 :- end_lpad.
 
-graph(digraph(G)):-
+graph(digraph([rankdir='LR'|G])):-
     findall(edge(A -> B,[label=P]),
-      clause(edge(A,B,_,_),(get_var_n(_,_,_,[P|_],_),_)),
+      clause('edge tabled'(A,B,_,_),(get_var_n(_,_,_,_,[P|_],_),_)),
       G).
 
 
@@ -49,7 +49,7 @@ graph(digraph(G)):-
 
 ?- prob(path(a,e),Prob). % what is the probability that a and e are connected?
 % expected result 0.22888
-?- prob_bar(path(a,e),Prob). % what is the probability that a and e are connected?
+?- prob(path(a,e),Prob),bar(Prob,C). % what is the probability that a and e are connected?
 % expected result 0.22888
 ?- graph(G). % shows the probabilistic graph
 

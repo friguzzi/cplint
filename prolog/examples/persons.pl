@@ -38,13 +38,13 @@ female(cathy).
 ?- prob(male,Prob).  % what is the probability of sampling a male from the 
 % population?
 % expected result 0.4
-?- prob(female,Prob).% what is the probability of sampling a female from the 
+?- prob(female,Prob). % what is the probability of sampling a female from the 
 % population?
 % expected result 0.6
-?- prob_bar(male,Prob).  % what is the probability of sampling a male from the 
+?- prob(male,Prob),bar(Prob,C).  % what is the probability of sampling a male from the 
 % population?
 % expected result 0.4
-?- prob_bar(female,Prob). % what is the probability of sampling a female from the 
+?- prob(female,Prob),bar(Prob,C). % what is the probability of sampling a female from the 
 % population?
 % expected result 0.6
 */

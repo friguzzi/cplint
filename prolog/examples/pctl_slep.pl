@@ -82,10 +82,10 @@ models(S, or(F1, F2),Hist,Limit,Time) :-
 models(S, not(F), Hist,Limit,Time) :-
 	\+ models(S, F,Hist,Limit,Time).
 models(S, prob_until(comp(Op, P), F1, F2),Hist,Limit,Time) :-
-	mc_sample(pmodels(S, until(F1, F2),Hist,Limit,Time),20, Q,[]),
+	mc_sample(pmodels(S, until(F1, F2),Hist,Limit,Time),20, Q),
 	comp(Q, Op, P).
 models(S, prob_next(comp(Op, P), F),Hist,Limit,Time) :-
-	mc_sample(pmodels(S, next(F),Hist,Limit,Time),20, Q,[]),
+	mc_sample(pmodels(S, next(F),Hist,Limit,Time),20, Q),
 	comp(Q, Op, P).
 
 comp(Q,>,P):-
@@ -385,7 +385,7 @@ graph_prob(G):-
   assert(num(4)),
   assert(kr(2)),
   findall(L-P,
-    (between(1,6,L),mc_sample(bounded_eventually(elect,L),100,P,[])),LV),
+    (between(1,6,L),mc_sample(bounded_eventually(elect,L),100,P)),LV),
   G=c3{data:_{x:x, rows:[x-'Probability of leader elected within L rounds (N=4, K=2)'|LV]},%legend:_{show: false},
     axis:_{x:_{min:1,max:6,label:'L',padding:_{bottom:0.0,top:0.0}},
 %        tick:_{values:[0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]}},

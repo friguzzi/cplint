@@ -1,6 +1,6 @@
 /*
-Model checking of a Markov chain: we want to know what is the likelihood 
-that on an execution of the chain from a start state s, a final state t 
+Model checking of a Markov chain: we want to know what is the likelihood
+that on an execution of the chain from a start state s, a final state t
 will be reached?
 From
 Gorlin, Andrey, C. R. Ramakrishnan, and Scott A. Smolka. "Model checking with probabilistic tabled logic programming." Theory and Practice of Logic Programming 12.4-5 (2012): 681-700.
@@ -40,12 +40,12 @@ trans(s4,_,s3).
 
 markov_chain(digraph(G)):-
     findall(edge(A -> B,[label=P]),
-      (clause(trans(A,_,B,_,_,_),
-        (get_var_n(_,_,_,Probs,_),equality(_,_,N,_))),
+      (clause('trans tabled'(A,_,B,_,_,_),
+        (get_var_n(_,_,_,_,Probs,_),equalityc(_,_,N,_))),
         nth0(N,Probs,P)),
       G0),
     findall(edge(A -> B,[label=1.0]),
-      clause(trans(A,_,B,_,_,_),one(_,_)),
+      clause('trans tabled'(A,_,B,_,_,_),onec(_,_)),
       G1),
     append(G0,G1,G).
 
@@ -73,4 +73,3 @@ markov_chain(digraph(G)):-
 ?- markov_chain(G).
 % draw the Markov chain
 */
-

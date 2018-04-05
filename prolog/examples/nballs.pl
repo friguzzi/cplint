@@ -31,27 +31,27 @@ size(X,S):beta(S,4, 2):-material(X,wood).
 :- end_lpad.
 
 /** <examples>
-?- Options=[successes(S),failures(F)], mc_sample(drawn(1,1),1000,P,Options).
+?- mc_sample(drawn(1,1),1000,T,F,P).
 %T = 285,
 %F = 715,
 %P = 0.285.
 
-?- Options=[successes(S),failures(F)], mc_sample(drawn(1,1),1000,P,Options).
+?- mc_sample(drawn(1,1),1000,T,F,P).
 %T = 290,
 %F = 710,
 %P = 0.29.
 
-?- Options=[successes(S),failures(F)], mc_sample(drawn(1,1),1000,P,Options).
+?- mc_sample(drawn(1,1),1000,T,F,P).
 %T = 283,
 %F = 717,
 %P = 0.283.
 
-?- Options=[successes(S),failures(F)], mc_sample((drawn(1,1),material(1,wood)),1000,P,Options).
+?- mc_sample((drawn(1,1),material(1,wood)),1000,T,F,P).
 %T = 86,
 %F = 914,
 %P = 0.086.
 
-?- Options=[successes(S),failures(F)], mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,P,Options).
+?- mc_sample((drawn(1,1),material(1,wood),color(1,black)),1000,T,F,P).
 %T = 44,
 %F = 956,
 %P = 0.044.

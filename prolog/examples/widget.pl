@@ -17,8 +17,8 @@ quantity greater than 0.2?
 What is the distribution of the feature given that the third machine added
 a quantity of 2.0?
 Adapted from
-Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan.
-"Inference in probabilistic logic programs with continuous random variables."
+Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan. 
+"Inference in probabilistic logic programs with continuous random variables." 
 Theory and Practice of Logic Programming 12.4-5 (2012): 505-523.
 http://arxiv.org/pdf/1112.2681v3.pdf
 */
@@ -31,7 +31,7 @@ http://arxiv.org/pdf/1112.2681v3.pdf
 :- mc.
 :- begin_lpad.
 
-widget(X) :-
+widget(X) :- 
   machine(M),
   st(M,Z),
   pt(Y),
@@ -49,44 +49,44 @@ pt(X): gaussian(X,0.5, 1.5).
 :- end_lpad.
 
 hist_uncond(Samples,NBins,Chart):-
-  mc_sample_arg(widget(X),Samples,X,L0,[]),
-  histogram(L0,NBins,Chart,[]).
+  mc_sample_arg(widget(X),Samples,X,L0),
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature?
 
 hist_rej_macha(Samples,NBins,Chart):-
-  mc_rejection_sample_arg(widget(X),machine(a),Samples,X,L0,[]),
-  histogram(L0,NBins,Chart,[]).
+  mc_rejection_sample_arg(widget(X),machine(a),Samples,X,L0),
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature given that the widget was procuded
 % by machine a, computed by taking Samples samples with rejection sampling and
 % drawing a histogram with NBins bins?
 
 hist_mh_macha(Samples,Lag,NBins,Chart):-
   mc_mh_sample_arg(widget(X),machine(a),Samples,X,L0,[lag(Lag)]),
-  histogram(L0,NBins,Chart,[]).
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature given that the widget was procuded
 % by machine a, computed by taking Samples samples with Metropolis-Hastings
 % (lag=Lag) and drawing a histogram with NBins bins?
 
 hist_rej_dis(Samples,NBins,Chart):-
-  mc_rejection_sample_arg(widget(X),(pt(Y),Y>0.2),Samples,X,L0,[]),
-  histogram(L0,NBins,Chart,[]).
+  mc_rejection_sample_arg(widget(X),(pt(Y),Y>0.2),Samples,X,L0),
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature given that the third machine added a
-% quantity greater than 0.2, computed by taking Samples samples with rejection
+% quantity greater than 0.2, computed by taking Samples samples with rejection 
 % sampling and
 % drawing a histogram with NBins bins?
 
 hist_mh_dis(Samples,Lag,NBins,Chart):-
   mc_mh_sample_arg(widget(X),(pt(Y),Y>0.2),Samples,X,L0,[lag(Lag)]),
-  histogram(L0,NBins,Chart,[]).
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature given that the third machine added a
-% quantity greater than 0.2, computed by taking Samples samples with
+% quantity greater than 0.2, computed by taking Samples samples with 
 % Metropolis-Hastings and
 % drawing a histogram with NBins bins?
 
 hist_lw(Samples,NBins,Chart):-
-  mc_sample_arg(widget(Y),Samples,Y,L0,[]),
+  mc_sample_arg(widget(Y),Samples,Y,L0),
   mc_lw_sample_arg(widget(X),pt(2.0),Samples,X,L),
-  densities(L0,L,NBins,Chart).
+  densities(L0,L,Chart,[nbins(NBins)]).
 % What is the distribution of the feature given that the third machine added
 % a quantity of 2.0, computed by taking Samples samples with likelihood weighting
 % and drawing a density with NBins bins?
@@ -113,14 +113,15 @@ hist_lw(Samples,NBins,Chart):-
 
 ?- hist_rej_dis(10000,40,G).
 % What is the distribution of the feature given that the third machine added a
-% quantity greater than 0.2, computed by taking 10000 samples with rejection
+% quantity greater than 0.2, computed by taking 10000 samples with rejection 
 % sampling and
 % drawing a histogram with 40 bins?
 
 ?- hist_mh_dis(10000,2,40,G).
 % What is the distribution of the feature given that the third machine added a
-% quantity greater than 0.2, computed by taking 10000 samples with
+% quantity greater than 0.2, computed by taking 10000 samples with 
 % Metropolis-Hastings and
 % drawing a histogram with 40 bins?
 
 */
+ 

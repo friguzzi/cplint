@@ -26,7 +26,7 @@ c.
 
 ?- prob(a,Prob).
 % expected result 0.2
-?- prob_bar(a,Prob).
+?- prob(a,Prob),bar(Prob,C).
 % expected result 0.2
 
 */

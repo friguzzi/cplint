@@ -17,8 +17,8 @@ quantity greater than 0.2?
 What is the distribution of the feature given that the third machine added
 a quantity of 2.0?
 Adapted from
-Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan.
-"Inference in probabilistic logic programs with continuous random variables."
+Islam, Muhammad Asiful, C. R. Ramakrishnan, and I. V. Ramakrishnan. 
+"Inference in probabilistic logic programs with continuous random variables." 
 Theory and Practice of Logic Programming 12.4-5 (2012): 505-523.
 http://arxiv.org/pdf/1112.2681v3.pdf
 */
@@ -48,8 +48,8 @@ set_sw(pt, norm(0.5, 0.1)).
 :- end_lpad.
 
 hist_uncond(Samples,NBins,Chart):-
-  mc_sample_arg(widget(X),Samples,X,L0,[]),
-  histogram(L0,NBins,Chart,[]).
+  mc_sample_arg(widget(X),Samples,X,L0),
+  histogram(L0,Chart,[nbins(NBins)]).
 % What is the distribution of the feature?
 
 
@@ -58,3 +58,4 @@ hist_uncond(Samples,NBins,Chart):-
 % What is the distribution of the feature?
 
 */
+ 

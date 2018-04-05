@@ -1,18 +1,18 @@
-/*
+/* 
 1st and 2nd-order Hidden Markov model for part-of-speech tagging.
-This program differs from http://cplint.lamping.unife.it/example/inference/hmmpos.pl because
+This program differs from http://cplint.lamping.unife.it/example/inference/hmmpos.pl because 
 1. a 1st-order HMM and a 2nd-order HMM are included
 2. the probabilistic predicates trans/3, trans2/4, out/3 and out2/4 are defined
-intensionally
-3. the probability values are defined on the basis of frequency data from a
+intensionally 
+3. the probability values are defined on the basis of frequency data from a 
 (toy in this example) dataset
 The states represent parts-of-speech, and the symbols emitted by the states are words.
-In the 1st-order HMM, a word depends probabilistically on its own
-part-of-speech (i.e. its tag) which in turn depends on the part-of-speech of
+In the 1st-order HMM, a word depends probabilistically on its own 
+part-of-speech (i.e. its tag) which in turn depends on the part-of-speech of 
 the preceding word (or on the start state in case there is no preceding word).
-In the 2nd-order HMM, a word depends probabilistically on its own
-part-of-speech and the preceding tag which in turn depends on the
-part-of-speech of the two preceding words (or on the start state in case there
+In the 2nd-order HMM, a word depends probabilistically on its own 
+part-of-speech and the preceding tag which in turn depends on the 
+part-of-speech of the two preceding words (or on the start state in case there 
 are no preceding words).
 From
 http://stp.lingfil.uu.se/~nivre/docs/thesis3.pdf
@@ -20,19 +20,19 @@ Original program by Joakim Nivre and Torbjorn Lager, adapted to MCINTYRE by Fabr
 */
 /** <examples>
 
-?-  mc_sample_arg(hmm(S,['I',can,can,a,can]),1000,S,O,[]).
+?-  mc_sample_arg(hmm(S,['I',can,can,a,can]),1000,S,O).
 % sample the state sequence corresonding to the phrase "I can can a can"
 % the most frequent state sequence is an approximate POS tagging for the
 % sentence. It corresponds to the Viterbi path of the HMM.
 % expected result: the most frequent tagging should be [pn,vb,vb,dt,nn]
-?- mc_sample_arg(hmm2(S,['I',can,can,a,can]),1000,S,O,[]).
+?- mc_sample_arg(hmm2(S,['I',can,can,a,can]),1000,S,O).
 % as above but for the second order model
 %
-?- mc_sample_arg(hmm(S,['I',can,can,a,can]),1000,S,O,[bar(BarChart)]).
-?- mc_sample_arg(hmm2(S,['I',can,can,a,can]),1000,S,O,[bar(BarChart)]).
-?- mc_sample_arg(hmm(S,[can, the ,can, do, the, can ,can]),10000,S,O,[]).
+?- mc_sample_arg(hmm(S,['I',can,can,a,can]),1000,S,O),argbar(O,C).
+?- mc_sample_arg(hmm2(S,['I',can,can,a,can]),1000,S,O),argbar(O,C).
+?- mc_sample_arg(hmm(S,[can, the ,can, do, the, can ,can]),10000,S,O),argbar(O,C).
 % example by Douglas R. Miles
-?- mc_sample_arg(hmm(S,[can, the ,can, do, the, can ,can]),10000,S,O,[bar(BarChart)]).
+?- mc_sample_arg(hmm(S,[can, the ,can, do, the, can ,can]),10000,S,O),argbar(O,C).
 */
 
 :- use_module(library(mcintyre)).
@@ -46,36 +46,36 @@ Original program by Joakim Nivre and Torbjorn Lager, adapted to MCINTYRE by Fabr
 
 :- begin_lpad.
 
-% hmm(O): O is the output sequence
+% hmm(O): O is the output sequence 
 % hmm(S,O): O is the output sequence and S is the sequence of states
 % hmm(Q,S0,S,O):  from state Q and previous state S0, generates output O and
 % sequence of states S
 
 hmm(O):-hmm(_,O).
-% O is an output sequence if there is a state seuqnece S such that hmm1(S,O)
+% O is an output sequence if there is a state seuqnece S such that hmm(S,O) 
 % holds
 
 hmm(S,O):-trans(start,Q0,[]),hmm(Q0,[],S0,O),reverse(S0,S).
 % O is an output sequence and S a state sequence if the chain stats at state
-% q1 and ends generating state sequence S and output sequence O
+% start and ends generating state sequence S and output sequence O
 
 hmm(Q,S0,S,[L|O]):-
 	trans(Q,Q1,S0),
 	out(Q,L,S0),
 	hmm(Q1,[Q|S0],S,O).
-% an HMM in state Q goes in state Q1, emits the word L
+% an HMM in state Q goes in state Q1, emits the word L 
 % and continues the chain
 
 hmm(_,S,S,[]).
 % an HMM in sny state terminates the sequence without emitting any symbol
 
-% hmm2(O): O is the output sequence
+% hmm2(O): O is the output sequence 
 % hmm2(S,O): O is the output sequence and S is the sequence of states
 % hmm2(Q,S0,S1,S,O):  from state Q and previous state S1, generates output O and
 % sequence of states S
 
 hmm2(O):-hmm2(_,O).
-% O is an output sequence if there is a state seuqnece S such that hmm1(S,O)
+% O is an output sequence if there is a state seuqnece S such that hmm1(S,O) 
 % holds
 
 hmm2(S,O):-trans2(start,start,Q0,[]),hmm2(start,Q0,[],S0,O),reverse(S0,S).
@@ -86,7 +86,7 @@ hmm2(Q0,Q,S0,S,[L|O]):-
 	trans2(Q0,Q,Q1,S0),
 	out2(Q0,Q,L,S0),
 	hmm2(Q,Q1,[Q|S0],S,O).
-% an HMM in state Q goes in state Q1, emits the word L
+% an HMM in state Q goes in state Q1, emits the word L 
 % and continues the chain
 
 hmm2(_,_,S,S,[]).
@@ -96,7 +96,7 @@ trans(S0,S1,H):-
   findall((S,P),pc_c(S,S0,P),L),
   append(L0,[(LastS,_P)],L),
   foldl(pick_next_state(S0,H),L0,(1,_),(_,S1)),
-  (var(S1)->
+  (var(S1)->  
     S1=LastS
   ;
     true
@@ -122,7 +122,7 @@ out(S0,W,H):-
   findall((W,P),pw_c(W,S0,P),L),
   append(L0,[(LastW,_P)],L),
   foldl(pick_word(S0,H),L0,(1,_),(_,W)),
-  (var(W)->
+  (var(W)->  
     W=LastW
   ;
     true
@@ -148,7 +148,7 @@ trans2(S0,S1,S2,H):-
   findall((S,P),pc_cc(S,S0,S1,P),L),
   append(L0,[(LastS,_P)],L),
   foldl(pick_next_state2(S0,S1,H),L0,(1,_),(_,S2)),
-  (var(S2)->
+  (var(S2)->  
     S2=LastS
   ;
     true
@@ -174,7 +174,7 @@ out2(S0,S1,W,H):-
   findall((W,P),pw_cc(W,S0,S1,P),L),
   append(L0,[(LastW,_P)],L),
   foldl(pick_word2(S0,S1,H),L0,(1,_),(_,W)),
-  (var(W)->
+  (var(W)->  
     W=LastW
   ;
     true
@@ -263,7 +263,7 @@ pc_cc(C3,C1,C2,P) :-
 
 pc_cc(C3,C1,C2,0) :-
   \+ fccc(C1,C2,C3,_).
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % lex.mle.pl
@@ -505,3 +505,4 @@ types :-
 :- tokens.
 :- types.
 :- classes.
+

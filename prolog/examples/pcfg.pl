@@ -34,7 +34,7 @@ pcfg([A|R],Der0,Der,L0,L2):-
 % and continue with the rest of the list
 
 pcfg([A|R],Der0,Der,[A|L1],L2):-
-  \+ rule(A,_,_),
+  terminal(A),
   pcfg(R,Der0,Der,L1,L2).
 % if A is a terminal, move it to the output string
 
@@ -44,13 +44,15 @@ pcfg([],Der,Der,L,L).
 rule('S',Der,[a,'S']):0.2; rule('S',Der,[b,'S']):0.2; rule('S',Der,[a]):0.3; rule('S',Der,[b]):0.3.
 % encodes the three rules of the grammar
 
+terminal(a).
+terminal(b).
 :- end_lpad.
 
 /** <examples>
 
 ?- prob(pcfg([a,b,a,a]),Prob). % what is the probability that the string abaa belongs to the language?
 % expected result 0.0024
-?- prob_bar(pcfg([a,b,a,a]),Prob). % what is the probability that the string abaa belongs to the language?
+?- prob(pcfg([a,b,a,a]),Prob),bar(Prob,C). % what is the probability that the string abaa belongs to the language?
 % expected result 0.0024
 
 

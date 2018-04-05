@@ -1,11 +1,15 @@
-/*
-Viral Marketing
+/** <examples>
+?- prob(has(4),P).
+P = 0.192146176.
+
+?- prob(has(4),has(2),P).
+P = 0.380740705882353.
+
+?- prob(has(4),do(has(2)),P).
+P = 0.29964160000000006.
+
 */
 
-/** <examples>
-?- prob(has(2),do(has(3)),P).
-?- prob(has(2),has(3),P).
-*/
 :- use_module(library(pita)).
 
 :- if(current_predicate(use_rendering/1)).
@@ -25,6 +29,8 @@ graph(digraph([rankdir="LR"|G])):-
 has(_):0.1.
 
 has(P) :0.4 :- trusts(P, Q), has(Q).
+
+
 
 trusts(2,1).
 trusts(3,1).

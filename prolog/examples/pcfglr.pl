@@ -5,8 +5,8 @@ Probabilistic contect-free grammar.
 0.3:S->a
 0.3:S->b
 From
- Taisuke Sato and Keiichi Kubota. Viterbi training in PRISM.
-Theory and Practice of Logic Programming,  doi:10.1017/S1471068413000677.
+ Taisuke Sato and Keiichi Kubota. Viterbi training in PRISM. 
+Theory and Practice of Logic Programming,  doi:10.1017/S1471068413000677. 
 */
 :- use_module(library(mcintyre)).
 
@@ -40,7 +40,7 @@ pcfg([A|R],Der0,Der,[A|L1],L2):-
 pcfg([],Der,Der,L,L).
 % there are no more symbols to expand
 
-rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3;
+rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3; 
   rule('S',Der,[b]):0.3.
 
 % encodes the three rules of the grammar
@@ -48,32 +48,33 @@ rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3;
 :- end_lpad.
 
 /** <examples>
-?- mc_prob(pcfg([a]),Prob,[]).
+?- mc_prob(pcfg([a]),Prob).
 % expected result ~ 0.2986666666666667.
 
-?- mc_prob(pcfg([b]),Prob,[]).
+?- mc_prob(pcfg([b]),Prob).
 % expected result ~ 0.2976666666666667.
 
-?- mc_prob(pcfg([a,a]),Prob,[]).
+?- mc_prob(pcfg([a,a]),Prob).
 % expected result ~ 0.035666666666666666.
 
-?- mc_prob(pcfg([b,b]),Prob,[]).
+?- mc_prob(pcfg([b,b]),Prob).
 % expected result ~ 0.036833333333333336.
 
-?- mc_prob(pcfg([a,b]),Prob,[]).
+?- mc_prob(pcfg([a,b]),Prob).
 % expected result ~ 0.035833333333333335.
 
-?- mc_prob(pcfg([a,b,a]),Prob,[]).
+?- mc_prob(pcfg([a,b,a]),Prob).
 % expected result ~ 0.009.
 
-?- Options=[successes(S),failures(F)], mc_sample(pcfg([a,a]),1000,Prob,Options). % take 1000 samples of pcfg([a,a])
+?- mc_sample(pcfg([a,a]),1000,Prob,[successes(T),failures(F)]). % take 1000 samples of pcfg([a,a])
 
-?- mc_sample_bar(pcfg([a,a]),1000,Prob,[bar(BarChart)]). % take 1000 samples of pcfg([a,a])
+?- mc_sample(pcfg([a,a]),1000,Prob),bar(Prob,C). % take 1000 samples of pcfg([a,a])
 
-?- mc_sample_arg(pcfg(S),20,S,Values,[]). % take 20 samples of S in
+?- mc_sample_arg(pcfg(S),20,S,Values). % take 20 samples of S in 
 % findall(S,pcfg(S),L)
 
-?- mc_sample_arg(pcfg(L),20,L,Values,[bar(Chart)]). % take 20 samples of S in
+?- mc_sample_arg(pcfg(L),20,L,Values),argbar(Values,C). % take 20 samples of S in 
 % findall(S,pcfg(S),L)
 
 */
+

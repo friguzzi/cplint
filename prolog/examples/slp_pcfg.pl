@@ -12,9 +12,9 @@ can be represented with the SLP
   s(R).
 0.3::s([a]).
 0.3::s([b]).
-SLPs define a distribution over the argument of goals: the above program
+SLPs define a distribution over the argument of goals: the above program 
 defines a distribution over the values of S in for which s(S) succeeds.
-This SLP can be written as an LPAD/ProbLog program by
+This SLP can be written as an LPAD/ProbLog program by 
 recalling that in SLPs the probabilities of all rules with the same head predicate sum to one and define a mutually exclusive choice on how to continue a proof.
 Furthermore, repeated choices are independent, i.e., no stochastic memoization
 is done. Therefore, a counter argument is added to the predicate s/1 to
@@ -46,12 +46,13 @@ s(L):-s(L,0).
 :- end_lpad.
 
 /** <examples>
-?- mc_sample_arg(s(S),100,S,L,[]).
+?- mc_sample_arg(s(S),100,S,L).
 % sample 100 sentences from the language
-?- mc_sample_arg(s(S),100,S,L,[bar(Chart)]).
+?- mc_sample_arg(s(S),100,S,P),argbar(P,C).
 % sample 100 sentences from the language and draw a bar chart
 
 
 
 
 */
+

@@ -2,8 +2,8 @@
 A three-sided die is repeatedly thrown until the outcome is three.
 on(T,F) means that on the Tth throw the face F came out.
 From
-J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated
-disjunctions. In International Conference on Logic Programming,
+J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated 
+disjunctions. In International Conference on Logic Programming, 
 volume 3131 of LNCS, pages 195-209. Springer, 2004.
 */
 :- use_module(library(mcintyre)).
@@ -44,16 +44,17 @@ never_1:- \+ at_least_once_1.
 
 /** <examples>
 
-?- mc_sample(at_least_once_1,1000,Prob,[successes(T),failures(F)]). % what is the probability that the die lands on face 1 at least once?
+?- mc_sample(at_least_once_1,1000,Prob,[successes(S),failures(F)]). % what is the probability that the die lands on face 1 at least once?
 % expected result 0.5
-?- mc_sample(never_1,1000,Prob,[successes(T),failures(F)]). % what is the probability that the die never lands on face 1?
+?- mc_sample(never_1,1000,Prob,[successes(S),failures(F)]). % what is the probability that the die never lands on face 1?
 % expected result 0.5
-?- mc_prob_bar(on(0,1),Prob). % what is the probability that the die lands on face 1 at time 0?
+?- mc_prob(on(0,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 0?
 % expected result 0.16666666666666666
-?- mc_prob_bar(on(1,1),Prob). % what is the probability that the die lands on face 1 at time 1?
+?- mc_prob(on(1,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 1?
 % expected result 0.13888888888888887
-?- mc_prob_bar(on(2,1),Prob). % what is the probability that the die lands on face 1 at time 2?
+?- mc_prob(on(2,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 2?
 % expected result 0.11574074074074071
 
 
 */
+ 
