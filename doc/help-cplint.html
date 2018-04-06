@@ -151,11 +151,11 @@ mix(X) :- heads, g(X).
 mix(X) :- tails, h(X).</code></pre>
 <p>The argument <code>X</code> of <code>mix(X)</code> follows a distribution that is a mixture of two Gaussian, one with mean 0 and variance 1 with probability 0.6 and one with mean 5 and variance 2 with probability 0.4.</p>
 <p>The parameters of the distribution atoms can be taken from the probabilistic atom, the example <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a></p>
-<pre><code>value(I,X) :-
+<pre><code>val(I,X) :-
   mean(M),
-  value(I,M,X).
+  val(I,M,X).
 mean(M): gaussian(M,1.0, 5.0).
-value(_,M,X): gaussian(X,M, 2.0).</code></pre>
+val(_,M,X): gaussian(X,M, 2.0).</code></pre>
 <p>states that for an index <code>I</code> the continuous variable <code>X</code> is sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Guassian with mean 1 and variance 5.</p>
 <p>Any operation is allowed on continuous random variables. The example below (<a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a>) encodes a Kalman filter:</p>
 <pre><code>kf(N,O, T) :-
@@ -292,12 +292,12 @@ female(cathy).</code></pre>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
 <h2 id="uncondq">Unconditional Queries</h2>
 <p>The unconditional probability of an atom can be asked using <code>pita</code> with the predicate</p>
-<pre><code>prob(:Query:atom,-Probability:float).</code></pre>
+<pre><code>prob(:Query:atom,-Probability:float) is nondet</code></pre>
 <p>as in</p>
 <pre><code>?- prob(heads(coin),P).</code></pre>
 <p>If the query is non-ground, <code>prob/2</code> returns in backtracking the successful instantiations together with their probability.</p>
 <p>When using <code>mcintyre</code>, the predicate for querying is</p>
-<pre><code>mc_prob(:Query:atom,-Probability:float,+Options:list).</code></pre>
+<pre><code>mc_prob(:Query:atom,-Probability:float,+Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_prob/3</code>:</p>
 <ul>
 <li><p><code>bar(-BarChar:dict)</code> BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
@@ -305,10 +305,11 @@ female(cathy).</code></pre>
 <p>For example</p>
 <pre><code>?- mc_prob(heads(coin),P,[]).</code></pre>
 <p>You can also use</p>
-<pre><code>mc_prob(:Query:atom,-Probability:float).</code></pre>
+<pre><code>mc_prob(:Query:atom,-Probability:float) is det</code></pre>
 <p>which is equivalent to <code>mc_prob/3</code> with an empty option list. In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalent to calling the first with an empty option list.</p>
 <p>With <code>mcintyre</code>, you can also take a given number of sample with</p>
-<pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).</code></pre>
+<pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,
+  Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_sample/4</code>:</p>
 <ul>
 <li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
@@ -322,7 +323,7 @@ female(cathy).</code></pre>
 <p>samples <code>heads(coin)</code> 1000 times and returns the estimated probability that a sample is true.</p>
 <p>Moreover, you can sample arguments of queries with</p>
 <pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list).</code></pre>
+  -Values:list,+Options:list) is det</code></pre>
 <p>The predicate samples <code>Query</code> a number of <code>Samples</code> times. <code>Arg</code> should be a variable in <code>Query</code>. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random and <code>N</code> is the number of samples returning that list of values. If <code>L</code> is the empty list, it means that for that sample the query failed. If <code>L</code> is a list with a single element, it means that for that sample the query is determinate. If, in all couples <code>L-N</code>, <code>L</code> is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. This is one of the assumptions taken for programs of the PRISM system <span class="citation">[<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>. For example <a href="http://cplint.eu/example/inference/pcfglr.pl"><code>pcfglr.pl</code></a> and <a href="http://cplint.eu/example/inference/plcg.pl"><code>plcg.pl</code></a> satisfy this constraint while <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> and <a href="http://cplint.eu/example/inference/var_obj.pl"><code>var_obj.pl</code></a> doesn’t.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
@@ -334,11 +335,12 @@ female(cathy).</code></pre>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,Values).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> that takes 50 samples of <code>L</code> in <code>findall(S,(reach(s0,0,S),L)</code>.</p>
 <p>You can sample arguments of queries also with</p>
-<pre><code>mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list).</code></pre>
+<pre><code>mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,
+  -Values:list) is det</code></pre>
 <p>that samples <code>Query</code> a number of <code>Samples</code> times The predicate returns in <code>Values</code> a list of values of <code>Arg</code> returned as the first answer by <code>Query</code> in a world sampled at random. The value is <code>failure</code> if the query fails.</p>
 <p>The predicate</p>
 <pre><code>mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list).</code></pre>
+  -Values:list,+Options:list) is det</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times and returns in <code>Values</code> a list of couples <code>V-N</code> where <code>V</code> is the value of <code>Arg</code> returned as the first answer by <code>Query</code> in a world sampled at random and <code>N</code> is the number of samples returning that value. <code>V</code> is failure if the query fails. <code>mc_sample_arg_first/5</code> differs from <code>mc_sample_arg/5</code> because the first just computes the first answer of the query for each sampled world.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg_first/5</code>:</p>
 <ul>
@@ -346,24 +348,29 @@ female(cathy).</code></pre>
 </ul>
 <p>The predicate</p>
 <pre><code>mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list)</code></pre>
+  -Values:list,+Options:list) is det</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times and returns in <code>Values</code> a list of couples <code>V-N</code> where <code>V</code> is a value sampled with uniform probability from those returned by <code>Query</code> in a world sampled at random and <code>N</code> is the number of samples returning that value. <code>V</code> is failure if the query fails.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg_one/5</code>:</p>
 <ul>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> has a bar for each value of <code>Arg</code> returned by sampling with uniform probability one answer from those returned by the query in a world sampled at random. The size of the bar is the number of samples.</p></li>
 </ul>
 <p>Finally, you can compute expectations with</p>
-<pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
+<pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> by sampling. It takes <code>N</code> samples of <code>Query</code> and sums up the value of <code>Arg</code> for each sample. The overall sum is divided by <code>N</code> to give <code>Exp</code>.</p>
 <p>An example of use of the above predicate is</p>
 <pre><code>?- mc_expectation(eventually(elect,T),1000,T,E).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <h3 id="drawing-bdds">Drawing BDDs</h3>
 <p>With <code>pita</code>, you can obtain the BDD for a query with the predicates</p>
-<pre><code>bdd_dot_file(:Query:atom,+FileName:string,-Var:list)
-bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
+<pre><code>bdd_dot_file(:Query:atom,+FileName:string,-Var:list) is nondet
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <p>The first write the BDD to a file, the latter returns it as a string. The BDD is represented in the dot format of graphviz. Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table <code>Var</code> contains the associations between the rule groundings and the multivalued variables: the first column contains contains the multivalued variable index, the second column contains the rule index, corresponding to its position in the program, and the last column contains the list of constants grounding the rule, each replacing a variable in the order of appearance in the rule.</p>
-<p>The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer.</p>
+<p>The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer by including</p>
+<pre><code>:- use_rendering(graphviz).</code></pre>
+<p>before <code>:- pita.</code></p>
+<p>For example (<a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
+<pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
+<p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
 <h2 id="condq">Conditional Queries on Discrete Variables</h2>
 <p>The conditional probability of an atom query given another atom evidence can be asked using <code>pita</code> with the predicate</p>
 <pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet</code></pre>
@@ -371,7 +378,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <pre><code>?- prob(heads(coin),biased(coin),P).</code></pre>
 <p>If the query/evidence are non-ground, <code>prob/3</code> returns in backtracking ground instantiations together with their probability. The query and the evidence can be conjunctions of literals (positive or negative).</p>
 <p>You also have</p>
-<pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet</code></pre>
+<pre><code>prob(:Query:atom,:Evidence:atom,-Probability:float,
+  +Options:list) is nondet</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>prob/4</code>:</p>
 <ul>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
@@ -385,7 +393,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample. The final probability is given by the number of successes over the total number of samples.</p>
 <p>You can take a given number of sample with rejection sampling using</p>
 <pre><code>mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Probability:float,+Options:list).</code></pre>
+  -Probability:float,+Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
 <li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
@@ -398,7 +406,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>The query and the evidence can be conjunctions of literals.</p>
 <p>You can take a given number of sample with Metropolis-Hastings MCMC using</p>
 <pre><code>mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Probability:float,+Options:list).</code></pre>
+  -Probability:float,+Options:list) is det</code></pre>
 <p>where <code>Lag</code> (that is set with the options, default value 1) is the number of sampled choices to forget before taking a new sample.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_mh_sample/5</code>:</p>
 <ul>
@@ -415,7 +423,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <p>takes 10000 accepted samples and returns in <code>T</code> the number of samples where <code>eval(2,4)</code> is true, in <code>F</code> the number of samples where <code>eval(2,4)</code> is false and in <code>P</code> the estimated probability (<code>T/10000</code>).</p>
 <p>Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using</p>
 <pre><code>mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list).</code></pre>
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det</code></pre>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_rejection_sample_arg/6</code>:</p>
 <ul>
 <li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
@@ -423,7 +431,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a bar chart of the possible values</p></li>
 </ul>
 <pre><code>mc_mh_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list).</code></pre>
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det</code></pre>
 <p>that returns the distribution of values for <code>Arg</code> in <code>Query</code> in <code>Samples</code> of <code>Query</code> given that <code>Evidence</code> is true. <code>Options</code> is a list of options, the following are recognised by <code>mc_mh_sample_arg/6</code>:</p>
 <ul>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
@@ -437,14 +445,14 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 <pre><code>?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,Y,V,[]).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a>.</p>
 <p>Finally, you can compute expectations with</p>
-<pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
+<pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> by sampling. It takes <code>N</code> samples of <code>Query</code> and sums up the value of <code>Arg</code> for each sample. The overall sum is divided by <code>N</code> to give <code>Exp</code>.</p>
 <p>An example of use of the above predicate is</p>
 <pre><code>?- mc_expectation(eventually(elect,T),1000,T,E).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <p>To compute conditional expectations, use</p>
 <pre><code>mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-	?Arg:var,-Exp:float,+Options:list).</code></pre>
+	?Arg:var,-Exp:float,+Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_mh_expectation/6</code>:</p>
 <ul>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
@@ -452,35 +460,38 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
 </ul>
 <p>You can also use</p>
 <pre><code>mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
-  ?Arg:var,-Exp:float).</code></pre>
+  ?Arg:var,-Exp:float) is det</code></pre>
 <p>as in</p>
 <pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a> that computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
 <p>For example</p>
-<pre><code>?- mc_sample_arg(value(0,X),1000,X,L).</code></pre>
+<pre><code>?- mc_sample_arg(val(0,X),1000,X,L).</code></pre>
 <p>from (<a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a>)) samples 1000 values for <code>X</code> in <code>value(0,X)</code> and returns them in <code>L</code>.</p>
 <p>When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis-Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0. Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering <span class="citation">[<a href="#ref-fung1990weighing">9</a>,<a href="#ref-koller2009probabilistic">11</a>,<a href="#ref-Nitti2016">13</a>]</span> to obtain samples of continuous arguments of a goal.</p>
 <p>For each sample to be taken, likelihood weighting uses a meta-interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample. This meta-interpreter is similar to the one used to generate the first sample in Metropolis-Hastings.</p>
 <p>Then a different meta-interpreter is used to evaluate the weight of the sample. This meta-interpreter starts with the evidence as the query and a weight of 1. Each time the meta-interpreter encounters a probabilistic choice over a continuous variable, it first checks whether a value has already been sampled. If so, it computes the probability density of the sampled value and multiplies the weight by it. If the value has not been sampled, it takes a sample and records it, leaving the weight unchanged. In this way, each sample in the result has a weight that is 1 for the prior distribution and that may be different from the posterior distribution, reflecting the influence of evidence.</p>
 <p>In particle filtering, the evidence is a list of atoms. Each sample is weighted by the likelihood of an element of the evidence and constitutes a particle. After weighting, particles are resampled and the next element of the evidence is considered.</p>
 <p>The predicate</p>
-<pre><code>mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:float)</code></pre>
+<pre><code>mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Prob:float) is det</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> (a conjunction of atoms is allowed here). is true. The predicate returns in <code>Prob</code> the probability that the query is true. It performs likelihood weighting: each sample is weighted by the likelihood of evidence in the sample. For example</p>
 <pre><code>?- mc_lw_sample(nation(a),student_gpa(4.0),1000,P).</code></pre>
 <p>from <a href="http://cplint.eu/example/inference/indian_gpa.pl"><code>indian_gpa.pl</code></a> samples 1000 the query <code>nation(a)</code> given that <code>student_gpa(4.0)</code> has been observed.</p>
 <p>The predicate</p>
-<pre><code>mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-ValList)</code></pre>
+<pre><code>mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,
+  -ValList) is det</code></pre>
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
 <pre><code>?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).</code></pre>
 <p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>value(0,X)</code> given that <code>value(1,9)</code> and <code>value(2,8)</code> have been observed.</p>
 <p>You can compute conditional expectations using likelihood weighting with</p>
-<pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).</code></pre>
+<pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,
+  -Exp:float) is det</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> given that <code>Evidence</code> is true. It takes <code>N</code> samples of <code>Arg</code> in <code>Query</code>, weighting each according to the evidence, and returns their weighted average.</p>
 <p>The predicate</p>
 <pre><code>mc_particle_sample_arg(:Query:atom,+Evidence:list,
-  +Samples:int,?Arg:var,-Values:list)</code></pre>
+  +Samples:int,?Arg:var,-Values:list) is det</code></pre>
 <p>samples argument <code>Arg</code> of <code>Query</code> using particle filtering given that <code>Evidence</code> is true. <code>Evidence</code> is a list of goals and <code>Query</code> can be either a single goal or a list of goals. When <code>Query</code> is a single goal, the predicate returns in <code>Values</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds in a particle in the last set of particles and <code>W</code> is the weight of the particle. For each element of <code>Evidence</code>, the particles are obtained by sampling <code>Query</code> in each current particle and weighting the particle by the likelihood of the evidence element.</p>
 <p>When <code>Query</code> is a list of goals, <code>Arg</code> is a list of variables, one for each query of <code>Query</code> and <code>Arg</code> and <code>Query</code> must have the same length of <code>Evidence</code>. <code>Values</code> is then list of the same length of <code>Evidence</code> and each of its elements is a list of couples <code>V-W</code> where <code>V</code> is a value of the corresponding element of <code>Arg</code> for which the corresponding element of <code>Query</code> succeeds in a particle and <code>W</code> is the weight of the particle. For each element of <code>Evidence</code>, the particles are obtained by sampling the corresponding element of <code>Query</code> in each current particle and weighting the particle by the likelihood of the evidence element.</p>
 <p>For example</p>
@@ -492,11 +503,11 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
 <p>from <a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a> performs particle filtering for a Kalman filter with four observations. For each observation, the value of the state at the same time point is sampled. The list of samples is returned in <code>[F1,F2,F3,F4]</code>, with each element being the sample for a time point.</p>
 <p>The predicate</p>
 <pre><code>mc_particle_sample(:Query:atom,:Evidence:list,
-  +Samples:int,-Prob:float)</code></pre>
+  +Samples:int,-Prob:float) is det</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> is true using particle filtering. <code>Evidence</code> is a list of goals. The predicate returns in <code>Prob</code> the probability that the query is true.</p>
 <p>You can compute conditional expectations using particle filtering with</p>
 <pre><code>mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,
-  ?Arg:var,-Exp:float).</code></pre>
+  ?Arg:var,-Exp:float) is det</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> given that <code>Evidence</code> is true. It uses <code>N</code> particles.</p>
 <h2 id="causal">Causal Inference</h2>
 <p><code>pita</code> and <code>mcintyre</code> support causal reasoning, i.e., computing the effect of actions using the do-calculus <span class="citation">[<a href="#ref-Pea00-book">14</a>]</span>.</p>
@@ -533,10 +544,10 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
 <p>The same result can be achieved with</p>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,ValList),argbar(ValList,Chart)</code></pre>
 <p>Drawing a graph is particularly interesting when sampling values for continuous arguments of goals. In this case, you can use the samples to draw the probability density function of the argument. The predicate</p>
-<pre><code>histogram(+List:list,-Chart:dict,+Options:list)</code></pre>
+<pre><code>histogram(+List:list,-Chart:dict,+Options:list) is det</code></pre>
 <p>draws a histogram of the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be a list of couples of the form <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a sampled value and <code>W</code> is its weight. This is the format of the list of samples returned by argument sampling predicates.</p>
 <p>The predicate</p>
-<pre><code>density(+List:list,-Chart:dict,+Options:list)</code></pre>
+<pre><code>density(+List:list,-Chart:dict,+Options:list) is det</code></pre>
 <p>draws a line chart of the density the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be as for <code>histogram/4</code>.</p>
 <p>In <code>histogram/3</code> and <code>density/4</code> <code>Options</code> is a list of options, the following are recognised:</p>
 <ul>
@@ -546,7 +557,8 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
 </ul>
 <p>In this way you can specify the limits and the number of intervals of the <span class="math inline">\(X\)</span>.</p>
 <p>The predicate</p>
-<pre><code>densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list)</code></pre>
+<pre><code>densities(+PriorList:list,+PostList:list,-Chart:dict,
+  +Options:list) is det</code></pre>
 <p>draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in <code>PriorList</code> and <code>PostList</code> can be either couples <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a value and <code>W</code> its weight. The same options as for <code>histogram/3</code> and <code>density/4</code> are recognized.</p>
 <p>For example</p>
 <pre><code>?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
@@ -558,14 +570,6 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,Chart).</code></pre>
 <p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 amples of argument <code>X</code> of <code>value(0,X)</code> before and after observing <code>(value(1,9),value(2,8)</code> and draws the prior and posterior densities of the samples using a line chart.</p>
-<p>You can obtain the BDD for a query with the predicate</p>
-<pre><code>bdd_dot_string(:Query:atom,-DotString:string,-Var:list)</code></pre>
-<p>if you include</p>
-<pre><code>:- use_rendering(graphviz).</code></pre>
-<p>before <code>:- pita.</code> Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children with negation applied to the sub BDD. Each level of the BDD is associated to a variable of the form XI_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I. The hexadecimal number in each node is part of its address in memory and is not significant. The table <code>Var</code> contains the associations between the rule groundings and the multivalued variables.</p>
-<p>For example (<a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
-<pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
-<p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
 <h3 id="using-r">Using R</h3>
 <p>You have to load library <code>cplint_r</code> (a SWI-Prolog pack) with</p>
 <pre><code>:- use_module(library(cplint_r)).</code></pre>
@@ -870,24 +874,26 @@ fold(test,[490,491,...]).</code></pre>
 <pre><code>?- induce_par([train],P).</code></pre>
 <h3 id="structure-learning">Structure Learning</h3>
 <p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
-<pre><code>?- induce(&lt;list of folds&gt;,P).</code></pre>
-<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
+<pre><code>induce(+List_of_folds:list,-P:list) is det</code></pre>
+<p>where <code>List_of_folds</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
 <p>For example <a href="http://cplint.eu/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described below.</p>
 <p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <p>To execute LEMUR, prepare an input file in the editor panel as indicated above and call</p>
-<pre><code>?- induce_lm(&lt;list of folds&gt;,P).</code></pre>
-<p>where <code>&lt;list of folds&gt;</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
+<pre><code>induce_lm(+List_of_folds:list,-P:list) is det</code></pre>
+<p>where <code>List_of_folds</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
 <p>For example <a href="http://cplint.eu/example/lemur/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce_lm([train],P).</code></pre>
 <p>Between two executions of <code>induce_lm/2</code> you should exit SWI-Prolog to have a clean database.</p>
 <h3 id="testing">Testing</h3>
 <p>A program can also be tested on a test set in SLIPCOVER and LEMUR with</p>
-<pre><code>?- test(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,ROC,AUCPR,PR).</code></pre>
+<pre><code>test(+Program:list,+List_of_folds:list,-LL:float,
+  -AUCROC:float,-ROC:list,-AUCPR:float,-PR:list) is det</code></pre>
 <p>or</p>
-<pre><code>?- test_prob(&lt;program&gt;,&lt;list of folds&gt;,NPos,NNeg,LL,ExampleList).</code></pre>
-<p>where <code>&lt;program&gt;</code> is a list of terms representing clauses and <code>&lt;list of folds&gt;</code> is a list of folds.</p>
+<pre><code>test(+Program:list,+List_of_folds:list,-NPos:int,-NNeg:int,
+  -LL:float,-ExampleList:list) is det</code></pre>
+<p>where <code>Program</code> is a list of terms representing clauses and <code>List_of_folds</code> is a list of folds.</p>
 <p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
 <p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
 <p>Then you can draw the curves in <code>cplint</code> on SWISH using C3.js using</p>
@@ -906,7 +912,8 @@ fold(test,[490,491,...]).</code></pre>
 <p>You can also draw the curves in <code>cplint</code> on SWISH using R by loading library <code>cplint_r</code> with</p>
 <pre><code>:- use_module(library(cplint_r)).</code></pre>
 <p>and using</p>
-<pre><code>?- test_r(&lt;program&gt;,&lt;list of folds&gt;,LL,AUCROC,AUCPR).</code></pre>
+<pre><code>test_r(+Program:list,+List_of_folds:list,-LL:float,
+  -AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>or predicate</p>
 <pre><code>compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>

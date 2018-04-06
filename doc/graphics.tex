@@ -74,7 +74,7 @@ In this case, you can use the samples to draw the
 probability density function of the argument.
 The predicate
 \begin{verbatim}
-histogram(+List:list,-Chart:dict,+Options:list)
+histogram(+List:list,-Chart:dict,+Options:list) is det
 \end{verbatim}
 draws a histogram of the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
@@ -83,7 +83,7 @@ where \verb|V| is a sampled value and \verb|W| is its weight. This is the format
 
 The predicate
 \begin{verbatim}
-density(+List:list,-Chart:dict,+Options:list)
+density(+List:list,-Chart:dict,+Options:list) is det
 \end{verbatim}
 draws a line chart of the density the samples in \verb|List| dividing the domain in
  \verb|NBins| bins.
@@ -102,7 +102,8 @@ In this way you can specify the limits and the number of intervals of the $X$.
 
 The predicate
 \begin{verbatim}
-densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list)
+densities(+PriorList:list,+PostList:list,-Chart:dict,
+  +Options:list) is det
 \end{verbatim}
 draws a line chart of the density of two sets of samples, usually
  prior and post observations. The samples in \verb|PriorList| and \verb|PostList|
@@ -127,30 +128,6 @@ Instead
 from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 takes 1000 amples of argument \verb|X| of \verb|value(0,X)| before and after observing
 \verb|(value(1,9),value(2,8)| and draws the prior and posterior densities of the samples using a line chart.
-
-You can obtain the BDD for a query with the predicate
-\begin{verbatim}
-bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
-\end{verbatim}
-if you include
-\begin{verbatim}
-:- use_rendering(graphviz).
-\end{verbatim}
-before \verb|:- pita.|
-Solid edges indicate 1-children, dashed edges indicate 0-children and dotted
-edges indicate 0-children with negation applied to the sub BDD.
-Each level of the BDD is associated to a variable of the form XI\_J indicated on the left:
-I indicates the  multivalued variable index and J the index of the Boolean variable of rule I.
-The hexadecimal number in each node is part of its address in memory and is not significant.
-The table \verb|Var| contains the associations between the rule groundings and the
-multivalued variables.
-
-For example (\href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
-\begin{verbatim}
-?- bdd_dot_string(heads(coin),BDD,Var).
-\end{verbatim}
-returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
-multivalued variables.
 
 \subsubsection{Using R}
 You have to load library \texttt{cplint\_r}  (a SWI-Prolog pack) with
