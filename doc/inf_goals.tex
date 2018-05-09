@@ -2,7 +2,7 @@
 \label{uncondq}
 The unconditional probability of an atom can be asked using \verb|pita| with the predicate
 \begin{verbatim}
-prob(:Query:atom,-Probability:float).
+prob(:Query:atom,-Probability:float) is nondet
 \end{verbatim}
 as in
 \begin{verbatim}
@@ -12,7 +12,7 @@ If the query is non-ground, \verb|prob/2| returns in backtracking the successful
 
 When using \verb|mcintyre|, the predicate for querying is
 \begin{verbatim}
-mc_prob(:Query:atom,-Probability:float,+Options:list).
+mc_prob(:Query:atom,-Probability:float,+Options:list) is det
 \end{verbatim} where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_prob/3|:
 \begin{itemize}
@@ -27,7 +27,7 @@ For example
 \end{verbatim}
 You can also use
 \begin{verbatim}
-mc_prob(:Query:atom,-Probability:float).
+mc_prob(:Query:atom,-Probability:float) is det
 \end{verbatim}
 which is equivalent to \verb|mc_prob/3| with an empty option list. In general, all the predicates that admit
 a list of options as an argument have a corresponding version without the list of options that is equivalent
@@ -35,7 +35,8 @@ to calling the first with an empty option list.
 
 With \verb|mcintyre|, you can also take a given number of sample with
 \begin{verbatim}
-mc_sample(:Query:atom,+Samples:int,-Probability:float,Options:list).
+mc_sample(:Query:atom,+Samples:int,-Probability:float,
+  Options:list) is det
 \end{verbatim}
 where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample/4|:
@@ -66,7 +67,7 @@ estimated probability that a sample is true.
 Moreover, you can sample arguments of queries with
 \begin{verbatim}
 mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list).
+  -Values:list,+Options:list) is det
 \end{verbatim}
 The predicate samples \verb|Query| a number of \verb|Samples| times.
 \verb|Arg| should be a variable in \verb|Query|.
@@ -113,7 +114,8 @@ that takes 50 samples of \verb|L| in \verb|findall(S,(reach(s0,0,S),L)|.
 
 You can sample arguments of queries also with
 \begin{verbatim}
-mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list).
+mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,
+  -Values:list) is det
 \end{verbatim}
 that samples \verb|Query| a number of \verb|Samples| times
 The predicate returns in \verb|Values| a list of values
@@ -124,7 +126,7 @@ The value is \verb|failure| if the query fails.
 The predicate
 \begin{verbatim}
 mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list).
+  -Values:list,+Options:list) is det
 \end{verbatim}
 samples \verb|Query| a number of \verb|Samples| times
 and returns in \verb|Values| a list of couples \verb|V-N| where
@@ -146,7 +148,7 @@ answer of the query for each sampled world.
 The predicate
 \begin{verbatim}
 mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,
-  -Values:list,+Options:list)
+  -Values:list,+Options:list) is det
 \end{verbatim}
  samples \verb|Query| a number of \verb|Samples| times
 and returns in \verb|Values| a list of couples \verb|V-N| where
@@ -167,7 +169,7 @@ returning that value.
 
 Finally, you can compute expectations with
 \begin{verbatim}
-mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).
+mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
 \end{verbatim}
 that computes the expected value of \verb|Arg| in \verb|Query| by
 sampling.
@@ -185,8 +187,8 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 With \verb|pita|, you can obtain the BDD for a query with the predicates
 \begin{verbatim}
-bdd_dot_file(:Query:atom,+FileName:string,-Var:list)
-bdd_dot_string(:Query:atom,-DotString:string,-Var:list)
+bdd_dot_file(:Query:atom,+FileName:string,-Var:list) is nondet
+bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet
 \end{verbatim}
 The first write the BDD to a file, the latter returns it as a string.
 The BDD is represented in the dot format of graphviz.
@@ -202,7 +204,19 @@ to its position in the program, and the last column contains the list
 of constants grounding the rule, each replacing a variable in the order of appearance in the
 rule.
 
-The BDD can be drawn in \verb|cplint| on SWISH by using the \verb|graphviz| renderer.
+The BDD can be drawn in \verb|cplint| on SWISH by using the \verb|graphviz| renderer
+by including
+\begin{verbatim}
+:- use_rendering(graphviz).
+\end{verbatim}
+before \verb|:- pita.|
+
+For example (\href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
+\begin{verbatim}
+?- bdd_dot_string(heads(coin),BDD,Var).
+\end{verbatim}
+returns the BDD for the query \verb|heads(coin)| and the list of associations between rule groundings and
+multivalued variables.
 
 
 \subsection{Conditional Queries on Discrete Variables}
@@ -220,7 +234,8 @@ If the query/evidence are non-ground, \verb|prob/3| returns in backtracking grou
 
 You also have
 \begin{verbatim}
-prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet
+prob(:Query:atom,:Evidence:atom,-Probability:float,
+  +Options:list) is nondet
 \end{verbatim}
 where \verb|Options| is a list of options, the following are recognised by \verb|prob/4|:
 \begin{itemize}
@@ -270,7 +285,7 @@ number of samples.
 You can take a given number of sample with rejection sampling using
 \begin{verbatim}
 mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Probability:float,+Options:list).
+  -Probability:float,+Options:list) is det
 \end{verbatim}
 where
 \verb|Options| is a list of options, the following are recognised by \verb|mc_sample_arg/5|:
@@ -294,7 +309,7 @@ The query and the evidence can be conjunctions of literals.
 You can take a given number of sample with Metropolis-Hastings MCMC using
 \begin{verbatim}
 mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,
-  -Probability:float,+Options:list).
+  -Probability:float,+Options:list) is det
 \end{verbatim}
 where \verb|Lag| (that is set with the options, default value 1) is the number of sampled choices to forget before taking a new sample.
 
@@ -328,7 +343,7 @@ estimated probability (\verb|T/10000|).
 Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using
 \begin{verbatim}
 mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list).
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det
 \end{verbatim}
 \verb|Options| is a list of options, the following are recognised by \verb|mc_rejection_sample_arg/6|:
 \begin{itemize}
@@ -341,7 +356,7 @@ Number of failueres
 \end{itemize}
 \begin{verbatim}
 mc_mh_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list).
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det
 \end{verbatim}
 that returns the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
 \verb|Query| given that \verb|Evidence| is true.
@@ -371,7 +386,7 @@ of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}.
 
 Finally, you can compute expectations with
 \begin{verbatim}
-mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float).
+mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
 \end{verbatim}
 that computes the expected value of \verb|Arg| in \verb|Query| by
 sampling.
@@ -388,7 +403,7 @@ that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 To compute conditional expectations, use
 \begin{verbatim}
 mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-	?Arg:var,-Exp:float,+Options:list).
+	?Arg:var,-Exp:float,+Options:list) is det
 \end{verbatim}
 where \verb|Options| is a list of options, the following are recognised by \verb|mc_mh_expectation/6|:
 \begin{itemize}
@@ -400,7 +415,7 @@ lag between each sample, \verb|Lag| sampled choices are forgotten, default value
 You can also use
 \begin{verbatim}
 mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
-  ?Arg:var,-Exp:float).
+  ?Arg:var,-Exp:float) is det
 \end{verbatim}
 as in
 \begin{verbatim}
@@ -422,7 +437,7 @@ arguments.
 
 For example
 \begin{verbatim}
-?- mc_sample_arg(value(0,X),1000,X,L).
+?- mc_sample_arg(val(0,X),1000,X,L).
 \end{verbatim}
 from (\href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}})) samples 1000 values for \verb|X| in
 \verb|value(0,X)| and returns them in \verb|L|.
@@ -461,7 +476,8 @@ is considered.
 
  The predicate
 \begin{verbatim}
-mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:float)
+mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Prob:float) is det
 \end{verbatim}
 samples \verb|Query|  a number of \verb|Samples| times given that \verb|Evidence|
 (a conjunction of atoms is allowed here). is true.
@@ -478,7 +494,8 @@ from \href{http://cplint.eu/example/inference/indian_gpa.pl}{\texttt{indian\_gpa
 
  The predicate
 \begin{verbatim}
-mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-ValList)
+mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,
+  -ValList) is det
 \end{verbatim}
 returns in \verb|ValList| a list of couples \verb|V-W| where \verb|V| is a value of \verb|Arg|
 for which \verb|Query| succeeds and \verb|W| is the
@@ -493,7 +510,8 @@ from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_
 
 You can compute conditional expectations using likelihood weighting with
 \begin{verbatim}
-mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float).
+mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,
+  -Exp:float) is det
 \end{verbatim}
 that computes the expected value of \verb|Arg| in \verb|Query| given that
 \verb|Evidence| is true.
@@ -505,7 +523,7 @@ to the evidence, and returns their weighted average.
 The predicate
 \begin{verbatim}
 mc_particle_sample_arg(:Query:atom,+Evidence:list,
-  +Samples:int,?Arg:var,-Values:list)
+  +Samples:int,?Arg:var,-Values:list) is det
 \end{verbatim}
 samples argument \verb|Arg| of \verb|Query| using particle filtering
 given that
@@ -545,7 +563,7 @@ being the sample for a time point.
 The predicate
 \begin{verbatim}
 mc_particle_sample(:Query:atom,:Evidence:list,
-  +Samples:int,-Prob:float)
+  +Samples:int,-Prob:float) is det
 \end{verbatim}
 samples \verb|Query|  a number of \verb|Samples| times given that
 \verb|Evidence|
@@ -555,7 +573,7 @@ The predicate returns in \verb|Prob| the probability that the query is true.
 You can compute conditional expectations using particle filtering with
 \begin{verbatim}
 mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,
-  ?Arg:var,-Exp:float).
+  ?Arg:var,-Exp:float) is det
 \end{verbatim}
 that computes the expected value of \verb|Arg| in \verb|Query| given that
 \verb|Evidence| is true.

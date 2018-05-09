@@ -459,9 +459,9 @@ To execute SLIPCOVER,
 prepare an input file in the editor panel as indicated above 
 and call
 \begin{verbatim}
-?- induce(<list of folds>,P).
+induce(+List_of_folds:list,-P:list) is det
 \end{verbatim}
-where \verb|<list of folds>| is a list of the folds for training and
+where \verb|List_of_folds| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
 For example \href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
@@ -478,9 +478,9 @@ To execute LEMUR,
 prepare an input file in the editor panel as indicated above 
 and call
 \begin{verbatim}
-?- induce_lm(<list of folds>,P).
+induce_lm(+List_of_folds:list,-P:list) is det
 \end{verbatim}
-where \verb|<list of folds>| is a list of the folds for training and
+where \verb|List_of_folds| is a list of the folds for training and
 \verb|P| will contain the learned program.
 
 For example \href{http://cplint.eu/example/lemur/bongard.pl}{\texttt{bongard.pl}}, you can perform structure learning on the \verb|train| fold with 
@@ -496,14 +496,16 @@ clean database.
 
 A program can also be tested on a test set in SLIPCOVER and LEMUR with
 \begin{verbatim}
-?- test(<program>,<list of folds>,LL,AUCROC,ROC,AUCPR,PR).
+test(+Program:list,+List_of_folds:list,-LL:float,
+  -AUCROC:float,-ROC:list,-AUCPR:float,-PR:list) is det
 \end{verbatim}
 or
 \begin{verbatim}
-?- test_prob(<program>,<list of folds>,NPos,NNeg,LL,ExampleList).
+test(+Program:list,+List_of_folds:list,-NPos:int,-NNeg:int,
+  -LL:float,-ExampleList:list) is det
 \end{verbatim}
-where \verb|<program>| is a list of terms representing clauses and
-\verb|<list of folds>| is a list of folds.
+where \verb|Program| is a list of terms representing clauses and
+\verb|List_of_folds| is a list of folds.
 
 \verb|test/7| returns the log likelihood of the test examples in \verb|LL|, the Area Under the ROC curve in \verb|AUCROC|, a dictionary containing the list of points (in the form of Prolog pairs \verb|x-y|) of the ROC curve in \verb|ROC|,
 the Area Under the PR curve in \verb|AUCPR|, a dictionary containing the list of points of the PR curve in \verb|PR|.
@@ -544,7 +546,8 @@ You can also draw the curves in \texttt{cplint}  on SWISH using R by loading lib
 \end{verbatim}
 and using 
 \begin{verbatim}
-?- test_r(<program>,<list of folds>,LL,AUCROC,AUCPR).
+test_r(+Program:list,+List_of_folds:list,-LL:float,
+  -AUCROC:float,-AUCPR:float) is det
 \end{verbatim}
 or predicate
 \begin{verbatim}

@@ -24,7 +24,7 @@ Utility module for cplint
   to_atom/2]).
 
 /**
- * bar(+Probability:float,-Chart:dict) is nondet
+ * bar(+Probability:float,-Chart:dict) is det
  *
  * The predicate returns a dict for rendering with c3 as a bar chart with
  * a bar for the probability and a bar for one minus the probability.
@@ -39,7 +39,7 @@ bar(P,Chart):-
 	          legend:_{show: false}}.
 
 /**
- * bar1(+Probability:float,-Chart:dict) is nondet
+ * bar1(+Probability:float,-Chart:dict) is det
  *
  * The predicate returns a dict for rendering with c3 as a bar chart with
  * a bar for the probability
@@ -52,7 +52,7 @@ bar1(P,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 /**
- * bar(+Successes:int,+Failures:int,-Chart:dict) is nondet
+ * bar(+Successes:int,+Failures:int,-Chart:dict) is det
  *
  * The predicate returns a dict for rendering with c3 as a bar chart with
  * a bar for the number of successes and a bar for the number of failures
@@ -64,7 +64,7 @@ bar(S,F,Chart):-
 	           size:_{height: 100},
 	          legend:_{show: false}}.
 /**
- * argbar(+Values:list,-Chart:dict) is nondet
+ * argbar(+Values:list,-Chart:dict) is det
  *
  * Values is a list of couples V-N where
  * V is the value and N is the number of samples
@@ -83,7 +83,7 @@ argbar(ValList,Chart):-
 
 
 /**
- * to_atom(+In:pair,-Out:pair) is nondet
+ * to_atom(+In:pair,-Out:pair) is det
  *
  * Given In=A0-N, to_atom/2 returns Out=A-N
  * where A is an atom representing A0
