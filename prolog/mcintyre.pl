@@ -34,6 +34,8 @@
   sample_binomial/5,
   sample_beta/5,
   sample_discrete/4,
+  sample_exponential/4,
+  sample_pascal/5,
   sample_head/4,
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
@@ -764,6 +766,12 @@ initial_sample(_M:sample_gamma(R,VC,Shape,Scale,S)):-!,
 
 initial_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
+
+initial_sample(_M:sample_exponential(R,VC,Lambda,S)):-!,
+  sample_exponential(R,VC,Lambda,S).
+
+initial_sample(_M:sample_pascal(R,VC,N,P,S)):-!,
+  sample_pascal(R,VC,N,P,S).
 
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
@@ -1503,6 +1511,12 @@ lw_sample(_M:sample_geometric(R,VC,Par,S)):-!,
 lw_sample(_M:sample_uniform(R,VC,L,U,S)):-!,
   sample_uniform(R,VC,L,U,S).
 
+lw_sample(_M:sample_exponential(R,VC,Lambda,S)):-!,
+  sample_exponential(R,VC,Lambda,S).
+
+lw_sample(_M:sample_pascal(R,VC,N,P,S)):-!,
+  sample_pascal(R,VC,N,P,S).
+
 %lw_sample(_M:sample_discrete(R,VC,D,S)):-!,
 %  sample_discrete(R,VC,D,S).
 
@@ -1644,6 +1658,24 @@ lw_sample_weight(_M:sample_geometric(R,VC,Par,S),W0,W):-!,
     W=W0
   ;
     geometric_density(Par,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_exponential(R,VC,Lambda,S),W0,W):-!,
+  (var(S)->
+    sample_exponential(R,VC,Lambda,S),
+    W=W0
+  ;
+    exponential_prob(Lambda,S,D),
+    W is W0*D
+   ).
+
+lw_sample_weight(_M:sample_pascal(R,VC,N,P,S),W0,W):-!,
+  (var(S)->
+    sample_pascal(R,VC,N,P,S),
+    W=W0
+  ;
+    pascal_prob(N,P,S,D),
     W is W0*D
    ).
 
@@ -2342,7 +2374,7 @@ poisson_prob(Lambda,X,P):-
   fact(X,1,FX),
   P is (Lambda^X)*exp(-Lambda)/FX.
 
-fact(0,F,F):-!.
+fact(N,F,F):- N =< 0, !.
 
 fact(N,F0,F):-
   F1 is F0*N,
@@ -2507,6 +2539,100 @@ discrete([S0:W|T],W0,U,S):-
   ;
     discrete(T,W1,U,S)
   ).
+
+
+/**
+ * sample_exponential(+R:int,+VC:list,+N:int,+P:float,-S:int) is det
+ *
+ * Returns in S a sample for a exponential distributed variable with parameters
+ * Lambda associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_exponential(R,VC,_N,S):-
+  sampled(R,VC,S),!.
+
+sample_exponential(R,VC,Lambda,S):-
+  exponential(Lambda,S),
+  assertz(sampled(R,VC,S)).
+
+
+/** 
+ * exponential(+Lambda:float, -V:int)
+ * Samples a value from exponential distribution with parameter Lambda 
+ * 
+**/
+exponential(Lambda,V):-
+  V0 is 1 - exp(-Lambda),
+  random(RandomVal),    
+  exponential_(1,RandomVal,Lambda,V0,V).
+
+exponential_(I,RandomVal,_,CurrentProb,I):-
+  RandomVal =< CurrentProb, !.
+exponential_(I,RandomVal,Lambda,_,V):-
+  I1 is I+1,
+  CurrentProb is 1 - exp(-Lambda*I1),
+  exponential_(I1,RandomVal,Lambda,CurrentProb,V).
+
+exponential_prob(X,Lambda,V):-
+  V is Lambda*exp(-Lambda*X).
+
+
+/**
+ * sample_pascal(+R:int,+VC:list,+N:int,+P:float,-S:int) is det
+ *
+ * Returns in S a sample for a pascal distributed variable with parameters
+ * N and P associated to rule R with substitution VC. If the variable
+ * has already been sampled, it retrieves the sampled value, otherwise
+ * it takes a new sample and records it for rule R with substitution VC.
+ */
+sample_pascal(R,VC,_N,_P,S):-
+  sampled(R,VC,S),!.
+
+sample_pascal(R,VC,N,P,S):-
+  pascal(N,P,S),
+  assertz(sampled(R,VC,S)).
+
+/**
+ * pascal(+R:int,+P:float,-Value:int) is det
+ *
+ * samples a value from a pascal probability distribution with parameters
+ * R and P and returns it in Value. 
+ * R is the number of failures
+ * P is the success probability
+ */
+
+% R number of failures
+% P probability of success
+pascal(R,P,Value):-
+  pascal_prob(0,R,P,V0),
+  random(RandomVal),
+  pascal_prob_(0,R,P,V0,RandomVal,Value).
+
+pascal_prob_(I,_,_,CurrentProb,RandomVal,I):-
+  RandomVal =< CurrentProb, !.
+pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
+  I1 is I+1,
+  pascal_prob(I1,R,P,V0),
+  CurrentProb1 is V0 + CurrentProb,
+  pascal_prob_(I1,R,P,CurrentProb1,RandomVal,V).
+
+/*
+* K number of successes
+* R number of failures
+* P probability of success
+*/
+pascal_prob(K,R,P,Value):-
+  KR1 is K+R-1,
+  binomial_coeff(KR1,K,Bin),
+  Value is Bin*(P**K)*(1-P)**R.
+
+binomial_coeff(N,K,Val):-
+  fact(N,1,NF),
+  fact(K,1,KF),
+  NK is N-K,
+  fact(NK,1,NKF),
+  Val is NF/(KF*NKF).
 
 
 generate_rules_fact([],_HL,_VC,_R,_N,[]).
@@ -2772,7 +2898,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gamma distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
@@ -2786,7 +2912,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with beta distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
@@ -2801,7 +2927,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with poisson distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
@@ -2815,7 +2941,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with binomial distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~binomial(N,P)), !,
   add_arg(H,Var,H1),
@@ -2829,7 +2955,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
@@ -2859,7 +2985,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with geometric distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~geometric(Par)), !,
   add_arg(H,Var,H1),
@@ -2873,7 +2999,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with dirichlet distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~dirichlet(Par)), !,
   add_arg(H,Var,H1),
@@ -2887,7 +3013,7 @@ user:term_expansion((Head:=Body),Clause) :-
 
 user:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gaussian distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gaussian(Mean,Variance)), !,
   add_arg(H,Var,H1),
@@ -2897,6 +3023,34 @@ user:term_expansion((Head:=Body),Clause) :-
     generate_clause_gauss(H1,Body,[],R,Var,Mean,Variance,Clause)
   ;
     generate_clause_gauss(H1,Body,VC,R,Var,Mean,Variance,Clause)
+  ).
+
+user:term_expansion((Head:=Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with exponential distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~exponential(Lambda)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-Body,sample_exponential(R,[],Lambda,Var))
+  ;
+    Clause=(H1:-Body,sample_exponential(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion((Head:=Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with pascal distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~pascal(N,P)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-Body,sample_pascal(R,[],N,P,Var))
+  ;
+    Clause=(H1:-Body,sample_pascal(R,VC,N,P,Var))
   ).
 
 user:term_expansion((Head:=Body),(H1:-Body)) :-
@@ -2944,7 +3098,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gamma distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -2960,7 +3114,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with beta distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -2977,7 +3131,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with poisson distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -2993,7 +3147,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with binomial distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:A),
   nonvar(A),
@@ -3009,7 +3163,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -3027,7 +3181,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with discrete distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -3061,7 +3215,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with dirichlet distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -3077,7 +3231,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with geometriv distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -3093,7 +3247,7 @@ user:term_expansion((Head:-Body),Clause) :-
 
 user:term_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gaussian distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
@@ -3107,7 +3261,37 @@ user:term_expansion((Head:-Body),Clause) :-
     generate_clause_gauss(H,Body,VC,R,Var,Mean,Variance,Clause)
   ).
 
+user:term_expansion((Head:-Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with exponential distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
+  Head=(H:exponential(Var,Lambda)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_exponential(R,[],Lambda,Var))
+  ;
+    Clause=(H:-Body,sample_exponential(R,VC,Lambda,Var))
+  ).
 
+user:term_expansion((Head:-Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with pascal distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:A),
+  nonvar(A),
+  Head=(H:pascal(Var,N,P)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-Body,sample_pascal(R,[],N,P,Var))
+  ;
+    Clause=(H:-Body,sample_pascal(R,VC,N,P,Var))
+  ).
 
 user:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3180,7 +3364,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gamma distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
@@ -3194,7 +3378,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with beta distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
@@ -3209,7 +3393,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with poisson distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
@@ -3223,7 +3407,35 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with exponential distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~exponential(Lambda)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-sample_exponential(R,[],Lambda,Var))
+  ;
+    Clause=(H1:-sample_exponential(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with pascal distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H~pascal(N,P)), !,
+  add_arg(H,Var,H1),
+  extract_vars_list(Head,[],VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H1:-sample_pascal(R,[],N,P,Var))
+  ;
+    Clause=(H1:-sample_pascal(R,VC,N,P,Var))
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with binomial distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~binomial(N,P)), !,
   add_arg(H,Var,H1),
@@ -3237,7 +3449,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with uniform distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
@@ -3270,7 +3482,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gaussian distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~gaussian(Mean,Variance)), !,
   extract_vars_list([Head],[],VC),
@@ -3283,7 +3495,7 @@ user:term_expansion(Head,Clause) :-
   ).
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with dirichlet distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3299,7 +3511,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with geometric distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3347,7 +3559,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gamma distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3363,7 +3575,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with beta distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3380,7 +3592,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with poisson distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3396,7 +3608,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with binomial distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:A),
   nonvar(A),
@@ -3452,7 +3664,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with dirichlet distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3468,7 +3680,7 @@ user:term_expansion(Head,Clause) :-
 
 user:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% disjunctive fact with gaussian distr
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H:P),
   nonvar(P),
@@ -3480,6 +3692,38 @@ user:term_expansion(Head,Clause) :-
     generate_clause_gauss(H,true,[],R,Var,Mean,Variance,Clause)
   ;
     generate_clause_gauss(H,true,VC,R,Var,Mean,Variance,Clause)
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with exponential distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:P),
+  nonvar(P),
+  Head=(H:exponential(Var,Lambda)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_exponential(R,[],Lambda,Var))
+  ;
+    Clause=(H:-sample_exponential(R,VC,Lambda,Var))
+  ).
+
+user:term_expansion(Head,Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% disjunctive fact with pascal distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:A),
+  nonvar(A),
+  Head=(H:pascal(Var,N,P)), !,
+  extract_vars_list(Head,[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    Clause=(H:-sample_pascal(R,[],N,P,Var))
+  ;
+    Clause=(H:-sample_pascal(R,VC,N,P,Var))
   ).
 
 user:term_expansion(Head,[]) :-
