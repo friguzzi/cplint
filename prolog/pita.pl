@@ -1316,9 +1316,9 @@ act(M,A/B):-
 tab(M,A/B,P):-
   length(Args0,B),
   (M:local_pita_setting(depth_bound,true)->
-    ExtraArgs=[-,_,lattice(orc/3)]
+    ExtraArgs=[_,_,lattice(orc/3)] % ExtraArgs=[-,_,lattice(orc/3)]
   ;
-    ExtraArgs=[-,lattice(orc/3)]
+    ExtraArgs=[_,lattice(orc/3)] % ExtraArgs=[-,lattice(orc/3)]
   ),
   append(Args0,ExtraArgs,Args),
   P=..[A|Args],
