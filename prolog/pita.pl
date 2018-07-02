@@ -450,7 +450,8 @@ vit_prob(M:Goal,P,Delta):-
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   ret_vit_prob(Env,BDD,P,Exp0),
   reverse(Exp0,Exp),
@@ -494,7 +495,8 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
 bdd_dot_file(M:Goal,File,LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot(Env,BDD,File),
   end_test(Env).
@@ -511,7 +513,8 @@ bdd_dot_file(M:Goal,File,LV):-
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot_string(Env,BDD,Dot),
   end_test(Env).
@@ -530,7 +533,8 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
   create_dot_string(Env,BDD,Dot),
@@ -551,7 +555,8 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
   ret_abd_prob(Env,BDD,P,Exp),
@@ -575,7 +580,8 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   M:rule_n(NR),
   init_test(NR,Env),
-  get_node(M:Goal,Env,(_,BDD0)),!,
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD0),!,
   findall([V,R,S],M:v(R,S,V),LV),
   one(Env,One),
   make_query_vars(LV,M,Env,One,Cons,LAV),
@@ -773,11 +779,13 @@ get_p(M:Goal,Env,P):-
   ret_probc(Env,BDD,P).
 
 get_abd_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,(_,BDD)),
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),
   ret_abd_prob(Env,BDD,P,Exp).
 
 get_vit_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,(_,BDD)),
+  get_node(M:Goal,Env,Out),
+  Out=(_,BDD),
   ret_vit_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
@@ -787,67 +795,67 @@ get_cond_p(M:Goal,M:Evidence,Env,P):-
   P is PGE/PE.
 
 
-get_node(M:Goal,Env,B):-
+get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
   abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
-  (bagof(BDD,M:Goal1,L)*->
-    or_listc(L,Env,B)
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,B)
+    zeroc(Env,BDD)
   ).
 
-get_node(M:Goal,Env,B):- %with DB=false
+get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
   abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
-  (bagof(BDD,M:Goal1,L)*->
-    or_listc(L,Env,B)
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,B)
+    zeroc(Env,BDD)
   ).
 
-get_cond_node(M:Goal,M:Ev,Env,BGE,BE):-
+get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
-  (bagof(BDD,M:Goal1,L)*->
-    or_listc(L,Env,BG)
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,BG)
+    zeroc(Env,BDD)
   ),
   add_bdd_arg_db(Ev,Env,BDDE,DB,M,Ev1),%DB=depth bound
-  (bagof(BDDE,M:Ev1,LE)*->
-    or_listc(LE,Env,BE)
+  (M:Ev1*->
+    true
   ;
-    zeroc(Env,BE)
+    zeroc(Env,BDDE)
   ),
-  andcnf(Env,BG,BE,BGE).
+  andcnf(Env,BDD,BDDE,BGE).
 
 
 
-get_cond_node(M:Goal,M:Ev,Env,BGE,BE):- %with DB=false
+get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):- %with DB=false
   retractall(M:v(_,_,_)),
   abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
-  (bagof(BDD,M:Goal1,L)*->
-    or_listc(L,Env,BG)
+  (M:Goal1*->
+    true
   ;
-    zeroc(Env,BG)
+    zeroc(Env,BDD)
   ),
   add_bdd_arg(Ev,Env,BDDE,M,Ev1),
-  (bagof(BDDE,M:Ev1,LE)*->
-    or_listc(LE,Env,BE)
+  (M:Ev1*->
+    true
   ;
-    zeroc(Env,BE)
+    zeroc(Env,BDDE)
   ),
-  andcnf(Env,BG,BE,BGE).
+  andcnf(Env,BDD,BDDE,BGE).
 
 
 get_next_goal_number(PName,R):-

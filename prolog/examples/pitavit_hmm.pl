@@ -18,8 +18,6 @@ vol. 5649. Springer, 55-69.
 
 :- pita.
 
-:- set_pita(tabling,explicit).
-
 :- begin_lpad.
 
 % hmm(O): O is the output sequence

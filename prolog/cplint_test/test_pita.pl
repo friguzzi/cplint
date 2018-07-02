@@ -51,7 +51,7 @@ test(h_c):-
 test(h_c_b):-
   run(((prob(heads(coin),P),bar(P,C)),close_to(P,0.51),is_dict(C))).
 test(h_c_b2):-
-  run(((prob(heads(coin),P),bar2(P,C)),close_to(P,0.51),is_dict(C))).
+  run(((prob(heads(coin),P),bar1(P,C)),close_to(P,0.51),is_dict(C))).
 test(h_c_b_c):-
   run((prob((heads(coin),biased(coin)),P),close_to(P,0.06))).
 test(t_c):-
@@ -325,9 +325,9 @@ test(p):-
 :-ensure_loaded(library(examples/abd1)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[e, c])).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[e, c]))).
 test(bdd_a):-
-  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),Exp=[e, c])).
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),perm(Exp,[e, c]))).
 
 :- end_tests(abd1).
 
@@ -336,10 +336,10 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd2)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.72),Exp=[f, (\+g), c, d])).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[f, (\+g), c, d]))).
 test(bdd_a):-
   run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
-  Exp=[f, (\+g), c, d])).
+  perm(Exp,[f, (\+g), c, d]))).
 
 :- end_tests(abd2).
 
@@ -348,10 +348,10 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd3)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.42),Exp=[f, (\+g), (\+ c)])).
+  run((abd_prob(a,P,Exp),close_to(P,0.42),perm(Exp,[f, (\+g), (\+ c)]))).
 test(bdd_a):-
   run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.42),
-  Exp=[f, (\+g), (\+ c)])).
+  perm(Exp,[f, (\+g), (\+ c)]))).
 
 :- end_tests(abd3).
 
@@ -361,12 +361,12 @@ test(bdd_a):-
 
 test(win):-
   run((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
-  Exp=[
+  perm(Exp,[
 	  rule(0, '', [red:0.4, '':0.6], true),
 		rule(2, blue, [blue:0.5, '':0.5], true),
 		rule(3, yellow, [yellow:0.6, '':0.4], true),
 	  rule(1, green, [green:0.9, '':0.09999999999999998], true)
-	 ])).
+	 ]))).
 
 :- end_tests(map1).
 
@@ -376,11 +376,11 @@ test(win):-
 
 test(ev):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.27),
-	  Exp=[
+	  perm(Exp,[
 		  rule(2,pf(2,1),[pf(2,1):0.6,'':0.4],true),
 			rule(1,pf(1,2),[pf(1,2):0.75,'':0.25],true),
 			rule(0,pf(1,1),[pf(1,1):0.6,'':0.4],true)
-		  ])).
+		  ]))).
 
 :- end_tests(map_es3).
 
@@ -390,9 +390,9 @@ test(ev):-
 
 test(ev):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
-	  Exp=[
+	  perm(Exp,[
 		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
-		  ])).
+		  ]))).
 
 :- end_tests(map_es21).
 
@@ -402,10 +402,10 @@ test(ev):-
 
 test(ev):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.36),
-	  Exp=[
+	  perm(Exp,[
 		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
 			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
-		  ])).
+		  ]))).
 
 :- end_tests(map_es2).
 
@@ -415,9 +415,9 @@ test(ev):-
 
 test(ev):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.54),
-	  Exp=[
+	  perm(Exp,[
 		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)
-		  ])).
+		  ]))).
 
 :- end_tests(map_es2map).
 
@@ -426,9 +426,9 @@ test(ev):-
 :-ensure_loaded(library(examples/map_es2map1)).
 test(ev):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
-	  Exp=[
+	  perm(Exp,[
 		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
-		  ])).
+		  ]))).
 :- end_tests(map_es2map1).
 
 :- begin_tests(pitavit_win, []).
@@ -436,9 +436,9 @@ test(ev):-
 :-ensure_loaded(library(examples/pitavit_win)).
 test(win):-
   run((vit_prob(win,P,Exp),close_to(P,0.36),
-Exp=[
+  perm(Exp,[
   rule(0, red, [red:0.4, '':0.6], []),
-  rule(1, green, [green:0.9, '':0.09999999999999998], [])])).
+  rule(1, green, [green:0.9, '':0.09999999999999998], [])]))).
 
 :- end_tests(pitavit_win).
 
@@ -448,7 +448,7 @@ Exp=[
 
 test(hmm_a_g_g):-
   run((vit_prob(hmm([a,g,g]),P,Exp),close_to(P,0.000405),
-  Exp= [rule(0,next_state(q1,q2,[]),[next_state(q1,q1,[]):0.5,
+    perm(Exp, [rule(0,next_state(q1,q2,[]),[next_state(q1,q1,[]):0.5,
 	    next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
 		rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
 		  letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
@@ -461,13 +461,13 @@ test(hmm_a_g_g):-
 		rule(3,letter(q2,g,[q2,q1]),[letter(q2,a,[q2,q1]):0.1,
 		  letter(q2,c,[q2,q1]):0.2,letter(q2,g,[q2,q1]):0.3,
 			letter(q2,t,[q2,q1]):0.4],[])]
-  )).
+  ))).
 
 
 
 test(hmm_a_a_a):-
   run((vit_prob(hmm([a,a,a]),P,Exp),close_to(P,0.0008000000000000003),
-  Exp = [rule(0,next_state(q1,q1,[]),[next_state(q1,q1,[]):0.5,
+    perm(Exp, [rule(0,next_state(q1,q1,[]),[next_state(q1,q1,[]):0.5,
 	  next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
 	rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
 	  letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
@@ -480,7 +480,7 @@ test(hmm_a_a_a):-
 	rule(2,letter(q1,a,[q1,q1]),[letter(q1,a,[q1,q1]):0.4,
 	  letter(q1,c,[q1,q1]):0.3,letter(q1,g,[q1,q1]):0.2,
 	  letter(q1,t,[q1,q1]):0.1],[])]
-  )).
+  ))).
 
 :- end_tests(pitavit_hmm).
 
@@ -491,10 +491,10 @@ test(hmm_a_a_a):-
 
 test(h_c):-
   run((vit_prob(heads(coin),Prob,Exp),close_to(Prob,0.45),
-  Exp = [rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []),
+    perm(Exp, [rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []),
     rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5],
     [toss(coin), \+biased(coin)])]
-  )).
+  ))).
 
 :- end_tests(pitavit_coin).
 
@@ -505,16 +505,16 @@ test(h_c):-
 
 test(s_p):-
   run((vit_prob(color(s,purple),Prob,Exp),close_to(Prob,0.5),
-	Exp = [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-	 [mother(m, s), cg(m, 1, p), cg(m, 2, w)])])).
+	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
+	 [mother(m, s), cg(m, 1, p), cg(m, 2, w)])]))).
 
 
 test(s_w):-
   run((vit_prob(color(s,white),Prob,Exp),close_to(Prob,0.25),
-  Exp = [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
+  perm(Exp, [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
      [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),
 	 rule(1, cg(s, 2, w), [cg(s, 2, w):0.5, cg(s, 2, p):0.5],
-	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])])).
+	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])]))).
 
 :- end_tests(pitavit_mendel).
 

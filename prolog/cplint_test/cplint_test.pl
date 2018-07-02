@@ -1,9 +1,13 @@
 
 
 :-module(cplint_test,
-  [close_to/2,close_to/3,relatively_close_to/2,relatively_close_to/3,run/1]).
+  [close_to/2,close_to/3,relatively_close_to/2,relatively_close_to/3,run/1,
+  perm/2]).
 
 :- meta_predicate run(:).
+
+perm(A,B):-
+	permutation(A,B),!.
 
 run(M:H):-
 	copy_term(H,NH),
