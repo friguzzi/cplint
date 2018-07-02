@@ -1563,7 +1563,7 @@ void write_dot(environment * env, DdNode * bdd, FILE * file)
   char ** inames;
   int i,b,index,nv;
   variable v;
-  char numberVar[10],numberBit[10];
+  char numberVar[11],numberBit[11];
   inames= (char **) malloc(sizeof(char *)*(env->boolVars));
   index=0;
   for (i=0;i<env->nVars;i++)
