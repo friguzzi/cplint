@@ -2110,7 +2110,7 @@ get_next_rule_number(M,R):-
   retract(M:rule_sc_n(R)),
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
-/*
+
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
@@ -2149,53 +2149,6 @@ get_node(Goal,M,Env,BDD):- %with DB=false
     (_,BDD)=B
   ;
     zeroc(Env,(_,BDD))
-  ).
-*/
-
-get_node(\+ Goal,M,Env,BDD):-
-  M:local_setting(depth_bound,true),!,
-  M:local_setting(depth,DB),
-  retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),
-  abolish_all_tables,
-  (bagof(BDD,M:Goal1,L)->
-    or_listc(L,Env,B)
-  ;
-    zeroc(Env,B)
-  ),
-  bdd_notc(Env,B,(_,BDD)).
-
-get_node(\+ Goal,M,Env,BDD):-!,
-  retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,Goal1),
-  abolish_all_tables,
-  (bagof(BDD,M:Goal1,L)->
-    or_listc(L,Env,B)
-  ;
-    zeroc(Env,B)
-  ),
-  bdd_notc(Env,B,(_,BDD)).
-
-get_node(Goal,M,Env,B):-
-  M:local_setting(depth_bound,true),!,
-  M:local_setting(depth,DB),
-  retractall(M:v(_,_,_)),
-  add_bdd_arg_db(Goal,Env,BDD,DB,Goal1),%DB=depth bound
-  abolish_all_tables,
-  (bagof(BDD,M:Goal1,L)->
-    or_listc(L,Env,(_,B))
-  ;
-    zero(Env,B)
-  ).
-
-get_node(Goal,M,Env,B):- %with DB=false
-  retractall(M:v(_,_,_)),
-  add_bdd_arg(Goal,Env,BDD,Goal1),
-  abolish_all_tables,
-  (bagof(BDD,M:Goal1,L)->
-    or_listc(L,Env,(_,B))
-  ;
-    zero(Env,B)
   ).
 
 
@@ -3407,9 +3360,9 @@ write_body3(M,A,B):-
 tab(M,A/B,P):-
   length(Args0,B),
   (M:local_setting(depth_bound,true)->
-    ExtraArgs=[_,-,-,lattice(pita:orc/3)]
+    ExtraArgs=[_,_,_,lattice(pita:orc/3)]
   ;
-    ExtraArgs=[_,-,lattice(pita:orc/3)]
+    ExtraArgs=[_,_,lattice(pita:orc/3)]
   ),
   append(Args0,ExtraArgs,Args),
   P=..[A|Args],

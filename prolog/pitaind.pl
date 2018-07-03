@@ -29,7 +29,6 @@ details.
   msw/4,
   msw/5
     ]).
-:- reexport(library(tabling)).
 
 :-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
