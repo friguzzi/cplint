@@ -23,7 +23,7 @@ bar for the probability and a bar for one minus the probability,
 the third a  chart with
 a bar for the number of successes and a bar for the number of failures, and
 the fourth a  chart with
-a bar each value, where \verb|Values| is a list of couples \verb|V-N| where
+a for bar each value, where \verb|Values| is a list of couples \verb|V-N| where
   \verb|V| is the value and \verb|N| is the number of samples
   returning that value.
  
@@ -76,18 +76,14 @@ The predicate
 \begin{verbatim}
 histogram(+List:list,-Chart:dict,+Options:list) is det
 \end{verbatim}
-draws a histogram of the samples in \verb|List| dividing the domain in
- \verb|NBins| bins.
-\verb|List| must be a list of couples of the form \verb|[V]-W| or  \verb|V-W|
+draws a histogram of the samples in \verb|List| that  must be a list of couples of the form \verb|[V]-W| or  \verb|V-W|
 where \verb|V| is a sampled value and \verb|W| is its weight. This is the format of the list of samples returned by argument sampling predicates.
 
 The predicate
 \begin{verbatim}
 density(+List:list,-Chart:dict,+Options:list) is det
 \end{verbatim}
-draws a line chart of the density the samples in \verb|List| dividing the domain in
- \verb|NBins| bins.
-\verb|List| must be as for \verb|histogram/4|.
+draws a line chart of the density of  the samples in \verb|List| that  must take the same form as for \verb|histogram/3|.
 
 In  \verb|histogram/3| and  \verb|density/4| \verb|Options| is a list of options, the following are recognised: \begin{itemize}
 \item \verb|min(+Min:float)|
@@ -108,14 +104,14 @@ densities(+PriorList:list,+PostList:list,-Chart:dict,
 draws a line chart of the density of two sets of samples, usually
  prior and post observations. The samples in \verb|PriorList| and \verb|PostList|
 can be either couples \verb|[V]-W| or \verb|V-W| where \verb|V| is a value and \verb|W| its weight.
-The same options as for \verb|histogram/3| and  \verb|density/4|  are recognized.
+The same options as for \verb|histogram/3| and  \verb|density/3|  are recognized.
 
-For example
+For example, the query
 \begin{verbatim}
 ?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
     histogram(L0,Chart,[]).
 \end{verbatim}
-from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}},
 takes 1000 samples of argument \verb|X| of \verb|value(0,X)| and draws the density of the samples using an histogram.
 
 Instead

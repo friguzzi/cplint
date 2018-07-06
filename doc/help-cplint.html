@@ -525,7 +525,7 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
 bar(+Probability:float,-Chart:dict) is det
 bar(+Successes:int,+Failures:int,-Chart:dict) is det
 argbar(+Values:list,-Chart:dict) is det</code></pre>
-<p>They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a bar each value, where <code>Values</code> is a list of couples <code>V-N</code> where <code>V</code> is the value and <code>N</code> is the number of samples returning that value.</p>
+<p>They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where <code>Values</code> is a list of couples <code>V-N</code> where <code>V</code> is the value and <code>N</code> is the number of samples returning that value.</p>
 <p>To render C3.js charts you have to include</p>
 <pre><code>:- use_rendering(c3).</code></pre>
 <p>before <code>:- pita.</code></p>
@@ -545,10 +545,10 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,ValList),argbar(ValList,Chart)</code></pre>
 <p>Drawing a graph is particularly interesting when sampling values for continuous arguments of goals. In this case, you can use the samples to draw the probability density function of the argument. The predicate</p>
 <pre><code>histogram(+List:list,-Chart:dict,+Options:list) is det</code></pre>
-<p>draws a histogram of the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be a list of couples of the form <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a sampled value and <code>W</code> is its weight. This is the format of the list of samples returned by argument sampling predicates.</p>
+<p>draws a histogram of the samples in <code>List</code> that must be a list of couples of the form <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a sampled value and <code>W</code> is its weight. This is the format of the list of samples returned by argument sampling predicates.</p>
 <p>The predicate</p>
 <pre><code>density(+List:list,-Chart:dict,+Options:list) is det</code></pre>
-<p>draws a line chart of the density the samples in <code>List</code> dividing the domain in <code>NBins</code> bins. <code>List</code> must be as for <code>histogram/4</code>.</p>
+<p>draws a line chart of the density of the samples in <code>List</code> that must take the same form as for <code>histogram/3</code>.</p>
 <p>In <code>histogram/3</code> and <code>density/4</code> <code>Options</code> is a list of options, the following are recognised:</p>
 <ul>
 <li><p><code>min(+Min:float)</code> the minimum value of domain, default value the minimum in <code>List</code></p></li>
@@ -559,11 +559,11 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
 <p>The predicate</p>
 <pre><code>densities(+PriorList:list,+PostList:list,-Chart:dict,
   +Options:list) is det</code></pre>
-<p>draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in <code>PriorList</code> and <code>PostList</code> can be either couples <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a value and <code>W</code> its weight. The same options as for <code>histogram/3</code> and <code>density/4</code> are recognized.</p>
-<p>For example</p>
+<p>draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in <code>PriorList</code> and <code>PostList</code> can be either couples <code>[V]-W</code> or <code>V-W</code> where <code>V</code> is a value and <code>W</code> its weight. The same options as for <code>histogram/3</code> and <code>density/3</code> are recognized.</p>
+<p>For example, the query</p>
 <pre><code>?-  mc_sample_arg(value(0,X),1000,X,L0,[]),
     histogram(L0,Chart,[]).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 samples of argument <code>X</code> of <code>value(0,X)</code> and draws the density of the samples using an histogram.</p>
+<p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a>, takes 1000 samples of argument <code>X</code> of <code>value(0,X)</code> and draws the density of the samples using an histogram.</p>
 <p>Instead</p>
 <pre><code>?- mc_sample_arg(value(0,Y),1000,Y,L0,[]),
    mc_lw_sample_arg(value(0,X),
