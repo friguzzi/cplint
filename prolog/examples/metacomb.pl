@@ -32,14 +32,15 @@ max_true(G1, G2) :-
   max(P1, P2, P), p(P).
 
 a:0.5. 
-b:0.7. 
+b0:0.7. 
+b1:0.7. 
 c:0.2.
 
 d :-
-  a, \+ b.
+  a, \+ b0.
 
 e :- 
-  b, c.
+  b1, c.
 :- end_lpad.
 
 /** <examples>
