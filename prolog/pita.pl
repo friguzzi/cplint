@@ -14,10 +14,13 @@ details.
 */
 
 
-:- module(pita,[s/2, prob/2, 
+:- module(pita,[
+  prob/2, 
+  prob/3,
+  prob_meta/2, 
+  prob_meta/3,
   abd_prob/3,
   vit_prob/3,
-  prob/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
@@ -44,12 +47,13 @@ details.
     ]).
 :- reexport(library(cplint_util)).
 
-:-meta_predicate s(:,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob(:,:,-,+).
+:-meta_predicate prob_meta(:,:,-).
+:-meta_predicate prob_meta(:,:,-,+).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
@@ -353,13 +357,11 @@ load_file(File):-
   end_lpad_pred.
 
 /**
- * s(:Query:atom,-Probability:float) is nondet
+ * prob_meta(:Query:atom,-Probability:float) is nondet
  *
- * The predicate computes the probability of the ground query Query.
- * If Query is not ground, it returns in backtracking all instantiations of
- * Query together with their probabilities
+ * To be used in place of prob/2 for meta calls (doesn't abolish tables)
  */
-s(M:Goal,P):-
+prob_meta(M:Goal,P):-
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -391,6 +393,7 @@ s(M:Goal,P):-
  * It returns the explanation in Delta together with its Probability
  */
 abd_prob(M:Goal,P,Delta):-
+  abolish_all_tables,
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -416,6 +419,7 @@ abd_prob(M:Goal,P,Delta):-
  * It returns the explanation in Delta together with its Probability
  */
 vit_prob(M:Goal,P,Delta):-
+  abolish_all_tables,
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -448,6 +452,7 @@ vit_prob(M:Goal,P,Delta):-
 
  */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
+  abolish_all_tables,
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,Out),
@@ -531,6 +536,7 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * the rule number and the grounding substituion.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
+  abolish_all_tables,
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,Out),
@@ -553,6 +559,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  * the rule number and the grounding substituion.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
+  abolish_all_tables,
   M:rule_n(NR),
   init_test(NR,Env),
   get_node(M:Goal,Env,Out),
@@ -620,7 +627,8 @@ from_assign_to_map([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
  * Query together with their probabilities
  */
 prob(M:Goal,P):-
-  s(M:Goal,P).
+  abolish_all_tables,
+  prob_meta(M:Goal,P).
 
 
 /**
@@ -629,6 +637,15 @@ prob(M:Goal,P):-
  * Equivalent to prob/4 with an empty option list.
  */
 prob(M:Goal,M:Evidence,P):-
+  abolish_all_tables,
+  prob_meta(M:Goal,M:Evidence,P).
+
+/**
+ * prob_meta(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ *
+ * To be used in place of prob/3 for meta calls (doesn't abolish tables)
+ */
+prob_meta(M:Goal,M:Evidence,P):-  
   get_next_goal_number(M,GN),
   atomic_concat('$ev',GN,NewEv),
   deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
@@ -800,7 +817,6 @@ get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -811,7 +827,6 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -823,7 +838,6 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
-  abolish_all_tables,
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -842,7 +856,6 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):- %with DB=false
   retractall(M:v(_,_,_)),
-  abolish_all_tables,
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -1883,33 +1896,16 @@ average(L,Av):-
         length(L,N),
         Av is Sum/N.
 
-:- multifile sandbox:safe_primitive/1.
-
-/*sandbox:safe_primitive(pita:init(_,_,_)).
-sandbox:safe_primitive(pita:init_bdd(_,_)).
-sandbox:safe_primitive(pita:init_test(_,_)).
-sandbox:safe_primitive(pita:ret_prob(_,_,_)).
-sandbox:safe_primitive(pita:end(_)).
-sandbox:safe_primitive(pita:end_bdd(_)).
-sandbox:safe_primitive(pita:end_test(_)).
-sandbox:safe_primitive(pita:one(_,_)).
-sandbox:safe_primitive(pita:zero(_,_)).
-sandbox:safe_primitive(pita:and(_,_,_,_)).
-sandbox:safe_primitive(pita:or(_,_,_,_)).
-sandbox:safe_primitive(pita:bdd_not(_,_,_)).
-sandbox:safe_primitive(pita:get_abd_var_n(_,_,_,_,_,_)).
-sandbox:safe_primitive(pita:get_var_n(_,_,_,_,_,_)).
-sandbox:safe_primitive(pita:add_var(_,_,_,_,_)).
-sandbox:safe_primitive(pita:equality(_,_,_,_)).
-*/
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(pita:s(_,_), []).
 sandbox:safe_meta(pita:prob(_,_), []).
-sandbox:safe_meta(pita:abd_prob(_,_,_), []).
-sandbox:safe_meta(pita:vit_prob(_,_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_), []).
 sandbox:safe_meta(pita:prob(_,_,_,_), []).
+sandbox:safe_meta(pita:prob_meta(_,_), []).
+sandbox:safe_meta(pita:prob_meta(_,_,_), []).
+sandbox:safe_meta(pita:abd_prob(_,_,_), []).
+sandbox:safe_meta(pita:vit_prob(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
