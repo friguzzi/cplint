@@ -47,13 +47,14 @@ details.
     ]).
 :- reexport(library(cplint_util)).
 
-:-meta_predicate prob(:,-).
+
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
+:-meta_predicate prob(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob(:,:,-,+).
-:-meta_predicate prob_meta(:,:,-).
-:-meta_predicate prob_meta(:,:,-,+).
+:-meta_predicate prob_meta(:,-).
+:-meta_predicate prob_meta(:,:,+).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
@@ -1112,6 +1113,10 @@ process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
 
+process_body([H|T],BDD,BDD1,Vars,Vars1,[H1|Rest],Env,Module):-
+  transform(H,H1),!,
+  process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
+
 process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -1140,6 +1145,10 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
+
+process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H1|Rest],Env,Module):-
+  transform(H,H1),!,
+  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module):-
   builtin(H),!,
@@ -1883,9 +1892,11 @@ list2and([X],X):-
 list2and([H|T],(H,Ta)):-!,
     list2and(T,Ta).
 
+transform(H,H1):-
+  H=..[prob|Args],
+  H1=..[prob_meta|Args].
 
 builtin(average(_L,_Av)).
-builtin(prob(_,_)).
 builtin(G):-
   predicate_property(G,built_in).
 builtin(G):-
