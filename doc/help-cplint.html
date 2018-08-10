@@ -426,8 +426,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
   +Samples:int,?Arg:var,-Values:list,+Options:list) is det</code></pre>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_rejection_sample_arg/6</code>:</p>
 <ul>
-<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a bar chart of the possible values</p></li>
 </ul>
 <pre><code>mc_mh_sample_arg(:Query:atom,:Evidence:atom,
@@ -436,8 +436,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <ul>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
 <li><p><code>lag(+Lag:int)</code> lag between each sample, <code>Lag</code> sampled choices are forgotten, default value 1</p></li>
-<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a bar chart of the possible values</p></li>
 </ul>
 <p>The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random where <code>Evidence</code> is true and <code>N</code> is the number of samples returning that list of values.</p>
