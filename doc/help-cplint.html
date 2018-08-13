@@ -156,7 +156,7 @@ mix(X) :- tails, h(X).</code></pre>
   val(I,M,X).
 mean(M): gaussian(M,1.0, 5.0).
 val(_,M,X): gaussian(X,M, 2.0).</code></pre>
-<p>states that for an index <code>I</code> the continuous variable <code>X</code> is sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Guassian with mean 1 and variance 5.</p>
+<p>states that for an index <code>I</code> the continuous variable <code>X</code> is sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Gaussian with mean 1 and variance 5.</p>
 <p>Any operation is allowed on continuous random variables. The example below (<a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a>) encodes a Kalman filter:</p>
 <pre><code>kf(N,O, T) :-
   init(S),
