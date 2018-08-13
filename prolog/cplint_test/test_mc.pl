@@ -197,11 +197,11 @@ test(lw_exp_kf):-
 
 :-ensure_loaded(library(examples/gauss_mean_est)).
 test(lw_exp_value_0_X):-
-  run((mc_lw_expectation(value(0,X),(value(1,9),value(2,8)),2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
+  run((mc_lw_expectation(val(0,X),(val(1,9),val(2,8)),2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
 test(exp_value_0_X):-
-	run((mc_expectation(value(0,X),2000,X,E),relatively_close_to(E,0.9698875384639362,0.25))).
+	run((mc_expectation(val(0,X),2000,X,E),relatively_close_to(E,0.9698875384639362,0.25))).
 test(part_exp_value_0_X):-
-	run((mc_particle_expectation(value(0,X),[value(1,9),value(2,8)],2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
+	run((mc_particle_expectation(val(0,X),[val(1,9),val(2,8)],2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
 :- end_tests(gauss_mean_est).
 
 :- begin_tests(slp_pdcg, []).

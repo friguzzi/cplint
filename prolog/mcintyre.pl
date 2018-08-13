@@ -2096,12 +2096,14 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_uniform(R,VC,_L,_U,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_uniform(R,VC,L,U,S):-
   random(V),
-  S is L+V*(U-L),
-  assertz(sampled(R,VC,S)).
+  S0 is L+V*(U-L),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 uniform_density(L,U,D):-
   D is 1/(U-L).
@@ -2115,11 +2117,13 @@ uniform_density(L,U,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_gauss(R,VC,_Mean,_Variance,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_gauss(R,VC,Mean,Variance,S):-
-  gauss(Mean,Variance,S),
-  assertz(sampled(R,VC,S)).
+  gauss(Mean,Variance,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 /**
  * gauss(+Mean:float,+Variance:float,-S:float) is det
  *
@@ -2208,11 +2212,13 @@ gauss_density(Mean,Covariance,S,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_gamma(R,VC,_Shape,_Scale,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_gamma(R,VC,Shape,Scale,S):-
-  gamma(Shape,Scale,S),
-  assertz(sampled(R,VC,S)).
+  gamma(Shape,Scale,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * gamma(+Shape:float,+Scale:float,-S:float) is det
@@ -2274,11 +2280,13 @@ gamma_density(K,Scale,S,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_beta(R,VC,_A,_B,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_beta(R,VC,A,B,S):-
-  beta(A,B,S),
-  assertz(sampled(R,VC,S)).
+  beta(A,B,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * beta(+Alpha:float,+Beta:float,-S:float) is det
@@ -2309,11 +2317,13 @@ beta_density(Alpha,Beta,X,D):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_poisson(R,VC,_L,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_poisson(R,VC,L,S):-
-  poisson(L,S),
-  assertz(sampled(R,VC,S)).
+  poisson(L,S0),
+  assertz(sampled(R,VC,S)),
+  S=S0.
 
 /**
  * poisson(+Lambda:float,-S:int) is det
@@ -2358,11 +2368,13 @@ fact(N,F0,F):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_binomial(R,VC,_N,_P,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_binomial(R,VC,N,P,S):-
-  binomial(N,P,S),
-  assertz(sampled(R,VC,S)).
+  binomial(N,P,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * binomial(+N:int,+P:float,-S:int) is det
@@ -2402,11 +2414,13 @@ binomial_prob(N,P,X,Pr):-
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_dirichlet(R,VC,_Par,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_dirichlet(R,VC,Par,S):-
-  dirichlet(Par,S),
-  assertz(sampled(R,VC,S)).
+  dirichlet(Par,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * dirichlet(+Par:list,-S:float) is det
@@ -2442,11 +2456,13 @@ prod(X,A,P0,P0*X^(A-1)).
  * it takes a new sample and records it for rule R with substitution VC.
  */
 sample_geometric(R,VC,_Par,S):-
-  sampled(R,VC,S),!.
+  sampled(R,VC,S0),!,
+  S=S0.
 
 sample_geometric(R,VC,Par,S):-
-  geometric(Par,S),
-  assertz(sampled(R,VC,S)).
+  geometric(Par,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * geometric(+P:float,-I:int) is det
@@ -2482,10 +2498,10 @@ sample_discrete(R,VC,_D,S):-
   sampled(R,VC,S1),!,
   S=S1.
 
-sample_discrete(R,VC,D,S0):-
-  discrete(D,S),
-  S=S0,
-  assertz(sampled(R,VC,S)).
+sample_discrete(R,VC,D,S):-
+  discrete(D,S0),
+  assertz(sampled(R,VC,S0)),
+  S=S0.
 
 /**
  * discrete(+Distribution:list,-S:float) is det
