@@ -2322,7 +2322,7 @@ sample_poisson(R,VC,_L,S):-
 
 sample_poisson(R,VC,L,S):-
   poisson(L,S0),
-  assertz(sampled(R,VC,S)),
+  assertz(sampled(R,VC,S0)),
   S=S0.
 
 /**
