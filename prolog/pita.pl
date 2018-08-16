@@ -1179,8 +1179,8 @@ prob_ann(_:P,P):-!.
 prob_ann(P::_,P).
 
 
-gen_head(H,P,V,V1,H1:P):-copy_term((H,V),(H1,V1)).
-gen_head_disc(H,V,V1:P,H1:P):-copy_term((H,V),(H1,V1)).
+gen_head(H,P,VH,V,V1,H1:P):-copy_term((H,VH,V),(H1,VH,V1)).
+gen_head_disc(H,VH,V,V1:P,H1:P1):-copy_term((H,VH,V),(H1,VH,V1)),P1 is P.
 
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
@@ -1494,7 +1494,72 @@ user:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
+user:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
+% disjunctive clause with uniform distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
+  Head=(H:uniform(Var,D0)),!,
+  (var(D0)->
+     throw(error('Non ground list of values in uniform(Var,Values)'))
+  ;
+    true
+  ),
+  length(D0,Len),
+  Prob is 1.0/Len,
+  extract_vars_list([H],[],VH),
+  delete_equal(VH,Var,VH1),
+  maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs), %**** test single_var
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  (M:local_pita_setting(single_var,true)->
+    VC1 = []
+  ;
+    VC1 = VC
+  ),
+  to_table(M,HeadList,TabDir,HeadList1),
+  generate_rules(HeadList1,Env,Body1,VC1,R,Probs,BDDAnd,0,Clauses0,M),
+  append(TabDir,Clauses0,Clauses).
 
+
+user:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
+% disjunctive clause with discrete distr
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head = (_:P),
+  nonvar(P),
+  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
+  (var(D)->
+     throw(error('Non ground list of values in discrete(Var,Values) or finite(Var,Values)'))
+  ;
+    true
+  ),  
+  extract_vars_list([H],[],VH),
+  delete_equal(VH,Var,VH1),
+  maplist(gen_head_disc(H,VH1,Var),D,HeadList),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs), %**** test single_var
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  (M:local_pita_setting(single_var,true)->
+    VC1 = []
+  ;
+    VC1 = VC
+  ),
+  to_table(M,HeadList,TabDir,HeadList1),
+  generate_rules(HeadList1,Env,Body1,VC1,R,Probs,BDDAnd,0,Clauses0,M),
+  append(TabDir,Clauses0,Clauses).
 
 user:term_expansion((Head :- Body),
   [rule_by_num(R,HeadList,BodyList,VC1)|Clauses]):-
@@ -1711,9 +1776,16 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:uniform(Var,D0)),!,
+  (var(D0)->
+     throw(error('Non ground list of values in uniform(Var,Values)'))
+  ;
+    true
+  ),
   length(D0,Len),
   Prob is 1.0/Len,
-  maplist(gen_head(H,Prob,Var),D0,HeadList),
+  extract_vars_list([H],[],VH),
+  delete_equal(VH,Var,VH1),
+  maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),  
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   extract_vars_list(HeadList,[],VC),
@@ -1723,11 +1795,7 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
     VC1 = VC
   ),
   to_table(M,HeadList,TabDir,HeadList1),
-  (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList1,_Env,[],R,Probs,0,Clauses0,M)
-  ;
-    generate_rules_fact_vars(HeadList1,_Env,R,Probs,0,Clauses0,M)
-  ),
+  generate_rules_fact(HeadList1,_Env,VC1,R,Probs,0,Clauses0,M),
   append(TabDir,Clauses0,Clauses).
 
 
@@ -1738,7 +1806,14 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   Head = (_:P),
   nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
-  maplist(gen_head_disc(H,Var),D,HeadList),
+  (var(D)->
+     throw(error('Non ground list of values in discrete(Var,Values) or finite(Var,Values)'))
+  ;
+    true
+  ),
+  extract_vars_list([H],[],VH),
+  delete_equal(VH,Var,VH1),
+  maplist(gen_head_disc(H,VH1,Var),D,HeadList),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   extract_vars_list(HeadList,[],VC),
@@ -1748,11 +1823,7 @@ user:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
     VC1 = VC
   ),
   to_table(M,HeadList,TabDir,HeadList1),
-  (M:local_pita_setting(single_var,true)->
-    generate_rules_fact(HeadList1,_Env,[],R,Probs,0,Clauses0,M)
-  ;
-    generate_rules_fact_vars(HeadList1,_Env,R,Probs,0,Clauses0,M)
-  ),
+  generate_rules_fact(HeadList1,_Env,VC1,R,Probs,0,Clauses0,M),
   append(TabDir,Clauses0,Clauses).
 
 user:term_expansion(Head,[]) :-

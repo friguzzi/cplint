@@ -37,7 +37,8 @@ test_pita:-
     pitavit_mendel,
     meta,
     pcfg,
-    var_objdb
+    var_objdb,
+    card
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
@@ -554,4 +555,38 @@ test(pcfg):-
 
 :- end_tests(pcfg).
 
+:- begin_tests(card, []).
 
+:-ensure_loaded(library(examples/card)).
+
+test(card):-
+  run((prob(pair,Prob),close_to(Prob,0.07692307692307693))).
+
+:- end_tests(card).
+
+:- begin_tests(card_body, []).
+
+:-ensure_loaded(library(examples/card_body)).
+
+test(card_body):-
+  run((prob(pair,Prob),close_to(Prob,0.07692307692307693))).
+
+:- end_tests(card_body).
+
+:- begin_tests(card_disc, []).
+
+:-ensure_loaded(library(examples/card_disc)).
+
+test(card_disc):-
+  run((prob(pair,Prob),close_to(Prob,0.07692307692307693))).
+
+:- end_tests(card_disc).
+
+:- begin_tests(card_disc_body, []).
+
+:-ensure_loaded(library(examples/card_disc_body)).
+
+test(card_disc_body):-
+  run((prob(pair,Prob),close_to(Prob,0.07692307692307693))).
+
+:- end_tests(card_disc_body).
