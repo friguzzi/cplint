@@ -499,8 +499,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <pre><code>mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,
   -ValList) is det</code></pre>
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
-<pre><code>?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>value(0,X)</code> given that <code>value(1,9)</code> and <code>value(2,8)</code> have been observed.</p>
+<pre><code>?- mc_lw_sample_arg(val(0,X),(val(1,9),val(2,8)),100,X,L).</code></pre>
+<p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>val(0,X)</code> given that <code>val(1,9)</code> and <code>val(2,8)</code> have been observed.</p>
 <p>You can compute conditional expectations using likelihood weighting with</p>
 <pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,
   -Exp:float) is det</code></pre>
