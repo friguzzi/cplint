@@ -503,10 +503,10 @@ weight computed by likelihood weighting
 according to \verb|Evidence| (a conjunction of atoms is allowed here).
 For example
 \begin{verbatim}
-?- mc_lw_sample_arg(value(0,X),(value(1,9),value(2,8)),100,X,L).
+?- mc_lw_sample_arg(val(0,X),(val(1,9),val(2,8)),100,X,L).
 \end{verbatim}
 from \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}} samples 100 values for \verb|X| in
-\verb|value(0,X)| given that \verb|value(1,9)| and \verb|value(2,8)| have been observed.
+\verb|val(0,X)| given that \verb|val(1,9)| and \verb|val(2,8)| have been observed.
 
 You can compute conditional expectations using likelihood weighting with
 \begin{verbatim}
