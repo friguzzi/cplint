@@ -12,9 +12,13 @@ Utility module for cplint
   bar/3,
   bar1/2,
   argbar/2,
+  histogram/2,
   histogram/3,
+  densities/3,
   densities/4,
+  density/2,
   density/3,
+  density2d/2,
   density2d/3,
   to_pair/2,
   key/2,
@@ -92,6 +96,14 @@ to_atom(A0-N,A-N):-
   term_to_atom(A0,A).
 
 /**
+ * histogram(+List:list,-Chart:dict) is det
+ *
+ * Equivalent to histogram/3 with an empty option list.
+ */
+histogram(L0,Chart):-
+  histogram(L0,Chart,[]).
+
+/**
  * histogram(+List:list,-Chart:dict,+Options:list) is det
  *
  * Draws a histogram of the samples in List. List must be a list of couples of the form [V]-W or V-W
@@ -139,6 +151,14 @@ histogram(L0,NBins,Min,Max,Chart):-
      legend:_{show: false}}.
 
 /**
+ * densities(+PriorList:list,+PostList:list,-Chart:dict) is det
+ *
+ * Equivalent to densities/4 with an empty option list.
+ */
+densities(Pri,Post,Chart):-
+  densities(Pri,Post,Chart,[]).
+
+/**
  * densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of two sets of samples, usually
@@ -181,8 +201,7 @@ densities(Pri0,Post0,Chart,Options):-
  * The lines are drawn dividing the domain in
  * NBins bins. The X axis goes from Min to Max.
  */
-density(Post0,NBins,Min,Max,Chart):-
-  maplist(to_pair,Post0,Post),
+density(Post,NBins,Min,Max,Chart):-
   D is Max-Min,
   BinWidth is D/NBins,
   keysort(Post,Po),
@@ -213,6 +232,14 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
   bin2D(NBins,Post,XMin,YMin,XBinWidth,YBinWidth,D).
 
 /**
+ * density(+List:list,-Chart:dict) is det
+ *
+ * Equivalent to density/3 with an empty option list.
+ */
+density(Post,Chart):-
+  density(Post,Chart,[]).
+
+/**
  * density(+List:list,-Chart:dict,+Options:list) is det
  *
  * Draws a line chart of the density of a sets of samples.
@@ -227,7 +254,8 @@ density2d(Post0,NBins,XMin,XMax,YMin,YMax,D):-
  * * nbins(+NBins:int)
  *   the number of bins for dividing the domain, default value 40
  */
-density(Post0,Chart,Options):-
+density(Post,Chart,Options):-
+  maplist(to_pair,Post,Post0),
   maplist(key,Post0,PoK),
   max_list(PoK,DMax),
   min_list(PoK,DMin),
@@ -235,6 +263,14 @@ density(Post0,Chart,Options):-
   option(min(Min),Options,DMin),
   option(nbins(NBins),Options,40),
   density(Post0,NBins,Min,Max,Chart).
+
+/**
+ * density2d(+List:list,-Chart:dict) is det
+ *
+ *  Equivalent to density2d/3 with an empty option list.
+ */
+density2d(Post0,D):-
+  density2d(Post0,D,[]).
 
 /**
  * density2d(+List:list,-Chart:dict,+Options:list) is det
@@ -379,9 +415,13 @@ sandbox:safe_primitive(cplint_util:bar(_,_)).
 sandbox:safe_primitive(cplint_util:bar(_,_,_)).
 sandbox:safe_primitive(cplint_util:bar1(_,_)).
 sandbox:safe_primitive(cplint_util:argbar(_,_)).
+sandbox:safe_primitive(cplint_util:histogram(_,_)).
 sandbox:safe_primitive(cplint_util:histogram(_,_,_)).
+sandbox:safe_primitive(cplint_util:densities(_,_,_)).
 sandbox:safe_primitive(cplint_util:densities(_,_,_,_)).
+sandbox:safe_primitive(cplint_util:density(_,_)).
 sandbox:safe_primitive(cplint_util:density(_,_,_)).
+sandbox:safe_primitive(cplint_util:density2d(_,_)).
 sandbox:safe_primitive(cplint_util:density2d(_,_,_)).
 sandbox:safe_primitive(cplint_util:to_pair(_,_)).
 sandbox:safe_primitive(cplint_util:key(_,_)).
