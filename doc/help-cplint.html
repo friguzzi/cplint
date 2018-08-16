@@ -549,7 +549,7 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
 <p>The predicate</p>
 <pre><code>density(+List:list,-Chart:dict,+Options:list) is det</code></pre>
 <p>draws a line chart of the density of the samples in <code>List</code> that must take the same form as for <code>histogram/3</code>.</p>
-<p>In <code>histogram/3</code> and <code>density/4</code> <code>Options</code> is a list of options, the following are recognised:</p>
+<p>In <code>histogram/3</code> and <code>density/3</code> <code>Options</code> is a list of options, the following are recognised:</p>
 <ul>
 <li><p><code>min(+Min:float)</code> the minimum value of domain, default value the minimum in <code>List</code></p></li>
 <li><p><code>max(+Max:float)</code> the maximum value of domain, default value the maximum in <code>List</code></p></li>
@@ -570,6 +570,7 @@ argbar(+Values:list,-Chart:dict) is det</code></pre>
     (value(1,9),value(2,8)),1000,X,L),
    densities(L0,L,Chart).</code></pre>
 <p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> takes 1000 amples of argument <code>X</code> of <code>value(0,X)</code> before and after observing <code>(value(1,9),value(2,8)</code> and draws the prior and posterior densities of the samples using a line chart.</p>
+<p>Predicates <code>histogram/3</code>, <code>density/3</code> and <code>densities/4</code> each have a version with one argument less that is equivalent to the predicate called with an empty option list.</p>
 <h3 id="using-r">Using R</h3>
 <p>You have to load library <code>cplint_r</code> (a SWI-Prolog pack) with</p>
 <pre><code>:- use_module(library(cplint_r)).</code></pre>
