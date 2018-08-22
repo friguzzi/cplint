@@ -74,6 +74,7 @@ typedef struct
   int * rules; // array with the number of head atoms for each rule
   int * tunable_rules; // array with 1 if the parameters of the rule are tunable, 0 otherwise
   int nRules; // number of rules
+  double **arrayprob; //value of paramters. One value ofr each rule and Bool var
   double * nodes_probs;
   tablerow * nodesB; // tables of probabilities for nodes in Backward step
   tablerow * nodesFE; // tables of probabilities for nodes in Forward step
@@ -154,7 +155,7 @@ void Forward(example_data * ex_d,DdNode *node, int nex);
 void UpdateForward(example_data * ex_d,DdNode * node, int nex,
   DdNode *** nodesToVisit,int * NnodesToVisit);
 double GetOutsideExpe(example_data *ex_d,DdNode *root,double ex_prob, int nex);
-void Maximization(example_data * ex_d, double ** arrayprob);
+void Maximization(example_data * ex_d);
 static double Expectation(example_data *ex_d,DdNode **nodes_ex, int lenNodes);
 int reorder_int(environment *env);
 
@@ -209,21 +210,24 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
   rules=ex_d->rules;
   ex_d->nodes_probs=NULL;
   ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
+  ex_d->arrayprob=(double **) malloc(ex_d->nRules * sizeof(double *));
+
   tun_rules=ex_d->tunable_rules;
   for (j=0;j<nRules;j++)
   {
     ret=PL_get_list(list,head,list);
     RETURN_IF_FAIL
-    if (PL_is_pair(head))
+    if (PL_is_list(head))
     {
       ret=PL_get_list(head,nh,tun);
       RETURN_IF_FAIL
       ret=PL_get_integer(nh,&rules[j]);
+      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
       printf("rules %d %d\n",j,rules[j]);
       RETURN_IF_FAIL
       ret=PL_get_head(tun,tun);
       RETURN_IF_FAIL
-      ret=PL_get_integer(tun,&tunable);
+      tunable=0;
       printf("tunable %d\n",tunable);
       if (1)
       {
@@ -236,6 +240,8 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
         }
       }
       tun_rules[j]=tunable;
+      printf("tunable %d\n",tun_rules[j]);
+      
     }
     else
     {
@@ -244,14 +250,17 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
       RETURN_IF_FAIL
       eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
       eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
       for (i=0;i<rules[j]-1;i++)
       {
         eta[j][i]=(double *) malloc(2*sizeof(double));
         eta_temp[j][i]=(double *) malloc(2*sizeof(double));
       }
       tun_rules[j]=1;
+      printf("tunable %d\n",tun_rules[j]);
     }
   }
+
   ret=PL_put_pointer(ex_d_t,(void *)ex_d);
   RETURN_IF_FAIL
   return(PL_unify(ex_d_t,arg3));
@@ -1951,7 +1960,7 @@ double GetOutsideExpe(example_data * ex_d,DdNode *root,double ex_prob, int nex)
 }
 
 
-void Maximization(example_data * ex_d, double ** arrayprob)
+void Maximization(example_data * ex_d)
 {
   int r,i,j,e;
   double sum=0;
@@ -1968,10 +1977,10 @@ void Maximization(example_data * ex_d, double ** arrayprob)
         sum=(eta_rule[i][0]+eta_rule[i][1]);
         if (sum==0.0)
         {
-          arrayprob[r][i]=0;
+          ex_d->arrayprob[r][i]=0;
         }
         else
-          arrayprob[r][i]=eta_rule[i][1]/sum;
+          ex_d->arrayprob[r][i]=eta_rule[i][1]/sum;
       }
     }
   }
@@ -1983,7 +1992,7 @@ void Maximization(example_data * ex_d, double ** arrayprob)
       r=ex_d->env[e].vars[j].nRule;
       if (ex_d->tunable_rules[r])
       {
-        probs_rule=arrayprob[r];
+        probs_rule=ex_d->arrayprob[r];
         for(i=0;i<ex_d->rules[r]-1;i++)
         {
           ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=probs_rule[i];
@@ -2021,6 +2030,7 @@ static foreign_t randomize(term_t arg1)
       par=((double)rand())/RAND_MAX*(1-pmass);
       pmass=pmass+par;
       theta[i]=par;
+      ex_d->arrayprob[j][i]=par;
     }
     theta[ex_d->rules[j]-1]=1-pmass;
   }
@@ -2076,15 +2086,19 @@ static foreign_t randomize_init(term_t arg1, term_t arg2)
     pmass=0;
     ret=PL_get_list(list,head,list);
     RETURN_IF_FAIL
-    if (PL_is_pair(head))
+    if (PL_is_list(head))
     {
+      printf("qui\n");
       for (i=0;i<ex_d->rules[j]-1;i++)
       {
         ret=PL_get_list(head,p,head);
         RETURN_IF_FAIL
         ret=PL_get_float(p, &par);
+        printf("j %d i %d p %f\n",j,i,par);
         pmass=pmass+par;
         theta[i]=par;
+        ex_d->arrayprob[j][i]=par;
+        printf("ciao\n");
       }
       theta[ex_d->rules[j]-1]=1-pmass;
     }
@@ -2097,6 +2111,7 @@ static foreign_t randomize_init(term_t arg1, term_t arg2)
         pmass=pmass+par;
         theta[i]=par;
         printf("theta[i] %f\n",par);
+        ex_d->arrayprob[j][i]=par;
       }
       theta[ex_d->rules[j]-1]=1-pmass;
       printf("theta[i] %f\n",1-pmass);
@@ -2140,7 +2155,7 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
 {
   term_t pterm,nil,out1,out2,out3,nodesTerm,ruleTerm,head,tail,pair,compoundTerm;
   DdNode * node1,**nodes_ex;
-  int r,i,j,iter,cycle,ret;
+  int r,i,iter,cycle,ret;
   long iter1;
   size_t lenNodes;
   example_data * ex_d;
@@ -2148,7 +2163,6 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   double CLL1= -1.7*pow(10,8);  //+inf
   double p,p0,**eta_rule,ea,er;
   double ratio,diff;
-  double **arrayprob; //new value of paramters after an iteration. One value ofr each rule and Bool var
 
   ret=PL_get_pointer(arg1,(void **)&ex_d);
   RETURN_IF_FAIL
@@ -2175,11 +2189,6 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   RETURN_IF_FAIL
   ret=PL_get_integer(arg5,&iter);
   RETURN_IF_FAIL
-  arrayprob=(double **) malloc(ex_d->nRules * sizeof(double *));
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
-  }
 
   nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
   ex_d->nodes_probs=(double *)malloc(lenNodes*sizeof(double));
@@ -2219,8 +2228,10 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
       }
     }
     CLL0 = CLL1;
+    printf("bef ex\n");
     CLL1 = Expectation(ex_d,nodes_ex,lenNodes);
-    Maximization(ex_d, arrayprob);
+    printf("aft ex\n");
+    Maximization(ex_d);
     diff=CLL1-CLL0;
     ratio=diff/fabs(CLL0);
   }
@@ -2233,12 +2244,12 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     p0=1;
     for (i=0;i<ex_d->rules[r]-1;i++)
     {
-      p=arrayprob[r][i]*p0;
+      p=ex_d->arrayprob[r][i]*p0;
       ret=PL_put_float(pterm,p);
       RETURN_IF_FAIL
       ret=PL_cons_list(tail,pterm,tail);
       RETURN_IF_FAIL
-      p0=p0*(1-arrayprob[r][i]);
+      p0=p0*(1-ex_d->arrayprob[r][i]);
     }
     ret=PL_put_float(pterm,p0);
     RETURN_IF_FAIL

@@ -442,8 +442,19 @@ induce_parameters(M:Folds,R):-
 
 get_rule_info(M,R-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
+  length(HL,N),
   (Tun=1->
-    length(HL,Info)
+    Info=N
+  ;
+    get_probs(HL,Info0),
+    Info=[N,Info0]
+  ).
+
+get_rule_info_rand(M,R-Info):-
+  M:rule(R,HL,_BL,_Lit,Tun),
+  length(HL,N),
+  (Tun=1->
+    Info=N
   ;
     get_probs(HL,Info)
   ).
@@ -729,11 +740,6 @@ remove_int_atom(A,A1):-
 
 get_heads([],[]).
 
-get_heads([_-H|T],[HN|TN]):-
-  is_list(H),!,
-  length(H,HN),
-  get_heads(T,TN).
-
 get_heads([_-H|T],[H|TN]):-
 
   get_heads(T,TN).
@@ -839,7 +845,7 @@ random_restarts(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(random_restarts_number,NMax),
   Num is NMax-N+1,
   format3(M,"Restart number ~d~n~n",[Num]),
-  findall(R-Info,get_rule_info(M,R-Info),L),
+  findall(R-Info,get_rule_info_rand(M,R-Info),L),
   keysort(L,LS),
   maplist(get_arg,LS,LS1),
   randomize(ExData,LS1),
