@@ -36,7 +36,7 @@ details.
   or_list/3,
   ret_probc/3,equalityc/4,
   or_listc/3,
-  em/8,randomize/1,rand_seed/1,
+  em/8,randomize/1,randomize/2,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
   op(1150,fx,action),
