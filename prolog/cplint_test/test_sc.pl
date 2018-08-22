@@ -11,7 +11,8 @@ test_sc:-
 		hmmlearn,
 		shop,
 		multiple_paths_simple_learning,
-		multiple_paths_learning]).
+		multiple_paths_learning,
+    bongard_ind]).
 
 
 
@@ -158,3 +159,15 @@ writeln( [(p:1.0:-c, \+d, a, b),  (p:1.0:-d, \+a, \+b),
       (d:0.7420553493044134;'':0.2579446506955866:-true)]).
 
 :- end_tests(multiple_paths_learning).
+
+:- begin_tests(bongard_ind, []).
+:-ensure_loaded(library(examples/learning/bongard_ind)).
+:-use_module(library(cplint_test/cplint_test)).
+
+test(induce_par):-
+induce_par([train],P),
+writeln('Result:'),
+writeln(P),
+writeln('Expected:'),
+writeln([(pos:0.0032009782151307584;'':0.9967990217848692:-circle(_24), in(_28, _24)),  (pos:0.36069511297793233;'':0.6393048870220677:-triangle(_90), config(_90, down)),  (pos:0.4178555801893244;'':0.5821444198106756:-triangle(_144), config(_144, up))]).
+:- end_tests(bongard_ind).
