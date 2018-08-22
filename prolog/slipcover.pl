@@ -2562,6 +2562,23 @@ process_head(HeadList,M, GroundHeadList) :-
 process_head(HeadList,_M, HeadList).
 
 
+process_head_fixed([Head:p(ProbHead)],M, Prob, [Head:ProbHead1|Null]) :-!,
+  ProbHead1 is ProbHead,
+  ProbLast is 1 - Prob - ProbHead1,
+  M:local_setting(epsilon_parsing, Eps),
+  EpsNeg is - Eps,
+  ProbLast > EpsNeg,
+  (ProbLast > Eps ->
+    Null = ['':ProbLast]
+  ;
+    Null = []
+  ).
+
+process_head_fixed([Head:p(ProbHead)|Tail], M, Prob, [Head:ProbHead1|Next]) :-
+  ProbHead1 is ProbHead,
+  ProbNext is Prob + ProbHead1,
+  process_head_fixed(Tail, M, ProbNext, Next).
+
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
  * ----------------------------------------------------------------
@@ -2837,8 +2854,69 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   setof(Args,(VC0,I)^M:BodyI,ListOfVals),
   maplist(gen_cl_db_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
+
+term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
+  M:local_setting(compiling,on),
+% disjunctive clause with more than one head atom without depth_bound with individual pars
+  Head = (_H:A;_),
+  A=..[t,_P|Args],
+  !,
+  list2or(HeadList0, Head),
+  append(HeadList0,['':_],HeadList),
+  list2and(BodyList, Body),
+  maplist(add_int_arg(I),BodyList,BodyListI),
+  list2and(BodyListI,BodyI),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  delete_eq(VC,Args,VC0),
+  setof(Args,(VC0,I)^M:BodyI,ListOfVals),
+  maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
+  append(ListOfClauses,Clauses).
   
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])):-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
+  M:local_setting(compiling,on),
+  M:local_setting(depth_bound,true),
+% disjunctive clause with more than one head atom e depth_bound, fixed par
+  Head = (_H:p(_P);_),
+  !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  list2and(BodyList, Body),
+  process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
+  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),
+  (M:local_setting(single_var,true)->
+    generate_rules_db(HeadList,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+  ;
+    generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+   ).
+
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
+  M:local_setting(compiling,on),
+% disjunctive clause with more than one head atom senza depth_bound, fixed par
+  Head = (_H:p(_P);_),
+  !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
+  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),
+  (M:local_setting(single_var,true)->
+    generate_rules(HeadList,Env,Body1,[],R,Probs,BDDAnd,0,Clauses,Module,M)
+  ;
+    generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
+  ).
+
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
@@ -2858,24 +2936,6 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)]
   ;
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
-
-term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
-  M:local_setting(compiling,on),
-% disjunctive clause with more than one head atom without depth_bound with individual pars
-  Head = (_H:A;_),
-  A=..[t,_P|Args],
-  !,
-  list2or(HeadList0, Head),
-  append(HeadList0,['':_],HeadList),
-  list2and(BodyList, Body),
-  maplist(add_int_arg(I),BodyList,BodyListI),
-  list2and(BodyListI,BodyI),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  delete_eq(VC,Args,VC0),
-  setof(Args,(VC0,I)^M:BodyI,ListOfVals),
-  maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
 
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])):-
   M:local_setting(compiling,on),
@@ -2933,6 +2993,51 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])) :-
+% disjunctive clause with a single head atom e DB, con prob. diversa da 1, fixed par
+  M:local_setting(compiling,on),
+  M:local_setting(depth_bound,true),
+  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  Head = (H:p(_)),
+  !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  list2and(BodyList, Body),
+  process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
+  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),%***test single_var
+  (M:local_setting(single_var,true)->
+    generate_clause_db(H,Env,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+  ;
+    generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+  ).
+
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])) :-
+% disjunctive clause with a single head atom senza DB, con prob. diversa da 1, fixed par
+  M:local_setting(compiling,on),
+  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  Head = (H:p(_)),
+  !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
+  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),%***test single_vars
+  (M:local_setting(single_var,true)->
+    generate_clause(H,Env,Body2,[],R,Probs,BDDAnd,0,Clauses,Module,M)
+  ;
+    generate_clause(H,Env,Body2,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
+  ).
+
 term_expansion_int((Head :- Body),M, ([],[])) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
   M:local_setting(compiling,on),
@@ -2967,8 +3072,6 @@ term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
-
-
 
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
@@ -3042,6 +3145,38 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
+
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,0)])) :-
+  M:local_setting(compiling,on),
+  M:local_setting(depth_bound,true),
+% disjunctive FACT with more than one head atom e db, fixed par
+  Head=(_:p(_);_), !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  extract_vars_list(HeadList,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),
+  (M:local_setting(single_var,true)->
+    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
+  ;
+    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
+  ).
+
+
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,0)])) :-
+  M:local_setting(compiling,on),
+% disjunctive fact with more than one head atom senza db, fixed par
+  Head=(_:p(_);_), !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  extract_vars_list(HeadList,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs), %**** test single_var
+  (M:local_setting(single_var,true)->
+    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
+  ;
+    generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
+  ).
 
 term_expansion_int(Head,M,(Clauses,Rules)) :-
   M:local_setting(compiling,on),
@@ -3134,6 +3269,42 @@ term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   list2and([pita:onec(Env,BDD)],Body1),
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
+
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,0)])) :-
+  M:local_setting(compiling,on),
+  M:local_setting(depth_bound,true),
+% disjunctive fact with a single head atom e prob. generiche, con db, fixed par
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:p(_)), !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  extract_vars_list(HeadList,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),
+  add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
+  (M:local_setting(single_var,true)->
+    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+  ;
+    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+  ).
+
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,0)])) :-
+  M:local_setting(compiling,on),
+% disjunctive fact with a single head atom e prob. generiche, senza db, fixed par
+  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  Head=(H:p(_)), !,
+  list2or(HeadListOr, Head),
+  process_head_fixed(HeadListOr,M,0,HeadList),
+  extract_vars_list(HeadList,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),
+  add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
+  (M:local_setting(single_var,true)->
+    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+  ;
+    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+  ).
+
 
 term_expansion_int(Head,M,(Clauses,Rules)) :-
   M:local_setting(compiling,on),
