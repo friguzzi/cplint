@@ -86,7 +86,7 @@ fact of the form
 \begin{verbatim}
 bg(<list of terms representing clauses>).
 \end{verbatim}
-where the clauses must currently be deterministic.
+where the clauses must  be deterministic.
 Alternatively, you can specify a set of clauses by including them in 
 a section between
 \verb|:- begin_bg.| and \verb|:- end_bg.| For example
@@ -112,7 +112,7 @@ Moreover, you can specify an initial program with a fact of the form
 in(<list of terms representing clauses>).
 \end{verbatim}
 The initial program is used in parameter learning for providing 
-the structure. The indicated parameters do not matter as they are first randomized.
+the structure.
 Remember to enclose each clause in parentheses because \verb|:-| has the highest precedence.
 
 For example, \href{http://cplint.eu/example/learning/bongard.pl}{\texttt{bongard.pl}} has the initial program 
@@ -144,7 +144,53 @@ pos:0.000448807 :-
 \end{verbatim}
 If you specify both a \verb|in/1| fact and a section, the clauses of the two will be combined.
 
+The annotations of the head atoms of the initial program can be 
+ probabilities, as in the example above, in this case the  parameters do not matter as they are first randomized.
 
+The annotations of the head atoms of the initial program can also be 
+ \verb|p(<prob>)| with \verb|<prob>| a probability, in this case the parameter is fixed so it is not tuned by learning, as
+ in 
+ \begin{verbatim}
+ in([
+( pos:0.5 :-
+ 	circle(A),
+ 	in(B,A)
+),
+( pos:p(0.5) :-
+ 	circle(A),
+ 	triangle(B)
+)]).
+\end{verbatim}
+The annotations of the head atoms of the initial program can also be 
+ \verb|t(<prob>,<args>)| with \verb|<prob>| either a probability, in this case it is the initial value of the 
+parameter, or a variable, in this case the parameter is initially randomized, and \verb|<args>| a tuple of variables
+that also appear in the clause. In this case a different parameter is learned for every grounding of  
+\verb|<args>| that make the body true.
+
+For example, we can set the initial value of the parameter of the second clause to 0.9 with
+ \begin{verbatim}
+in([
+( pos:0.5 :-
+ 	circle(A),
+ 	in(B,A)
+),
+( pos:t(0.9) :-
+ 	circle(A),
+ 	triangle(B)
+)]).
+\end{verbatim}
+With the program below we learn a different parameter for every instantiation of \verb|C| in the second clause:
+\begin{verbatim}
+in([
+( pos:0.5 :-
+ 	circle(A),
+ 	in(_B,A)
+),
+( pos:t(_,C) :-
+ 	triangle(A),
+ 	config(A,C)
+)]).
+\end{verbatim}
 
 \subsubsection{Language Bias}
 %

@@ -171,3 +171,29 @@ writeln(P),
 writeln('Expected:'),
 writeln([(pos:0.0032009782151307584;'':0.9967990217848692:-circle(_24), in(_28, _24)),  (pos:0.36069511297793233;'':0.6393048870220677:-triangle(_90), config(_90, down)),  (pos:0.4178555801893244;'':0.5821444198106756:-triangle(_144), config(_144, up))]).
 :- end_tests(bongard_ind).
+
+:- begin_tests(bongard_fixed, []).
+:-ensure_loaded(library(examples/learning/bongard_fixed)).
+:-use_module(library(cplint_test/cplint_test)).
+
+test(induce_par):-
+induce_par([train],P),
+writeln('Result:'),
+writeln(P),
+writeln('Expected:'),
+writeln( [(pos:0.0021000155528233407;'':0.9978999844471766:-circle(_24), in(_28, _24)),  (pos:0.5;'':0.5:-circle(_24), triangle(_28))]).
+:- end_tests(bongard_fixed).
+
+:- begin_tests(bongard_initial, []).
+:-ensure_loaded(library(examples/learning/bongard_initial)).
+:-use_module(library(cplint_test/cplint_test)).
+
+test(induce_par):-
+induce_par([train],P),
+writeln('Result:'),
+writeln(P),
+writeln('Expected:'),
+writeln([(pos:0.07507285519157605;'':0.924927144808424:-circle(_24), in(_28, _24)),  (pos:0.41706649095461357;'':0.5829335090453864:-circle(_88), triangle(_98))]).
+
+:- end_tests(bongard_initial).
+

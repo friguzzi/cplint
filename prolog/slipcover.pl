@@ -280,7 +280,7 @@ to_dyn(M,P/A):-
 
 gen_fixed([],_M,[]).
 
-gen_fixed([(H,B,BL)|T],M,[rule(R,H,B,BL,1)|T1]):-
+gen_fixed([(H,B,BL)|T],M,[rule(R,H,B,BL,tunable)|T1]):-
   get_next_rule_number(M,R),
   gen_fixed(T,M,T1).
 
@@ -443,7 +443,7 @@ induce_parameters(M:Folds,R):-
 get_rule_info(M,R-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
   length(HL,N),
-  (Tun=1->
+  ((Tun=tunable;Tun=initial)->
     Info=N
   ;
     get_probs(HL,Info0),
@@ -453,7 +453,7 @@ get_rule_info(M,R-Info):-
 get_rule_info_rand(M,R-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
   length(HL,N),
-  (Tun=1->
+  (Tun=tunable->
     Info=N
   ;
     get_probs(HL,Info)
@@ -1160,7 +1160,7 @@ get_head_atoms(O,M):-
 
 generate_top_cl([],_M,[]):-!.
 
-generate_top_cl([A|T],M,[(rule(R,[A1:0.5,'':0.5],[],true,1),-1e20)|TR]):-
+generate_top_cl([A|T],M,[(rule(R,[A1:0.5,'':0.5],[],true,tunable),-1e20)|TR]):-
   A=..[F|ArgM],
   keep_const(ArgM,Arg),
   A1=..[F|Arg],
@@ -1297,7 +1297,7 @@ all_plus_args([H|T]):-
 
 generate_body([],_Mod,[]):-!.
 
-generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList,1),-1e20)|CL0]):-!,
+generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList,tunable),-1e20)|CL0]):-!,
   get_modeb(Det,Mod,[],BL),
   get_args(A,H,Pairs,[],Args,[],ArgsTypes,M),
   Mod:local_setting(d,D),
@@ -1317,7 +1317,7 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList,1),-1e20)|CL0]):-!,
   write_disj_clause2(Mod,user_output,(HeadV:-BodyListV)),
   generate_body(T,Mod,CL0).
 
-generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList,1),-1e20)|CL0]):-
+generate_body([(A,H)|T],Mod,[(rule(R,[Head:0.5,'':0.5],[],BodyList,tunable),-1e20)|CL0]):-
   functor(A,F,AA),
   findall(FB/AB,Mod:determination(F/AA,FB/AB),Det),
   get_modeb(Det,Mod,[],BL),
@@ -1690,7 +1690,7 @@ specialize_rule(Rule,M,SpecRule,Lit):-
   specialize_rule(BLS,Rule,M,SpecRule,Lit).
 
 %specializes the clause head
-specialize_rule(rule(ID,LH,BL,Lits),M,rule(ID,LH2,BL,Lits,1),Lit):-
+specialize_rule(rule(ID,LH,BL,Lits,Tun),M,rule(ID,LH2,BL,Lits,Tun),Lit):-
   M:local_setting(specialize_head,true),
 	length(LH,L),
 	L>2,
@@ -2636,12 +2636,41 @@ get_probs([_H:P|T], [P1|T1]) :-
   P1 is P,
   get_probs(T, T1).
 
-get_probs_t(L, LP,L2):-
-  length(L,N),
-  P is 1/N,
-  maplist(set_prob(P),L,LP,L2).
+get_probs_t([H:A|T],_M, LP,L3):-
+  A=..[t,Prob|_],
+  var(Prob),!,
+  length([H:A|T],N),
+  P is 1/(N+1),
+  maplist(set_prob(P),[H:A|T],LP,L2),
+  append(L2,['':P],L3).
+
+get_probs_t(L,M,LP,L3):-
+  process_head_init(L,M,0,L3),
+  get_probs(L3,LP).
+
+process_head_init([Head:Ann],M, Prob, [Head:ProbHead1|Null]) :-!,
+  Ann=..[t,ProbHead|_],
+  ProbHead1 is ProbHead,
+  ProbLast is 1 - Prob - ProbHead1,
+  M:local_setting(epsilon_parsing, Eps),
+  EpsNeg is - Eps,
+  ProbLast > EpsNeg,
+  (ProbLast > Eps ->
+    Null = ['':ProbLast]
+  ;
+    Null = []
+  ).
+
+process_head_init([Head:Ann|Tail], M, Prob, [Head:ProbHead1|Next]) :-
+  Ann=..[t,ProbHead|_],
+  ProbHead1 is ProbHead,
+  ProbNext is Prob + ProbHead1,
+  process_head_init(Tail, M, ProbNext, Next).
 
 set_prob(P,A:_,P,A:P).
+
+set_prob_t(A:Ann,P,A:P):-
+  Ann=..[t,P|_].
 
 get_at(A:_,A).
 
@@ -2804,7 +2833,7 @@ average(L,Av):-
         length(L,N),
         Av is Sum/N.
 
-gen_cl_db_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,1)):-
+gen_cl_db_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,Tun)):-
   copy_term((Args,HeadList0,BodyList0),(Vals,HeadList,BodyList)),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
@@ -2812,36 +2841,57 @@ gen_cl_db_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,tr
   append([pita:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_rule_number(M,R),
-  get_probs_t(HeadList,Probs,HeadList1),
+  get_probs_t(HeadList,M,Probs,HeadList1),
+  HeadList=[_:Ann|_],
+  Ann=..[t,P|_],
+  (var(P)->
+    Tun=tunable
+  ;
+    Tun=initial
+  ),
   (M:local_setting(single_var,true)->
     generate_rules_db(HeadList1,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ;
     generate_rules_db(HeadList1,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
 
-gen_cl_db_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,1)):-
+gen_cl_db_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,Tun)):-
   copy_term((Args,HeadList0),(Vals,HeadList)),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
-  get_probs_t(HeadList,Probs,HeadList1),
+  get_probs_t(HeadList,M,Probs,HeadList1),
+  HeadList=[_:Ann|_],
+  Ann=..[t,P|_],
+  (var(P)->
+    Tun=tunable
+  ;
+    Tun=initial
+  ),
   (M:local_setting(single_var,true)->
     generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
   ;
     generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
   ).
 
-gen_cl_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,1)):-
+gen_cl_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,Tun)):-
   copy_term((Args,HeadList0),(Vals,HeadList)),
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
-  get_probs_t(HeadList,Probs,HeadList1),
+  get_probs_t(HeadList,M,Probs,HeadList1),
+  HeadList=[_:Ann|_],
+  Ann=..[t,P|_],
+  (var(P)->
+    Tun=tunable
+  ;
+    Tun=initial
+  ),
   (M:local_setting(single_var,true)->
     generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
   ;
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
   ).
 
-gen_cl_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,1)):-
+gen_cl_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,Tun)):-
   copy_term((Args,HeadList0,BodyList0),(Vals,HeadList,BodyList)),
   process_body(BodyList,BDD,BDDAnd, [],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
@@ -2849,7 +2899,14 @@ gen_cl_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,
   append([pita:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_rule_number(M,R),
-  get_probs_t(HeadList,Probs,HeadList1),
+  get_probs_t(HeadList,M,Probs,HeadList1),
+  HeadList=[_:Ann|_],
+  Ann=..[t,P|_],
+  (var(P)->
+    Tun=tunable
+  ;
+    Tun=initial
+  ),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList1,Env,Body1,[],R,Probs,BDDAnd,0,Clauses,Module,M)
   ;
@@ -2895,7 +2952,7 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
   
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound, fixed par
@@ -2917,7 +2974,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)]
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])):-
   M:local_setting(compiling,on),
 % disjunctive clause with more than one head atom senza depth_bound, fixed par
   Head = (_H:p(_P);_),
@@ -2938,7 +2995,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)]
     generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])):-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tunable)])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
@@ -2959,7 +3016,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)]
     generate_rules_db(HeadList,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])):-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tunable)])):-
   M:local_setting(compiling,on),
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
@@ -2987,7 +3044,7 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)) :-
   Head = (H:A),
   A=..[t,_P|Args],
   !,
-  HeadList=[H:0.5,'':0.5],
+  HeadList=[H:A],
   list2and(BodyList, Body),
   maplist(add_int_arg(I),BodyList,BodyListI),
   list2and(BodyListI,BodyI),
@@ -3004,7 +3061,7 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   Head = (H:A),
   A=..[t,_P|Args],
   !,
-  HeadList=[H:0.5,'':0.5],
+  HeadList=[H:A],
   list2and(BodyList, Body),
   maplist(add_int_arg(I),BodyList,BodyListI),
   list2and(BodyListI,BodyI),
@@ -3015,7 +3072,7 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1, fixed par
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
@@ -3038,7 +3095,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,0)]
     generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1, fixed par
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3095,7 +3152,7 @@ term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tunable)])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
@@ -3117,7 +3174,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)]
     generate_clause_db(H,Env,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,1)])) :-
+term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tunable)])) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   M:local_setting(compiling,on),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
@@ -3168,7 +3225,7 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
 
-term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,0)])) :-
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db, fixed par
@@ -3185,7 +3242,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,0)])) :-
   ).
 
 
-term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,0)])) :-
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with more than one head atom senza db, fixed par
   Head=(_:p(_);_), !,
@@ -3235,7 +3292,7 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
-term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,1)])) :-
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
@@ -3252,7 +3309,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,1)])) :-
   ).
 
 
-term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,1)])) :-
+term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
@@ -3292,7 +3349,7 @@ term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
 
-term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,0)])) :-
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db, fixed par
@@ -3310,7 +3367,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,0)])) :-
     Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
-term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,0)])) :-
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db, fixed par
   (Head \= ((user:term_expansion(_,_)) :- _ )),
@@ -3357,7 +3414,7 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
-term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,1)])) :-
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
@@ -3375,7 +3432,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,1)])) :-
     Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
-term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,1)])) :-
+term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
