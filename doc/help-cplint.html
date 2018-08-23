@@ -720,36 +720,27 @@ pos:0.000448807 :-
 <p>If you specify both a <code>in/1</code> fact and a section, the clauses of the two will be combined.</p>
 <p>The annotations of the head atoms of the initial program can be probabilities, as in the example above, in this case the parameters do not matter as they are first randomized.</p>
 <p>The annotations of the head atoms of the initial program can also be <code>p(&lt;prob&gt;)</code> with <code>&lt;prob&gt;</code> a probability, in this case the parameter is fixed so it is not tuned by learning, as in</p>
-<pre><code> in([
-( pos:0.5 :-
+<pre><code>in([(pos:0.5 :-
  	circle(A),
- 	in(B,A)
-),
-( pos:p(0.5) :-
+ 	in(B,A)),
+     (pos:p(0.5) :-
  	circle(A),
- 	triangle(B)
-)]).</code></pre>
+ 	triangle(B))]).</code></pre>
 <p>The annotations of the head atoms of the initial program can also be <code>t(&lt;prob&gt;,&lt;args&gt;)</code> with <code>&lt;prob&gt;</code> either a probability, in this case it is the initial value of the parameter, or a variable, in this case the parameter is initially randomized, and <code>&lt;args&gt;</code> a tuple of variables that also appear in the clause. In this case a different parameter is learned for every grounding of <code>&lt;args&gt;</code> that make the body true.</p>
 <p>For example, we can set the initial value of the parameter of the second clause to 0.9 with</p>
-<pre><code>in([
-( pos:0.5 :-
+<pre><code>in([(pos:0.5 :-
  	circle(A),
- 	in(B,A)
-),
-( pos:t(0.9) :-
+ 	in(B,A)),
+     (pos:t(0.9) :-
  	circle(A),
- 	triangle(B)
-)]).</code></pre>
+ 	triangle(B))]).</code></pre>
 <p>With the program below we learn a different parameter for every instantiation of <code>C</code> in the second clause:</p>
-<pre><code>in([
-( pos:0.5 :-
+<pre><code>in([(pos:0.5 :-
  	circle(A),
- 	in(_B,A)
-),
-( pos:t(_,C) :-
+ 	in(_B,A)),
+     (pos:t(_,C) :-
  	triangle(A),
- 	config(A,C)
-)]).</code></pre>
+ 	config(A,C))]).</code></pre>
 <h3 id="language-bias">Language Bias</h3>
 <p>The language bias part contains the declarations of the input and output predicates. Output predicates are declared as</p>
 <pre><code>output(&lt;predicate&gt;/&lt;arity&gt;).</code></pre>

@@ -151,15 +151,12 @@ The annotations of the head atoms of the initial program can also be
  \verb|p(<prob>)| with \verb|<prob>| a probability, in this case the parameter is fixed so it is not tuned by learning, as
  in 
  \begin{verbatim}
- in([
-( pos:0.5 :-
+in([(pos:0.5 :-
  	circle(A),
- 	in(B,A)
-),
-( pos:p(0.5) :-
+ 	in(B,A)),
+     (pos:p(0.5) :-
  	circle(A),
- 	triangle(B)
-)]).
+ 	triangle(B))]).
 \end{verbatim}
 The annotations of the head atoms of the initial program can also be 
  \verb|t(<prob>,<args>)| with \verb|<prob>| either a probability, in this case it is the initial value of the 
@@ -169,27 +166,21 @@ that also appear in the clause. In this case a different parameter is learned fo
 
 For example, we can set the initial value of the parameter of the second clause to 0.9 with
  \begin{verbatim}
-in([
-( pos:0.5 :-
+in([(pos:0.5 :-
  	circle(A),
- 	in(B,A)
-),
-( pos:t(0.9) :-
+ 	in(B,A)),
+     (pos:t(0.9) :-
  	circle(A),
- 	triangle(B)
-)]).
+ 	triangle(B))]).
 \end{verbatim}
 With the program below we learn a different parameter for every instantiation of \verb|C| in the second clause:
 \begin{verbatim}
-in([
-( pos:0.5 :-
+in([(pos:0.5 :-
  	circle(A),
- 	in(_B,A)
-),
-( pos:t(_,C) :-
+ 	in(_B,A)),
+     (pos:t(_,C) :-
  	triangle(A),
- 	config(A,C)
-)]).
+ 	config(A,C))]).
 \end{verbatim}
 
 \subsubsection{Language Bias}
