@@ -459,8 +459,7 @@ get_rule_info(M,R-Info):-
   ((Tun=tunable;Tun=initial)->
     Info=N
   ;
-    get_probs(HL,Info0),
-    Info=[N,Info0]
+    Info=[N]
   ).
 
 get_rule_info_rand(M,R-Info):-

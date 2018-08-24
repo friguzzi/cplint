@@ -88,8 +88,11 @@ details.
  *
  * Initializes a data structure for performing parameter learning.
  * NumberOfRules is the number of rules of the model,
- * NumberOfHeads is a list of integers, one for each rule, indicating the number
- * of head atoms in each rule.
+ * NumberOfHeads is a list of terms, one for each rule. Each term is either
+ * an integer, indicating the number
+ * of head atoms in the rule, or a list [N] where N
+ * is the number of head atoms. In the first case, the parameters of the rule are tunable,
+ * in the latter they are fixed.
  * It returns an integer in Context that is a pointer to a
  * context data structure for performing the EM algorithm.
  */
@@ -207,6 +210,16 @@ details.
  * randomize(++Context:int) is det
  *
  * Randomizes the parameters of random variables associated to Context.
+ */
+
+/**
+ * randomize(++Context:int,++RuleInfo:list) is det
+ *
+ * Randomizes the parameters of random variables associated to Context.
+ * RuleInfo is a list of elements, one for each rule, with are either integers,
+ * in which case the parameters of the corresponding rule should be randomized,
+ * or a list of floats, in which case the parameters should be set to those indicated
+ * in the list.
  */
 
 /**

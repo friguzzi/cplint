@@ -224,8 +224,6 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
       ret=PL_get_integer(nh,&rules[j]);
       ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
       RETURN_IF_FAIL
-      ret=PL_get_head(tun,tun);
-      RETURN_IF_FAIL
       tunable=0;
       tun_rules[j]=tunable;
     }
