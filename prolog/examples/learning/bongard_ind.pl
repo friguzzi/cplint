@@ -5,16 +5,15 @@ Proceedings of the Sixth International Workshop on Algorithmic
 Learning Theory, volume 997 of Lecture Notes in Artificial Intelligence,
 pages 80-94. SpringerVerlag, 1995.
 
+This example shows how to learn a different parameter for each grounding of a 
+clause.
+
 Downloaded from
 https://dtai.cs.kuleuven.be/static/ACE/doc/
 */
 
 /** <examples>
 ?- induce_par([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % learn the parameteters and test the result
-?- induce([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % learn the structure and the parameters and test the result
-?- in(P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % test the input theory
-?- induce_par([all],P).
-?- induce([all],P).
 */
 :-use_module(library(slipcover)).
 
@@ -40,7 +39,7 @@ in([
  	in(_B,A)
 ),
 (
- pos:t(_,C) :-
+ pos:t(_,C) :- % different parameter for each grounding of C
  	triangle(A),
  	config(A,C)
 )]).
