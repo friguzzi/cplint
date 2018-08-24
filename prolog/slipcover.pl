@@ -250,7 +250,13 @@ induce_rules(M:Folds,R):-
     retract_all(ClBGRef)
   ;
     true
-  ).
+  ),
+  clean_up_db_structure(M).
+
+clean_up_db_structure(M):-
+  retractall(M:ref(_)),
+  retractall(M:ref_clause(_)),
+  clean_up_db(M).
 
 make_dynamic(M):-
   M:(dynamic int/1),
@@ -438,7 +444,14 @@ induce_parameters(M:Folds,R):-
     retract_all(ClBGRef)
   ;
     true
-  ).
+  ),
+  clean_up_db(M).
+
+clean_up_db(M):-
+  retract(M:rule_sc_n(_)),
+  assert(M:rule_sc_n(0)),
+  retractall(M:v(_,_,_)),
+  retractall(M:database(_)).
 
 get_rule_info(M,R-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
@@ -3846,21 +3859,12 @@ user:term_expansion((:- sc), []) :-!,
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
-    ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
+    ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3,
-    query_rule/4,
+    query_rule/4,database/1,
     zero_clauses/1,tabled/1)),
   retractall(M:tabled(_)),
   style_check(-discontiguous).
-
-user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
-  prolog_load_context(module, M),
-  input_mod(M),!,
-  list2and(L,Conj),
-  maplist(tab(M),L,L1),
-  maplist(zero_clause(M),L,LZ),
-  assert(M:zero_clauses(LZ)),
-  list2and(L1,Conj1).
 
 user:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
