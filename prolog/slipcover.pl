@@ -258,6 +258,11 @@ clean_up_db_structure(M):-
   retractall(M:ref_clause(_)),
   clean_up_db(M).
 
+/**
+ * make_dynamic(+Module:atom) is det
+ *
+ * Makes the predicates required for learning dynamic.
+ */
 make_dynamic(M):-
   M:(dynamic int/1),
   findall(O,M:output(O),LO),
@@ -1306,7 +1311,12 @@ all_plus_args([H|T]):-
   H=..[_|Args],
   all_plus_args(Args),
   all_plus_args(T).
-
+/**
+ * generate_body(+ModeDecs:list,+Module:atom,-BottomClauses:list) is det
+ *
+ * Generates the body of bottom clauses and returns the bottom clauses in BottomClauses.
+ * 
+ */
 generate_body([],_Mod,[]):-!.
 
 generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList,tunable),-1e20)|CL0]):-!,
@@ -1597,6 +1607,11 @@ generate_goal([P/A|T],M,H,G0,G1):-
   append(G2,LN,G3),
   generate_goal(T,M,H,G3,G1).
 
+/**
+ * remove_duplicates(+List1:list,-List2:list) is det
+ *
+ * Removes duplicates from List1. Equality is checked with ==.
+ */
 remove_duplicates(L0,L):-
   remove_duplicates(L0,[],L1),
   reverse(L1,L).
@@ -1716,7 +1731,12 @@ update_head1([H:_P|T],N,[H:P|T1]):-
 	       P is 1/N,
 	       update_head1(T,N,T1).
 
-
+/**
+ * banned_clause(+Module:atom,-Head:term,-Body:term) is nondet
+ *
+ * The predicate checks whether Head:-Body is a banned clause, as specified
+ * by the user in the input file. Module is the module of the input file.
+ */
 banned_clause(M,H,B):-
   numbervars((H,B),0,_N),
   M:banned(H2,B2),
@@ -1818,9 +1838,14 @@ remove_eq(X,[_|R],R1):-
   remove_eq(X,R,R1).
 
 
-linked_clause(X):-
-  linked_clause(X,[]).
-
+/**
+ * linked_clause(+Literals:list,+Module:atom,+PrevLits:list) is det
+ *
+ * The predicate checks whether Literals form a linked list of literals
+ * given that PrevLits are the previous literals.
+ * In a linked list of literals input variables of a literal are output variables in  
+ * a previous literal.
+ */
 linked_clause([],_M,_).
 
 linked_clause([L|R],M,PrevLits):-
@@ -1881,7 +1906,12 @@ input_vars1([V|RV],[+_T|RT],[V|RV1]):-
 input_vars1([_V|RV],[_|RT],RV1):-
   input_vars1(RV,RT,RV1).
 
-
+/**
+ * exctract_type_vars(+Literals:list,+Module:atom,+Types:term) is det
+ *
+ * The predicate extracts the type of variables from the list of literals
+ * Literals. Types is a list of elements of the form Variable=Type
+ */
 exctract_type_vars([],_M,[]).
 
 exctract_type_vars([Lit|RestLit],M,TypeVars):-
@@ -1918,7 +1948,14 @@ type_vars([V|RV],[-T|RT],[V=T|RTV]):-atom(T),!,
 type_vars([_V|RV],[_T|RT],RTV):-
   type_vars(RV,RT,RTV).
 
-
+/**
+ * take_var_args(+ArgSpec:list,+TypeVars:list,-Vars:list) is det
+ *
+ * The predicate returns in Vars the list of vars corresponding to 
+ * variables arguments in ArgSpec (those with argument specification 
+ * +type or -type). TypeVars is a list of terns of the form
+ * Variable=Types as returnd by extract_type_vars/3.
+ */
 take_var_args([],_,[]).
 
 take_var_args([+T|RT],TypeVars,[V|RV]):-
@@ -1945,7 +1982,13 @@ add_probs([],['':P],P):-!.
 add_probs([H|T],[H:P|T1],P):-
   add_probs(T,T1,P).
 
-
+/**
+ * extract_fancy_vars(+Term:term,-Vars:list) is nondet
+ *
+ * Given Term, it returns the list of all of its variables
+ * in the form 'VN'=Var where VN is an atom with N an increasing integer
+ * starting from 1 and Var a variable in Term.
+ */
 extract_fancy_vars(List,Vars):-
   term_variables(List,Vars0),
   fancy_vars(Vars0,1,Vars).
@@ -1961,6 +2004,13 @@ fancy_vars([X|R],N,[NN2=X|R1]):-
   fancy_vars(R,N1,R1).
 
 
+/**
+ * delete_one(+List:list,-Rest:list,+Element:term) is nondet
+ *
+ * As the library predicate delete(+List1, @Elem, -List2) but
+ * Element is unified with the deleted element (so it can be 
+ * instantiated by the call).
+ */
 delete_one([X|R],R,X).
 
 delete_one([X|R],[X|R1],D):-
@@ -2077,7 +2127,12 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 
 */
 
-
+/**
+ * assert_all(+Terms:list,+Module:atom,-Refs:list) is det
+ *
+ * The predicate asserts all terms in Terms in module Module using assertz(M:Term,Ref) and 
+ * returns the list of references in Refs
+ */
 assert_all([],_M,[]).
 
 assert_all([H|T],M,[HRef|TRef]):-
@@ -2090,13 +2145,11 @@ assert_all([H|T],[HRef|TRef]):-
   assertz(slipcover:H,HRef),
   assert_all(T,TRef).
 
-
-retract_all([],_):-!.
-
-retract_all([H|T],M):-
-  erase(M,H),
-  retract_all(T,M).
-
+/**
+ * retract_all(+Refs:list) is det
+ *
+ * The predicate erases all references in Refs (using erase/1).
+ */
 retract_all([]):-!.
 
 retract_all([H|T]):-
@@ -2112,7 +2165,14 @@ read_clauses_dir(S,[Cl|Out]):-
     read_clauses_dir(S,Out)
   ).
 
-
+/**
+ * process_clauses(+InputClauses:list,+Module:atom,+Rules:list,-RulesOut:list,+Clauses:list,-ClausesOut:list) is det
+ *
+ * InputClauses is a list of probabilistic clauses in input syntax.
+ * The predicate translates them into the internal format.
+ * RulesOut/Rules is a difference list of term of the form rule(R,HeadList,BodyList,Lit,Tun).
+ * ClausesOut/Clauses is a difference list of clauses to be asserted.
+ */
 process_clauses([],_M,C,C,R,R):-!.
 
 process_clauses([end_of_file],_M,C,C,R,R):-!.
@@ -2139,7 +2199,12 @@ process_clauses([H|T],M,C0,C1,R0,R1):-
   ),
   process_clauses(T,M,C2,C1,R2,R1).
 
-
+/**
+ * get_next_rule_number(+Module:atom,-R:integer) is det
+ *
+ * The predicate returns the next rule number. Module is used to access local
+ * data.
+ */
 get_next_rule_number(M,R):-
   retract(M:rule_sc_n(R)),
   R1 is R+1,
@@ -2579,7 +2644,11 @@ difference([H|T],L2,L3):-
 difference([H|T],L2,[H|L3]):-
   difference(T,L2,L3).
 
-
+/**
+ * member_eq(+List:list,+Element:term) is det
+ *
+ * Checks the presence of Element in List. Equality is checked with ==.
+ */
 member_eq(E,[H|_T]):-
   E==H,!.
 
@@ -2735,7 +2804,17 @@ gen_clause_cw(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :
   add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
   Clauses=[(Head1 :- Body1)].
 
-
+/**
+ * generate_clauses(+Rules0:list,+Module:atom,+StartingIndex:integer,-Rules:list,+Clauses:list,-ClausesOut:list) is det
+ *
+ * The predicate generate the internal representation of rules to produce clauses to be
+ * asserted in the database. 
+ * Rules0 is a list of term of the form rule(R,HeadList,BodyList,Lit,Tun).
+ * Rules is a list of terms of the form 
+ * rule(N,HeadList,BodyList,Lit,Tun) where N is
+ * an increasing index starting from StartingIndex.
+ * ClausesOut/Clauses is a difference list of clauses to be asserted.
+ */
 generate_clauses([],_M,[],_N,C,C):-!.
 
 generate_clauses([H|T],M,[H1|T1],N,C0,C):-
@@ -2802,7 +2881,14 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !
   add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
   Clauses=[(Head1 :- Body1)].
 
-
+/**
+ * generate_clauses_bg(+Rules:list,-Clauses:list) is det
+ *
+ * The predicate generate clauses to be
+ * asserted in the database for the rules from the background. 
+ * Rules is a list of term of the form def_rule(H,BodyList,_Lit).
+ * Clauses is a list of clauses to be asserted.
+ */
 generate_clauses_bg([],[]):-!.
 
 generate_clauses_bg([H|T],[CL|T1]):-
@@ -3722,7 +3808,12 @@ compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
   compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 
-
+/**
+ * write2(+Module:atom,+Message:term) is det
+ *
+ * The predicate calls write(Message) if the verbosity is at least 2.
+ * Module is used to get the verbosity setting
+ */
 write2(M,A):-
   M:local_setting(verbosity,Ver),
   (Ver>1->
@@ -3730,7 +3821,12 @@ write2(M,A):-
   ;
     true
   ).
-
+/**
+ * write3(+Module:atom,+Message:term) is det
+ *
+ * The predicate calls write(Message) if the verbosity is at least 3.
+ * Module is used to get the verbosity setting.
+ */
 write3(M,A):-
   M:local_setting(verbosity,Ver),
   (Ver>2->
@@ -3738,7 +3834,12 @@ write3(M,A):-
   ;
     true
   ).
-
+/**
+ * nl2(+Module:atom) is det
+ *
+ * The predicate prints a newline if the verbosity is at least 2.
+ * Module is used to get the verbosity setting.
+ */
 nl2(M):-
   M:local_setting(verbosity,Ver),
   (Ver>1->
@@ -3746,7 +3847,12 @@ nl2(M):-
   ;
     true
   ).
-
+/**
+ * nl3(+Module:atom) is det
+ *
+ * The predicate prints a newline if the verbosity is at least 3.
+ * Module is used to get the verbosity setting.
+ */
 nl3(M):-
   M:local_setting(verbosity,Ver),
   (Ver>2->
@@ -3754,7 +3860,12 @@ nl3(M):-
   ;
     true
   ).
-
+/**
+ * format2(+Module:atom,+Format, :Arguments) is det
+ *
+ * The predicate calls format(Format,Arguments) if the verbosity is at least 2.
+ * Module is used to get the verbosity setting.
+ */
 format2(M,A,B):-
   M:local_setting(verbosity,Ver),
   (Ver>1->
@@ -3762,7 +3873,12 @@ format2(M,A,B):-
   ;
     true
   ).
-
+/**
+ * format3(+Module:atom,+Format, :Arguments) is det
+ *
+ * The predicate calls format(Format,Arguments) if the verbosity is at least 3.
+ * Module is used to get the verbosity setting.
+ */
 format3(M,A,B):-
   M:local_setting(verbosity,Ver),
   (Ver>2->
@@ -3770,7 +3886,12 @@ format3(M,A,B):-
   ;
     true
   ).
-
+/**
+ * write_rules2(+Module:atom,+Rules:list,+Stream:atom) is det
+ *
+ * The predicate write the rules in Rules on stream Stream if the verbosity is at least 2.
+ * Module is used to get the verbosity setting.
+ */
 write_rules2(M,A,B):-
   M:local_setting(verbosity,Ver),
   (Ver>1->
@@ -3778,7 +3899,12 @@ write_rules2(M,A,B):-
   ;
     true
   ).
-
+/**
+ * write_rules3(+Module:atom,+Rules:list,+Stream:atom) is det
+ *
+ * The predicate write the rules in Rules on stream Stream if the verbosity is at least 3.
+ * Module is used to get the verbosity setting.
+ */
 write_rules3(M,A,B):-
   M:local_setting(verbosity,Ver),
   (Ver>2->
@@ -3820,7 +3946,13 @@ write_body3(M,A,B):-
     true
   ).
 
-
+/**
+ * tab(+Module:atom,+PredSpec:pred_spec,-TableSpec:term) is det
+ *
+ * Records the fact that predicate PredSpec must be tabled and returns
+ * the necessary term for the tabling directive in TableSpec.
+ * Module is used to store the information in the correct module
+ */
 tab(M,A/B,P):-
   length(Args0,B),
   (M:local_setting(depth_bound,true)->
@@ -3836,7 +3968,12 @@ tab(M,A/B,P):-
   ;
     assert(M:tabled(PT))
   ).
-
+/**
+ * zero_clause(+Module:atom,+PredSpec:pred_spec,-ZeroClause:term) is det
+ *
+ * Generates the zero clause for predicate PredSpec. 
+ * Module is the module of the input file.
+ */
 zero_clause(M,A/B,(H:-maplist(nonvar,Args0),pita:zeroc(Env,BDD))):-
   B1 is B+1,
   length(Args0,B1),
