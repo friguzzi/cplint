@@ -49,12 +49,25 @@ never_1:- \+ at_least_once_1.
 ?- mc_sample(never_1,1000,Prob,[successes(S),failures(F)]). % what is the probability that the die never lands on face 1?
 % expected result 0.5
 ?- mc_prob(on(0,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 0?
-% expected result 0.16666666666666666
+% expected result 0.333333333333333
 ?- mc_prob(on(1,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 1?
-% expected result 0.13888888888888887
+% expected result 0.222222222222222
 ?- mc_prob(on(2,1),Prob),bar(Prob,C). % what is the probability that the die lands on face 1 at time 2?
-% expected result 0.11574074074074071
-
+% expected result 0.148148147703704
+?- mc_mh_sample(on(2,1),on(1,1),1000,P,[mix(1000),successes(T),failures(F)]).
+% expected result 0.333333333333333
+?- mc_mh_sample(on(2,1),on(0,1),1000,P,[mix(1000),successes(T),failures(F)]).
+% expected result 0.222222222222222
+?- mc_gibbs_sample(on(0,1),1000,P).
+% expected result 0.333333333333333
+?- mc_gibbs_sample(on(1,1),1000,P).
+% expected result 0.222222222222222
+?- mc_gibbs_sample(on(2,1),1000,P).
+% expected result 0.148148147703704
+?- mc_gibbs_sample(on(2,1),on(1,1),1000,P,[mix(1000),successes(T),failures(F)]).
+% expected result 0.333333333333333
+?- mc_gibbs_sample(on(2,1),on(0,1),1000,P,[mix(1000),successes(T),failures(F)]).
+% expected result 0.222222222222222
 
 */
  

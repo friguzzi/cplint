@@ -10,10 +10,16 @@
   mc_mh_sample/4,
   mc_mh_sample/5,
   mc_lw_sample/4,
+  mc_gibbs_sample/5,
+  mc_gibbs_sample/4,
+  mc_gibbs_sample/3,
   mc_rejection_sample_arg/6,
   mc_rejection_sample_arg/5,
   mc_mh_sample_arg/5,
   mc_mh_sample_arg/6,
+  mc_gibbs_sample_arg/4,
+  mc_gibbs_sample_arg/5,
+  mc_gibbs_sample_arg/6,
   mc_sample_arg_first/4,
   mc_sample_arg_first/5,
   mc_sample_arg_one/4,
@@ -22,6 +28,9 @@
   mc_expectation/4,
   mc_mh_expectation/5,
   mc_mh_expectation/6,
+  mc_gibbs_expectation/4,
+  mc_gibbs_expectation/5,
+  mc_gibbs_expectation/6,
   mc_rejection_expectation/5,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
@@ -65,6 +74,9 @@
 :-meta_predicate mc_mh_sample(:,:,+,-).
 :-meta_predicate mc_mh_sample(:,:,+,-,+).
 :-meta_predicate mc_mh_sample(:,:,+,+,+,-,-,-).
+:-meta_predicate mc_gibbs_sample(:,:,+,-,+).
+:-meta_predicate mc_gibbs_sample(:,+,-,+).
+:-meta_predicate mc_gibbs_sample(:,+,-).
 :-meta_predicate mc_sample(:,+,-).
 :-meta_predicate mc_sample(:,+,-,+).
 :-meta_predicate mc_sample_arg(:,+,?,-).
@@ -74,6 +86,11 @@
 :-meta_predicate mc_mh_sample_arg0(:,:,+,+,+,?,-).
 :-meta_predicate mc_mh_sample_arg(:,:,+,?,-,+).
 :-meta_predicate mc_mh_sample_arg(:,:,+,?,-).
+:-meta_predicate mc_gibbs_sample_arg0(:,:,+,+,+,?,-).
+:-meta_predicate mc_gibbs_sample_arg0(:,+,+,+,?,-).
+:-meta_predicate mc_gibbs_sample_arg(:,:,+,?,-,+).
+:-meta_predicate mc_gibbs_sample_arg(:,+,?,-,+).
+:-meta_predicate mc_gibbs_sample_arg(:,+,?,-).
 :-meta_predicate mc_sample_arg_first(:,+,?,-).
 :-meta_predicate mc_sample_arg_first(:,+,?,-,+).
 :-meta_predicate mc_sample_arg_one(:,+,?,-,+).
@@ -82,6 +99,9 @@
 :-meta_predicate mc_expectation(:,+,?,-).
 :-meta_predicate mc_mh_expectation(:,:,+,?,-).
 :-meta_predicate mc_mh_expectation(:,:,+,?,-,+).
+:-meta_predicate mc_gibbs_expectation(:,+,?,-).
+:-meta_predicate mc_gibbs_expectation(:,+,?,-,+).
+:-meta_predicate mc_gibbs_expectation(:,:,+,?,-,+).
 :-meta_predicate mc_rejection_expectation(:,:,+,?,-).
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
@@ -109,6 +129,14 @@
 
 :-meta_predicate mh_sample_arg(+,+,+,:,:,?,+,-,+,-).
 :-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
+:-meta_predicate gibbs_montecarlo(+,+,:,-).
+:-meta_predicate gibbs_montecarlo(+,+,:,:,-).
+
+:-meta_predicate mc_gibbs_sample(:,:,+,+,-,-,-).
+:-meta_predicate gibbs_sample_arg(+,:,:,?,+,-).
+:-meta_predicate gibbs_sample_arg(+,:,?,+,-).
+
+
 :-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
 
 :-use_module(library(lists)).
@@ -125,13 +153,19 @@
 :-predicate_options(mc_prob/3,3,[bar(-)]).
 :-predicate_options(mc_sample/4,4,[successes(-),failures(-),bar(-)]).
 :-predicate_options(mc_mh_sample/5,5,[successes(-),failures(-),mix(+),lag(+)]).
+:-predicate_options(mc_gibbs_sample/5,5,[successes(-),failures(-),mix(+)]).
+:-predicate_options(mc_gibbs_sample/4,4,[successes(-),failures(-),mix(+)]).
 :-predicate_options(mc_rejection_sample/5,5,[successes(-),failures(-)]).
 :-predicate_options(mc_sample_arg/5,5,[bar(-)]).
 :-predicate_options(mc_rejection_sample_arg/6,6,[bar(-)]).
 :-predicate_options(mc_mh_sample_arg/6,6,[mix(+),lag(+),bar(-)]).
+:-predicate_options(mc_gibbs_sample_arg/6,6,[mix(+),bar(-)]).
+:-predicate_options(mc_gibbs_sample_arg/5,5,[mix(+),bar(-)]).
 :-predicate_options(mc_sample_arg_first/5,5,[bar(-)]).
 :-predicate_options(mc_sample_arg_one/5,5,[bar(-)]).
 :-predicate_options(mc_mh_expectation/6,6,[mix(+),lag(+)]).
+:-predicate_options(mc_gibbs_expectation/6,6,[mix(+)]).
+:-predicate_options(mc_gibbs_expectation/5,5,[mix(+)]).
 :-predicate_options(histogram/3,3,[max(+),min(+),nbins(+)]).
 :-predicate_options(density/3,3,[max(+),min(+),nbins(+)]).
 :-predicate_options(density2d/3,3,[xmax(+),xmin(+),ymax(+),ymin(+),nbins(+)]).
@@ -643,6 +677,318 @@ get_pred_const(do(Do0),AP0,AP):-
 
 ac(do(_)).
 nac(do(\+ _)).
+
+/**
+ * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
+ *
+ * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) 
+ * times.
+ * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ *
+ * Options is a list of options, the following are recognised by mc_mh_sample/5:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ */
+mc_gibbs_sample(M:Goal,S,P,Options):-
+  option(mix(Mix),Options,0),
+  option(successes(T),Options,_T),
+  option(failures(F),Options,_F),
+  mc_gibbs_sample(M:Goal,S,Mix,T,F,P).
+
+/**
+ * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float) is det
+ *
+ * Equivalent to mc_gibbs_sample/4 with an empty option list.
+ */
+mc_gibbs_sample(M:Goal,S,P):-
+  mc_gibbs_sample(M:Goal,S,P,[]).
+
+mc_gibbs_sample(M:Goal,S,Mix,T,F,P):-
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  (Mix=0->
+    T1=Succ,
+    S1 is S-1
+  ;
+    T1=0,
+    S1=S,
+    Mix1 is Mix-1,
+    gibbs_montecarlo(Mix1,0, M:Goal,  _TMix)
+  ),
+  gibbs_montecarlo(S1,T1,  M:Goal,   T),
+  P is T / S,
+  F is S - T,
+  erase_samples.
+
+gibbs_montecarlo(K,T, _Goals,T):-
+  K=<0,!.
+
+gibbs_montecarlo(K0, T0, M:Goal,   T):-
+  retract(sampled(_,_,_)),
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  T1 is T0 + Succ,
+  K1 is K0-1,
+  gibbs_montecarlo(K1, T1,M:Goal, T).
+/**
+ * mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+ *
+ * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) times given that
+ * Evidence
+ * is true and returns
+ * the number of Successes, of Failures and the
+ * Probability (Successes/Samples).
+ * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ * If Query/Evidence are not ground, it considers them as existential queries.
+ *
+ * Options is a list of options, the following are recognised by mc_mh_sample/5:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * successes(-Successes:int)
+ *   Number of succeses
+ * * failures(-Failures:int)
+ *   Number of failueres
+ */
+mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
+  option(mix(Mix),Options,0),
+  option(successes(T),Options,_T),
+  option(failures(F),Options,_F),
+  mc_gibbs_sample(M:Goal,M:Evidence,S,Mix,T,F,P).
+
+
+mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
+  initial_sample_cycle(M:Evidence),!,
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  (Mix=0->
+    T1=Succ,
+    S1 is S-1
+  ;
+    T1=0,
+    S1=S,
+    Mix1 is Mix-1,
+    gibbs_montecarlo(Mix1,0, M:Goal, M:Evidence, _TMix)
+  ),
+  gibbs_montecarlo(S1,T1,  M:Goal, M:Evidence,  T),
+  P is T / S,
+  F is S - T,
+  erase_samples,
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
+
+gibbs_montecarlo(K,T, _Goals,_Ev,T):-
+  K=<0,!.
+
+gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
+  retract(sampled(_,_,_)),
+  initial_sample_cycle(M:Evidence),!,
+  copy_term(Goal,Goal1),
+  (M:Goal1->
+    Succ=1
+  ;
+    Succ=0
+  ),
+  T1 is T0 + Succ,
+  K1 is K0-1,
+  gibbs_montecarlo(K1, T1,M:Goal,M:Evidence, T).
+
+
+/**
+ * mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ *
+ * The predicate samples Query  a number of Samples times.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ *
+ * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for each possible value of L,
+ *   the list of value of Arg for which Query succeeds in
+ *   a world sampled at random.
+ */
+mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options):-
+  option(mix(Mix),Options,0),
+  option(bar(Chart),Options,no),
+  mc_gibbs_sample_arg0(M:Goal,S,Mix,Arg,ValList),
+  (nonvar(Chart)->
+    true
+  ;
+    argbar(ValList,Chart)
+  ).
+/**
+ * mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ *
+ * Equivalent to mc_gibbs_sample_arg/5 with an empty option list.
+ */
+mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
+  mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,[]).
+/**
+ * mc_gibbs_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ *
+ * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ * * bar(-BarChar:dict)
+ *   BarChart is a dict for rendering with c3 as a bar chart with
+ *   a bar for each possible value of L,
+ *   the list of value of Arg for which Query succeeds in
+ *   a world sampled at random.
+ */
+mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
+  option(mix(Mix),Options,0),
+  option(bar(Chart),Options,no),
+  mc_gibbs_sample_arg0(M:Goal,M:Evidence,S,Mix,Arg,ValList),
+  (nonvar(Chart)->
+    true
+  ;
+    argbar(ValList,Chart)
+  ).
+
+
+
+
+gibbs_sample_arg(K,_Goals,_Ev,_Arg,V,V):-
+  K=<0,!.
+
+gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
+  retract(sampled(_,_,_)),
+  initial_sample_cycle(M:Evidence),!,
+  findall(Arg,M:Goal,La),
+  numbervars(La),
+  (get_assoc(La, V0, N)->
+    N1 is N+1,
+    put_assoc(La,V0,N1,V1)
+  ;
+    put_assoc(La,V0,1,V1)
+  ),
+  K1 is K0-1,
+  gibbs_sample_arg(K1,M:Goal,M:Evidence,Arg,V1,V).
+
+
+/**
+ * mc_gibbs_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times given that Evidence
+ * is true.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ */
+mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
+  deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
+  initial_sample_cycle(M:Evidence),!,
+  empty_assoc(Values0),
+  findall(Arg,M:Goal,La),
+  numbervars(La),
+  put_assoc(La,Values0,1,Values1),
+  (Mix=0->
+    Values2=Values1,
+    S1 is S-1
+  ;
+    Mix1 is Mix-1,
+    gibbs_sample_arg(Mix1,M:Goal,M:Evidence,Arg, Values1,_Values),
+    S1=S,
+    Values2=Values0
+  ),
+  gibbs_sample_arg(S1,M:Goal,M:Evidence,Arg, Values2,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList),
+  maplist(erase,UpdatedClausesRefs),
+  maplist(M:assertz,ClausesToReAdd).
+
+/**
+ * mc_gibbs_sample_arg0(:Query:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ *
+ * The predicate samples Query  a number of Samples times.
+ * Arg should be a variable in Query.
+ * The predicate returns in Values a list of couples L-N where
+ * L is the list of values of Arg for which Query succeeds in
+ * a world sampled at random and N is the number of samples
+ * returning that list of values.
+ * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+ * a variable given the values of the variables in its Markov blanket.
+ */
+mc_gibbs_sample_arg0(M:Goal,S,Mix,Arg,ValList):-
+  empty_assoc(Values0),
+  findall(Arg,M:Goal,La),
+  numbervars(La),
+  put_assoc(La,Values0,1,Values1),
+  (Mix=0->
+    Values2=Values1,
+    S1 is S-1
+  ;
+    Mix1 is Mix-1,
+    gibbs_sample_arg(Mix1,M:Goal,Arg, Values1,_Values),
+    S1=S,
+    Values2=Values0
+  ),
+  gibbs_sample_arg(S1,M:Goal,Arg, Values2,Values),
+  erase_samples,
+  assoc_to_list(Values,ValList0),
+  sort(2, @>=,ValList0,ValList).
+
+gibbs_sample_arg(K,_Goals,_Arg,V,V):-
+  K=<0,!.
+
+gibbs_sample_arg(K0,M:Goal, Arg,V0,V):-
+  retract(sampled(_,_,_)),
+  findall(Arg,M:Goal,La),
+  numbervars(La),
+  (get_assoc(La, V0, N)->
+    N1 is N+1,
+    put_assoc(La,V0,N1,V1)
+  ;
+    put_assoc(La,V0,1,V1)
+  ),
+  K1 is K0-1,
+  gibbs_sample_arg(K1,M:Goal,Arg,V1,V).
 
 /**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -1974,6 +2320,33 @@ mc_expectation(M:Goal,S,Arg,E):-
   E is Sum/S.
 
 /**
+ * mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ */
+mc_gibbs_expectation(M:Goal,S,Arg,E,Options):-
+  mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options),
+  foldl(value_cont,ValList,0,Sum),
+  erase_samples,
+  E is Sum/S.  
+
+/**
+ * mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+ *
+ * Equivalent to mc_gibbs_expectation/5 with an empty option list.
+ */
+mc_gibbs_expectation(M:Goal,S,Arg,E):-
+  mc_gibbs_expectation(M:Goal,S,Arg,E,[]).
+
+
+/**
  * mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query by
@@ -1989,10 +2362,30 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
   E is Sum/S.
 
 /**
+ * mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
+ *
+ * The predicate computes the expected value of Arg in Query by
+ * Gibbs sampling.
+ * It takes N samples of Query and sums up the value of Arg for
+ * each sample. The overall sum is divided by N to give Exp.
+ * Arg should be a variable in Query.
+ *
+ * Options is a list of options, the following are recognised by mc_mh_expectation/6:
+ * * mix(+Mix:int)
+ *   The first Mix samples are discarded (mixing time), default value 0
+ */
+mc_gibbs_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
+  mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options),
+  foldl(value_cont,ValList,0,Sum),
+  erase_samples,
+  E is Sum/S.
+
+
+/**
  * mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
  *
  * The predicate computes the expected value of Arg in Query by
- * sampling.
+ * Metropolis Hastings sampling.
  * It takes N samples of Query and sums up the value of Arg for
  * each sample. The overall sum is divided by N to give Exp.
  * Arg should be a variable in Query.
@@ -3633,6 +4026,9 @@ sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample(_,_,_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample(_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_sample_arg(_,_,_,_,_), []).
@@ -3645,10 +4041,16 @@ sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_sample_arg(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample_arg(_,_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample_arg(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_sample_arg(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_expectation(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_mh_expectation(_,_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_rejection_expectation(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_expectation(_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_expectation(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_gibbs_expectation(_,_,_,_,_,_), []).
 
 sandbox:safe_meta(mcintyre:mc_lw_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_sample_arg(_,_,_,_,_), []).

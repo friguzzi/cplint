@@ -5,8 +5,7 @@
 
 :-use_module(library(cplint_test/cplint_test)).
 
-test_mc:-
-	run_tests([
+test_list([
     coinmc,
     threesideddicemc,
     markov_chain,
@@ -24,30 +23,17 @@ test_mc:-
     nballsdc,
     simpsonmc,
     viralmc,
-    uwcsemc
+    uwcsemc,
+    lda
   ]).
 
+test_mc:-
+  test_list(L),
+	run_tests(L).
+
 test_mc_rev:-
-	reverse([
-    coinmc,
-    threesideddicemc,
-    markov_chain,
-    prefix,
-    pre_plcg,
-    pctl_slep,
-    arithm,
-    gaussian_mixture,
-    kalman_filter,
-    gauss_mean_est,
-    slp_pdcg,
-    indian_gpa,
-    indian_gpadc,
-    nballs,
-    nballsdc,
-    simpsonmc,
-    viralmc,
-    uwcsemc
-  ],Rev),
+  test_list(L),
+	reverse(L,Rev),
   run_tests(Rev).
 
 
@@ -84,6 +70,26 @@ test(on_1_1):-
   run((mc_sample(on(1,1),1000,P),close_to(P,0.222222222222222))).
 test(on_2_1):-
 	run((mc_sample(on(2,1),1000,P),close_to(P,0.148148147703704))).
+test(on_2_1__on_1_1_mh):-
+  run((mc_mh_sample(on(2,1),on(1,1),1000,P,[mix(1000)]),close_to(P,0.333333333333333))).
+test(on_2_1__on_0_1_mh):-
+  run((mc_mh_sample(on(2,1),on(0,1),1000,P,[mix(1000)]),close_to(P,0.222222222222222))).
+
+
+test(on_0_1_g):-
+	run((mc_gibbs_sample(on(0,1),1000,P),close_to(P,0.333333333333333))).
+test(on_1_1_g):-
+  run((mc_gibbs_sample(on(1,1),1000,P),close_to(P,0.222222222222222))).
+test(on_2_1_g):-
+	run((mc_gibbs_sample(on(2,1),1000,P),close_to(P,0.148148147703704))).
+
+test(on_2_1_g_m):-
+	run((mc_gibbs_sample(on(2,1),1000,P,[mix(100)]),close_to(P,0.148148147703704))).
+
+test(on_2_1__on_1_1_g):-
+  run((mc_gibbs_sample(on(2,1),on(1,1),1000,P,[mix(1000)]),close_to(P,0.333333333333333))).
+test(on_2_1__on_0_1_g):-
+  run((mc_gibbs_sample(on(2,1),on(0,1),1000,P,[mix(1000)]),close_to(P,0.222222222222222))).
 
 :- end_tests(threesideddicemc).
 
@@ -105,6 +111,12 @@ test(reach_s1_0_s0):-
 	run((mc_sample(reach(s1,0,s0),1000,P),close_to(P,0))).
 test(reach_s0_0_S_s0):-
 	run((mc_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values))).
+test(reach_s0_0_S_s0):-
+	run((mc_mh_sample_arg(reach(s0,0,S),reach(s0,0,s1),50,S,Values),\+ member([s0]-_,Values))).
+test(reach_s0_0_S_s0_g):-
+	run((mc_gibbs_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values))).
+test(reach_s0_0_S_s0):-
+	run((mc_gibbs_sample_arg(reach(s0,0,S),reach(s0,0,s1),50,S,Values,[mix(100)]),\+ member([s0]-_,Values))).
 test(reach_s0_0_s0_s3_s2,[nondet]):-
 	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values),member(s3-_,Values),member(s2-_,Values))).
 test(reach_s0_0_S_s0_o):-
@@ -167,6 +179,24 @@ test(exp_eval_2_eval_1_3):-
   run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E),relatively_close_to(E,2.855,1))).
 test(exp_eval_2_eval_1_3_o):-
   run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10),lag(2)]),relatively_close_to(E,2.855,1))).
+
+test(eval_1_3_g):-
+	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[]),close_to(P,0.1151,0.4))).
+test(eval_1_3_o_g):-
+	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[mix(10),successes(S),failures(F)]),
+  close_to(P,0.1151,0.4),close_to(S,51,100),close_to(F,449,100))).
+test(eval_0_2_1_3_g):-
+  run((mc_gibbs_sample(eval(2,4),(eval(0,2),eval(1,3)),200,P,[]),close_to(P,1))).
+
+test(exp_eval_2_g):-
+  run((mc_gibbs_expectation(eval(2,Y),100,Y,E),relatively_close_to(E,3.968,1))).
+test(exp_eval_2_g_m):-
+  run((mc_gibbs_expectation(eval(2,Y),100,Y,E,[mix(100)]),relatively_close_to(E,3.968,1))).
+test(exp_eval_2_eval_1_3_g):-
+  run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[]),relatively_close_to(E,2.855,1))).
+test(exp_eval_2_eval_1_3_o_g):-
+  run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10)]),relatively_close_to(E,2.855,1))).
+
 :- end_tests(arithm).
 
 :- begin_tests(gaussian_mixture, []).
@@ -174,7 +204,7 @@ test(exp_eval_2_eval_1_3_o):-
 :-ensure_loaded(library(examples/gaussian_mixture)).
 
 test(mix_X):-
-	run((mc_expectation(mix(X),1000,X,E),relatively_close_to(E,2.250340770862126,0.1))).
+	run((mc_expectation(mix(X),1000,X,E),relatively_close_to(E,1.9911150139041882,0.2))).
 test(mix_X_heads):-
 	run((mc_mh_expectation(mix(X),heads,1000,X,E),close_to(E,0,1))).
 test(mix_X_mix):-
@@ -284,7 +314,7 @@ test(rec_d_n_drug_m):-
   run((mc_rejection_sample(recovery,(do(\+ drug),\+ female),500,P),close_to(P,0.7))).
 
 test(mh_rec_drug):-
-  run((mc_mh_sample(recovery,drug,500,P,[lag(2)]),close_to(P,0.5))).
+  run((mc_mh_sample(recovery,drug,500,P,[lag(2)]),close_to(P,0.5,0.15))).
 test(mh_rec_n_drug):-
   run((mc_mh_sample(recovery,\+ drug,500,P,[lag(2)]),close_to(P,0.4))).
 test(mh_rec_drug_f):-
@@ -326,3 +356,19 @@ test(mh_has_2_d_has_3):-
 test(taught_by_c1_p1):-
   run((mc_sample(taught_by(c1,p1),1000,P),close_to(P,0.0926040439925477))).
 :- end_tests(uwcsemc).
+
+:- begin_tests(lda, []).
+
+:-ensure_loaded(library(examples/lda)).
+
+test(topic_1_1_1):-
+  run((mc_sample(topic(1,1,1),400,P),close_to(P,0.5))).
+test(topic_1_1_1_g):-
+  run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5))).
+
+test(topic_1_1_1_ww):-
+  run((mc_mh_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
+test(topic_1_1_1_ww_g):-
+  run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
+
+:- end_tests(lda).

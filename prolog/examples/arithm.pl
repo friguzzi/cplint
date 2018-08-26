@@ -85,6 +85,34 @@ random_const(_,C):discrete(C,[0:0.1,1:0.1,2:0.1,3:0.1,4:0.1,
 % F = 0,
 % P = 1.
 
+?- mc_gibbs_sample(eval(2,4),eval(1,3),100,P,
+  [mix(100),successes(T),failures(F)]).
+% perform Metropolis Hastings sampling of eval(2,Y) given that
+% eval(1,3) is true (100 samples, 100 mixing samplesi, lag 3)
+% expected result
+% T = 17,
+% F = 83,
+% P = 0.17.
+
+?- mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[]).
+% expected result
+% P = 0.17.
+
+?- mc_gibbs_sample(eval(2,4),eval(1,3),100,P,
+  [successes(T),failures(F),mix(100)]).
+% perform Gibbs sampling of eval(2,Y) given that
+% eval(1,3) is true
+% expected result
+% T = 17,
+% F = 83,
+% P = 0.17.
+
+?- mc_gibbs_sample(eval(2,4),(eval(0,2),eval(1,3)),100,P,
+  []).
+% perform Gibbs sampling of eval(2,Y) given that
+% eval(0,2) and eval(1,3) are true
+% expected result
+% P = 1.
 
 ?-  mc_rejection_sample(eval(2,4),eval(1,3),100,P,
   [successes(T),failures(F)]).
