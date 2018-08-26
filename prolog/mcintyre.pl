@@ -1063,14 +1063,17 @@ mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
   maplist(M:assertz,ClausesToReAdd).
 
 gibbs_sample_cycle(M:G):-
-  copy_term(G,G1),
   save_samples_copy(M,G),
+  gibbs_sample_cycle(M,G),
+  delete_samples_copy(M,G).
+
+gibbs_sample_cycle(M,G):-
+  copy_term(G,G1),
   (M:G1->
-    delete_samples_copy(M,G)
+    true
   ;
     erase_samples,
-    restore_samples(M,G)   , 
-    gibbs_sample_cycle(M:G)
+    gibbs_sample_cycle(M,G)
   ).
 
 
