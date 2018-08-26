@@ -184,14 +184,14 @@ test(eval_1_3_g):-
 	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[]),close_to(P,0.1151,0.4))).
 test(eval_1_3_o_g):-
 	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[mix(10),successes(S),failures(F)]),
-  close_to(P,0.1151,0.4),close_to(S,51,100),close_to(F,449,100))).
+  close_to(P,0.1151,0.4),close_to(S,51,150),close_to(F,449,150))).
 test(eval_0_2_1_3_g):-
   run((mc_gibbs_sample(eval(2,4),(eval(0,2),eval(1,3)),200,P,[]),close_to(P,1))).
 
 test(exp_eval_2_g):-
-  run((mc_gibbs_expectation(eval(2,Y),100,Y,E),relatively_close_to(E,3.968,1))).
+  run((mc_gibbs_expectation(eval(2,Y),300,Y,E),relatively_close_to(E,3.968,1))).
 test(exp_eval_2_g_m):-
-  run((mc_gibbs_expectation(eval(2,Y),100,Y,E,[mix(100)]),relatively_close_to(E,3.968,1))).
+  run((mc_gibbs_expectation(eval(2,Y),500,Y,E,[mix(100)]),relatively_close_to(E,3.968,1))).
 test(exp_eval_2_eval_1_3_g):-
   run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[]),relatively_close_to(E,2.855,1))).
 test(exp_eval_2_eval_1_3_o_g):-

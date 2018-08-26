@@ -25,14 +25,14 @@ close_to(V,T):-
 	epsilon(E),
 	TLow is T-E,
 	THigh is T+E,
-	TLow<V,
-	V<THigh.
+	TLow=<V,
+	V=<THigh.
 
 close_to(V,T,E):-
 	TLow is T-E,
 	THigh is T+E,
-	TLow<V,
-	V<THigh.
+	TLow=<V,
+	V=<THigh.
 
 relative_epsilon(0.1).
 
@@ -40,11 +40,11 @@ relatively_close_to(V,T):-
 	relative_epsilon(E),
 	TLow is T*(1-E),
 	THigh is T*(1+E),
-	TLow<V,
-	V<THigh.
+	TLow=<V,
+	V=<THigh.
 
 relatively_close_to(V,T,E):-
 	TLow is T*(1-E),
 	THigh is T*(1+E),
-	TLow<V,
-	V<THigh.
+	TLow=<V,
+	V=<THigh.

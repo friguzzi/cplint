@@ -106,6 +106,7 @@
 :-meta_predicate montecarlo_cycle(-,-,:,-,-,-,-,-,-).
 :-meta_predicate montecarlo(-,-,-,:,-,-).
 :-meta_predicate initial_sample_cycle(:).
+:-meta_predicate gibbs_sample_cycle(:).
 :-meta_predicate initial_sample(:).
 :-meta_predicate lw_sample_bool(+,:,:,-).
 :-meta_predicate initial_sample_neg(:).
@@ -775,7 +776,7 @@ mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
 
 mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
-  initial_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -803,7 +804,7 @@ gibbs_montecarlo(K,T, _Goals,_Ev,T):-
 
 gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
   retract(sampled(_,_,_)),
-  initial_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -894,7 +895,7 @@ gibbs_sample_arg(K,_Goals,_Ev,_Arg,V,V):-
 
 gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
   retract(sampled(_,_,_)),
-  initial_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),!,
   findall(Arg,M:Goal,La),
   numbervars(La),
   (get_assoc(La, V0, N)->
@@ -922,7 +923,7 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
  */
 mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
-  initial_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),!,
   empty_assoc(Values0),
   findall(Arg,M:Goal,La),
   numbervars(La),
@@ -1061,6 +1062,16 @@ mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
+gibbs_sample_cycle(M:G):-
+  copy_term(G,G1),
+  save_samples_copy(M,G),
+  (M:G1->
+    delete_samples_copy(M,G)
+  ;
+    erase_samples,
+    restore_samples(M,G)   , 
+    gibbs_sample_cycle(M:G)
+  ).
 
 
 initial_sample_cycle(M:G):-
