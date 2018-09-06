@@ -736,7 +736,7 @@ gibbs_montecarlo(K,T, _Goals,T):-
   K=<0,!.
 
 gibbs_montecarlo(K0, T0, M:Goal,   T):-
-  retract(sampled(_,_,_)),
+  remove_samples(R,S),
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -745,7 +745,14 @@ gibbs_montecarlo(K0, T0, M:Goal,   T):-
   ),
   T1 is T0 + Succ,
   K1 is K0-1,
+  check_sampled(R,S),
   gibbs_montecarlo(K1, T1,M:Goal, T).
+
+remove_samples(R,S):-
+  retract(sampled(R,S,_)).
+
+check_sampled(R,S):-
+  sampled(R,S,_),!.
 /**
  * mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
