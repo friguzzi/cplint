@@ -362,7 +362,7 @@ test(taught_by_c1_p1):-
 :-ensure_loaded(library(examples/lda)).
 
 test(topic_1_1_1):-
-  run((mc_sample(topic(1,1,1),400,P),close_to(P,0.5))).
+  run((mc_sample(topic(1,1,1),400,P),close_to(P,0.5,0.2))).
 test(topic_1_1_1_g):-
   run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5))).
 

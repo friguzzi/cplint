@@ -736,7 +736,7 @@ gibbs_montecarlo(K,T, _Goals,T):-
   K=<0,!.
 
 gibbs_montecarlo(K0, T0, M:Goal,   T):-
-  remove_samples(R,S),
+  remove_samples(LS),
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -745,14 +745,17 @@ gibbs_montecarlo(K0, T0, M:Goal,   T):-
   ),
   T1 is T0 + Succ,
   K1 is K0-1,
-  check_sampled(R,S),
+  check_sampled(M,LS),
   gibbs_montecarlo(K1, T1,M:Goal, T).
 
-remove_samples(R,S):-
-  retract(sampled(R,S,_)).
+remove_samples([(R,S)]):-
+  retract(sampled(R,S,_)),!.
 
-check_sampled(R,S):-
-  sampled(R,S,_),!.
+% check_sampled(M,R,S):-
+%   M:sampled(R,S,_),!.
+
+check_sampled(M,[(R,S)]):-
+  M:samp(R,S,_).
 /**
  * mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
@@ -810,7 +813,7 @@ gibbs_montecarlo(K,T, _Goals,_Ev,T):-
   K=<0,!.
 
 gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
-  retract(sampled(_,_,_)),
+  remove_samples(LS),
   gibbs_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
   (M:Goal1->
@@ -820,6 +823,7 @@ gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
   ),
   T1 is T0 + Succ,
   K1 is K0-1,
+  check_sampled(M,LS),
   gibbs_montecarlo(K1, T1,M:Goal,M:Evidence, T).
 
 
@@ -901,7 +905,7 @@ gibbs_sample_arg(K,_Goals,_Ev,_Arg,V,V):-
   K=<0,!.
 
 gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
-  retract(sampled(_,_,_)),
+  remove_samples(LS),
   gibbs_sample_cycle(M:Evidence),!,
   findall(Arg,M:Goal,La),
   numbervars(La),
@@ -912,6 +916,7 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
     put_assoc(La,V0,1,V1)
   ),
   K1 is K0-1,
+  check_sampled(M,LS),
   gibbs_sample_arg(K1,M:Goal,M:Evidence,Arg,V1,V).
 
 
@@ -986,7 +991,7 @@ gibbs_sample_arg(K,_Goals,_Arg,V,V):-
   K=<0,!.
 
 gibbs_sample_arg(K0,M:Goal, Arg,V0,V):-
-  retract(sampled(_,_,_)),
+  remove_samples(LS),
   findall(Arg,M:Goal,La),
   numbervars(La),
   (get_assoc(La, V0, N)->
@@ -995,6 +1000,7 @@ gibbs_sample_arg(K0,M:Goal, Arg,V0,V):-
   ;
     put_assoc(La,V0,1,V1)
   ),
+  check_sampled(M,LS),
   K1 is K0-1,
   gibbs_sample_arg(K1,M:Goal,Arg,V1,V).
 
@@ -2939,7 +2945,8 @@ discrete([S0:W|T],W0,U,S):-
   ).
 
 
-generate_rules_fact([],_HL,_VC,_R,_N,[]).
+generate_rules_fact([],HeadList,VC,R,_N,[Rule]):-
+  Rule=(samp(R,VC,N):-(sample_head(R,VC,HeadList,N))).
 
 generate_rules_fact([Head:_P1,'':_P2],HeadList,VC,R,N,[Clause]):-!,
   Clause=(Head:-(sample_head(R,VC,HeadList,N))).
@@ -2950,19 +2957,62 @@ generate_rules_fact([Head:_P|T],HeadList,VC,R,N,[Clause|Clauses]):-
   generate_rules_fact(T,HeadList,VC,R,N1,Clauses).
 
 
+generate_clause_samp(Head,Body,HeadList,VC,R,N,[Clause,Rule]):-
+  generate_clause(Head,Body,HeadList,VC,R,N,Clause),
+  Rule=(samp(R,VC,Val):-sample_head(R,VC,HeadList,Val)).
 
 generate_clause(Head,Body,HeadList,VC,R,N,Clause):-
-  Clause=(Head:-(Body,sample_head(R,VC,HeadList,N))).
+  Clause=[(Head:-(Body,sample_head(R,VC,HeadList,N)))].
 
 generate_clause_gauss(Head,Body,VC,R,Var,Mean,Variance,Clause):-
-  Clause=(Head:-(Body,sample_gauss(R,VC,Mean,Variance,Var))).
+  Clause=[(Head:-(Body,sample_gauss(R,VC,Mean,Variance,Var))),
+  (samp(R,VC,Var):-sample_gauss(R,VC,Mean,Variance,Var))].
 
 generate_clause_uniform(Head,Body,VC,R,Var,L,U,Clause):-
-  Clause=(Head:-(Body,sample_uniform(R,VC,L,U,Var))).
+  Clause=[(Head:-(Body,sample_uniform(R,VC,L,U,Var))),
+  (samp(R,VC,Var):-sample_uniform(R,VC,L,U,Var))].
+
+generate_clause_gamma(H1,Body,VC,R,Shape,Scale,Var,Clause):-
+      Clause=[(H1:-(Body,sample_gamma(R,VC,Shape,Scale,Var))),
+      (samp(R,VC,Var):-sample_gamma(R,VC,Shape,Scale,Var))].
+
+generate_clause_beta(H1,Body,VC,R,Alpha,Beta,Var,Clause):-
+  Clause=[(H1:-(Body,sample_beta(R,VC,Alpha,Beta,Var))),
+  (samp(R,VC,Var):-sample_beta(R,VC,Alpha,Beta,Var))].
+
+generate_clause_poisson(H1,Body,VC,R,Lambda,Var,Clause):-
+  Clause=[(H1:-(Body,sample_poisson(R,VC,Lambda,Var))),
+  (samp(R,VC,Var):-sample_poisson(R,VC,Lambda,Var))].
+
+generate_clause_binomial(H1,Body,VC,R,N,P,Var,Clause):-
+  Clause=[(H1:-(Body,sample_binomial(R,VC,N,P,Var))),
+  (samp(R,VC,Var):-sample_binomial(R,VC,N,P,Var))].
+
+generate_clause_discrete_uniform(H1,Body,VC,R,D0,Var,Clause):-
+  Clause=[(H1:-Body,length(D0,Len),Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var)),
+  (samp(R,VC,Var):-length(D0,Len),Prob is 1.0/Len,
+      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))].
+
+generate_clause_discrete(H1,Body,VC,R,D,Var,Clause):-
+  Clause=[(H1:-Body,sample_discrete(R,VC,D,Var)),
+  (samp(R,VC,Var):-sample_discrete(R,VC,D,Var))].
+
+generate_clause_finite(H1,Body,VC,R,D0,Var,Clause):-
+  Clause=[(H1:-Body,maplist(swap,D0,D),sample_discrete(R,[],D,Var)),
+    (samp(R,VC,Var):-maplist(swap,D0,D),sample_discrete(R,VC,D,Var))].
+
+generate_clause_geometric(H1,Body,VC,R,Par,Var,Clause):-
+  Clause=[(H1:-Body,sample_geometric(R,VC,Par,Var)),
+    (samp(R,VC,Var):-sample_geometric(R,VC,Par,Var))].
+
+generate_clause_dirichlet(H1,Body,VC,R,Par,Var,Clause):-
+  Clause=[(H1:-Body,sample_dirichlet(R,VC,Par,Var)),
+    (samp(R,VC,Var):-sample_dirichlet(R,VC,Par,Var))].
 
 
-
-generate_rules([],_Body,_HeadList,_VC,_R,_N,[]).
+generate_rules([],_Body,HeadList,VC,R,_N,[Rule]):-
+  Rule=(samp(R,VC,N):-sample_head(R,VC,HeadList,N)).
 
 generate_rules([Head:_P1,'':_P2],Body,HeadList,VC,R,N,[Clause]):-!,
   generate_clause(Head,Body,HeadList,VC,R,N,Clause).
@@ -3167,6 +3217,8 @@ user:term_expansion((:- mc), []) :-!,
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
+  dynamic(M:samp/3),
+  retractall(M:samp(_,_,_)),
   style_check(-discontiguous).
 
 user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
@@ -3209,9 +3261,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_gamma(R,[],Shape,Scale,Var))
+    generate_clause_gamma(H1,Body,[],R,Shape,Scale,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_gamma(R,VC,Shape,Scale,Var))
+    generate_clause_gamma(H1,Body,VC,R,Shape,Scale,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3223,9 +3275,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_beta(R,[],Alpha,Beta,Var))
+    generate_clause_beta(H1,Body,[],R,Alpha,Beta,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_beta(R,VC,Alpha,Beta,Var))
+    generate_clause_beta(H1,Body,VC,R,Alpha,Beta,Var,Clause)
   ).
 
 
@@ -3238,9 +3290,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_poisson(R,[],Lambda,Var))
+    generate_clause_poisson(H1,Body,[],R,Lambda,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_poisson(R,VC,Lambda,Var))
+    generate_clause_poisson(H1,Body,VC,R,Lambda,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3252,9 +3304,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_binomial(R,[],N,P,Var))
+    generate_clause_binomial(H1,Body,[],R,N,P,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_binomial(R,VC,N,P,Var))
+    generate_clause_binomial(H1,Body,VC,R,N,P,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3266,11 +3318,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_discrete_uniform(H1,Body,[],R,D0,Var,Clause)
   ;
-    Clause=(H1:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_discrete_uniform(H1,Body,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3282,9 +3332,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list([Head],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,maplist(swap,D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_finite(H1,Body,[],R,D0,Var,Clause)
   ;
-    Clause=(H1:-Body,maplist(swap,D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_finite(H1,Body,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3296,9 +3346,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list([H],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_geometric(R,[],Par,Var))
+    generate_clause_geometric(H1,Body,[],R,Par,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_geometric(R,VC,Par,Var))
+    generate_clause_geometric(H1,Body,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3310,9 +3360,9 @@ user:term_expansion((Head:=Body),Clause) :-
   extract_vars_list([H],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_dirichlet(R,[],Par,Var))
+    generate_clause_dirichlet(H1,Body,[],R,Par,Var,Clause)
   ;
-    Clause=(H1:-Body,sample_dirichlet(R,VC,Par,Var))
+    generate_clause_dirichlet(H1,Body,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion((Head:=Body),Clause) :-
@@ -3383,9 +3433,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_gamma(R,[],Shape,Scale,Var))
+    generate_clause_gamma(H,Body,[],R,Shape,Scale,Var,Clause)
   ;
-    Clause=(H:-Body,sample_gamma(R,VC,Shape,Scale,Var))
+    generate_clause_gamma(H,Body,VC,R,Shape,Scale,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3399,9 +3449,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_beta(R,[],Alpha,Beta,Var))
+    generate_clause_beta(H,Body,[],R,Alpha,Beta,Var,Clause)
   ;
-    Clause=(H:-Body,sample_beta(R,VC,Alpha,Beta,Var))
+    generate_clause_beta(H,Body,VC,R,Alpha,Beta,Var,Clause)
   ).
 
 
@@ -3416,9 +3466,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_poisson(R,[],Lambda,Var))
+    generate_clause_poisson(H,Body,[],R,Lambda,Var,Clause)
   ;
-    Clause=(H:-Body,sample_poisson(R,VC,Lambda,Var))
+    generate_clause_poisson(H,Body,VC,R,Lambda,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3432,9 +3482,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_binomial(R,[],N,P,Var))
+    generate_clause_binomial(H,Body,[],R,N,P,Var,Clause)
   ;
-    Clause=(H:-Body,sample_binomial(R,VC,N,P,Var))
+    generate_clause_binomial(H,Body,VC,R,N,P,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3448,11 +3498,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_discrete_uniform(H,Body,[],R,D0,Var,Clause)
   ;
-    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_discrete_uniform(H,Body,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3466,9 +3514,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_discrete(R,[],D,Var))
+    generate_clause_discrete(H,Body,[],R,D,Var,Clause)
   ;
-    Clause=(H:-Body,sample_discrete(R,VC,D,Var))
+    generate_clause_discrete(H,Body,VC,R,D,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3482,11 +3530,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_discrete_uniform(H,Body,[],R,D0,Var,Clause)
   ;
-    Clause=(H:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_discrete_uniform(H,Body,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3500,9 +3546,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_dirichlet(R,[],Par,Var))
+    generate_clause_dirichlet(H,Body,[],R,Par,Var,Clause)
   ;
-    Clause=(H:-Body,sample_dirichlet(R,VC,Par,Var))
+    generate_clause_dirichlet(H,Body,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3516,9 +3562,9 @@ user:term_expansion((Head:-Body),Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_geometric(R,[],Par,Var))
+    generate_clause_geometric(H,Body,[],R,Par,Var,Clause)
   ;
-    Clause=(H:-Body,sample_geometric(R,VC,Par,Var))
+    generate_clause_geometric(H,Body,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion((Head:-Body),Clause) :-
@@ -3574,9 +3620,9 @@ user:term_expansion((Head :- Body), Clauses) :-
   extract_vars_list((Head :- Body),[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    generate_clause(H,Body,HeadList,[],R,0,Clauses)
+    generate_clause_samp(H,Body,HeadList,[],R,0,Clauses)
   ;
-    generate_clause(H,Body,HeadList,VC,R,0,Clauses)
+    generate_clause_samp(H,Body,HeadList,VC,R,0,Clauses)
   ).
 
 
@@ -3617,9 +3663,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_gamma(R,[],Shape,Scale,Var))
+    generate_clause_gamma(H1,true,[],R,Shape,Scale,Var,Clause)
   ;
-    Clause=(H1:-sample_gamma(R,VC,Shape,Scale,Var))
+    generate_clause_gamma(H1,true,VC,R,Shape,Scale,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3631,9 +3677,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_beta(R,[],Alpha,Beta,Var))
+    generate_clause_beta(H1,true,[],R,Alpha,Beta,Var,Clause)
   ;
-    Clause=(H1:-sample_beta(R,VC,Alpha,Beta,Var))
+    generate_clause_beta(H1,true,VC,R,Alpha,Beta,Var,Clause)
   ).
 
 
@@ -3646,9 +3692,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_poisson(R,[],Lambda,Var))
+    generate_clause_poisson(H1,true,[],R,Lambda,Var,Clause)
   ;
-    Clause=(H1:-sample_poisson(R,VC,Lambda,Var))
+    generate_clause_poisson(H1,true,VC,R,Lambda,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3660,9 +3706,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_binomial(R,[],N,P,Var))
+    generate_clause_binomial(H1,true,[],R,N,P,Var,Clause)
   ;
-    Clause=(H1:-sample_binomial(R,VC,N,P,Var))
+    generate_clause_binomial(H1,true,VC,R,N,P,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3671,17 +3717,12 @@ user:term_expansion(Head,Clause) :-
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
-  length(D0,Len),
-  Prob is 1.0/Len,
-  maplist(add_prob(Prob),D0,D),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-length(D0,Len),Prob is 1.0/Len,
-       maplist(add_prob(Prob),D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_discrete_uniform(H1,true,[],R,D0,Var,Clause)
   ;
-    Clause=(H1:-length(D0,Len),Prob is 1.0/Len,
-       maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_discrete_uniform(H1,true,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3693,9 +3734,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list([Head],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-maplist(swap,D0,D),sample_discrete(R,[],D,Var))
+    generate_clause_finite(H1,true,[],R,D0,Var,Clause)
   ;
-    Clause=(H1:-maplist(swap,D0,D),sample_discrete(R,VC,D,Var))
+    generate_clause_finite(H1,true,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3722,9 +3763,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_dirichlet(R,[],Par,Var))
+    generate_clause_dirichlet(H,true,[],R,Par,Var,Clause)
   ;
-    Clause=(H:-sample_dirichlet(R,VC,Par,Var))
+    generate_clause_dirichlet(H,true,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3738,9 +3779,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_geometric(R,[],Par,Var))
+    generate_clause_geometric(H,true,[],R,Par,Var,Clause)
   ;
-    Clause=(H:-sample_geometric(R,VC,Par,Var))
+    generate_clause_geometric(H,true,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3786,9 +3827,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_gamma(R,[],Shape,Scale,Var))
+    generate_clause_gamma(H,true,[],R,Shape,Scale,Var,Clause)
   ;
-    Clause=(H:-sample_gamma(R,VC,Shape,Scale,Var))
+    generate_clause_gamma(H,true,VC,R,Shape,Scale,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3802,9 +3843,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_beta(R,[],Alpha,Beta,Var))
+    generate_clause_beta(H,true,[],R,Alpha,Beta,Var,Clause)
   ;
-    Clause=(H:-sample_beta(R,VC,Alpha,Beta,Var))
+    generate_clause_beta(H,true,VC,R,Alpha,Beta,Var,Clause)
   ).
 
 
@@ -3819,9 +3860,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_poisson(R,[],Lambda,Var))
+    generate_clause_poisson(H,true,[],R,Lambda,Var,Clause)
   ;
-    Clause=(H:-sample_poisson(R,VC,Lambda,Var))
+    generate_clause_poisson(H,true,VC,R,Lambda,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3835,9 +3876,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_binomial(R,[],N,P,Var))
+    generate_clause_binomial(H,true,[],R,N,P,Var,Clause)
   ;
-    Clause=(H:-sample_binomial(R,VC,N,P,Var))
+    generate_clause_binomial(H,true,VC,R,N,P,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3851,17 +3892,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-
-      length(D0,Len),
-      Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),
-      sample_discrete(R,[],D,Var))
+    generate_clause_discrete_uniform(H,true,[],R,D0,Var,Clause)
   ;
-    Clause=(H:-
-      length(D0,Len),
-      Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),
-      sample_discrete(R,VC,D,Var))
+    generate_clause_discrete_uniform(H,true,VC,R,D0,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3875,9 +3908,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_discrete(R,[],D,Var))
+    generate_clause_discrete(H,true,[],R,D,Var,Clause)
   ;
-    Clause=(H:-sample_discrete(R,VC,D,Var))
+    generate_clause_discrete(H,true,VC,R,D,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3891,9 +3924,9 @@ user:term_expansion(Head,Clause) :-
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_dirichlet(R,[],Par,Var))
+    generate_clause_dirichlet(H,true,[],R,Par,Var,Clause)
   ;
-    Clause=(H:-sample_dirichlet(R,VC,Par,Var))
+    generate_clause_dirichlet(H,true,VC,R,Par,Var,Clause)
   ).
 
 user:term_expansion(Head,Clause) :-
@@ -3940,9 +3973,9 @@ user:term_expansion(Head,Clause) :-
   extract_vars_list(HeadList,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    generate_clause(H,true,HeadList,[],R,0,Clause)
+    generate_clause_samp(H,true,HeadList,[],R,0,Clause)
   ;
-    generate_clause(H,true,HeadList,VC,R,0,Clause)
+    generate_clause_samp(H,true,HeadList,VC,R,0,Clause)
   ).
 
 
