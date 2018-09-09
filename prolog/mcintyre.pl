@@ -273,7 +273,7 @@ s(Mo:Goal,P):-
   montecarlo_cycle(0, 0, Mo:Goal, K, MinError, _Samples, _Lower, P, _Upper),
   !,
   erase_samples,
-  restore_samples(Mo,Goal1).
+  restore_samples_delete_copy(Mo,Goal1).
 
 save_samples_tab(M,I,S):-
   sampled(R,Sub,V),
@@ -331,11 +331,19 @@ assert_samp(R,Sub,V):-
 
 
 restore_samples(M,G):-
-  retract(M:mem(G,R,Sub,V)),
+  M:mem(G,R,Sub,V),
   assertz(sampled(R,Sub,V)),
   fail.
 
 restore_samples(_M,_G).
+
+
+restore_samples_delete_copy(M,G):-
+  retract(M:mem(G,R,Sub,V)),
+  assertz(sampled(R,Sub,V)),
+  fail.
+
+restore_samples_delete_copy(_M,_G).
 
 save_samples_copy(M,G):-
   sampled(R,Sub,V),
@@ -463,7 +471,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     ;
       Succ = Succ0,
       erase_samples,
-      restore_samples(M,Goal)
+      restore_samples_delete_copy(M,Goal)
     ),
     N1 is N0 + 1,
     S1 is S0 + Succ,
@@ -477,7 +485,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     NC1 = NC0,
     Succ = Succ0,
     erase_samples,
-    restore_samples(M,Goal)
+    restore_samples_delete_copy(M,Goal)
   ),
   mh_montecarlo(L,K1,NC1,N1, S1,Succ, SuccNew,M:Goal,M:Evidence, N,S).
 
@@ -566,7 +574,7 @@ mc_sample(M:Goal,S,T,F,P):-
   P is T / N,
   F is N - T,
   erase_samples,
-  restore_samples(M,Goal1).
+  restore_samples_delete_copy(M,Goal1).
 
 /**
  * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -1086,6 +1094,7 @@ gibbs_sample_cycle(M,G):-
     true
   ;
     erase_samples,
+    restore_samples(M,G),
     gibbs_sample_cycle(M,G)
   ).
 
@@ -1410,7 +1419,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
       K1 is K0-1,
       AP1=AP0,
       erase_samples,
-      restore_samples(M,Goal)
+      restore_samples_delete_copy(M,Goal)
     )
   ;
     K1 = K0,
@@ -1418,7 +1427,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
     V1 = V0,
     AP1=AP0,
     erase_samples,
-    restore_samples(M,Goal)
+    restore_samples_delete_copy(M,Goal)
   ),
   mh_sample_arg(L,K1,NC1,M:Goal,M:Evidence,Arg,AP1,AP,V1,V).
 
@@ -3217,7 +3226,7 @@ user:term_expansion((:- mc), []) :-!,
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
-  dynamic(M:samp/3),
+  dynamic((M:samp/3,M:mem/4)),
   retractall(M:samp(_,_,_)),
   style_check(-discontiguous).
 
