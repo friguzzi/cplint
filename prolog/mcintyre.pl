@@ -454,7 +454,6 @@ mh_montecarlo(_L,K,_NC0,N,S,Succ0,Succ0, _Goals,_Ev,N,S):-
   K=<0,!.
 
 mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
-  save_samples_copy(M,Goal),
   resample(L),
   copy_term(Evidence,Ev1),
   (M:Ev1->
@@ -467,11 +466,12 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     count_samples(NC1),
     (accept(NC0,NC1)->
       Succ = Succ1,
-      delete_samples_copy(M,Goal)
+      delete_samples_copy(M,Goal),
+      save_samples_copy(M,Goal)
     ;
       Succ = Succ0,
       erase_samples,
-      restore_samples_delete_copy(M,Goal)
+      restore_samples(M,Goal)
     ),
     N1 is N0 + 1,
     S1 is S0 + Succ,
@@ -485,7 +485,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     NC1 = NC0,
     Succ = Succ0,
     erase_samples,
-    restore_samples_delete_copy(M,Goal)
+    restore_samples(M,Goal)
   ),
   mh_montecarlo(L,K1,NC1,N1, S1,Succ, SuccNew,M:Goal,M:Evidence, N,S).
 
@@ -697,7 +697,7 @@ nac(do(\+ _)).
  * a variable given the values of the variables in its Markov blanket.
  * If Query/Evidence are not ground, it considers them as existential queries.
  *
- * Options is a list of options, the following are recognised by mc_mh_sample/5:
+ * Options is a list of options, the following are recognised by mc_gibbs_sample/4:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * successes(-Successes:int)
@@ -777,7 +777,7 @@ check_sampled(M,[(R,S)]):-
  * a variable given the values of the variables in its Markov blanket.
  * If Query/Evidence are not ground, it considers them as existential queries.
  *
- * Options is a list of options, the following are recognised by mc_mh_sample/5:
+ * Options is a list of options, the following are recognised by mc_gibbs_sample/5:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * successes(-Successes:int)
@@ -794,7 +794,7 @@ mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
 
 mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
-  gibbs_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -817,12 +817,14 @@ mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-gibbs_montecarlo(K,T, _Goals,_Ev,T):-
+gibbs_montecarlo(K,T,_G,_Ev,T):-
   K=<0,!.
 
 gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
   remove_samples(LS),
-  gibbs_sample_cycle(M:Evidence),!,
+  save_samples_copy(M,Evidence),
+  gibbs_sample_cycle(M:Evidence),
+  delete_samples_copy(M,Evidence),
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -848,7 +850,7 @@ gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
  * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
  * a variable given the values of the variables in its Markov blanket.
  *
- * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * Options is a list of options, the following are recognised by mc_gibbs_sample_arg/5:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * bar(-BarChar:dict)
@@ -887,7 +889,7 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
  * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
  * a variable given the values of the variables in its Markov blanket.
  *
- * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * Options is a list of options, the following are recognised by mc_gibbs_sample_arg/6:
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * bar(-BarChar:dict)
@@ -914,7 +916,9 @@ gibbs_sample_arg(K,_Goals,_Ev,_Arg,V,V):-
 
 gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
   remove_samples(LS),
-  gibbs_sample_cycle(M:Evidence),!,
+  save_samples_copy(M,Evidence),
+  gibbs_sample_cycle(M:Evidence),
+  delete_samples_copy(M,Evidence),
   findall(Arg,M:Goal,La),
   numbervars(La),
   (get_assoc(La, V0, N)->
@@ -943,7 +947,7 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
  */
 mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
-  gibbs_sample_cycle(M:Evidence),!,
+  gibbs_sample_cycle(M:Evidence),
   empty_assoc(Values0),
   findall(Arg,M:Goal,La),
   numbervars(La),
@@ -1074,28 +1078,26 @@ mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
   ),
   count_samples(NC),
   Mix1 is Mix-1,
+  save_samples_copy(M,Goal),
   mh_montecarlo(L,Mix1,NC,0, Succ,Succ,Succ1,M:Goal, M:Evidence, _NMix, _TMix),
   count_samples(NC1),
   mh_montecarlo(L,S,NC1,0, 0,Succ1,_Succ1, M:Goal, M:Evidence, _N, T),
   P is T / S,
   F is S - T,
   erase_samples,
+  delete_samples_copy(M,Goal),
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-gibbs_sample_cycle(M:G):-
-  save_samples_copy(M,G),
-  gibbs_sample_cycle(M,G),
-  delete_samples_copy(M,G).
 
-gibbs_sample_cycle(M,G):-
+gibbs_sample_cycle(M:G):-
   copy_term(G,G1),
   (M:G1->
     true
   ;
     erase_samples,
     restore_samples(M,G),
-    gibbs_sample_cycle(M,G)
+    gibbs_sample_cycle(M:G)
   ).
 
 
@@ -1377,12 +1379,14 @@ mc_mh_sample_arg0(M:Goal,M:Evidence0,S,Mix,L,Arg,ValList):-
   put_assoc(La,Values0,1,Values1),
   count_samples(NC),
   Mix1 is Mix-1,
+  save_samples_copy(M,Goal),
   mh_sample_arg(L,Mix1,NC,M:Goal,M:Evidence,Arg, La,La1,Values1,_Values),
   count_samples(NC1),
   mh_sample_arg(L,S,NC1,M:Goal,M:Evidence,Arg, La1,_La,Values0,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList),
+  delete_samples_copy(M,Goal),
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
@@ -1392,7 +1396,6 @@ mh_sample_arg(_L,K,_NC0,_Goals,_Ev,_Arg,AP,AP,V,V):-
   K=<0,!.
 
 mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
-  save_samples_copy(M,Goal),
   resample(L),
   copy_term(Evidence,Ev1),
   (M:Ev1->
@@ -1407,6 +1410,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
         put_assoc(La,V0,1,V1)
       ),
       delete_samples_copy(M,Goal),
+      save_samples_copy(M,Goal),
       K1 is K0-1,
       AP1 = La
     ;
@@ -1419,7 +1423,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
       K1 is K0-1,
       AP1=AP0,
       erase_samples,
-      restore_samples_delete_copy(M,Goal)
+      restore_samples(M,Goal)
     )
   ;
     K1 = K0,
@@ -1427,7 +1431,7 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
     V1 = V0,
     AP1=AP0,
     erase_samples,
-    restore_samples_delete_copy(M,Goal)
+    restore_samples(M,Goal)
   ),
   mh_sample_arg(L,K1,NC1,M:Goal,M:Evidence,Arg,AP1,AP,V1,V).
 
