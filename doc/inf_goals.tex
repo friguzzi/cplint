@@ -33,7 +33,7 @@ which is equivalent to \verb|mc_prob/3| with an empty option list. In general, a
 a list of options as an argument have a corresponding version without the list of options that is equivalent
 to calling the first with an empty option list.
 
-With \verb|mcintyre|, you can also take a given number of sample with
+With \verb|mcintyre|, you can also take a given number of samples with
 \begin{verbatim}
 mc_sample(:Query:atom,+Samples:int,-Probability:float,
   Options:list) is det
@@ -63,6 +63,24 @@ As another example, the call
 samples \verb|heads(coin)| 1000 times and returns the
 estimated probability that a sample is true.
 
+You can also sample using Gibbs sampling with
+\begin{verbatim}
+mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,
+  +Options:list) is det
+\end{verbatim}
+where
+\verb|Options| is a list of options, the following are recognised by \verb|mc_gibbs_sample/4|:
+\begin{itemize}
+\item \verb|block(+Block:int)|
+   Perform blocked Gibbs: \verb|Block| variables are sampled together, default value 1
+\item \verb|mix(+Mix:int)|
+   The first \verb|Mix| samples are discarded (mixing time), default value 0
+\item \verb|successes(-Successes:int)|
+Number of succesess
+\item \verb|failures(-Failures:int)|
+Number of failures
+\end{itemize}
+\verb|mc_gibbs_sample/3| is equivalent to \verb|mc_gibbs_sample/4| with an empty option list.
 
 Moreover, you can sample arguments of queries with
 \begin{verbatim}
@@ -166,6 +184,13 @@ returning that value.
     The size of the bar is the number of samples.
 \end{itemize}
 
+The predicate
+\begin{verbatim}
+mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-
+  Values:list,+Options:list) is det
+\end{verbatim}
+samples an argument of the query using Gibbs sampling. The same options as those of \verb|mc_gibbs_sample/4| are
+recognized.
 
 Finally, you can compute expectations with
 \begin{verbatim}
@@ -182,6 +207,13 @@ An example of use of the above predicate is
 \end{verbatim}
 of \href{http://cplint.eu/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
 that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
+
+The predicate
+\begin{verbatim}
+mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,
+  -Exp:float) is det
+\end{verbatim}
+computes an expectation with Gibbs sampling.
 
 \subsubsection{Drawing BDDs}
 
@@ -250,7 +282,7 @@ as in
 \end{verbatim}
 \verb|prob/3| is equivalent to \verb|prob/4| with an empty option list. 
 
-When using \verb|mcintyre|, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo.
+When using \verb|mcintyre|, you can ask conditional queries with rejection sampling, Metropolis-Hastings Markov Chain Monte Carlo or Gibbs sampling.
 In rejection sampling \cite{von195113}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise
 the sample is discarded.
 In Metropolis-Hastings MCMC, \verb|mcintyre| follows the algorithm proposed in \cite{nampally2014adaptive} (the non adaptive version).
@@ -339,90 +371,77 @@ takes 10000 accepted samples and returns in \verb|T| the number of samples where
 \verb|eval(2,4)| is true, in \verb|F| the number of samples where \verb|eval(2,4)| is false and in \verb|P| the
 estimated probability (\verb|T/10000|).
 
-
-Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using
+The predicate
+\begin{verbatim}
+mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Probability:float,+Options:list) is det
+\end{verbatim}
+performs Gibbs sampling.
+\verb|Options| is a list of options, the following are recognised by \verb|mc_gibbs_sample/5|:
+\begin{itemize}
+\item \verb|block(+Block:int)|
+   Perform blocked Gibbs: \verb|Block| variables are sampled together, default value 1
+\item \verb|mix(+Mix:int)|
+   The first \verb|Mix| samples are discarded (mixing time), default value 0
+\item \verb|successes(-Successes:int)|
+Number of succesess
+\item \verb|failures(-Failures:int)|
+Number of failures
+\end{itemize}
+Moreover, you can sample arguments of queries with rejection sampling, Metropolis-Hastings MCMC or Gibbs sampling using
 \begin{verbatim}
 mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
   +Samples:int,?Arg:var,-Values:list,+Options:list) is det
-\end{verbatim}
-\verb|Options| is a list of options, the following are recognised by \verb|mc_rejection_sample_arg/6|:
-\begin{itemize}
-\item \verb|successes(-Successes:int)|
-Number of successes
-\item \verb|failures(-Failures:int)|
-Number of failures
-\item \verb|bar(-BarChar:dict)|
-    \verb|BarChart| is a bar chart of the possible values
-\end{itemize}
-\begin{verbatim}
 mc_mh_sample_arg(:Query:atom,:Evidence:atom,
   +Samples:int,?Arg:var,-Values:list,+Options:list) is det
+mc_gibbs_sample_arg(:Query:atom,+Samples:int,
+  ?Arg:var,-Values:list,+Options:list) is det
 \end{verbatim}
-that returns the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
+that return the distribution of values for \verb|Arg| in \verb|Query| in \verb|Samples| of
 \verb|Query| given that \verb|Evidence| is true.
-\verb|Options| is a list of options, the following are recognised by \verb|mc_mh_sample_arg/6|:
+\verb|Options| is a list of options, the following are recognised:
 \begin{itemize}
 \item \verb|mix(+Mix:int)|
-The first  \verb|Mix| samples are discarded (mixing time), default value 0
+The first  \verb|Mix| samples are discarded (mixing time), default value 0 (only MH and GIbbs)
 \item \verb|lag(+Lag:int)|
-lag between each sample, \verb|Lag| sampled choices are forgotten, default value 1
-\item \verb|successes(-Successes:int)|
-Number of successes
-\item \verb|failures(-Failures:int)|
-Number of failures
+lag between each sample, \verb|Lag| sampled choices are forgotten, default value 1 (only MH)
+\item \verb|block(+Block:int)|
+   Perform blocked Gibbs: \verb|Block| variables are sampled together, default value 1 (only Gibbs)
 \item \verb|bar(-BarChar:dict)|
     \verb|BarChart| is a bar chart of the possible values
 \end{itemize}
-The predicate returns in \verb|Values| a list of couples \verb|L-N| where
+The predicates return in \verb|Values| a list of couples \verb|L-N| where
 \verb|L| is the list of values of \verb|Arg| for which \verb|Query|
 succeeds in a world sampled at random where \verb|Evidence| is true and \verb|N|
 is the number of samples returning that list of values.
-
+\begin{verbatim}
+mc_gibbs_sample_arg(:Query:atom,+Samples:int,
+  ?Arg:var,-Values:list,+Options:list) is det
+\end{verbatim}
 An example of use of the above predicates is
 \begin{verbatim}
 ?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,Y,V,[]).
 \end{verbatim}
 of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}.
 
-Finally, you can compute expectations with
-\begin{verbatim}
-mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
-\end{verbatim}
-that computes the expected value of \verb|Arg| in \verb|Query| by
-sampling.
-It takes \verb|N| samples of \verb|Query| and sums up the value of \verb|Arg| for
-each sample. The overall sum is divided by \verb|N| to give \verb|Exp|.
-
-An example of use of the above predicate is
-\begin{verbatim}
-?- mc_expectation(eventually(elect,T),1000,T,E).
-\end{verbatim}
-of \href{http://cplint.eu/example/inference/pctl_slep.pl}{\texttt{pctl\_slep.pl}}
-that returns in \verb|E| the expected value of \verb|T| by taking 1000 samples.
 
 To compute conditional expectations, use
 \begin{verbatim}
-mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-	?Arg:var,-Exp:float,+Options:list) is det
-\end{verbatim}
-where \verb|Options| is a list of options, the following are recognised by \verb|mc_mh_expectation/6|:
-\begin{itemize}
-\item \verb|mix(+Mix:int)|
-The first  \verb|Mix| samples are discarded (mixing time), default value 0
-\item \verb|lag(+Lag:int)|
-lag between each sample, \verb|Lag| sampled choices are forgotten, default value 1
-\end{itemize}
-You can also use
-\begin{verbatim}
 mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
   ?Arg:var,-Exp:float) is det
+mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float,+Options:list) is det
+mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float,+Options:list) is det
 \end{verbatim}
-as in
+where \verb|Options| is a list of options, the same as those of the predicates for conditional argument 
+sampling are recognised.
+For example
 \begin{verbatim}
 ?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).
 \end{verbatim}
 of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}
-that computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that
+computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that
 \verb|eval(1,3)| is true by taking 1000 samples using Metropolis-Hastings MCMC.
 
 \subsection{Conditional Queries on Continuous Variables}

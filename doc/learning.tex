@@ -197,7 +197,7 @@ Input predicates are those whose atoms you are not interested in predicting. You
 \begin{verbatim}
 input_cw(<predicate>/<arity>).
 \end{verbatim}
-For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input/hypothesized program are not used to derive atoms for these predicates. Moreover,   clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.
+For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input or in the hypothesized program are not used to derive atoms for these predicates. Moreover,   clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.
 
 Open world input predicates are declared with
 \begin{verbatim}
@@ -553,7 +553,8 @@ and \verb|Prob| is the probability of example \verb|a|.
 
 Then you can draw the curves in \texttt{cplint}  on SWISH using C3.js using
 \begin{verbatim}
-compute_areas_diagrams(+ExampleList:list,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
+compute_areas_diagrams(+ExampleList:list,
+  -AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det
 \end{verbatim}
 (from pack \href{http://www.swi-prolog.org/pack/list?p=auc}{\texttt{auc}})
 that takes as input a list \verb|ExampleList| of pairs probability-literal of the form that is returned by
@@ -588,7 +589,8 @@ test_r(+Program:list,+List_of_folds:list,-LL:float,
 \end{verbatim}
 or predicate
 \begin{verbatim}
-compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det
+compute_areas_diagrams_r(+ExampleList:list,
+  -AUCROC:float,-AUCPR:float) is det
 \end{verbatim}
 that takes as input a list \verb|ExampleList| of pairs probability-literal of the form that is returned by
 \verb|test_prob/6|.

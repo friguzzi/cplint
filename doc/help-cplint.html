@@ -307,7 +307,7 @@ female(cathy).</code></pre>
 <p>You can also use</p>
 <pre><code>mc_prob(:Query:atom,-Probability:float) is det</code></pre>
 <p>which is equivalent to <code>mc_prob/3</code> with an empty option list. In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalent to calling the first with an empty option list.</p>
-<p>With <code>mcintyre</code>, you can also take a given number of sample with</p>
+<p>With <code>mcintyre</code>, you can also take a given number of samples with</p>
 <pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,
   Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_sample/4</code>:</p>
@@ -321,6 +321,17 @@ female(cathy).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns in <code>S</code> the number of successes, in <code>F</code> the number of failures and in <code>P</code> the estimated probability (<code>S/1000</code>). As another example, the call</p>
 <pre><code>?- mc_sample(heads(coin),1000,Prob).</code></pre>
 <p>samples <code>heads(coin)</code> 1000 times and returns the estimated probability that a sample is true.</p>
+<p>You can also sample using Gibbs sampling with</p>
+<pre><code>mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,
+  +Options:list) is det</code></pre>
+<p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_gibbs_sample/4</code>:</p>
+<ul>
+<li><p><code>block(+Block:int)</code> Perform blocked Gibbs: <code>Block</code> variables are sampled together, default value 1</p></li>
+<li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of succesess</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
+</ul>
+<p><code>mc_gibbs_sample/3</code> is equivalent to <code>mc_gibbs_sample/4</code> with an empty option list.</p>
 <p>Moreover, you can sample arguments of queries with</p>
 <pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,
   -Values:list,+Options:list) is det</code></pre>
@@ -354,12 +365,20 @@ female(cathy).</code></pre>
 <ul>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> has a bar for each value of <code>Arg</code> returned by sampling with uniform probability one answer from those returned by the query in a world sampled at random. The size of the bar is the number of samples.</p></li>
 </ul>
+<p>The predicate</p>
+<pre><code>mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-
+  Values:list,+Options:list) is det</code></pre>
+<p>samples an argument of the query using Gibbs sampling. The same options as those of <code>mc_gibbs_sample/4</code> are recognized.</p>
 <p>Finally, you can compute expectations with</p>
 <pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> by sampling. It takes <code>N</code> samples of <code>Query</code> and sums up the value of <code>Arg</code> for each sample. The overall sum is divided by <code>N</code> to give <code>Exp</code>.</p>
 <p>An example of use of the above predicate is</p>
 <pre><code>?- mc_expectation(eventually(elect,T),1000,T,E).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
+<p>The predicate</p>
+<pre><code>mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,
+  -Exp:float) is det</code></pre>
+<p>computes an expectation with Gibbs sampling.</p>
 <h3 id="drawing-bdds">Drawing BDDs</h3>
 <p>With <code>pita</code>, you can obtain the BDD for a query with the predicates</p>
 <pre><code>bdd_dot_file(:Query:atom,+FileName:string,-Var:list) is nondet
@@ -387,7 +406,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <p>as in</p>
 <pre><code>?- prob(heads(coin),biased(coin),P,[bar(Chart)}).</code></pre>
 <p><code>prob/3</code> is equivalent to <code>prob/4</code> with an empty option list.</p>
-<p>When using <code>mcintyre</code>, you can ask conditional queries with rejection sampling or with Metropolis-Hastings Markov Chain Monte Carlo. In rejection sampling <span class="citation">[<a href="#ref-von195113">22</a>]</span>, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded. In Metropolis-Hastings MCMC, <code>mcintyre</code> follows the algorithm proposed in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> (the non adaptive version). A Markov chain is built by building an initial sample and by generating successor samples.</p>
+<p>When using <code>mcintyre</code>, you can ask conditional queries with rejection sampling, Metropolis-Hastings Markov Chain Monte Carlo or Gibbs sampling. In rejection sampling <span class="citation">[<a href="#ref-von195113">22</a>]</span>, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded. In Metropolis-Hastings MCMC, <code>mcintyre</code> follows the algorithm proposed in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> (the non adaptive version). A Markov chain is built by building an initial sample and by generating successor samples.</p>
 <p>The initial sample is built by randomly sampling choices so that the evidence is true. This is done with a backtracking meta-interpreter that starts with the goal and randomizes the order in which clauses are selected during the search so that the initial sample is unbiased. Each time the meta-interpreter encounters a probabilistic choice, it first checks whether a value has already been sampled, if not, it takes a sample and records it. If a failure is obtained, the meta-interpreter backtracks to other clauses but without deleting samples. Then the goal is queries using regular MCINTYRE.</p>
 <p>A successor sample is obtained by deleting a fixed number (parameter <code>Lag</code>) of sampled probabilistic choices. Then the evidence is queried using regular MCINTYRE starting with the undeleted choices. If the query succeeds, the goal is queried using regular MCINTYRE. The sample is accepted with a probability of <span class="math inline">\(\min\{1,\frac{N_0}{N_1}\}\)</span> where <span class="math inline">\(N_0\)</span> is the number of choices sampled in the previous sample and <span class="math inline">\(N_1\)</span> is the number of choices sampled in the current sample. In <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> the lag is always 1 but the proof in <span class="citation">[<a href="#ref-nampally2014adaptive">12</a>]</span> that the above acceptance probability yields a valid Metropolis-Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in <code>cplint</code>.</p>
 <p>Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample. The final probability is given by the number of successes over the total number of samples.</p>
@@ -421,49 +440,46 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <pre><code>?- mc_mh_sample(eval(2,4),eval(1,3),10000,P,
   [successes(T), failures(F)]).</code></pre>
 <p>takes 10000 accepted samples and returns in <code>T</code> the number of samples where <code>eval(2,4)</code> is true, in <code>F</code> the number of samples where <code>eval(2,4)</code> is false and in <code>P</code> the estimated probability (<code>T/10000</code>).</p>
-<p>Moreover, you can sample arguments of queries with rejection sampling and Metropolis-Hastings MCMC using</p>
-<pre><code>mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list) is det</code></pre>
-<p><code>Options</code> is a list of options, the following are recognised by <code>mc_rejection_sample_arg/6</code>:</p>
+<p>The predicate</p>
+<pre><code>mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,
+  -Probability:float,+Options:list) is det</code></pre>
+<p>performs Gibbs sampling. <code>Options</code> is a list of options, the following are recognised by <code>mc_gibbs_sample/5</code>:</p>
 <ul>
-<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
-<li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a bar chart of the possible values</p></li>
-</ul>
-<pre><code>mc_mh_sample_arg(:Query:atom,:Evidence:atom,
-  +Samples:int,?Arg:var,-Values:list,+Options:list) is det</code></pre>
-<p>that returns the distribution of values for <code>Arg</code> in <code>Query</code> in <code>Samples</code> of <code>Query</code> given that <code>Evidence</code> is true. <code>Options</code> is a list of options, the following are recognised by <code>mc_mh_sample_arg/6</code>:</p>
-<ul>
+<li><p><code>block(+Block:int)</code> Perform blocked Gibbs: <code>Block</code> variables are sampled together, default value 1</p></li>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
-<li><p><code>lag(+Lag:int)</code> lag between each sample, <code>Lag</code> sampled choices are forgotten, default value 1</p></li>
-<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of succesess</p></li>
 <li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
+</ul>
+<p>Moreover, you can sample arguments of queries with rejection sampling, Metropolis-Hastings MCMC or Gibbs sampling using</p>
+<pre><code>mc_rejection_sample_arg(:Query:atom,:Evidence:atom,
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det
+mc_mh_sample_arg(:Query:atom,:Evidence:atom,
+  +Samples:int,?Arg:var,-Values:list,+Options:list) is det
+mc_gibbs_sample_arg(:Query:atom,+Samples:int,
+  ?Arg:var,-Values:list,+Options:list) is det</code></pre>
+<p>that return the distribution of values for <code>Arg</code> in <code>Query</code> in <code>Samples</code> of <code>Query</code> given that <code>Evidence</code> is true. <code>Options</code> is a list of options, the following are recognised:</p>
+<ul>
+<li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0 (only MH and GIbbs)</p></li>
+<li><p><code>lag(+Lag:int)</code> lag between each sample, <code>Lag</code> sampled choices are forgotten, default value 1 (only MH)</p></li>
+<li><p><code>block(+Block:int)</code> Perform blocked Gibbs: <code>Block</code> variables are sampled together, default value 1 (only Gibbs)</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a bar chart of the possible values</p></li>
 </ul>
-<p>The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random where <code>Evidence</code> is true and <code>N</code> is the number of samples returning that list of values.</p>
+<p>The predicates return in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random where <code>Evidence</code> is true and <code>N</code> is the number of samples returning that list of values.</p>
+<pre><code>mc_gibbs_sample_arg(:Query:atom,+Samples:int,
+  ?Arg:var,-Values:list,+Options:list) is det</code></pre>
 <p>An example of use of the above predicates is</p>
 <pre><code>?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,Y,V,[]).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a>.</p>
-<p>Finally, you can compute expectations with</p>
-<pre><code>mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det</code></pre>
-<p>that computes the expected value of <code>Arg</code> in <code>Query</code> by sampling. It takes <code>N</code> samples of <code>Query</code> and sums up the value of <code>Arg</code> for each sample. The overall sum is divided by <code>N</code> to give <code>Exp</code>.</p>
-<p>An example of use of the above predicate is</p>
-<pre><code>?- mc_expectation(eventually(elect,T),1000,T,E).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <p>To compute conditional expectations, use</p>
-<pre><code>mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
-	?Arg:var,-Exp:float,+Options:list) is det</code></pre>
-<p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_mh_expectation/6</code>:</p>
-<ul>
-<li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
-<li><p><code>lag(+Lag:int)</code> lag between each sample, <code>Lag</code> sampled choices are forgotten, default value 1</p></li>
-</ul>
-<p>You can also use</p>
 <pre><code>mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
-  ?Arg:var,-Exp:float) is det</code></pre>
-<p>as in</p>
+  ?Arg:var,-Exp:float) is det
+mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float,+Options:list) is det
+mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
+  ?Arg:var,-Exp:float,+Options:list) is det</code></pre>
+<p>where <code>Options</code> is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example</p>
 <pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a> that computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
+<p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a> computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
 <p>For example</p>
@@ -747,7 +763,7 @@ pos:0.000448807 :-
 <p>and indicate the predicate whose atoms you want to predict. Derivations for the atoms for this predicates in the input data are built by the system. These are the predicates for which new clauses are generated.</p>
 <p>Input predicates are those whose atoms you are not interested in predicting. You can declare closed world input predicates with</p>
 <pre><code>input_cw(&lt;predicate&gt;/&lt;arity&gt;).</code></pre>
-<p>For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input/hypothesized program are not used to derive atoms for these predicates. Moreover, clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.</p>
+<p>For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input or in the hypothesized program are not used to derive atoms for these predicates. Moreover, clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.</p>
 <p>Open world input predicates are declared with</p>
 <pre><code>input(&lt;predicate&gt;/&lt;arity&gt;).</code></pre>
 <p>In this case, if a subgoal for such a predicate is encountered when deriving a subgoal for the output predicates, both the facts in the interpretations, those derivable from them and the background knowledge, the background clauses and the clauses of the input program are used.</p>
@@ -921,7 +937,8 @@ fold(test,[490,491,...]).</code></pre>
 <p><code>test/7</code> returns the log likelihood of the test examples in <code>LL</code>, the Area Under the ROC curve in <code>AUCROC</code>, a dictionary containing the list of points (in the form of Prolog pairs <code>x-y</code>) of the ROC curve in <code>ROC</code>, the Area Under the PR curve in <code>AUCPR</code>, a dictionary containing the list of points of the PR curve in <code>PR</code>.</p>
 <p><code>test_prob/6</code> returns the log likelihood of the test examples in <code>LL</code>, the numbers of positive and negative examples in <code>NPos</code> and <code>NNeg</code> and the list <code>ExampleList</code> containing couples <code>Prob-Ex</code> where <code>Ex</code> is <code>a</code> for <code>a</code> a positive example and <code>\+(a)</code> for <code>a</code> a negative example and <code>Prob</code> is the probability of example <code>a</code>.</p>
 <p>Then you can draw the curves in <code>cplint</code> on SWISH using C3.js using</p>
-<pre><code>compute_areas_diagrams(+ExampleList:list,-AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det</code></pre>
+<pre><code>compute_areas_diagrams(+ExampleList:list,
+  -AUCROC:float,-ROC:dict,-AUCPR:float,-PR:dict) is det</code></pre>
 <p>(from pack <a href="http://www.swi-prolog.org/pack/list?p=auc"><code>auc</code></a>) that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
 <p>For example, to test on fold <code>test</code> the program learned on fold <code>train</code> you can run the query</p>
 <pre><code>?- induce_par([train],P),
@@ -939,7 +956,8 @@ fold(test,[490,491,...]).</code></pre>
 <pre><code>test_r(+Program:list,+List_of_folds:list,-LL:float,
   -AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>or predicate</p>
-<pre><code>compute_areas_diagrams_r(+ExampleList:list,-AUCROC:float,-AUCPR:float) is det</code></pre>
+<pre><code>compute_areas_diagrams_r(+ExampleList:list,
+  -AUCROC:float,-AUCPR:float) is det</code></pre>
 <p>that takes as input a list <code>ExampleList</code> of pairs probability-literal of the form that is returned by <code>test_prob/6</code>.</p>
 <h2 id="parameters-1">Parameters</h2>
 <p>Parameters are set with commands of the form</p>
