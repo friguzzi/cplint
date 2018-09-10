@@ -130,12 +130,13 @@
 
 :-meta_predicate mh_sample_arg(+,+,+,:,:,?,+,-,+,-).
 :-meta_predicate mh_montecarlo(+,+,+,+,+,+,-,:,:,+,-).
-:-meta_predicate gibbs_montecarlo(+,+,:,-).
-:-meta_predicate gibbs_montecarlo(+,+,:,:,-).
+:-meta_predicate gibbs_montecarlo(+,+,+,:,-).
+:-meta_predicate gibbs_montecarlo(+,+,+,:,:,-).
 
-:-meta_predicate mc_gibbs_sample(:,:,+,+,-,-,-).
-:-meta_predicate gibbs_sample_arg(+,:,:,?,+,-).
-:-meta_predicate gibbs_sample_arg(+,:,?,+,-).
+:-meta_predicate mc_gibbs_sample(:,:,+,+,+,-,-,-).
+:-meta_predicate mc_gibbs_sample(:,+,+,+,-,-,-).
+:-meta_predicate gibbs_sample_arg(+,:,:,+,?,+,-).
+:-meta_predicate gibbs_sample_arg(+,:,+,?,+,-).
 
 
 :-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
@@ -154,19 +155,19 @@
 :-predicate_options(mc_prob/3,3,[bar(-)]).
 :-predicate_options(mc_sample/4,4,[successes(-),failures(-),bar(-)]).
 :-predicate_options(mc_mh_sample/5,5,[successes(-),failures(-),mix(+),lag(+)]).
-:-predicate_options(mc_gibbs_sample/5,5,[successes(-),failures(-),mix(+)]).
-:-predicate_options(mc_gibbs_sample/4,4,[successes(-),failures(-),mix(+)]).
+:-predicate_options(mc_gibbs_sample/5,5,[successes(-),failures(-),mix(+),block(+)]).
+:-predicate_options(mc_gibbs_sample/4,4,[successes(-),failures(-),mix(+),block(+)]).
 :-predicate_options(mc_rejection_sample/5,5,[successes(-),failures(-)]).
 :-predicate_options(mc_sample_arg/5,5,[bar(-)]).
 :-predicate_options(mc_rejection_sample_arg/6,6,[bar(-)]).
 :-predicate_options(mc_mh_sample_arg/6,6,[mix(+),lag(+),bar(-)]).
-:-predicate_options(mc_gibbs_sample_arg/6,6,[mix(+),bar(-)]).
-:-predicate_options(mc_gibbs_sample_arg/5,5,[mix(+),bar(-)]).
+:-predicate_options(mc_gibbs_sample_arg/6,6,[mix(+),bar(-),block(+)]).
+:-predicate_options(mc_gibbs_sample_arg/5,5,[mix(+),bar(-),block(+)]).
 :-predicate_options(mc_sample_arg_first/5,5,[bar(-)]).
 :-predicate_options(mc_sample_arg_one/5,5,[bar(-)]).
 :-predicate_options(mc_mh_expectation/6,6,[mix(+),lag(+)]).
-:-predicate_options(mc_gibbs_expectation/6,6,[mix(+)]).
-:-predicate_options(mc_gibbs_expectation/5,5,[mix(+)]).
+:-predicate_options(mc_gibbs_expectation/6,6,[mix(+),block(+)]).
+:-predicate_options(mc_gibbs_expectation/5,5,[mix(+),block(+)]).
 :-predicate_options(histogram/3,3,[max(+),min(+),nbins(+)]).
 :-predicate_options(density/3,3,[max(+),min(+),nbins(+)]).
 :-predicate_options(density2d/3,3,[xmax(+),xmin(+),ymax(+),ymin(+),nbins(+)]).
@@ -698,6 +699,8 @@ nac(do(\+ _)).
  * If Query/Evidence are not ground, it considers them as existential queries.
  *
  * Options is a list of options, the following are recognised by mc_gibbs_sample/4:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * successes(-Successes:int)
@@ -707,9 +710,10 @@ nac(do(\+ _)).
  */
 mc_gibbs_sample(M:Goal,S,P,Options):-
   option(mix(Mix),Options,0),
+  option(block(Block),Options,1),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
-  mc_gibbs_sample(M:Goal,S,Mix,T,F,P).
+  mc_gibbs_sample(M:Goal,S,Mix,Block,T,F,P).
 
 /**
  * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float) is det
@@ -719,7 +723,7 @@ mc_gibbs_sample(M:Goal,S,P,Options):-
 mc_gibbs_sample(M:Goal,S,P):-
   mc_gibbs_sample(M:Goal,S,P,[]).
 
-mc_gibbs_sample(M:Goal,S,Mix,T,F,P):-
+mc_gibbs_sample(M:Goal,S,Mix,Block,T,F,P):-
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -733,18 +737,18 @@ mc_gibbs_sample(M:Goal,S,Mix,T,F,P):-
     T1=0,
     S1=S,
     Mix1 is Mix-1,
-    gibbs_montecarlo(Mix1,0, M:Goal,  _TMix)
+    gibbs_montecarlo(Mix1,0,Block,M:Goal,_TMix)
   ),
-  gibbs_montecarlo(S1,T1,  M:Goal,   T),
+  gibbs_montecarlo(S1,T1,Block,M:Goal,T),
   P is T / S,
   F is S - T,
   erase_samples.
 
-gibbs_montecarlo(K,T, _Goals,T):-
+gibbs_montecarlo(K,T,_Block,_Goals,T):-
   K=<0,!.
 
-gibbs_montecarlo(K0, T0, M:Goal,   T):-
-  remove_samples(LS),
+gibbs_montecarlo(K0, T0,Block,M:Goal,T):-
+  remove_samples(Block,LS),
   copy_term(Goal,Goal1),
   (M:Goal1->
     Succ=1
@@ -754,15 +758,28 @@ gibbs_montecarlo(K0, T0, M:Goal,   T):-
   T1 is T0 + Succ,
   K1 is K0-1,
   check_sampled(M,LS),
-  gibbs_montecarlo(K1, T1,M:Goal, T).
+  gibbs_montecarlo(K1,T1,Block,M:Goal,T).
 
-remove_samples([(R,S)]):-
-  retract(sampled(R,S,_)),!.
+remove_samples(Block,Samp):-
+  remove_samp(Block,Samp).
+
+remove_samp(0,[]):-!.
+
+remove_samp(Block0,[(R,S)|Samp]):-
+  retract(sampled(R,S,_)),!,
+  Block is Block0-1,
+  remove_samp(Block,Samp).
+
+remove_samp(_,[]).
+
 
 % check_sampled(M,R,S):-
 %   M:sampled(R,S,_),!.
 
-check_sampled(M,[(R,S)]):-
+check_sampled(M,S):-
+  maplist(check_sam(M),S).
+
+check_sam(M,(R,S)):-
   M:samp(R,S,_).
 /**
  * mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -778,6 +795,8 @@ check_sampled(M,[(R,S)]):-
  * If Query/Evidence are not ground, it considers them as existential queries.
  *
  * Options is a list of options, the following are recognised by mc_gibbs_sample/5:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * successes(-Successes:int)
@@ -787,12 +806,13 @@ check_sampled(M,[(R,S)]):-
  */
 mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
   option(mix(Mix),Options,0),
+  option(block(Block),Options,1),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
-  mc_gibbs_sample(M:Goal,M:Evidence,S,Mix,T,F,P).
+  mc_gibbs_sample(M:Goal,M:Evidence,S,Mix,Block,T,F,P).
 
 
-mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
+mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,Block,T,F,P):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   gibbs_sample_cycle(M:Evidence),
   copy_term(Goal,Goal1),
@@ -808,20 +828,20 @@ mc_gibbs_sample(M:Goal,M:Evidence0,S,Mix,T,F,P):-
     T1=0,
     S1=S,
     Mix1 is Mix-1,
-    gibbs_montecarlo(Mix1,0, M:Goal, M:Evidence, _TMix)
+    gibbs_montecarlo(Mix1,0,Block,M:Goal,M:Evidence,_TMix)
   ),
-  gibbs_montecarlo(S1,T1,  M:Goal, M:Evidence,  T),
+  gibbs_montecarlo(S1,T1,Block,M:Goal,M:Evidence,T),
   P is T / S,
   F is S - T,
   erase_samples,
   maplist(erase,UpdatedClausesRefs),
   maplist(M:assertz,ClausesToReAdd).
 
-gibbs_montecarlo(K,T,_G,_Ev,T):-
+gibbs_montecarlo(K,T,_Block,_G,_Ev,T):-
   K=<0,!.
 
-gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
-  remove_samples(LS),
+gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
+  remove_samples(Block,LS),
   save_samples_copy(M,Evidence),
   gibbs_sample_cycle(M:Evidence),
   delete_samples_copy(M,Evidence),
@@ -834,7 +854,7 @@ gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
   T1 is T0 + Succ,
   K1 is K0-1,
   check_sampled(M,LS),
-  gibbs_montecarlo(K1, T1,M:Goal,M:Evidence, T).
+  gibbs_montecarlo(K1, T1,Block,M:Goal,M:Evidence, T).
 
 
 /**
@@ -851,6 +871,8 @@ gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
  * a variable given the values of the variables in its Markov blanket.
  *
  * Options is a list of options, the following are recognised by mc_gibbs_sample_arg/5:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * bar(-BarChar:dict)
@@ -861,8 +883,9 @@ gibbs_montecarlo(K0, T0, M:Goal, M:Evidence,  T):-
  */
 mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options):-
   option(mix(Mix),Options,0),
+  option(block(Block),Options,1),
   option(bar(Chart),Options,no),
-  mc_gibbs_sample_arg0(M:Goal,S,Mix,Arg,ValList),
+  mc_gibbs_sample_arg0(M:Goal,S,Mix,Block,Arg,ValList),
   (nonvar(Chart)->
     true
   ;
@@ -890,6 +913,8 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
  * a variable given the values of the variables in its Markov blanket.
  *
  * Options is a list of options, the following are recognised by mc_gibbs_sample_arg/6:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  * * bar(-BarChar:dict)
@@ -900,8 +925,9 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
  */
 mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
   option(mix(Mix),Options,0),
+  option(block(Block),Options,1),
   option(bar(Chart),Options,no),
-  mc_gibbs_sample_arg0(M:Goal,M:Evidence,S,Mix,Arg,ValList),
+  mc_gibbs_sample_arg0(M:Goal,M:Evidence,S,Mix,Block,Arg,ValList),
   (nonvar(Chart)->
     true
   ;
@@ -911,11 +937,11 @@ mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
 
 
 
-gibbs_sample_arg(K,_Goals,_Ev,_Arg,V,V):-
+gibbs_sample_arg(K,_Goals,_Ev,_Block,_Arg,V,V):-
   K=<0,!.
 
-gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
-  remove_samples(LS),
+gibbs_sample_arg(K0,M:Goal, M:Evidence,Block, Arg,V0,V):-
+  remove_samples(Block,LS),
   save_samples_copy(M,Evidence),
   gibbs_sample_cycle(M:Evidence),
   delete_samples_copy(M,Evidence),
@@ -929,11 +955,11 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
   ),
   K1 is K0-1,
   check_sampled(M,LS),
-  gibbs_sample_arg(K1,M:Goal,M:Evidence,Arg,V1,V).
+  gibbs_sample_arg(K1,M:Goal,M:Evidence,Block,Arg,V1,V).
 
 
 /**
- * mc_gibbs_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_gibbs_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Block:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -942,10 +968,11 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence, Arg,V0,V):-
  * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
- * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
- * a variable given the values of the variables in its Markov blanket.
+ * It performs blocked Gibbs sampling: each sample is obtained from the 
+ * previous one by resampling
+ * Block variables given the values of the variables in its Markov blanket.
  */
-mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
+mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Block,Arg,ValList):-
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   gibbs_sample_cycle(M:Evidence),
   empty_assoc(Values0),
@@ -957,11 +984,11 @@ mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
     S1 is S-1
   ;
     Mix1 is Mix-1,
-    gibbs_sample_arg(Mix1,M:Goal,M:Evidence,Arg, Values1,_Values),
+    gibbs_sample_arg(Mix1,M:Goal,M:Evidence,Block,Arg, Values1,_Values),
     S1=S,
     Values2=Values0
   ),
-  gibbs_sample_arg(S1,M:Goal,M:Evidence,Arg, Values2,Values),
+  gibbs_sample_arg(S1,M:Goal,M:Evidence,Block,Arg, Values2,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList),
@@ -969,7 +996,7 @@ mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
   maplist(M:assertz,ClausesToReAdd).
 
 /**
- * mc_gibbs_sample_arg0(:Query:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_gibbs_sample_arg0(:Query:atom,+Samples:int,+Mix:int,+Block:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times.
  * Arg should be a variable in Query.
@@ -977,10 +1004,11 @@ mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Arg,ValList):-
  * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
- * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
- * a variable given the values of the variables in its Markov blanket.
+ * It performs blocked Gibbs sampling: each sample is obtained from the previous one 
+ * by resampling
+ * Block variables given the values of the variables in its Markov blanket.
  */
-mc_gibbs_sample_arg0(M:Goal,S,Mix,Arg,ValList):-
+mc_gibbs_sample_arg0(M:Goal,S,Mix,Block,Arg,ValList):-
   empty_assoc(Values0),
   findall(Arg,M:Goal,La),
   numbervars(La),
@@ -990,20 +1018,20 @@ mc_gibbs_sample_arg0(M:Goal,S,Mix,Arg,ValList):-
     S1 is S-1
   ;
     Mix1 is Mix-1,
-    gibbs_sample_arg(Mix1,M:Goal,Arg, Values1,_Values),
+    gibbs_sample_arg(Mix1,M:Goal,Block,Arg, Values1,_Values),
     S1=S,
     Values2=Values0
   ),
-  gibbs_sample_arg(S1,M:Goal,Arg, Values2,Values),
+  gibbs_sample_arg(S1,M:Goal,Block,Arg, Values2,Values),
   erase_samples,
   assoc_to_list(Values,ValList0),
   sort(2, @>=,ValList0,ValList).
 
-gibbs_sample_arg(K,_Goals,_Arg,V,V):-
+gibbs_sample_arg(K,_Goals,_Block,_Arg,V,V):-
   K=<0,!.
 
-gibbs_sample_arg(K0,M:Goal, Arg,V0,V):-
-  remove_samples(LS),
+gibbs_sample_arg(K0,M:Goal,Block, Arg,V0,V):-
+  remove_samples(Block,LS),
   findall(Arg,M:Goal,La),
   numbervars(La),
   (get_assoc(La, V0, N)->
@@ -1014,7 +1042,7 @@ gibbs_sample_arg(K0,M:Goal, Arg,V0,V):-
   ),
   check_sampled(M,LS),
   K1 is K0-1,
-  gibbs_sample_arg(K1,M:Goal,Arg,V1,V).
+  gibbs_sample_arg(K1,M:Goal,Block,Arg,V1,V).
 
 /**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
@@ -2368,6 +2396,8 @@ mc_expectation(M:Goal,S,Arg,E):-
  * each sample. The overall sum is divided by N to give Exp.
  * Arg should be a variable in Query.
  * Options is a list of options, the following are recognised by mc_mh_sample_arg/6:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  */
@@ -2411,6 +2441,8 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
  * Arg should be a variable in Query.
  *
  * Options is a list of options, the following are recognised by mc_mh_expectation/6:
+ * * block(+Block:int)
+ *   Perform blocked Gibbs: Block variables are sampled together, default value 1
  * * mix(+Mix:int)
  *   The first Mix samples are discarded (mixing time), default value 0
  */

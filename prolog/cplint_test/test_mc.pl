@@ -2,7 +2,7 @@
   [test_mc/0,test_mc_rev/0]).
 :- use_module(library(plunit)).
 
-
+:-set_random(seed(100)).
 :-use_module(library(cplint_test/cplint_test)).
 
 test_list([
@@ -86,10 +86,16 @@ test(on_2_1_g):-
 test(on_2_1_g_m):-
 	run((mc_gibbs_sample(on(2,1),1000,P,[mix(100)]),close_to(P,0.148148147703704))).
 
+test(on_2_1_g_m_b):-
+	run((mc_gibbs_sample(on(2,1),1000,P,[mix(100),block(2)]),close_to(P,0.148148147703704))).
+
 test(on_2_1__on_1_1_g):-
   run((mc_gibbs_sample(on(2,1),on(1,1),1000,P,[mix(1000)]),close_to(P,0.333333333333333))).
 test(on_2_1__on_0_1_g):-
   run((mc_gibbs_sample(on(2,1),on(0,1),1000,P,[mix(1000)]),close_to(P,0.222222222222222))).
+
+test(on_2_1__on_0_1_g_b):-
+  run((mc_gibbs_sample(on(2,1),on(0,1),1000,P,[mix(1000),block(2)]),close_to(P,0.222222222222222))).
 
 :- end_tests(threesideddicemc).
 
@@ -117,6 +123,10 @@ test(reach_s0_0_S_s0_g):-
 	run((mc_gibbs_sample_arg(reach(s0,0,S),50,S,Values),\+ member([s0]-_,Values))).
 test(reach_s0_0_S_s0):-
 	run((mc_gibbs_sample_arg(reach(s0,0,S),reach(s0,0,s1),50,S,Values,[mix(100)]),\+ member([s0]-_,Values))).
+
+test(reach_s0_0_S_s0_b):-
+	run((mc_gibbs_sample_arg(reach(s0,0,S),reach(s0,0,s1),50,S,Values,[mix(100),block(2)]),\+ member([s0]-_,Values))).
+
 test(reach_s0_0_s0_s3_s2,[nondet]):-
 	run((mc_sample_arg_first(reach(s0,0,S),50,S,Values),member(s3-_,Values),member(s2-_,Values))).
 test(reach_s0_0_S_s0_o):-
@@ -181,7 +191,9 @@ test(exp_eval_2_eval_1_3_o):-
   run((mc_mh_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10),lag(2)]),relatively_close_to(E,2.855,1))).
 
 test(eval_1_3_g):-
-	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[]),close_to(P,0.1151,0.4))).
+	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[]),close_to(P,0.604,0.4))).
+test(eval_1_3_g_n):-
+	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[block(2)]),close_to(P,0.2,0.4))).
 test(eval_1_3_o_g):-
 	run((mc_gibbs_sample(eval(2,4),eval(1,3),500,P,[mix(10),successes(S),failures(F)]),
   close_to(P,0.1151,0.4),close_to(S,51,150),close_to(F,449,150))).
@@ -196,6 +208,9 @@ test(exp_eval_2_eval_1_3_g):-
   run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[]),relatively_close_to(E,2.855,1))).
 test(exp_eval_2_eval_1_3_o_g):-
   run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10)]),relatively_close_to(E,2.855,1))).
+
+test(exp_eval_2_eval_1_3_o_g_b):-
+  run((mc_gibbs_expectation(eval(2,Y),eval(1,3),300,Y,E,[mix(10),block(3)]),relatively_close_to(E,2.855,1))).
 
 :- end_tests(arithm).
 
@@ -364,11 +379,13 @@ test(taught_by_c1_p1):-
 test(topic_1_1_1):-
   run((mc_sample(topic(1,1,1),400,P),close_to(P,0.5,0.2))).
 test(topic_1_1_1_g):-
-  run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5))).
+  run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5,0.2))).
 
 test(topic_1_1_1_ww):-
   run((mc_mh_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
 test(topic_1_1_1_ww_g):-
   run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
+test(topic_1_1_1_ww_g_b):-
+  run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[block(2)]),close_to(G,0.5,0.5))).
 
 :- end_tests(lda).
