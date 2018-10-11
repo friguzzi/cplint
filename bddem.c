@@ -686,46 +686,47 @@ static foreign_t ret_vit_prob(term_t arg1, term_t arg2,
 
   return(PL_unify(out,arg3)&&PL_unify(outass,arg4));
 }
-
 static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
 {
   environment * env;
   int ret,varIndex,i,j;
-  DdNode * cons, * tmp1, * tmp2, * vari, * varj, * or, * tmpor;
+  DdNode * cons, * tmp0,* tmp1, * tmp2, * vari, * varlast, * varj, * or, * tmpor;
   term_t out;
   variable var;
 
   ret=PL_get_pointer(arg1,(void **)&env);
   RETURN_IF_FAIL
   ret=PL_get_integer(arg2,&varIndex);
+  /*  printf(" V = varIndex = %d\n",varIndex); */
   RETURN_IF_FAIL
 
-
-  //env->vars[varIndex].abducible_or_query=1;
-  //env->n_abd++;
   var=env->vars[varIndex];
 
   cons=Cudd_ReadOne(env->mgr);
   or=Cudd_ReadLogicZero(env->mgr);
 
   for (i=var.firstBoolVar; i<var.firstBoolVar+var.nVal-1; i++)
-  {
+  {    
     vari=Cudd_bddIthVar(env->mgr,i);
     tmpor=Cudd_bddOr(env->mgr,or,vari);
     Cudd_Ref(tmpor);
     Cudd_RecursiveDeref(env->mgr,or);
     or=tmpor;
-    for(j=i+1; j<var.firstBoolVar+var.nVal-1; j++)
-    {
+    for(j=i+1; j<var.firstBoolVar+var.nVal; j++)
+    {      
       varj=Cudd_bddIthVar(env->mgr,j);
-      tmp1=Cudd_Not(Cudd_bddAnd(env->mgr,vari,varj));
+      tmp0=Cudd_bddAnd(env->mgr,vari,varj);
+      Cudd_Ref(tmp0);//added
+      tmp1=Cudd_Not(tmp0);
+      Cudd_Ref(tmp1);//added
       tmp2=Cudd_bddAnd(env->mgr,cons,tmp1);
       Cudd_Ref(tmp2);
-      Cudd_RecursiveDeref(env->mgr,cons);
       cons=tmp2;
+    Cudd_Ref(cons);//added
     }
   }
-  tmpor=Cudd_bddOr(env->mgr,or,Cudd_bddIthVar(env->mgr,var.firstBoolVar+var.nVal-1));
+  varlast=Cudd_bddIthVar(env->mgr,var.firstBoolVar+var.nVal-1);
+  tmpor=Cudd_bddOr(env->mgr,or,varlast);
   Cudd_Ref(tmpor);
   Cudd_RecursiveDeref(env->mgr,or);
   tmp1=Cudd_bddAnd(env->mgr,cons,tmpor);
@@ -738,6 +739,7 @@ static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3)
   RETURN_IF_FAIL
   return(PL_unify(out,arg3));
 }
+
 term_t abd_clist_to_pllist(explan_t *mpa)
 {
   term_t out,tail,head,var,val;
