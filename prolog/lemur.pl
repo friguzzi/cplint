@@ -335,8 +335,8 @@ subsume_theory1([Rule|R],TheoryN):-
 
 
 subsume_theory2(Rule,[Rule1|R],R):-
-  Rule = rule(_,[H: _, _: _],Body,_),
-  Rule1 = rule(_,[H1: _, _: _],Body1,_),
+  Rule = rule(_,[H: _, _: _],Body,_,_),
+  Rule1 = rule(_,[H1: _, _: _],Body1,_,_),
   H = H1,
   subsume_body(Body,Body1),
   !.
@@ -375,8 +375,8 @@ same_theory1([Rule|R],TheoryN):-
 
 
 same_theory2(Rule,[Rule1|R],R):-
-  Rule = rule(_,[H: _, _: _],Body,_),
-  Rule1 = rule(_,[H1: _, _: _],Body1,_),
+  Rule = rule(_,[H: _, _: _],Body,_,_),
+  Rule1 = rule(_,[H1: _, _: _],Body1,_,_),
   H = H1,
   same_body(Body,Body1),
   !.
@@ -823,7 +823,7 @@ theory_length([],X,X).
 
 theory_length([T|R],K,K1):-
   theory_length(R,K,K0),
-  T = rule(_,_,B,_),
+  T = rule(_,_,B,_,_),
   length(B,L),
   ( L > K0 ->
     K1 = L
@@ -939,7 +939,7 @@ add_rule(M,add(SpecRule)):-
   P is 1/L1,
   generate_head(HLS,P,Head),
   get_next_rule_number(M,ID),
-  Rule0 = rule(ID,Head,[],true),
+  Rule0 = rule(ID,Head,[],true,_),
   specialize_rule(Rule0,M,SpecRule,_Lit).
 
 generate_head([H|_T],_P,[H1:0.5,'':0.5]):-
@@ -957,7 +957,7 @@ specialize_theory(Theory,M,Ref):-
   choose_rule(Theory,M,Rule),
   specialize_rule(Rule,M,SpecRule,Lit),
   Ref = add_body(Rule,SpecRule,Lit),
-  SpecRule = rule(_,_,_B,_).
+  SpecRule = rule(_,_,_B,_,_).
 
 
 specialize_rule(Rule,M,SpecRule,Lit):-
@@ -969,7 +969,7 @@ specialize_rule(Rule,M,SpecRule,Lit):-
 
 
 specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
-  Rule = rule(ID,LH,BL,true),
+  Rule = rule(ID,LH,BL,true,Tun),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
   specialize_rule_lit(Lit,M,ALL,SLit),
@@ -982,10 +982,10 @@ specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
   M:local_setting(max_var,MV),
   NV=<MV,
   \+ banned_clause(M,LH1,BL2),
-  SpecRul = rule(ID,LH,BL2,true).
+  SpecRul = rule(ID,LH,BL2,true,Tun).
 
 specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
-  Rule = rule(ID,LH,BL,true),
+  Rule = rule(ID,LH,BL,true,Tun),
   remove_prob(LH,LH1),
   append(LH1,BL,ALL),
   specialize_rule_lit(Lit,M,ALL,SLit),
@@ -1000,7 +1000,7 @@ specialize_rule_bl([Lit|_RLit],M,Rule,SpecRul,SLit):-
   NV=<MV,
   M:local_setting(maxdepth_var,_MD),
   \+ banned_clause(M,LH1,BL1),
-  SpecRul = rule(ID,LH,BL1,true).
+  SpecRul = rule(ID,LH,BL1,true,Tun).
 
 
 specialize_rule_bl([_|RLit],M,Rule,SpecRul,Lit):-
@@ -1089,7 +1089,7 @@ user:term_expansion((:- lemur), []) :-!,
   assert(M:rule_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
-    ref_clause/1,ref/1,model/1,neg/1,rule/4,determination/2,
+    ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,
     query_rule/4,
     zero_clauses/1,tabled/1)),
