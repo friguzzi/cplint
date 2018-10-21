@@ -24,7 +24,8 @@ test_list([
     simpsonmc,
     viralmc,
     uwcsemc,
-    lda
+    lda,
+    bitcoin_attack
   ]).
 
 test_mc:-
@@ -389,3 +390,38 @@ test(topic_1_1_1_ww_g_b):-
   run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[block(2)]),close_to(G,0.5,0.5))).
 
 :- end_tests(lda).
+
+
+:- begin_tests(bitcoin_attack, []).
+
+:-ensure_loaded(library(examples/bitcoin_attack)).
+
+test(poisson):-
+  run((mc_sample(success_poisson,1000,P),close_to(P,0.042))).
+
+test(pascal):-
+  run((mc_sample(success_pascal,1000,P),close_to(P,0.036))).
+
+:- end_tests(bitcoin_attack).
+
+:- begin_tests(bitcoin_two_phase, []).
+
+:-ensure_loaded(library(examples/bitcoin_two_phase)).
+test(a):-
+  run((mc_sample(reach(a0,0,a2),1000,P),close_to(P,0.071))).
+
+test(b):-
+  run((mc_sample(reach(b0,0,b2),1000,P),close_to(P,0.115))).
+
+:- end_tests(bitcoin_two_phase).
+
+:- begin_tests(binomial, []).
+
+:-ensure_loaded(library(examples/binomial)).
+
+test(exp):-
+  run((mc_expectation(a(X),1000,X,E),close_to(E,10))).
+
+
+:- end_tests(binomial).
+
