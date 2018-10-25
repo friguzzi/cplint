@@ -113,7 +113,7 @@ The compilation was successful with the following package versions
     util-linux 2.32.1-1
     which 2.21-2
 
-In MSYS2 shell, go the folder where `cplint` is located, typically `AppData/Roaming/SWI-Prolog/pack/cplint/` in your home.
+In the MSYS2 shell, go the folder where `cplint` is located, typically `AppData/Roaming/SWI-Prolog/pack/cplint/` in your home.
 Execute `buildenv.sh` 
 
     $ source buildenv.sh
