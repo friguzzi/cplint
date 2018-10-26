@@ -55,7 +55,7 @@ Modify this file by commenting the line defining the PATH variable in this way
 
     #PATH=...
 
-Open a MSYS2 shell. Install required packages using `pacmam`
+Open a Mingw-w64 64 bit shell. Install required packages using `pacmam`
 
     pacman -S mingw64/mingw-w64-x86_64-gcc
     pacman -S msys/automake-wrapper
@@ -113,7 +113,7 @@ The compilation was successful with the following package versions
     util-linux 2.32.1-1
     which 2.21-2
 
-In the MSYS2 shell, go the folder where `cplint` is located, typically `AppData/Roaming/SWI-Prolog/pack/cplint/` in your home.
+In the Mingw shell, go the folder where `cplint` is located, typically `AppData/Roaming/SWI-Prolog/pack/cplint/` in your home.
 Execute `buildenv.sh` 
 
     $ source buildenv.sh
