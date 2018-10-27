@@ -1,7 +1,10 @@
 /*
 Computing the probability of mining the next block with a two-phase
 Proof-of-Work protocol in a Bitcoin network
-From Damiano Azzolini, Fabrizio Riguzzi, Evelina Lamma, Elena Bellodi, and Riccardo Zese.  Modeling bitcoin protocols with probabilistic logic programming. PLP 2018 http://ceur-ws.org/Vol-2219/paper6.pdf
+From Damiano Azzolini, Fabrizio Riguzzi, Evelina Lamma, Elena Bellodi,
+and Riccardo Zese.
+Modeling bitcoin protocols with probabilistic logic programming.
+PLP 2018 http://ceur-ws.org/Vol-2219/paper6.pdf
 */
 :- use_module(library(mcintyre)).
 
