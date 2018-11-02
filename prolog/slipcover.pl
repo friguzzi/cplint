@@ -2250,6 +2250,9 @@ get_node(Goal,M,Env,BDD):- %with DB=false
     zeroc(Env,(_,BDD))
   ).
 
+add_int_arg(_I,A,A):-
+  builtin(A),!.
+
 add_int_arg(I,A,A1):-
   A=..[P|Args],
   A1=..[P,I|Args].
@@ -3028,7 +3031,11 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   delete_eq(VC,Args,VC0),
-  setof(Args,(VC0,I)^M:BodyI,ListOfVals),
+  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_db_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3046,7 +3053,11 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   delete_eq(VC,Args,VC0),
-  setof(Args,(VC0,I)^M:BodyI,ListOfVals),
+  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),  
   maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
   
@@ -3149,7 +3160,11 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)) :-
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   delete_eq(VC,Args,VC0),
-  setof(Args,(VC0,I)^call(M:BodyI),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_db_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3166,7 +3181,11 @@ term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   delete_eq(VC,Args,VC0),
-  setof(Args,(VC0,I)^call(M:BodyI),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3369,7 +3388,11 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   delete_eq(VC,Args,VC0),
   maplist(add_int_arg(I),HeadAts0,HeadAts),
   list2or(HeadAts,HeadG),
-  setof(Args,(VC0,I)^call(M:HeadG),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_db_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3386,7 +3409,11 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   delete_eq(VC,Args,VC0),
   maplist(add_int_arg(I),HeadAts0,HeadAts),
   list2or(HeadAts,HeadG),
-  setof(Args,(VC0,I)^call(M:HeadG),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3494,7 +3521,11 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   extract_vars_list([H],[],VC),
   delete_eq(VC,Args,VC0),
   add_int_arg(I,H,HeadG),
-  setof(Args,(VC0,I)^call(M:HeadG),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_db_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
@@ -3508,7 +3539,11 @@ term_expansion_int(Head,M,(Clauses,Rules)) :-
   extract_vars_list([H],[],VC),
   delete_eq(VC,Args,VC0),
   add_int_arg(I,H,HeadG),
-  setof(Args,(VC0,I)^call(M:HeadG),ListOfVals),
+  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
+    true
+  ;
+    ListOfVals=[[]]
+  ),
   maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
   append(ListOfClauses,Clauses).
 
