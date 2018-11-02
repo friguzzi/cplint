@@ -25,6 +25,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
   sample/4,learn_params/5,
   op(500,fx,#),op(500,fx,'-#'),
   test_prob/6,rules2terms/2,
+  get_sc_var_n/6,
   process_clauses/6,
   generate_clauses/6,
   generate_clauses_bg/2,
@@ -455,11 +456,14 @@ induce_parameters(M:Folds,R):-
 clean_up_db(M):-
   retract(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
+  retract(M:rule_ng_sc_n(_)),
+  assert(M:rule_ng_sc_n(0)),
   retractall(M:v(_,_,_)),
   retractall(M:database(_)).
 
 get_rule_info(M,R-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
+  R\= ng(_,_),
   length(HL,N),
   ((Tun=tunable;Tun=initial)->
     Info=N
@@ -2210,6 +2214,21 @@ get_next_rule_number(M,R):-
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
 
+
+/**
+ * get_next_nonground_rule_number(+Module:atom,-R:integer) is det
+ *
+ * The predicate returns the next nonground rule number used when a different
+ * parameter for each rule grounding must be learned
+ * Module is used to access local
+ * data.
+ */
+get_next_nonground_rule_number(M,R):-
+  retract(M:rule_ng_sc_n(R)),
+  R1 is R+1,
+  assert(M:rule_ng_sc_n(R1)).
+
+
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
@@ -2289,11 +2308,11 @@ generate_rules_fact([],_Env,_VC,_R,_Probs,_N,[],_Module,_M).
 
 generate_rules_fact([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module,M):-!,
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
 
 generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module,M):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact(T,Env,VC,R,Probs,N1,Clauses,Module,M).
 
@@ -2302,23 +2321,23 @@ generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module,_M).
 
 generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module,M):-!,
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
 
 generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module,M):-
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact_db(T,Env,VC,R,Probs,N1,Clauses,Module,M).
 
 
 generate_clause(Head,Env,Body,VC,R,Probs,BDDAnd,N,Clause,Module,M):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(Body,pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module,M):-
   add_bdd_arg_db(Head,Env,BDD,DBH,Module,Head1),
-  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
 
 
 generate_rules([],_Env,_Body,_VC,_R,_Probs,_BDDAnd,_N,[],_Module,_M).
@@ -2772,8 +2791,8 @@ gen_clause((H :- Body),M,N,N,(H :- Body),[(H1 :- Body)]):-
   !,
   to_tabled(M,H,H1).
 
-gen_clause(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
-  rule(N,HeadList,BodyList,Lit,Tun),Clauses):-
+gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
+  rule(RI,HeadList,BodyList,Lit,Tun),Clauses):-
   M:local_setting(depth_bound,true),!,
 % disjunctive clause with more than one head atom e depth_bound
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
@@ -2784,14 +2803,20 @@ gen_clause(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
   get_probs(HeadList,Probs),
   maplist(to_tabled_head_list(M),HeadList,HeadList1),
   (M:local_setting(single_var,true)->
-    generate_rules_db(HeadList1,Env,Body1,[],N,Probs,DB,BDDAnd,0,Clauses,Module,M)
+    generate_rules_db(HeadList1,Env,Body1,[],RI,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules_db(HeadList1,Env,Body1,VC,N,Probs,DB,BDDAnd,0,Clauses,Module,M)
-   ),
-  N1 is N+1.
+    generate_rules_db(HeadList1,Env,Body1,VC,RI,Probs,DB,BDDAnd,0,Clauses,Module,M)
+  ),
+  (R=ng(_,_)->
+    RI=R,
+    N1=N
+  ;
+    RI=N,
+    N1 is N+1
+  ).
 
-gen_clause(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
-  rule(N,HeadList,BodyList,Lit,Tun),Clauses):-!,
+gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
+  rule(RI,HeadList,BodyList,Lit,Tun),Clauses):-!,
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
   append([pita:onec(Env,BDD)],BodyList1,BodyList2),
@@ -2801,11 +2826,17 @@ gen_clause(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
   get_probs(HeadList,Probs),
   maplist(to_tabled_head_list(M),HeadList,HeadList1),
   (M:local_setting(single_var,true)->
-    generate_rules(HeadList1,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,[],RI,Probs,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules(HeadList1,Env,Body1,VC,N,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,VC,RI,Probs,BDDAnd,0,Clauses,Module,M)
   ),
-  N1 is N+1.
+  (R=ng(_,_)->
+    RI=R,
+    N1=N
+  ;
+    RI=N,
+    N1 is N+1
+  ).
 
 gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
@@ -2848,6 +2879,27 @@ gen_clause_bg(def_rule(H,BodyList,_Lit),Clauses) :-
   Clauses=(Head1 :- Body1).
 
 
+get_sc_var_n(M,Env,R,S,Probs0,V):-
+  (ground(Probs0)->
+    maplist(is,Probs,Probs0),
+    (M:v(R,S,V)->
+      true
+    ;
+      (R=ng(R,Vals)->
+        get_next_rule_number(M,GR),
+        rule(ng(R,Vals),HeadList,BodyList,Lits,Tun),
+        assert(rule(GR,HeadList,BodyList,Lits,Tun))
+      ;
+        GR=R
+      ),
+      length(Probs,L),
+      add_var(Env,L,Probs,GR,V),
+      assert(M:v(R,S,V))
+    )
+  ;
+    throw(error('Non ground probailities not instantiated by the body'))
+  ).
+
 /**
  * builtin(+Goal:atom) is det
  *
@@ -2876,132 +2928,106 @@ average(L,Av):-
         length(L,N),
         Av is Sum/N.
 
-gen_cl_db_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,Tun)):-
-  copy_term((Args,HeadList0,BodyList0),(Vals,HeadList,BodyList)),
+gen_cl_db_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun)):-
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   append([pita:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
-  get_next_rule_number(M,R),
+  get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
-  Ann=..[t,P|_],
+  Ann=..[t,P|Vals],
   (var(P)->
     Tun=tunable
   ;
     Tun=initial
   ),
   (M:local_setting(single_var,true)->
-    generate_rules_db(HeadList1,Env,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+    generate_rules_db(HeadList1,Env,Body1,[],ng(R,Vals),Probs,DB,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules_db(HeadList1,Env,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,Module,M)
+    generate_rules_db(HeadList1,Env,Body1,VC,ng(R,Vals),Probs,DB,BDDAnd,0,Clauses,Module,M)
    ).
 
-gen_cl_db_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,Tun)):-
-  copy_term((Args,HeadList0),(Vals,HeadList)),
+gen_cl_db_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
   extract_vars_list(HeadList,[],VC),
-  get_next_rule_number(M,R),
+  get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
-  Ann=..[t,P|_],
+  Ann=..[t,P|Vals],
   (var(P)->
     Tun=tunable
   ;
     Tun=initial
   ),
   (M:local_setting(single_var,true)->
-    generate_rules_fact_db(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
+    generate_rules_fact_db(HeadList,_Env,[],ng(R,Vals),Probs,0,Clauses,_Module,M)
   ;
-    generate_rules_fact_db(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
+    generate_rules_fact_db(HeadList,_Env,VC,ng(R,Vals),Probs,0,Clauses,_Module,M)
   ).
 
-gen_cl_fact_t(M,Args,HeadList0,Vals,Clauses,rule(R,HeadList1,[],true,Tun)):-
-  copy_term((Args,HeadList0),(Vals,HeadList)),
+gen_cl_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
   extract_vars_list(HeadList,[],VC),
-  get_next_rule_number(M,R),
+  get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
-  Ann=..[t,P|_],
+  Ann=..[t,P|Vals],
   (var(P)->
     Tun=tunable
   ;
     Tun=initial
   ),
   (M:local_setting(single_var,true)->
-    generate_rules_fact(HeadList,_Env,[],R,Probs,0,Clauses,_Module,M)
+    generate_rules_fact(HeadList,_Env,[],ng(R,Vals),Probs,0,Clauses,_Module,M)
   ;
-    generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
+    generate_rules_fact(HeadList,_Env,VC,ng(R,Vals),Probs,0,Clauses,_Module,M)
   ).
 
-gen_cl_t(M,Args,HeadList0,BodyList0,Vals,Clauses,rule(R,HeadList1,BodyList,true,Tun)):-
-  copy_term((Args,HeadList0,BodyList0),(Vals,HeadList,BodyList)),
+gen_cl_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun)):-
   process_body(BodyList,BDD,BDDAnd, [],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
   append([pita:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
-  get_next_rule_number(M,R),
+  get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
-  Ann=..[t,P|_],
+  Ann=..[t,P|Vals],
   (var(P)->
     Tun=tunable
   ;
     Tun=initial
   ),
   (M:local_setting(single_var,true)->
-    generate_rules(HeadList1,Env,Body1,[],R,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,[],ng(R,Vals),Probs,BDDAnd,0,Clauses,Module,M)
   ;
-    generate_rules(HeadList1,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
+    generate_rules(HeadList1,Env,Body1,VC,ng(R,Vals),Probs,BDDAnd,0,Clauses,Module,M)
   ).
 
 term_expansion_int((Head :- Body),_M, ((H :- Body),[])):-
   Head=db(H),!.
 
-term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
+term_expansion_int((Head :- Body),M, (Clauses,[Rule])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound with individual pars
   Head = (_H:A;_),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   list2or(HeadList, Head),
   list2and(BodyList, Body),
-  maplist(add_int_arg(I),BodyList,BodyListI),
-  list2and(BodyListI,BodyI),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  delete_eq(VC,Args,VC0),
-  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_db_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_db_t(M,HeadList,BodyList,Clauses,Rule).
 
-term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
+term_expansion_int((Head :- Body),M, (Clauses,[Rule])):-
   M:local_setting(compiling,on),
 % disjunctive clause with more than one head atom without depth_bound with individual pars
   Head = (_H:A;_),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   list2or(HeadList0, Head),
   append(HeadList0,['':_],HeadList),
   list2and(BodyList, Body),
-  maplist(add_int_arg(I),BodyList,BodyListI),
-  list2and(BodyListI,BodyI),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  delete_eq(VC,Args,VC0),
-  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),  
-  maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_t(M,HeadList,BodyList,Clauses,Rule).
   
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])):-
   M:local_setting(compiling,on),
@@ -3087,49 +3113,27 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
     generate_rules(HeadList,Env,Body1,VC,R,Probs,BDDAnd,0,Clauses,Module,M)
   ).
 
-term_expansion_int((Head :- Body),M, (Clauses,Rules)) :-
+term_expansion_int((Head :- Body),M, (Clauses,[Rule])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1 with individual pars
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
   Head = (H:A),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   HeadList=[H:A],
   list2and(BodyList, Body),
-  maplist(add_int_arg(I),BodyList,BodyListI),
-  list2and(BodyListI,BodyI),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  delete_eq(VC,Args,VC0),
-  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_db_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_db_t(M,HeadList,BodyList,Clauses,Rule).
 
-term_expansion_int((Head :- Body),M, (Clauses,Rules)):-
+term_expansion_int((Head :- Body),M, (Clauses,[Rule])):-
   M:local_setting(compiling,on),
 % disjunctive clause with a single head atom without depth_bound with individual pars
   Head = (H:A),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   HeadList=[H:A],
   list2and(BodyList, Body),
-  maplist(add_int_arg(I),BodyList,BodyListI),
-  list2and(BodyListI,BodyI),
-  append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
-  delete_eq(VC,Args,VC0),
-  (setof(Args,(VC0,I)^call(M:BodyI),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_t(M,Args,HeadList,BodyList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_t(M,HeadList,BodyList,Clauses,Rule).
 
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1, fixed par
@@ -3316,48 +3320,26 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,fixed)])) :-
     generate_rules_fact(HeadList,_Env,VC,R,Probs,0,Clauses,_Module,M)
   ).
 
-term_expansion_int(Head,M,(Clauses,Rules)) :-
+term_expansion_int(Head,M,(Clauses,[Rule])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db with individual pars
   Head = (_H:A;_),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   list2or(HeadList0, Head),
   append(HeadList0,['':_],HeadList),
-  maplist(get_at,HeadList0,HeadAts0),
-  extract_vars_list(HeadAts0,[],VC),
-  delete_eq(VC,Args,VC0),
-  maplist(add_int_arg(I),HeadAts0,HeadAts),
-  list2or(HeadAts,HeadG),
-  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_db_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_db_fact_t(M,HeadList,Clauses,Rule).
 
-term_expansion_int(Head,M,(Clauses,Rules)) :-
+term_expansion_int(Head,M,(Clauses,[Rule])) :-
   M:local_setting(compiling,on),
 % disjunctive FACT with more than one head atom wo db with individual pars
   Head = (_H:A;_),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   list2or(HeadList0, Head),
   append(HeadList0,['':_],HeadList),
-  maplist(get_at,HeadList0,HeadAts0),
-  extract_vars_list(HeadAts0,[],VC),
-  delete_eq(VC,Args,VC0),
-  maplist(add_int_arg(I),HeadAts0,HeadAts),
-  list2or(HeadAts,HeadG),
-  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_fact_t(M,HeadList,Clauses,Rule).
 
 term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
@@ -3429,9 +3411,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
@@ -3446,48 +3428,30 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
 
-term_expansion_int(Head,M,(Clauses,Rules)) :-
+term_expansion_int(Head,M,(Clauses,[Rule])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive FACT with a sigble head atom e db with individual pars
   Head = (H:A),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   HeadList=[H:0.5,'':0.5],
-  extract_vars_list([H],[],VC),
-  delete_eq(VC,Args,VC0),
-  add_int_arg(I,H,HeadG),
-  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_db_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_db_fact_t(M,HeadList,Clauses,Rule).
 
-term_expansion_int(Head,M,(Clauses,Rules)) :-
+term_expansion_int(Head,M,(Clauses,[Rule])) :-
   M:local_setting(compiling,on),
 % disjunctive FACT with a single head atom wo db with individual pars
   Head = (H:A),
-  A=..[t,_P|Args],
+  A=..[t,_P|_],
   !,
   HeadList=[H:0.5,'':0.5],
-  extract_vars_list([H],[],VC),
-  delete_eq(VC,Args,VC0),
-  add_int_arg(I,H,HeadG),
-  (setof(Args,(VC0,I)^call(M:HeadG),ListOfVals)->
-    true
-  ;
-    ListOfVals=[[]]
-  ),
-  maplist(gen_cl_fact_t(M,Args,HeadList),ListOfVals,ListOfClauses,Rules),
-  append(ListOfClauses,Clauses).
+  gen_cl_fact_t(M,HeadList,Clauses,Rule).
 
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
@@ -3502,9 +3466,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
@@ -3519,9 +3483,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(pita:get_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
   ).
 
 term_expansion_int(Head,M, ((Head1:-pita:onec(Env,One)),[def_rule(Head,[],true)])) :-
@@ -3970,6 +3934,8 @@ user:term_expansion((:- sc), []) :-!,
   assert(input_mod(M)),
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
+  retractall(M:rule_ng_sc_n(_)),
+  assert(M:rule_ng_sc_n(0)),
   M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,

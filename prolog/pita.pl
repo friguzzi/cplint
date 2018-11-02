@@ -32,7 +32,7 @@ details.
   one/2,zero/2,and/4,or/4,bdd_not/3,
   onec/2,zeroc/2,andc/4,bdd_notc/3,
   orc/3,
-  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,
+  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,add_var/5,
   or_list/3,
   ret_probc/3,equalityc/4,
   or_listc/3,
