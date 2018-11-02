@@ -2457,64 +2457,6 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Env,_Module,_M):-!.
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module,M):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module,M):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:onec(Env,BDDN));
-  (H2,pita:bdd_notc(Env,BDDH,BDDN))),
-  pita:andc(Env,BDD,BDDN,BDD2)
-  |Rest],Env,Module,M):-
-  given(M,H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-  neg(H1)|Rest],Env,Module,M):-
-  given_cw(M,H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[H1,pita:bdd_notc(Env,BDDH,BDDN),
-  pita:andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module,M):-!,
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module,M):-
-  builtin(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module,M):-
-  db(H),!,
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[((H1,pita:onec(Env,BDDH));H2),pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
-  given(M,H),!,
-  add_mod_arg(H,Module,H1),
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[H1|Rest],Env,Module,M):-
-  given_cw(M,H),!,
-  add_mod_arg(H,Module,H1),
-  process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-!, %agg. cut
-  add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
-
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module,M):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
