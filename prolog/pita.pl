@@ -28,11 +28,11 @@ details.
   map_bdd_dot_string/6,
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
-  init/3,init_bdd/2,init_test/2,end/1,end_bdd/1,end_test/1,
+  init/3,init_bdd/2,init_test/1,end/1,end_bdd/1,end_test/1,
   one/2,zero/2,and/4,or/4,bdd_not/3,
   onec/2,zeroc/2,andc/4,bdd_notc/3,
   orc/3,
-  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,add_var/5,
+  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,add_var/4,
   or_list/3,
   ret_probc/3,equalityc/4,
   or_listc/3,
@@ -127,7 +127,7 @@ details.
 
 
 /**
- * init_test(++NumberOfRules:int,--Environment:int) is det
+ * init_test(--Environment:int) is det
  *
  * Initializes a data structure for storing a single BDD.
  * NumberOfRules is the number of rules of the model,
@@ -223,7 +223,7 @@ details.
  */
 
 /**
- * add_var(++Environment:int,++NumberOfHeads:int,++ProbabilityDistribution:list, ++Rule:int,-Variable:int) is det.
+ * add_var(++Environment:int,++ProbabilityDistribution:list, ++Rule:int,-Variable:int) is det.
  *
  * Returns in Variable the index of a new random variable in Environment with
  * NumberOHeads values and probability distribution ProbabilityDistribution
@@ -393,8 +393,7 @@ prob_meta(M:Goal,P):-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   M:(asserta((Head1 :- Body2),Ref)),
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   findall((Goal,P),get_p(M:Goal1,Env,P),L),
   end_test(Env),
   erase(Ref),
@@ -418,8 +417,7 @@ abd_prob(M:Goal,P,Delta):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
@@ -444,8 +442,7 @@ vit_prob(M:Goal,P,Delta):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   findall((Goal,P,Exp),get_vit_p(M:Goal1,Env,P,Exp),L),
   end_test(Env),
   erase(Ref),
@@ -467,8 +464,7 @@ vit_prob(M:Goal,P,Delta):-
  */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   abolish_all_tables,
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -512,8 +508,7 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_file(M:Goal,File,LV):-
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -530,8 +525,7 @@ bdd_dot_file(M:Goal,File,LV):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -551,8 +545,7 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   abolish_all_tables,
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -574,8 +567,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   abolish_all_tables,
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -599,8 +591,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
  * the rule number and the grounding substituion.
  */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD0),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -672,8 +663,7 @@ prob_meta(M:Goal,M:Evidence,P):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   (EvNoAct=true->
     findall((Goal,P),get_p(M:Goal1,Env,P),L)
   ;
@@ -924,8 +914,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
     (M:v(R,S,V)->
       true
     ;
-      length(Probs,L),
-      add_query_var(Env,L,Probs,R,V),
+      add_query_var(Env,Probs,R,V),
       assert(M:v(R,S,V))
     )
   ;
@@ -938,8 +927,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
     (M:v(R,S,V)->
       true
     ;
-      length(Probs,L),
-      add_var(Env,L,Probs,R,V),
+      add_var(Env,Probs,R,V),
       assert(M:v(R,S,V))
     )
   ;
@@ -959,8 +947,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
     (M:av(R,S,V)->
       true
     ;
-      length(Probs,L),
-      add_abd_var(Env,L,Probs,R,V),
+      add_abd_var(Env,Probs,R,V),
       assert(M:av(R,S,V))
     )
   ;
@@ -978,8 +965,7 @@ msw(M:A,B,Env,BDD):-
   M:sw(R,A,Probs0),
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    length(Probs,L),
-    add_var(Env,L,Probs,R,V),
+    add_var(Env,Probs,R,V),
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
@@ -998,8 +984,7 @@ msw(M:A,B,Env,BDD,_DB):-
   M:sw(R,A,Probs0),
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    length(Probs,L),
-    add_var(Env,L,Probs,R,V),
+    add_var(Env,Probs,R,V),
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;

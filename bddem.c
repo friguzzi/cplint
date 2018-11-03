@@ -136,10 +136,10 @@ prob_abd_expl vit_Prob(DdNode *node, environment * env,
   expltablerow * expltable, tablerow * table,
   int comp_par);
 static foreign_t end_bdd(term_t);
-static foreign_t init_test(term_t, term_t);
-static foreign_t add_var(term_t,term_t,term_t,term_t,term_t);
-static foreign_t add_query_var(term_t,term_t,term_t,term_t,term_t);
-static foreign_t add_abd_var(term_t,term_t,term_t,term_t,term_t);
+static foreign_t init_test(term_t);
+static foreign_t add_var(term_t,term_t,term_t,term_t);
+static foreign_t add_query_var(term_t,term_t,term_t,term_t);
+static foreign_t add_abd_var(term_t,term_t,term_t,term_t);
 static foreign_t init(term_t,term_t,term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
@@ -200,7 +200,7 @@ static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
   ex_d->ex=0;
   ret=PL_get_integer(arg1,&nRules);
   RETURN_IF_FAIL
-  ex_d->nRules=nRules;
+  ex_d->nRules=0;
   ex_d->env=NULL;
   ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
   eta=ex_d->eta;
@@ -300,15 +300,13 @@ static foreign_t end_bdd(term_t arg1)
   PL_succeed;
 }
 
-static foreign_t init_test(term_t arg1,term_t arg2)
+static foreign_t init_test(term_t arg1)
 {
   term_t env_t;
   environment * env;
-  int nRules,ret;
-  ret=PL_get_integer(arg1,&nRules);
-  RETURN_IF_FAIL
-  env_t=PL_new_term_ref();
+  int ret;
 
+  env_t=PL_new_term_ref();
   env=(environment *)malloc(sizeof(environment));
   env->mgr=Cudd_Init(0,0,UNIQUE_SLOTS,CACHE_SLOTS,5120);
   env->n_abd=0;
@@ -324,11 +322,12 @@ static foreign_t init_test(term_t arg1,term_t arg2)
   env->nVars=0;
   env->probs=NULL;
   env->boolVars=0;
+  env->nRules=0;
 
-  env->rules= (int *) malloc(nRules * sizeof(int));
+  env->rules= NULL;
   ret=PL_put_pointer(env_t,(void *) env);
   RETURN_IF_FAIL
-  return(PL_unify(env_t,arg2));
+  return(PL_unify(env_t,arg1));
 }
 
 static foreign_t end_test(term_t arg1)
@@ -1196,11 +1195,12 @@ void free_list(explan_t * head)
     free(head);
   }
 }
-static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4)
 {
   term_t out,head,probTerm;
   variable * v;
-  int i,ret;
+  int i,ret,nRules;
+  size_t lenProbs;
   double p,p0;
   environment * env;
 
@@ -1214,15 +1214,26 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   v=&env->vars[env->nVars-1];
   v->abducible=0;
   v->query=0;
-  ret=PL_get_integer(arg2,&v->nVal);
-  RETURN_IF_FAIL
-  ret=PL_get_integer(arg4,&v->nRule);
-  RETURN_IF_FAIL
 
+  ret=PL_get_integer(arg3,&v->nRule);
+  RETURN_IF_FAIL
+  probTerm=PL_copy_term_ref(arg2);
+  ret=PL_skip_list(probTerm,0,&lenProbs);
+  if (ret!=PL_LIST) return FALSE;
+  v->nVal=lenProbs;
+  nRules=env->nRules;
+  if (v->nRule>=nRules)
+  {
+    env->rules=(int *)  realloc(env->rules,((v->nRule+1)* sizeof(int)));
+    for (i=nRules;i<v->nRule;i++)
+      env->rules[i]=0;
+    env->rules[v->nRule]=lenProbs;
+    env->nRules=v->nRule+1;
+  }
   v->firstBoolVar=env->boolVars;
   env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
   env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
-  probTerm=PL_copy_term_ref(arg3);
+
   p0=1;
   for (i=0;i<v->nVal-1;i++)
   {
@@ -1240,14 +1251,15 @@ static foreign_t add_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t
   ret=PL_put_integer(out,env->nVars-1);
   RETURN_IF_FAIL
 
-  return(PL_unify(out,arg5));
+  return(PL_unify(out,arg4));
 }
 
-static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4)
 {
   term_t out,head,probTerm;
   variable * v;
-  int i,ret;
+  int i,ret,nRules;
+  size_t lenProbs;
   double p;
   environment * env;
 
@@ -1262,16 +1274,29 @@ static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, 
   v=&env->vars[env->nVars-1];
   v->query=1;
   v->abducible=0;
-  ret=PL_get_integer(arg2,&v->nVal);
+
+  probTerm=PL_copy_term_ref(arg2);
+
+  ret=PL_skip_list(probTerm,0,&lenProbs);
+  if (ret!=PL_LIST) return FALSE;
+  v->nVal=lenProbs;
+
+  ret=PL_get_integer(arg3,&v->nRule);
   RETURN_IF_FAIL
-  ret=PL_get_integer(arg4,&v->nRule);
-  RETURN_IF_FAIL
+  nRules=env->nRules;
+  if (v->nRule>=nRules)
+  {
+    env->rules=(int *)  realloc(env->rules,((v->nRule+1)* sizeof(int)));
+    for (i=nRules;i<v->nRule;i++)
+      env->rules[i]=0;
+    env->rules[v->nRule]=lenProbs;
+    env->nRules=v->nRule+1;
+  }
 
   env->n_abd_boolVars=env->n_abd_boolVars+v->nVal;
   v->firstBoolVar=env->boolVars;
   env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal)* sizeof(double))));
   env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal)* sizeof(int)));
-  probTerm=PL_copy_term_ref(arg3);
 
   for (i=0;i<v->nVal;i++)
   {
@@ -1288,16 +1313,17 @@ static foreign_t add_query_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, 
   ret=PL_put_integer(out,env->nVars-1);
   RETURN_IF_FAIL
 
-  return(PL_unify(out,arg5));
+  return(PL_unify(out,arg4));
 }
 
-static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, term_t arg5)
+static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4)
 {
   term_t out,head,probTerm;
   variable * v;
-  int i,ret;
+  int i,ret,nRules;
   double p,p0;
   environment * env;
+  size_t lenProbs;
 
   head=PL_new_term_ref();
   out=PL_new_term_ref();
@@ -1312,16 +1338,28 @@ static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, te
 
   v->abducible=1;
   v->query=0;
-  ret=PL_get_integer(arg2,&v->nVal);
+  probTerm=PL_copy_term_ref(arg2);
+  ret=PL_skip_list(probTerm,0,&lenProbs);
+  if (ret!=PL_LIST) return FALSE;
+  v->nVal=lenProbs;
+
+  ret=PL_get_integer(arg3,&v->nRule);
   RETURN_IF_FAIL
+  nRules=env->nRules;
+  if (v->nRule>=nRules)
+  {
+    env->rules=(int *)  realloc(env->rules,((v->nRule+1)* sizeof(int)));
+    for (i=nRules;i<v->nRule;i++)
+      env->rules[i]=0;
+    env->rules[v->nRule]=lenProbs;
+    env->nRules=v->nRule+1;
+  }
   env->n_abd_boolVars=env->n_abd_boolVars+v->nVal-1;
 
-  ret=PL_get_integer(arg4,&v->nRule);
-  RETURN_IF_FAIL
   v->firstBoolVar=env->boolVars;
   env->probs=(double *) realloc(env->probs,(((env->boolVars+v->nVal-1)* sizeof(double))));
   env->bVar2mVar=(int *) realloc(env->bVar2mVar,((env->boolVars+v->nVal-1)* sizeof(int)));
-  probTerm=PL_copy_term_ref(arg3);
+
   p0=1;
   for (i=0;i<v->nVal-1;i++)
   {
@@ -1338,7 +1376,7 @@ static foreign_t add_abd_var(term_t arg1,term_t arg2,term_t arg3,term_t arg4, te
   ret=PL_put_integer(out,env->nVars-1);
   RETURN_IF_FAIL
 
-  return(PL_unify(out,arg5));
+  return(PL_unify(out,arg4));
 }
 
 static foreign_t equality(term_t arg1,term_t arg2,term_t arg3, term_t arg4)
@@ -2146,10 +2184,61 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   long iter1;
   size_t lenNodes;
   example_data * ex_d;
+  double ***eta;
+  double ***eta_temp;
+  int nRules, *rules, tunable, *tun_rules;
+
+
+
   double CLL0= -2.2*pow(10,10); //-inf
   double CLL1= -1.7*pow(10,8);  //+inf
   double p,p0,**eta_rule,ea,er;
   double ratio,diff;
+
+  nRules=ex_d->nRules;
+  ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
+  eta=ex_d->eta;
+  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
+  eta_temp=ex_d->eta_temp;
+  ex_d->rules= (int *) malloc(nRules * sizeof(int));
+  rules=ex_d->rules;
+  ex_d->nodes_probs=NULL;
+  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
+  ex_d->arrayprob=(double **) malloc(nRules * sizeof(double *));
+/*
+  tun_rules=ex_d->tunable_rules;
+  for (j=0;j<nRules;j++)
+  {
+    ret=PL_get_list(list,head,list);
+    RETURN_IF_FAIL
+    if (PL_is_list(head)) 
+    { // fixed parameters
+      ret=PL_get_list(head,nh,tun);
+      RETURN_IF_FAIL
+      ret=PL_get_integer(nh,&rules[j]);
+      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
+      RETURN_IF_FAIL
+      tunable=0;
+      tun_rules[j]=tunable;
+    }
+    else
+    {
+      ret=PL_get_integer(head,&rules[j]);
+      RETURN_IF_FAIL
+      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
+      
+      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      for (i=0;i<rules[j]-1;i++)
+      {
+        eta[j][i]=(double *) malloc(2*sizeof(double));
+        eta_temp[j][i]=(double *) malloc(2*sizeof(double));
+      }
+      tun_rules[j]=1;
+    }
+  }
+
+*/
 
   ret=PL_get_pointer(arg1,(void **)&ex_d);
   RETURN_IF_FAIL
@@ -2329,9 +2418,9 @@ install_t install()
   PL_register_foreign("init_bdd",2,init_bdd,0);
   PL_register_foreign("end",1,end,0);
   PL_register_foreign("end_bdd",1,end_bdd,0);
-  PL_register_foreign("add_var",5,add_var,0);
-  PL_register_foreign("add_query_var",5,add_query_var,0);
-  PL_register_foreign("add_abd_var",5,add_abd_var,0);
+  PL_register_foreign("add_var",4,add_var,0);
+  PL_register_foreign("add_query_var",4,add_query_var,0);
+  PL_register_foreign("add_abd_var",4,add_abd_var,0);
   PL_register_foreign("equality",4,equality,0);
   PL_register_foreign("and",4,and,0);
   PL_register_foreign("one",2,one,0);
@@ -2340,7 +2429,7 @@ install_t install()
   PL_register_foreign("bdd_not",3,bdd_not,0);
   PL_register_foreign("create_dot",3,create_dot,0);
   PL_register_foreign("create_dot_string",3,create_dot_string,0);
-  PL_register_foreign("init_test",2,init_test,0);
+  PL_register_foreign("init_test",1,init_test,0);
   PL_register_foreign("end_test",1,end_test,0);
   PL_register_foreign("ret_prob",3,ret_prob,0);
   PL_register_foreign("ret_abd_prob",4,ret_abd_prob,0);
