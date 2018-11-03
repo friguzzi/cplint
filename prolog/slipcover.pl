@@ -534,7 +534,8 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
 update_theory_par(M,OldR,Par,Rules):-
    findall(def_rule(H,B,L),member(def_rule(H,B,L),OldR),DefRules0),
    findall((H:-B),member((H:-B),OldR),DefRules1),
-   new_rules(Par,M,DisjRules),
+   new_rules(Par,M,DisjRules0),
+   sort(DisjRules0,DisjRules),
    append([DefRules0,DefRules1,DisjRules],Rules).
 
 new_rules([],_M,[]).
