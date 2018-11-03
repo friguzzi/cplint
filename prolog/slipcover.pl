@@ -362,16 +362,13 @@ cycle_structure([(RH,_CLL)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
 
 cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   format2(Mod,"Theory iteration ~d~n~n",[M]),
+  reset_next_rule_number(M),
   generate_clauses([RH|R0],Mod,R2,0,[],Th1),
   format3(Mod,"Initial theory~n~n",[]),
   write_rules3(Mod,[RH|R0],user_output),
   assert_all(Th1,Mod,Th1Ref),
   assert_all(R2,Mod,R2Ref),!,
-  findall(R-HN,(Mod:rule(R,HL,_BL,_Lit,_Tun),length(HL,HN)),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH,ExData),
+  init(ExData),
   retractall(Mod:v(_,_,_)),
   length(DB,NEx),
   abolish_all_tables,
@@ -461,9 +458,14 @@ clean_up_db(M):-
   retractall(M:v(_,_,_)),
   retractall(M:database(_)).
 
-get_rule_info(M,R-Info):-
+get_rule_info(M,RI-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
   R\= ng(_,_),
+  (R=g(RI)->
+    true
+  ;
+    RI=R
+  ),
   length(HL,N),
   ((Tun=tunable;Tun=initial)->
     Info=N
@@ -471,13 +473,24 @@ get_rule_info(M,R-Info):-
     Info=[N]
   ).
 
-get_rule_info_rand(M,R-Info):-
+get_rule_info_rand(M,RI-Info):-
   M:rule(R,HL,_BL,_Lit,Tun),
+  R\= ng(_,_),
+  (R=g(RI)->
+    true
+  ;
+    RI=R
+  ),
   length(HL,N),
   (Tun=tunable->
     Info=N
   ;
-    get_probs(HL,Info)
+    get_probs(HL,Info0),
+    (Tun=initial->
+      Info=Info0
+    ; % fixed parameters
+      Info=[Info0]
+    )
   ).
 
 
@@ -491,16 +504,14 @@ get_rule_info_rand(M,R-Info):-
  */
 
 learn_params(DB,M,R0,R,Score):-  %Parameter Learning
+  reset_next_rule_number(M),
+  reset_next_nonground_rule_number(M),
   generate_clauses(R0,M,R1,0,[],Th0),
   format2(M,"Initial theory~n",[]),
   write_rules2(M,R1,user_output),
   assert_all(Th0,M,Th0Ref),
   assert_all(R1,M,R1Ref),!,
-  findall(R-Info,get_rule_info(M,R-Info),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH,ExData),
+  init(ExData),
   retractall(M:v(_,_,_)),
   length(DB,NEx),
   abolish_all_tables,
@@ -514,29 +525,29 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   M:local_setting(random_restarts_number,N),
   random_restarts(N,M,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
   end(ExData),
+  update_theory_par(M,R1,Par,R),
   retract_all(Th0Ref),
   retract_all(R1Ref),!,
-  update_theory_par(R1,Par,R).  %replaces in R1 the probabilities Par and outputs R
+  retractall(M:rule(_,_,_,_,_)).
 
 
-update_theory_par([],_Par,[]).
+update_theory_par(M,OldR,Par,Rules):-
+   findall(def_rule(H,B,L),member(def_rule(H,B,L),OldR),DefRules0),
+   findall((H:-B),member((H:-B),OldR),DefRules1),
+   new_rules(Par,M,DisjRules),
+   append([DefRules0,DefRules1,DisjRules],Rules).
 
-update_theory_par([def_rule(H,B,L)|T0],Par,[def_rule(H,B,L)|T]):-!,
-  update_theory_par(T0,Par,T).
+new_rules([],_M,[]).
 
-update_theory_par([(H:-B)|T0],Par,[(H:-B)|T]):-!,
-  update_theory_par(T0,Par,T).
+new_rules([[_N,[1.0|_]]|T],M,R):-!,
+  new_rules(T,M,R).
 
-update_theory_par([rule(N,H,_B,_L,_Tun)|T0],Par,T):-
-  member([N,[1.0|_T]],Par),
-  last(H,'':_P),!,
-  update_theory_par(T0,Par,T).
 
-update_theory_par([rule(N,H,B,L,Tun)|T0],Par,[rule(N,H1,B,L,Tun)|T]):-
-  member([N,P],Par),!,
+new_rules([[N,P]|T],M,[rule(N,H1,B,L,Tun)|R]):-
   reverse(P,P1),
+  (M:rule(N,H,B,L,Tun);M:rule(g(N),H,B,L,Tun)),
   update_head_par(H,P1,H1),
-  update_theory_par(T0,Par,T).
+  new_rules(T,M,R).
 
 
 update_theory(R,initial,R):-!.
@@ -598,11 +609,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   generate_clauses_cw([R1],M,[R2],0,[],Th1),
   assert_all(Th1,M,Th1Ref),
   assert_all([R2],M,[R2Ref]),!,
-  findall(RN-HN,(M:rule(RN,HL,_BL,_Lit,_Tun),length(HL,HN)),L),
-  keysort(L,LS),
-  get_heads(LS,LSH),
-  length(LSH,NR),
-  init(NR,LSH,ExData),
+  init(ExData),
   retractall(M:v(_,_,_)),
   length(DB,NEx),
   get_output_preds(R1,O),
@@ -869,11 +876,10 @@ random_restarts(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   findall(R-Info,get_rule_info_rand(M,R-Info),L),
   keysort(L,LS),
   maplist(get_arg,LS,LS1),
-  randomize(ExData,LS1),
   M:local_setting(epsilon_em,EA),
   M:local_setting(epsilon_em_fraction,ER),
   M:local_setting(iter,Iter),
-  em(ExData,Nodes,EA,ER,Iter,CLL,Par1,ExP),
+  em(ExData,LS1,Nodes,EA,ER,Iter,CLL,Par1,ExP),
   score(M,LE,ExP,CLL,ScoreR),
   format3(M,"Random_restart: Score ~f~n",[ScoreR]),
   N1 is N-1,
@@ -2203,6 +2209,8 @@ process_clauses([H|T],M,C0,C1,R0,R1):-
   ),
   process_clauses(T,M,C2,C1,R2,R1).
 
+
+
 /**
  * get_next_rule_number(+Module:atom,-R:integer) is det
  *
@@ -2214,6 +2222,9 @@ get_next_rule_number(M,R):-
   R1 is R+1,
   assert(M:rule_sc_n(R1)).
 
+reset_next_rule_number(M):-
+  retract(M:rule_sc_n(_)),
+  assert(M:rule_sc_n(0)).
 
 /**
  * get_next_nonground_rule_number(+Module:atom,-R:integer) is det
@@ -2228,6 +2239,9 @@ get_next_nonground_rule_number(M,R):-
   R1 is R+1,
   assert(M:rule_ng_sc_n(R1)).
 
+reset_next_nonground_rule_number(M):-
+  retract(M:rule_ng_sc_n(_)),
+  assert(M:rule_ng_sc_n(0)).
 
 get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
@@ -2791,7 +2805,7 @@ gen_clause((H :- Body),M,N,N,(H :- Body),[(H1 :- Body)]):-
   !,
   to_tabled(M,H,H1).
 
-gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
+gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   rule(RI,HeadList,BodyList,Lit,Tun),Clauses):-
   M:local_setting(depth_bound,true),!,
 % disjunctive clause with more than one head atom e depth_bound
@@ -2807,15 +2821,14 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
   ;
     generate_rules_db(HeadList1,Env,Body1,VC,RI,Probs,DB,BDDAnd,0,Clauses,Module,M)
   ),
-  (R=ng(_,_)->
-    RI=R,
-    N1=N
+  (R=ng(_,Vals)->
+    get_next_nonground_rule_number(M,RG),
+    RI=ng(RG,Vals)
   ;
-    RI=N,
-    N1 is N+1
+    get_next_rule_number(M,RI)
   ).
 
-gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
+gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   rule(RI,HeadList,BodyList,Lit,Tun),Clauses):-!,
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
@@ -2830,13 +2843,13 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N1,
   ;
     generate_rules(HeadList1,Env,Body1,VC,RI,Probs,BDDAnd,0,Clauses,Module,M)
   ),
-  (R=ng(_,_)->
-    RI=R,
-    N1=N
+  (R=ng(_,Vals)->
+    get_next_nonground_rule_number(M,RG),
+    RI=ng(RG,Vals)
   ;
-    RI=N,
-    N1 is N+1
+    get_next_rule_number(M,RI)
   ).
+
 
 gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
@@ -2885,16 +2898,25 @@ get_sc_var_n(M,Env,R,S,Probs0,V):-
     (M:v(R,S,V)->
       true
     ;
-      (R=ng(R,Vals)->
-        get_next_rule_number(M,GR),
-        rule(ng(R,Vals),HeadList,BodyList,Lits,Tun),
-        assert(rule(GR,HeadList,BodyList,Lits,Tun))
+      (R=ng(RN,Vals)->
+        M:rule(ng(RN,Vals),HeadList,BodyList,Lits,Tun),
+        (M:rule(g(GR),HeadList,BodyList,Lits,Tun)->
+          (M:v(GR,S,V)->
+            true
+          ;
+            add_var(Env,Probs,GR,V),
+            assert(M:v(GR,S,V))
+          )
+        ;
+          get_next_rule_number(M,GR),
+          assert(M:rule(g(GR),HeadList,BodyList,Lits,Tun)),
+          add_var(Env,Probs,GR,V),
+          assert(M:v(GR,S,V))
+        )
       ;
-        GR=R
-      ),
-      length(Probs,L),
-      add_var(Env,L,Probs,GR,V),
-      assert(M:v(R,S,V))
+        add_var(Env,Probs,R,V),
+        assert(M:v(R,S,V))
+      )
     )
   ;
     throw(error('Non ground probailities not instantiated by the body'))
@@ -3714,9 +3736,7 @@ neg_ex([H|T],M,[HT|TT],At1,C):-
 compute_CLL_atoms([],_M,_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
-  findall(R,M:rule(R,_HL,_BL,_Lit,_T),LR),
-  length(LR,NR),
-  init_test(NR,Env),
+  init_test(Env),
   abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
@@ -3732,9 +3752,7 @@ compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
-  findall(R,M:rule(R,_HL,_BL,_Lit,_L),LR),
-  length(LR,NR),
-  init_test(NR,Env),
+  init_test(Env),
   abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),

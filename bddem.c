@@ -140,15 +140,16 @@ static foreign_t init_test(term_t);
 static foreign_t add_var(term_t,term_t,term_t,term_t);
 static foreign_t add_query_var(term_t,term_t,term_t,term_t);
 static foreign_t add_abd_var(term_t,term_t,term_t,term_t);
-static foreign_t init(term_t,term_t,term_t);
+static foreign_t init(term_t);
 static foreign_t end(term_t);
 static foreign_t EM(term_t,term_t,term_t,term_t,
-  term_t,term_t,term_t,term_t);
+  term_t,term_t,term_t,term_t,term_t);
 static foreign_t reorder(term_t arg1);
 static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3);
 static foreign_t randomize_init(term_t arg1, term_t arg2);
 static foreign_t randomize(term_t arg1);
 
+static foreign_t init_par(example_data * ex_d, term_t ruleHeadsTerm);
 double ProbPath(example_data * ex_d,DdNode *node, int nex);
 //static int rec_deref(void);
 void Forward(example_data * ex_d,DdNode *node, int nex);
@@ -183,70 +184,27 @@ term_t abd_clist_to_pllist(explan_t *mpa);
 term_t vit_clist_to_pllist(explan_t *mpa, environment * env);
 
 
-static foreign_t init(term_t arg1,term_t arg2,term_t arg3)
+static foreign_t init(term_t arg1)
 {
-  int j,i,ret;
+  int ret;
   example_data * ex_d;
-  double ***eta;
-  double ***eta_temp;
-  int nRules, *rules, tunable, *tun_rules;
+
   term_t ex_d_t=PL_new_term_ref();
-  term_t list=PL_copy_term_ref(arg2);
-  term_t head=PL_new_term_ref();
-  term_t nh=PL_new_term_ref();
-  term_t tun=PL_new_term_ref();
   ex_d=(example_data *)malloc(sizeof(example_data));
 
   ex_d->ex=0;
-  ret=PL_get_integer(arg1,&nRules);
-  RETURN_IF_FAIL
   ex_d->nRules=0;
   ex_d->env=NULL;
-  ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
-  eta=ex_d->eta;
-  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
-  eta_temp=ex_d->eta_temp;
-  ex_d->rules= (int *) malloc(nRules * sizeof(int));
-  rules=ex_d->rules;
+  ex_d->eta=NULL;
+  ex_d->eta_temp=NULL;
+  ex_d->rules=NULL;
   ex_d->nodes_probs=NULL;
-  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
-  ex_d->arrayprob=(double **) malloc(ex_d->nRules * sizeof(double *));
-
-  tun_rules=ex_d->tunable_rules;
-  for (j=0;j<nRules;j++)
-  {
-    ret=PL_get_list(list,head,list);
-    RETURN_IF_FAIL
-    if (PL_is_list(head)) 
-    { // fixed parameters
-      ret=PL_get_list(head,nh,tun);
-      RETURN_IF_FAIL
-      ret=PL_get_integer(nh,&rules[j]);
-      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
-      RETURN_IF_FAIL
-      tunable=0;
-      tun_rules[j]=tunable;
-    }
-    else
-    {
-      ret=PL_get_integer(head,&rules[j]);
-      RETURN_IF_FAIL
-      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
-      
-      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      for (i=0;i<rules[j]-1;i++)
-      {
-        eta[j][i]=(double *) malloc(2*sizeof(double));
-        eta_temp[j][i]=(double *) malloc(2*sizeof(double));
-      }
-      tun_rules[j]=1;
-    }
-  }
+  ex_d->tunable_rules=NULL;
+  ex_d->arrayprob=NULL;
 
   ret=PL_put_pointer(ex_d_t,(void *)ex_d);
   RETURN_IF_FAIL
-  return(PL_unify(ex_d_t,arg3));
+  return(PL_unify(ex_d_t,arg1));
 
 }
 
@@ -2163,6 +2121,132 @@ static foreign_t randomize_init(term_t arg1, term_t arg2)
   free(Theta_rules);
   PL_succeed;
 }
+
+static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
+{
+  double * theta,p0;
+  double pmass,par;
+  double **Theta_rules;
+  double ***eta;
+  double ***eta_temp;
+  int ret,i,j,e,rule;
+  term_t head=PL_new_term_ref();
+  term_t p=PL_new_term_ref();
+  term_t ruleHeadsTerm;
+  size_t nHeads,nRules;
+  int *rules, tunable, *tun_rules;
+
+  ruleHeadsTerm=PL_copy_term_ref(ruleHeadsArg);
+  ret=PL_skip_list(ruleHeadsTerm,0,&nRules);
+  if (ret!=PL_LIST) return FALSE;
+
+
+  ex_d->rules= (int *) malloc(nRules * sizeof(int));
+  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
+
+  ex_d->nRules=nRules;
+  ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
+  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
+  eta=ex_d->eta;
+  eta_temp=ex_d->eta_temp;
+  ex_d->nodes_probs=NULL;
+  ex_d->arrayprob=(double **) malloc(nRules * sizeof(double *));
+  tun_rules=ex_d->tunable_rules;
+
+  rules=ex_d->rules;
+  Theta_rules=(double **)malloc(nRules *sizeof(double *));
+
+  for (j=0;j<nRules;j++)
+  {
+    
+    ret=PL_get_list(ruleHeadsTerm,head,ruleHeadsTerm);
+    RETURN_IF_FAIL
+    pmass=0;
+    if (PL_is_list(head)) 
+    { 
+      ret=PL_skip_list(head,0,&nHeads);
+      if (ret!=PL_LIST) return FALSE;
+      if (nHeads==1) // fixed parameters
+      {
+        ret=PL_get_head(head,head);
+        RETURN_IF_FAIL 
+        ret=PL_skip_list(head,0,&nHeads);
+        if (ret!=PL_LIST) return FALSE;
+        tunable=0;
+        tun_rules[j]=tunable;
+      }
+      else // initial parameters
+      { 
+        tunable=1;
+        tun_rules[j]=tunable;
+      } 
+        
+      Theta_rules[j]=(double *)malloc(nHeads*sizeof(double));
+      theta=Theta_rules[j];
+      rules[j]=nHeads,
+      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
+      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+
+      for (i=0;i<ex_d->rules[j]-1;i++)
+      {
+        ret=PL_get_list(head,p,head);
+        RETURN_IF_FAIL
+        ret=PL_get_float(p, &par);
+        RETURN_IF_FAIL
+        eta[j][i]=(double *) malloc(2*sizeof(double));
+        eta_temp[j][i]=(double *) malloc(2*sizeof(double));
+        pmass=pmass+par;
+        theta[i]=par;
+        ex_d->arrayprob[j][i]=par;
+      }
+      theta[ex_d->rules[j]-1]=1-pmass;
+    }
+    else
+    {
+      ret=PL_get_integer(head,&rules[j]);
+      RETURN_IF_FAIL
+      Theta_rules[j]=(double *)malloc(nHeads*sizeof(double));
+      theta=Theta_rules[j];
+      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
+      
+      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      for (i=0;i<rules[j]-1;i++)
+      {
+        eta[j][i]=(double *) malloc(2*sizeof(double));
+        eta_temp[j][i]=(double *) malloc(2*sizeof(double));
+        par=((double)rand())/RAND_MAX*(1-pmass);
+        pmass=pmass+par;
+        theta[i]=par;
+        ex_d->arrayprob[j][i]=par;
+      }
+      tun_rules[j]=1;
+      theta[ex_d->rules[j]-1]=1-pmass;
+    }
+  }
+
+  for(e=0;e<ex_d->ex;e++)
+  {
+    for (j=0; j<ex_d->env[e].nVars; j++)
+    {
+      rule=ex_d->env[e].vars[j].nRule;
+      theta=Theta_rules[rule];
+      p0=1;
+      for (i=0; i<ex_d->env[e].vars[j].nVal-1;i++)
+      {
+        ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=theta[i]/p0;
+        p0=p0*(1-theta[i]/p0);
+      }
+    }
+  }
+  for (j=0;j<ex_d->nRules;j++)
+  {
+    free(Theta_rules[j]);
+  }
+  free(Theta_rules);
+  return TRUE;
+}
 static foreign_t rand_seed(term_t arg1)
 {
   int seed;
@@ -2176,17 +2260,15 @@ static foreign_t rand_seed(term_t arg1)
   PL_succeed;
 }
 
-static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,term_t arg6,term_t arg7,term_t arg8)
+static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
+term_t arg6,term_t arg7,term_t arg8,term_t arg9)
 {
-  term_t pterm,nil,out1,out2,out3,nodesTerm,ruleTerm,head,tail,pair,compoundTerm;
+  term_t pterm,nil,out1,out2,out3,nodesTerm,ruleTerm,tail,pair,compoundTerm;
   DdNode * node1,**nodes_ex;
   int r,i,iter,cycle,ret;
   long iter1;
   size_t lenNodes;
   example_data * ex_d;
-  double ***eta;
-  double ***eta_temp;
-  int nRules, *rules, tunable, *tun_rules;
 
 
 
@@ -2195,56 +2277,14 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   double p,p0,**eta_rule,ea,er;
   double ratio,diff;
 
-  nRules=ex_d->nRules;
-  ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
-  eta=ex_d->eta;
-  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
-  eta_temp=ex_d->eta_temp;
-  ex_d->rules= (int *) malloc(nRules * sizeof(int));
-  rules=ex_d->rules;
-  ex_d->nodes_probs=NULL;
-  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
-  ex_d->arrayprob=(double **) malloc(nRules * sizeof(double *));
-/*
-  tun_rules=ex_d->tunable_rules;
-  for (j=0;j<nRules;j++)
-  {
-    ret=PL_get_list(list,head,list);
-    RETURN_IF_FAIL
-    if (PL_is_list(head)) 
-    { // fixed parameters
-      ret=PL_get_list(head,nh,tun);
-      RETURN_IF_FAIL
-      ret=PL_get_integer(nh,&rules[j]);
-      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
-      RETURN_IF_FAIL
-      tunable=0;
-      tun_rules[j]=tunable;
-    }
-    else
-    {
-      ret=PL_get_integer(head,&rules[j]);
-      RETURN_IF_FAIL
-      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
-      
-      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      for (i=0;i<rules[j]-1;i++)
-      {
-        eta[j][i]=(double *) malloc(2*sizeof(double));
-        eta_temp[j][i]=(double *) malloc(2*sizeof(double));
-      }
-      tun_rules[j]=1;
-    }
-  }
-
-*/
+  term_t head=PL_new_term_ref();
 
   ret=PL_get_pointer(arg1,(void **)&ex_d);
   RETURN_IF_FAIL
+  ret=init_par(ex_d,arg2);
+  RETURN_IF_FAIL
   pair=PL_new_term_ref();
-  head=PL_new_term_ref();
-  nodesTerm=PL_copy_term_ref(arg2);
+  nodesTerm=PL_copy_term_ref(arg3);
 
   ret=PL_skip_list(nodesTerm,0,&lenNodes);
   if (ret!=PL_LIST) return FALSE;
@@ -2258,12 +2298,12 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
   nil=PL_new_term_ref();
   compoundTerm=PL_new_term_ref();
 
-  ret=PL_get_float(arg3,&ea);
+  ret=PL_get_float(arg4,&ea);
   RETURN_IF_FAIL
 
-  ret=PL_get_float(arg4,&er);
+  ret=PL_get_float(arg5,&er);
   RETURN_IF_FAIL
-  ret=PL_get_integer(arg5,&iter);
+  ret=PL_get_integer(arg6,&iter);
   RETURN_IF_FAIL
 
   nodes_ex=(DdNode **)malloc(lenNodes*sizeof(DdNode*));
@@ -2350,18 +2390,18 @@ static foreign_t EM(term_t arg1,term_t arg2,term_t arg3,term_t arg4,term_t arg5,
     ret=PL_cons_list(out3,pterm,out3);
     RETURN_IF_FAIL
   }
-  ret=PL_unify(out3,arg8);
+  ret=PL_unify(out3,arg9);
   RETURN_IF_FAIL
 
   ret=PL_put_float(out1,CLL1);
   RETURN_IF_FAIL
-  ret=PL_unify(out1,arg6);
+  ret=PL_unify(out1,arg7);
   RETURN_IF_FAIL
   free(nodes_ex);
   free(ex_d->example_prob);
   free(ex_d->nodes_probs);
 
-  return (PL_unify(out2,arg7));
+  return (PL_unify(out2,arg8));
 }
 
 
@@ -2414,7 +2454,7 @@ install_t install()
 {
   srand(10);
 
-  PL_register_foreign("init",3,init,0);
+  PL_register_foreign("init",1,init,0);
   PL_register_foreign("init_bdd",2,init_bdd,0);
   PL_register_foreign("end",1,end,0);
   PL_register_foreign("end_bdd",1,end_bdd,0);
@@ -2437,7 +2477,7 @@ install_t install()
   PL_register_foreign("ret_vit_prob",4,ret_vit_prob,0);
   PL_register_foreign("reorder",1,reorder,0);
   PL_register_foreign("make_query_var",3,make_query_var,0);
-  PL_register_foreign("em",8,EM,0);
+  PL_register_foreign("em",9,EM,0);
   PL_register_foreign("randomize",1,randomize,0);
   PL_register_foreign("randomize",2,randomize_init,0);
   PL_register_foreign("rand_seed",1,rand_seed,0);

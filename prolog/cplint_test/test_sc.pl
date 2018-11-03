@@ -1,19 +1,37 @@
 
 :- module(test_sc,
-  [test_sc/0]).
+  [test_sc/0,test_all/0,test_par/0,test_stru/0]).
 :- use_module(library(plunit)).
 
 test_sc:-
-	run_tests([mach,
+  test_all.
+
+test_all:-
+  test_par,
+  test_stru.
+
+test_par:-
+  par(P),
+  run_tests(P).
+
+test_stru:-
+  stru(S),
+  run_tests(S).
+
+par([
 	  bongard,
 		bongardkeys,
-		registration,
 		hmmlearn,
 		shop,
 		multiple_paths_simple_learning,
 		multiple_paths_learning,
-    bongard_ind]).
+    bongard_ind,
+    bongard_fixed,
+    bongard_initial]).
 
+stru([mach,
+		registration,
+    bongard_ind]).
 
 
 :- begin_tests(mach, []).
@@ -31,7 +49,6 @@ test(induce_par):-
 
 test(test_in):-
   in(P),test(P,[all],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL, -21.286207461851408),close_to(AUCROC,0.7733333333333333),close_to(AUCPR, 0.5527564018467214).
-
 test(induce):-
   induce([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL,-18.554628716462105),close_to(AUCROC,0.77),close_to(AUCPR,0.600952380952381).
 :- end_tests(mach).
@@ -47,12 +64,6 @@ writeln(P),
 writeln('Expected:'),
 writeln([(pos:0.08375986464331642;'':0.9162401353566836:-circle(A), in(_96, A)),  (pos:0.41285257298968425;'':0.5871474270103157:-circle(_92), triangle(_97))]).
 
-test(induce_par2):-
-induce_par([train],P),
-writeln('Result:'),
-writeln(P),
-writeln('Expected:'),
-writeln([(pos:0.08375986464331642;'':0.9162401353566836:-circle(A), in(_96, A)),  (pos:0.41285257298968425;'':0.5871474270103157:-circle(_92), triangle(_97))]).
 
 :- end_tests(bongard).
 
@@ -97,18 +108,7 @@ atomic_list_concat(['Expected:\nP =',
 '\nAUCROC =', 0.9722222222222223,
 '\nAUCPR =', 0.9791666666666667],St1),
 writeln(St1).
-test(induce2):-
-  induce([all],P),test(P,[all],LL,AUCROC,_ROC,AUCPR,_PR),
-writeln('Result:'),
-writeln(P),
-atomic_list_concat(['\nLL=',LL,'\nAUCROC=',AUCROC,'\nAUCPR=',AUCPR,'\n'],St),
-writeln(St),
-atomic_list_concat(['Expected:\nP =',
-"[(party(yes):0.015604109954480928;:0.9843958900455191:-company_type(university),job(researcher)),(party(yes):0.3224437982952064;:0.6775562017047936:-job(researcher)),(party(yes):0.9999999983379018;:1.6620982368209525e-9:-company_type(commercial)),(party(yes):0.6233797589501375;:0.37662024104986247:-not_company_type(university)),(party(yes):0.0003946210127296068;:0.9996053789872704:-subscription(_814)),(party(no):1.0;:0.0:-not_company_type(commercial),subscription(_1844),subscription(_1854),subscription(_1864),course_len(_1864,4))]",
-'\nLL =', -1.909937224474644,
-'\nAUCROC =', 0.9722222222222223,
-'\nAUCPR =', 0.9791666666666667],St1),
-writeln(St1).
+
 :- end_tests(registration).
 
 :- begin_tests(hmmlearn, []).
@@ -189,7 +189,9 @@ induce_par([train],P),
 writeln('Result:'),
 writeln(P),
 writeln('Expected:'),
-writeln([(pos:0.0032009782151307584;'':0.9967990217848692:-circle(_24), in(_28, _24)),  (pos:0.36069511297793233;'':0.6393048870220677:-triangle(_90), config(_90, down)),  (pos:0.4178555801893244;'':0.5821444198106756:-triangle(_144), config(_144, up))]).
+writeln([(pos:0.0032009782151307584;'':0.9967990217848692:-circle(_24), in(_28, _24)), 
+  (pos:0.36069511297793233;'':0.6393048870220677:-triangle(_90), config(_90, down)),
+  (pos:0.4178555801893244;'':0.5821444198106756:-triangle(_144), config(_144, up))]).
 :- end_tests(bongard_ind).
 
 :- begin_tests(bongard_fixed, []).
