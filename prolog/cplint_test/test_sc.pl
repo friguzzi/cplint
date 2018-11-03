@@ -30,8 +30,7 @@ par([
     bongard_initial]).
 
 stru([mach,
-		registration,
-    bongard_ind]).
+		registration]).
 
 
 :- begin_tests(mach, []).

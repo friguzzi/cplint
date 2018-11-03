@@ -2206,7 +2206,7 @@ static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
     {
       ret=PL_get_integer(head,&rules[j]);
       RETURN_IF_FAIL
-      Theta_rules[j]=(double *)malloc(nHeads*sizeof(double));
+      Theta_rules[j]=(double *)malloc(rules[j]*sizeof(double));
       theta=Theta_rules[j];
       ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
       
