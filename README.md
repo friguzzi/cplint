@@ -53,6 +53,13 @@ Example of use
     ?- [coin].
     ?- prob(heads(coin),P).
 
+Testing the installation
+------------------------
+
+    $ swipl
+    ?- [library(cplint_test/test)].
+    ?- test.
+
 Datasets
 --------
 
