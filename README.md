@@ -10,7 +10,7 @@ You can try it online at http://cplint.lamping.unife.it/
 
 Installation
 ------------
-This is a SWI-Prolog (http://www.swi-prolog.org/) pack.
+This is an SWI-Prolog (http://www.swi-prolog.org/) pack.
 
 It can be installed with `pack_install/1`
 
@@ -19,7 +19,13 @@ It can be installed with `pack_install/1`
 
 Requirements
 -------------
-It requires packs `bddem`, `auc` and `matrix`, they are installed automatically when installing pack `cplint` or can installed manually as
+It requires the packs
+
+ * `bddem` https://github.com/friguzzi/bddem
+ * `auc` https://github.com/friguzzi/auc
+ * `matrix` https://github.com/friguzzi/matrix
+ 
+ They are installed automatically when installing pack `cplint` or can installed manually as
 
     $ swipl
     ?- pack_install(bddem).
@@ -28,10 +34,16 @@ It requires packs `bddem`, `auc` and `matrix`, they are installed automatically 
 
 `bddem` uses a foreign library and contains the library binaries for 32 and 64 bits Linux and 64 bits Windows. If you want to recompile the foreign library you can use
 
-    ?- pack_rebuild(deem).
+    ?- pack_rebuild(bdeem).
 
 On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page https://github.com/friguzzi/bddem
 
+You can upgrade the pack with
+
+    $ swipl
+    ?- pack_upgrade(cplint).
+
+Note that the packs on which `cplint` depends are not upgraded automatically in this case so they need to be upgraded manually.
 
 Example of use
 ---------------
@@ -41,9 +53,20 @@ Example of use
     ?- [coin].
     ?- prob(heads(coin),P).
 
+Testing the installation
+------------------------
+
+    $ swipl
+    ?- [library(cplint_test/test)].
+    ?- test.
+
 Datasets
 --------
 
 Other machine learning datasets are available in pack cplint_datasets 
 (https://github.com/friguzzi/cplint_datasets)
 
+Support
+-------
+
+Use the Google group https://groups.google.com/forum/#!forum/cplint
