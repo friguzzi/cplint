@@ -15,15 +15,12 @@
   map_bdd_dot_string/6,
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
-  init/1,init_bdd/2,init_test/1,end/1,end_bdd/1,end_test/1,
-  one/2,zero/2,and/4,or/4,bdd_not/3,
   onec/2,zeroc/2,andc/4,bdd_notc/3,
   orc/3,
-  ret_prob/3,get_var_n/6,get_abd_var_n/6,equality/4,add_var/4,
+  get_var_n/6,get_abd_var_n/6,
   or_list/3,
   ret_probc/3,equalityc/4,
   or_listc/3,
-  em/9,rand_seed/1,
   load/1,load_file/1,
   op(600,xfy,'::'),
   op(1150,fx,action),
@@ -47,6 +44,7 @@ details.
 @copyright Fabrizio Riguzzi
 */
 :- reexport(library(cplint_util)).
+:- reexport(library(bddem)).
 
 
 :-meta_predicate abd_prob(:,-,-).
