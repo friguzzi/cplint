@@ -59,3 +59,7 @@ Datasets
 Other machine learning datasets are available in pack cplint_datasets 
 (https://github.com/friguzzi/cplint_datasets)
 
+Support
+-------
+
+Use the Google group https://groups.google.com/forum/#!forum/cplint
