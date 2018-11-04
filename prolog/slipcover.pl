@@ -1,3 +1,31 @@
+
+:-module(slipcover,[set_sc/2,setting_sc/2,
+  induce/2,induce_par/2,test/7,list2or/2,list2and/2,
+  sample/4,learn_params/5,
+  op(500,fx,#),op(500,fx,'-#'),
+  test_prob/6,rules2terms/2,
+  get_sc_var_n/6,
+  process_clauses/6,
+  generate_clauses/6,
+  generate_clauses_bg/2,
+  generate_body/3,
+  make_dynamic/1,
+  extract_fancy_vars/2,
+  linked_clause/3,
+  banned_clause/3,
+  take_var_args/3,
+  remove_duplicates/2,
+  extract_type_vars/3,
+  delete_one/3,
+  get_next_rule_number/2,
+  tab/3,
+  zero_clause/3,
+  member_eq/2,
+  retract_all/1,assert_all/3,
+  write2/2,write3/2,format2/3,format3/3,
+  write_rules2/3,write_rules3/3,
+  nl2/1,nl3/1]).
+
 /** <module> slipcover
 
 This module performs learning over Logic Programs with Annotated
@@ -20,32 +48,6 @@ SLIPCOVER
 Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-module(slipcover,[set_sc/2,setting_sc/2,
-  induce/2,induce_par/2,test/7,list2or/2,list2and/2,
-  sample/4,learn_params/5,
-  op(500,fx,#),op(500,fx,'-#'),
-  test_prob/6,rules2terms/2,
-  get_sc_var_n/6,
-  process_clauses/6,
-  generate_clauses/6,
-  generate_clauses_bg/2,
-  generate_body/3,
-  make_dynamic/1,
-  extract_fancy_vars/2,
-  linked_clause/3,
-  banned_clause/3,
-  take_var_args/3,
-  remove_duplicates/2,
-  exctract_type_vars/3,
-  delete_one/3,
-  get_next_rule_number/2,
-  tab/3,
-  zero_clause/3,
-  member_eq/2,
-  retract_all/1,assert_all/3,
-  write2/2,write3/2,format2/3,format3/3,
-  write_rules2/3,write_rules3/3,
-  nl2/1,nl3/1]).
 :-reexport(library(pita)).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
@@ -377,7 +379,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
     Mod:local_setting(group,G),
     derive_bdd_nodes_groupatoms(DB,Mod,ExData,NEx,G,[],Nodes,0,CLL0,LE,[]),!   % 1 BDD per example if G=1
   ;
-    derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),! % 1 BDD per model
+    derive_bdd_nodes(DB,Mod,ExData,NEx,[],Nodes,0,CLL0),! % 1 BDD per model
   ),
   Mod:local_setting(random_restarts_number,N),
   format3(Mod,"~nInitial CLL ~f~n~n",[CLL0]),
@@ -520,7 +522,7 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
     M:local_setting(group,G),
     derive_bdd_nodes_groupatoms(DB,M,ExData,NEx,G,[],Nodes,0,CLL0,LE,[]),!
   ;
-    derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!
+    derive_bdd_nodes(DB,M,ExData,NEx,[],Nodes,0,CLL0),!
   ),
   format3(M,"Initial score ~f~n",[CLL0]),
   M:local_setting(random_restarts_number,N),
@@ -620,7 +622,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
     M:local_setting(group,G),
     derive_bdd_nodes_groupatoms_output_atoms(DB,M,ExData,O,NEx,G,[],Nodes,0,CLL0,LE,[]),!
   ;
-    derive_bdd_nodes(DB,ExData,NEx,[],Nodes,0,CLL0),!
+    derive_bdd_nodes(DB,M,ExData,NEx,[],Nodes,0,CLL0),!
   ),
   format3(M,"Initial CLL ~f~n",[CLL0]),
   M:local_setting(random_restarts_REFnumber,N),
@@ -773,12 +775,13 @@ get_heads([],[]).
 get_heads([_-H|T],[H|TN]):-
 
   get_heads(T,TN).
-derive_bdd_nodes([],_ExData,_E,Nodes,Nodes,CLL,CLL).
 
-derive_bdd_nodes([H|T],ExData,E,Nodes0,Nodes,CLL0,CLL):-
-  get_output_atoms(O),
-  generate_goal(O,H,[],GL),
-  ('$prob'(H,P)->
+derive_bdd_nodes([],_M,_ExData,_E,Nodes,Nodes,CLL,CLL).
+
+derive_bdd_nodes([H|T],M,ExData,E,Nodes0,Nodes,CLL0,CLL):-
+  get_output_atoms(O,M),
+  generate_goal(O,M,H,[],GL),
+  (M:'$prob'(H,P)->
     CardEx is P*E
 
   ;
@@ -786,7 +789,7 @@ derive_bdd_nodes([H|T],ExData,E,Nodes0,Nodes,CLL0,CLL):-
   ),
   init_bdd(ExData,Env),
   one(Env,One),
-  get_node_list(GL,Env,One,BDD,CardEx),
+  get_node_list(GL,M,Env,One,BDD,CardEx),
   ret_prob(Env,BDD,HP),
   (HP=:=0.0->
     setting_sc(logzero,LZ),
@@ -796,16 +799,16 @@ derive_bdd_nodes([H|T],ExData,E,Nodes0,Nodes,CLL0,CLL):-
   ),
   end_bdd(ExData),
   append(Nodes0,[[BDD,CardEx]],Nodes1),
-  derive_bdd_nodes(T,ExData,E,Nodes1,Nodes,CLL1,CLL).
+  derive_bdd_nodes(T,M,ExData,E,Nodes1,Nodes,CLL1,CLL).
 
 
-get_node_list([],_Env,BDD,BDD,_CE).
+get_node_list([],_M,_Env,BDD,BDD,_CE).
 
 
-get_node_list([H|T],Env,BDD0,BDD,CE):-
-  get_node(H,Env,BDD1),
-  andcnf(Env,BDD0,BDD1,BDD2),
-  get_node_list(T,Env,BDD2,BDD,CE).
+get_node_list([H|T],M,Env,BDD0,BDD,CE):-
+  get_node(H,M,Env,BDD1),
+  and(Env,BDD0,BDD1,BDD2),
+  get_node_list(T,M,Env,BDD2,BDD,CE).
 
 
 derive_bdd_nodes_groupatoms_output_atoms([],_M,_ExData,_O,_E,_G,Nodes,Nodes,CLL,CLL,LE,LE).
@@ -1804,7 +1807,7 @@ remove_prob([X:_|R],[X|R1]):-
 
 specialize_rule1(Lit,M,Lits,SpecLit):-
   Lit =.. [Pred|Args],
-  exctract_type_vars(Lits,M,TypeVars0),
+  extract_type_vars(Lits,M,TypeVars0),
   remove_duplicates(TypeVars0,TypeVars),
   take_var_args(Args,TypeVars,Args1),
   SpecLit =.. [Pred|Args1],
@@ -1899,21 +1902,21 @@ input_vars1([_V|RV],[_|RT],RV1):-
   input_vars1(RV,RT,RV1).
 
 /**
- * exctract_type_vars(+Literals:list,+Module:atom,+Types:term) is det
+ * extract_type_vars(+Literals:list,+Module:atom,+Types:term) is det
  *
  * The predicate extracts the type of variables from the list of literals
  * Literals. Types is a list of elements of the form Variable=Type
  */
-exctract_type_vars([],_M,[]).
+extract_type_vars([],_M,[]).
 
-exctract_type_vars([Lit|RestLit],M,TypeVars):-
+extract_type_vars([Lit|RestLit],M,TypeVars):-
   Lit =.. [Pred|Args],
   length(Args,L),
   length(Args1,L),
   Lit1 =.. [Pred|Args1],
   take_mode(M,Lit1),
   type_vars(Args,Args1,Types),
-  exctract_type_vars(RestLit,M,TypeVars0),
+  extract_type_vars(RestLit,M,TypeVars0),
   !,
   append(Types,TypeVars0,TypeVars).
 
@@ -2538,14 +2541,6 @@ given_cw(M,H):-
   functor(H,P,Ar),
   (M:input_cw(P/Ar)).
 
-
-and_list([],B,B).
-
-and_list([H|T],B0,B1):-
-  and(B0,H,B2),
-  and_list(T,B2,B1).
-
-
 /**
  * set_sc(:Parameter:atom,+Value:term) is det
  *
@@ -2873,7 +2868,15 @@ gen_clause_bg(def_rule(H,BodyList,_Lit),Clauses) :-
   add_mod_arg(H,Module,Head1),
   Clauses=(Head1 :- Body1).
 
-
+/**
+ * get_sc_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
+ *
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule, grouding substitution Substitution and head distribution
+ * Probabilities in environment Environment.
+ * Differs from get_var_n/6 of pita because R can be ng(RN,Vals), indicating a rule for which
+ * different instantiations get different parameters.
+ */
 get_sc_var_n(M,Env,R,S,Probs0,V):-
   (ground(Probs0)->
     maplist(is,Probs,Probs0),

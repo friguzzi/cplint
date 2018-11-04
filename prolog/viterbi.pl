@@ -1,13 +1,19 @@
-/*==============================================================================
- *	LPAD and CP-Logic reasoning suite
- *	File best.pl
- *	Goal oriented interpreter for LPADs based on SLDNF
- *	Copyright (c) 2009, Stefano Bragaglia
- *============================================================================*/
+
 :- module(viterbi,[ viterbi/3,
   op(600,xfy,'::')
     ]).
+/** <module> kbest
 
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the most likely explanation
+of the query
+
+
+@author Stefano Bragaglia and Fabrizio Riguzzi
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
+@copyright Stefano Bragaglia and Fabrizio Riguzzi
+*/
 :-use_module(library(rbtrees)).
 
 :- thread_local vit_input_mod/1.
@@ -17,7 +23,12 @@
 
 
 default_setting_viterbi(epsilon_parsing, 1e-5).
-
+/**
+ * viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
+ *
+ * The predicate computes the most probable explanation of the conjunction of literals Query.
+ * It returns the explanation in Exp
+ */
 viterbi(M:Goals,Prob,Exp):-
   retractall(M:best_prob(_)),
   retractall(M:best_exp(_)),

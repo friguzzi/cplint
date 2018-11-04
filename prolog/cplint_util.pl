@@ -1,11 +1,4 @@
-/** <module> cplint_util
 
-Utility module for cplint
-
-@author Fabrizio Riguzzi
-@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
-@copyright Fabrizio Riguzzi
-*/
 
 :- module(cplint_util,[
   bar/2,
@@ -26,7 +19,14 @@ Utility module for cplint
   bin/5,
   beta/2,
   to_atom/2]).
+/** <module> cplint_util
 
+Utility module for cplint
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
+@copyright Fabrizio Riguzzi
+*/
 /**
  * bar(+Probability:float,-Chart:dict) is det
  *

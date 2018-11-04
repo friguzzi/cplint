@@ -1,17 +1,4 @@
-/** <module> pita
 
-This module performs reasoning over Logic Programs with Annotated
-Disjunctions and CP-Logic programs.
-It reads probabilistic program andcomputes the probability of queries.
-
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
-details.
-
-@author Fabrizio Riguzzi
-@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
-@copyright Fabrizio Riguzzi
-*/
 
 
 :- module(pita,[
@@ -45,6 +32,20 @@ details.
   msw/4,
   msw/5
     ]).
+/** <module> pita
+
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program andcomputes the probability of queries.
+
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+details.
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
+@copyright Fabrizio Riguzzi
+*/
 :- reexport(library(cplint_util)).
 
 
@@ -84,15 +85,9 @@ details.
 
 
 /**
- * init(++NumberOfRules:int,++NumberOfHeads:list,--Context:int) is det
+ * init(--Context:int) is det
  *
  * Initializes a data structure for performing parameter learning.
- * NumberOfRules is the number of rules of the model,
- * NumberOfHeads is a list of terms, one for each rule. Each term is either
- * an integer, indicating the number
- * of head atoms in the rule, or a list [N] where N
- * is the number of head atoms. In the first case, the parameters of the rule are tunable,
- * in the latter they are fixed.
  * It returns an integer in Context that is a pointer to a
  * context data structure for performing the EM algorithm.
  */
@@ -103,7 +98,7 @@ details.
  * Terminates the context data structure for performing parameter learning.
  * Context is a pointer to a context data structure for performing
  * the EM algorithm
- * Context must have been returned by a call to init/3.
+ * Context must have been returned by a call to init/1.
  * It frees the memory occupied by Context.
  */
 
@@ -130,7 +125,6 @@ details.
  * init_test(--Environment:int) is det
  *
  * Initializes a data structure for storing a single BDD.
- * NumberOfRules is the number of rules of the model,
  * Returns an integer Environment that is a pointer to a data structure for
  * storing a single BDD to be used for inference only (no learning).
  */
@@ -192,13 +186,29 @@ details.
  */
 
 /**
- * em(++Context:int,++ListOfBDDs:list,++EA:float,++ER:float,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
+ * em(++Context:int,++RuleInfo:list,++ListOfBDDs:list,++EA:float,++ER:float,++Iterations:int,-LL:float,-Parameters:list,-ExampleProbabilities:list) is det
  *
+ * NumberOfHeads is a list of terms, one for each rule. Each term is either
+ * an integer, indicating the number
+ * of head atoms in the rule, or a list [N] where N
+ * is the number of head atoms. In the first case, the parameters of the rule are tunable,
+ * in the latter they are fixed.
+
  * Performs EM learning.
- * Takes as input the Context, a list of BDDs each representing one example,
+ * Takes as input the Context, information on the rules,
+ * a list of BDDs each representing one example,
  * the minimum absolute difference EA and relative difference ER between the
  * log likelihood of examples in two different iterations and the maximum number of iterations
  * Iterations.
+ * RuleInfo is a list of elements, one for each rule, with are either
+ *
+ * * an integer, indicating the number of heads, in which case the parameters of the 
+ *   corresponding rule should be randomized,
+ * * a list of floats, in which case the parameters should be set to those indicated
+ *   in the list and not changed during learning (fixed parameters)
+ * * [a list of floats], in which case the initial values of the parameters should 
+ *   be set to those indicated
+ *   in the list and changed during learning (initial values of the parameters)
  * Returns the final log likelihood of examples LL, the list of new Parameters
  * and a list with the final probabilities of each example.
  * Parameters is a list whose elements are of the form [N,P] where N is the rule
@@ -206,21 +216,6 @@ details.
  * in reverse order.
  */
 
-/**
- * randomize(++Context:int) is det
- *
- * Randomizes the parameters of random variables associated to Context.
- */
-
-/**
- * randomize(++Context:int,++RuleInfo:list) is det
- *
- * Randomizes the parameters of random variables associated to Context.
- * RuleInfo is a list of elements, one for each rule, with are either integers,
- * in which case the parameters of the corresponding rule should be randomized,
- * or a list of floats, in which case the parameters should be set to those indicated
- * in the list.
- */
 
 /**
  * add_var(++Environment:int,++ProbabilityDistribution:list, ++Rule:int,-Variable:int) is det.

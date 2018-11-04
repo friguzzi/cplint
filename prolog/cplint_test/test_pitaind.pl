@@ -15,7 +15,7 @@ test_pitaind:-
 :-ensure_loaded(library(examples/uwcse_indind)).
 
 test(advisedby_harry_ben):-
-  run((prob(advisedby(harry, ben),P),
+  run((prob_ind(advisedby(harry, ben),P),
   close_to(P, 0.87269376))).
 
 :- end_tests(uwcse_indind).
@@ -25,7 +25,7 @@ test(advisedby_harry_ben):-
 :-ensure_loaded(library(examples/uwcse_indinds)).
 
 test(advisedby_harry_ben):-
-  run((prob(advisedby(harry, ben),P),
+  run((prob_ind(advisedby(harry, ben),P),
   close_to(P, 0.20433599999999996))).
 
 :- end_tests(uwcse_indinds).
@@ -35,27 +35,27 @@ test(advisedby_harry_ben):-
 :-ensure_loaded(library(examples/bloodtype_indexc)).
 
 test(pc_p_f_a):-
-  run((prob(pchrom(p_f,a),Prob),
+  run((prob_ind(pchrom(p_f,a),Prob),
   close_to(Prob, 0.318))).
 
 test(p_f_a):-
-  run((prob(pchrom(p_f,a),Prob),
+  run((prob_ind(pchrom(p_f,a),Prob),
   close_to(Prob, 0.3))).
 
 test(p_a):-
-  run((prob(bloodtype(p,a),Prob),
+  run((prob_ind(bloodtype(p,a),Prob),
   close_to(Prob, 0.3186942939999999))).
 
 test(p_b):-
-  run((prob(bloodtype(p,b),Prob),
+  run((prob_ind(bloodtype(p,b),Prob),
   close_to(Prob, 0.2239874943000002))).
 
 test(p_aa):-
-  run((prob(bloodtype(p,ab),Prob),
+  run((prob_ind(bloodtype(p,ab),Prob),
   close_to(Prob, 0.19329257700000035))).
 
 test(p_null):-
-  run((prob(bloodtype(p,null),Prob),
+  run((prob_ind(bloodtype(p,null),Prob),
   close_to(Prob, 0.16751706690000012))).
 
 :- end_tests(bloodtype_indexc).
@@ -65,12 +65,12 @@ test(p_null):-
 :-ensure_loaded(library(examples/mendel_indexc)).
 
 test(s_1_p):-
-  run((prob(cg(s,1,p),P),close_to(P,0.5))).
+  run((prob_ind(cg(s,1,p),P),close_to(P,0.5))).
 test(s_1_w):-
-  run((prob(cg(s,1,w),P),close_to(P,0.5))).
+  run((prob_ind(cg(s,1,w),P),close_to(P,0.5))).
 test(s_2_p):-
-  run((prob(cg(s,2,p),P),close_to(P,0.5))).
+  run((prob_ind(cg(s,2,p),P),close_to(P,0.5))).
 test(s_2_w):-
-  run((prob(cg(s,2,w),P),close_to(P,0.5))).
+  run((prob_ind(cg(s,2,w),P),close_to(P,0.5))).
 
 :- end_tests(mendel_indexc).

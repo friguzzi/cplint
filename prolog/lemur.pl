@@ -1027,7 +1027,7 @@ remove_prob([X:_|R],[X|R1]):-
 
 specialize_rule_lit(Lit,M,Lits,SpecLit):-
   Lit =.. [Pred|Args],
-  exctract_type_vars(Lits,M,TypeVars0),
+  extract_type_vars(Lits,M,TypeVars0),
   remove_duplicates(TypeVars0,TypeVars),
   take_var_args(Args,TypeVars,Args1),
   SpecLit =.. [Pred|Args1],

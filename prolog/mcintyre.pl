@@ -64,6 +64,23 @@
   msw/2,
   set_sw/2
   ]).
+
+/** <module> mcintyre
+
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries
+using sampling.
+
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+details.
+
+@author Fabrizio Riguzzi
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
+@copyright Fabrizio Riguzzi
+*/
+
 :- reexport(library(cplint_util)).
 
 :-meta_predicate s(:,-).
@@ -176,21 +193,7 @@
 
 :- style_check(-discontiguous).
 
-/** <module> mcintyre
 
-This module performs reasoning over Logic Programs with Annotated
-Disjunctions and CP-Logic programs.
-It reads probabilistic program and computes the probability of queries
-using sampling.
-
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
-details.
-
-@author Fabrizio Riguzzi
-@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
-@copyright Fabrizio Riguzzi
-*/
 
 :- thread_local v/3,rule_n/1,mc_input_mod/1,local_mc_setting/2,
   sampled/3, sampled_g/2, sampled_g/1.
@@ -2420,7 +2423,7 @@ mc_expectation(M:Goal,S,Arg,E):-
   E is Sum/S.
 
 /**
- * mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+ * mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
  *
  * The predicate computes the expected value of Arg in Query by
  * sampling.
@@ -3024,14 +3027,14 @@ discrete([S0:W|T],W0,U,S):-
 
 
 /**
- * sample_exponential(+R:int,+VC:list,+N:int,+P:float,-S:int) is det
+ * sample_exponential(+R:int,+VC:list,+Lambda:float,-S:int) is det
  *
  * Returns in S a sample for a exponential distributed variable with parameters
  * Lambda associated to rule R with substitution VC. If the variable
  * has already been sampled, it retrieves the sampled value, otherwise
  * it takes a new sample and records it for rule R with substitution VC.
  */
-sample_exponential(R,VC,_N,S):-
+sample_exponential(R,VC,_,S):-
   sampled(R,VC,S),!.
 
 sample_exponential(R,VC,Lambda,S):-
@@ -3040,7 +3043,8 @@ sample_exponential(R,VC,Lambda,S):-
 
 
 /** 
- * exponential(+Lambda:float, -V:int)
+ * exponential(+Lambda:float, -V:int) is det
+ *
  * Samples a value from exponential distribution with parameter Lambda 
  * 
 **/
@@ -4406,7 +4410,7 @@ sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
 sandbox:safe_meta(mcintyre:set_mc(_,_), []).
-sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
+sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
 sandbox:safe_meta(mcintyre:set_sw(_,_) ,[]).
 
 :- license(artisticv2).

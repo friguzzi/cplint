@@ -1,12 +1,19 @@
-/*==============================================================================
- *	LPAD and CP-Logic reasoning suite
- *	File best.pl
- *	Goal oriented interpreter for LPADs based on SLDNF
- *	Copyright (c) 2009, Stefano Bragaglia
- *============================================================================*/
+
 :- module(kbest,[ kbest/3,kbest/4,
   op(600,xfy,'::')
     ]).
+/** <module> kbest
+
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries
+using kbest inference.
+
+
+@author Stefano Bragaglia and Fabrizio Riguzzi
+@license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
+@copyright Stefano Bragaglia and Fabrizio Riguzzi
+*/
 
 :-use_module(library(pita)).
 
@@ -31,50 +38,30 @@ default_setting_kbest(prob_step, 0.001).
 
 
 
-/* SOLVING PREDICATES
- * ------------------
- * The predicates in this section solve any given problem with several class of
- * algorithms.
+
+/**
+ * kbest(:Query:conjunction,+K:int,-Probability:float,-Exps:list) is nondet
  *
- * Note: the original predicates (no more need and eligible to be deleted) have
- *       been moved to the end of the file.
+ * The predicate computes the K most probable explanations of the conjunction of literals Query.
+ * It returns the explanations in Exps together with their Probability
  */
-
-/* solve(Goals, Prob, ResTime, BddTime)
- * ------------------------------------
- * This predicate computes the probability of a given list of goals using an
- * iterative deepening, probability bounded algorithm.
- * It also returns the number of handled BDDs and the CPUTime spent performing
- * resolution and spent handling the BDDs.
- *
- * Note: when their derivation is cut, negative goals are added to the head of
- *	   the goals' list to be solved during the following iteration.
- *
- * INPUT
- *  - GoalsList: given list of goal to work on. It can contains variables: the
- *	  predicate returns in backtracking all the solutions and their equivalent
- *	  lower and upper bound probability.
- *
- * OUTPUT
- *  - Prob: resulting lower bound probability for the given list of goals.
- *  - ResTime: CPU time spent on performing resolution.
- *  - BddTime: CPU time spent on handling BDDs.
- */
-kbest(M:Goals, K, Exps) :-
-  compute_exp(Goals,M,K,BestK),
-  convert_exps(BestK,M,Exps).
-
-
 kbest(M:Goals, K, P, Exps) :-
   compute_exp(Goals,M,K,BestK),
   convert_exps(BestK,M,Exps),
   compute_prob(BestK,M,P).
 
-
+/**
+ * kbest(:Query:conjunction,+K:int,-Exps:list) is nondet
+ *
+ * The predicate computes the K most probable explanations of the conjunction of literals Query.
+ * It returns the explanations in Exps
+ */
+kbest(M:Goals, K, Exps) :-
+  compute_exp(Goals,M,K,BestK),
+  convert_exps(BestK,M,Exps).
 
 compute_prob(Exps,M,P):-
-  M:rule_n(NR),
-  init_test(NR,Env),
+  init_test(Env),
   retractall(M:v(_,_,_)),
   maplist(exp2bdd(M,Env),Exps,LB),
   or_list(LB,Env,BDD),
@@ -541,30 +528,6 @@ choose_a_head(N, R, S, [(NH, R, SH)|T], [(NH, R, S), (NH, R, SH)|T]) :-
 choose_a_head(N, R, S, [H|T], [H|T1]) :-
 	choose_a_head(N, R, S, T, T1).
 
-
-/* insert_full_ptree([Head|Tail], Trie)
- * ------------------------------------
- * This predicate inserts the ground part of the given list in a trie.
- */
-insert_full_ptree([], _Trie).
-
-insert_full_ptree([_Prob-(Gnd, _Var, _Goals)|Tail], Trie) :-
-	reverse(Gnd, Gnd1),
-	insert_ptree(Gnd1, Trie),
-	insert_full_ptree(Tail, Trie).
-
-
-
-/* insert_list_ptree([Head|Tail], Trie)
- * ------------------------------------
- * This predicate inserts the given list in a trie.
- */
-insert_list_ptree([], _Trie).
-
-insert_list_ptree([Head|Tail], Trie) :-
-	reverse(Head, Head1),
-	insert_ptree(Head1, Trie),
-	insert_list_ptree(Tail, Trie).
 
 builtin(average(_L,_Av)).
 builtin(prob(_,_)).
