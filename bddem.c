@@ -2005,26 +2005,24 @@ static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
   term_t p=PL_new_term_ref();
   term_t ruleHeadsTerm;
   size_t nHeads,nRules;
-  int *rules, tunable, *tun_rules;
+  int *rules, *tun_rules;
 
   ruleHeadsTerm=PL_copy_term_ref(ruleHeadsArg);
   ret=PL_skip_list(ruleHeadsTerm,0,&nRules);
   if (ret!=PL_LIST) return FALSE;
 
-
-  ex_d->rules= (int *) malloc(nRules * sizeof(int));
-  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
-
   ex_d->nRules=nRules;
+  ex_d->rules= (int *) malloc(nRules * sizeof(int));
+  rules=ex_d->rules;
+  ex_d->tunable_rules= (int *) malloc(nRules * sizeof(int));
+  tun_rules=ex_d->tunable_rules;
   ex_d->eta= (double ***) malloc(nRules * sizeof(double **));
-  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
   eta=ex_d->eta;
+  ex_d->eta_temp= (double ***) malloc(nRules * sizeof(double **));
   eta_temp=ex_d->eta_temp;
   ex_d->nodes_probs=NULL;
   ex_d->arrayprob=(double **) malloc(nRules * sizeof(double *));
-  tun_rules=ex_d->tunable_rules;
 
-  rules=ex_d->rules;
   Theta_rules=(double **)malloc(nRules *sizeof(double *));
 
   for (j=0;j<nRules;j++)
@@ -2043,23 +2041,19 @@ static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
         RETURN_IF_FAIL 
         ret=PL_skip_list(head,0,&nHeads);
         if (ret!=PL_LIST) return FALSE;
-        tunable=0;
-        tun_rules[j]=tunable;
+        tun_rules[j]=0;
       }
       else // initial parameters
-      { 
-        tunable=1;
-        tun_rules[j]=tunable;
-      } 
+        tun_rules[j]=1;
         
       Theta_rules[j]=(double *)malloc(nHeads*sizeof(double));
       theta=Theta_rules[j];
       rules[j]=nHeads,
-      ex_d->arrayprob[j]= (double *) malloc((ex_d->rules[j]-1)*sizeof(double));
-      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      ex_d->arrayprob[j]= (double *) malloc((nHeads-1)*sizeof(double));
+      eta[j]= (double **) malloc((nHeads-1)*sizeof(double *));
+      eta_temp[j]= (double **) malloc((nHeads-1)*sizeof(double *));
 
-      for (i=0;i<ex_d->rules[j]-1;i++)
+      for (i=0;i<nHeads-1;i++)
       {
         ret=PL_get_list(head,p,head);
         RETURN_IF_FAIL
@@ -2071,18 +2065,20 @@ static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
         theta[i]=par;
         ex_d->arrayprob[j][i]=par;
       }
-      theta[ex_d->rules[j]-1]=1-pmass;
+      theta[nHeads-1]=1-pmass;
     }
     else
     {
       ret=PL_get_integer(head,&rules[j]);
-      RETURN_IF_FAIL
-      Theta_rules[j]=(double *)malloc(rules[j]*sizeof(double));
-      theta=Theta_rules[j];
-      ex_d->arrayprob[j]= (double *) malloc((rules[j]-1)*sizeof(double));
+      nHeads=rules[j];
       
-      eta[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
-      eta_temp[j]= (double **) malloc((rules[j]-1)*sizeof(double *));
+      RETURN_IF_FAIL
+      Theta_rules[j]=(double *)malloc(nHeads*sizeof(double));
+      theta=Theta_rules[j];
+      ex_d->arrayprob[j]= (double *) malloc((nHeads-1)*sizeof(double));
+      
+      eta[j]= (double **) malloc((nHeads-1)*sizeof(double *));
+      eta_temp[j]= (double **) malloc((nHeads-1)*sizeof(double *));
       for (i=0;i<rules[j]-1;i++)
       {
         eta[j][i]=(double *) malloc(2*sizeof(double));
@@ -2093,7 +2089,7 @@ static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
         ex_d->arrayprob[j][i]=par;
       }
       tun_rules[j]=1;
-      theta[ex_d->rules[j]-1]=1-pmass;
+      theta[nHeads-1]=1-pmass;
     }
   }
 

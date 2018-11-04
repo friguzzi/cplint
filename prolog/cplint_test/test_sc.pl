@@ -7,8 +7,10 @@ test_sc:-
   test_all.
 
 test_all:-
-  test_par,
-  test_stru.
+  par(P),
+  stru(S),
+  append(P,S,A),
+  run_tests(A).
 
 test_par:-
   par(P),
