@@ -1,2 +1,0 @@
-cp Makefile.temp Makefile
-cd cudd-3.0.0 && autoreconf && ./configure CFLAGS="-Wall -Wextra -g -O3 -fPIC" LD="" && cd ..
