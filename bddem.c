@@ -146,8 +146,7 @@ static foreign_t EM(term_t,term_t,term_t,term_t,
   term_t,term_t,term_t,term_t,term_t);
 static foreign_t reorder(term_t arg1);
 static foreign_t make_query_var(term_t arg1, term_t arg2, term_t arg3);
-static foreign_t randomize_init(term_t arg1, term_t arg2);
-static foreign_t randomize(term_t arg1);
+
 
 static foreign_t init_par(example_data * ex_d, term_t ruleHeadsTerm);
 double ProbPath(example_data * ex_d,DdNode *node, int nex);
@@ -1992,135 +1991,7 @@ void Maximization(example_data * ex_d)
   }
 }
 
-static foreign_t randomize(term_t arg1)
-{
-  int i,j,e,rule,ret;
-  double * theta,p0;
-  double pmass,par;
-  double **Theta_rules;
-  example_data * ex_d;
 
-  ret=PL_get_pointer(arg1,(void **)&ex_d);
-  RETURN_IF_FAIL
-
-
-  Theta_rules=(double **)malloc(ex_d->nRules *sizeof(double *));
-
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    Theta_rules[j]=(double *)malloc(ex_d->rules[j]*sizeof(double));
-  }
-
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    theta=Theta_rules[j];
-    pmass=0;
-    for (i=0;i<ex_d->rules[j]-1;i++)
-    {
-      par=((double)rand())/RAND_MAX*(1-pmass);
-      pmass=pmass+par;
-      theta[i]=par;
-      ex_d->arrayprob[j][i]=par;
-    }
-    theta[ex_d->rules[j]-1]=1-pmass;
-  }
-  for(e=0;e<ex_d->ex;e++)
-  {
-    for (j=0; j<ex_d->env[e].nVars; j++)
-    {
-      rule=ex_d->env[e].vars[j].nRule;
-      theta=Theta_rules[rule];
-      p0=1;
-      for (i=0; i<ex_d->env[e].vars[j].nVal-1;i++)
-      {
-        ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=theta[i]/p0;
-        p0=p0*(1-theta[i]/p0);
-      }
-    }
-  }
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    free(Theta_rules[j]);
-  }
-  free(Theta_rules);
-  PL_succeed;
-}
-
-
-static foreign_t randomize_init(term_t arg1, term_t arg2)
-{
-  int i,j,e,rule,ret;
-  double * theta,p0;
-  double pmass,par;
-  double **Theta_rules;
-  example_data * ex_d;
-  term_t list=PL_copy_term_ref(arg2);
-  term_t head=PL_new_term_ref();
-  term_t p=PL_new_term_ref();
-
-  ret=PL_get_pointer(arg1,(void **)&ex_d);
-  RETURN_IF_FAIL
-
-
-  Theta_rules=(double **)malloc(ex_d->nRules *sizeof(double *));
-
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    Theta_rules[j]=(double *)malloc(ex_d->rules[j]*sizeof(double));
-  }
-
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    theta=Theta_rules[j];
-    pmass=0;
-    ret=PL_get_list(list,head,list);
-    RETURN_IF_FAIL
-    if (PL_is_list(head))
-    {
-      for (i=0;i<ex_d->rules[j]-1;i++)
-      {
-        ret=PL_get_list(head,p,head);
-        RETURN_IF_FAIL
-        ret=PL_get_float(p, &par);
-        pmass=pmass+par;
-        theta[i]=par;
-        ex_d->arrayprob[j][i]=par;
-      }
-      theta[ex_d->rules[j]-1]=1-pmass;
-    }
-    else
-    {
-      for (i=0;i<ex_d->rules[j]-1;i++)
-      {
-        par=((double)rand())/RAND_MAX*(1-pmass);
-        pmass=pmass+par;
-        theta[i]=par;
-        ex_d->arrayprob[j][i]=par;
-      }
-      theta[ex_d->rules[j]-1]=1-pmass;
-    }
-  }
-  for(e=0;e<ex_d->ex;e++)
-  {
-    for (j=0; j<ex_d->env[e].nVars; j++)
-    {
-      rule=ex_d->env[e].vars[j].nRule;
-      theta=Theta_rules[rule];
-      p0=1;
-      for (i=0; i<ex_d->env[e].vars[j].nVal-1;i++)
-      {
-        ex_d->env[e].probs[ex_d->env[e].vars[j].firstBoolVar+i]=theta[i]/p0;
-        p0=p0*(1-theta[i]/p0);
-      }
-    }
-  }
-  for (j=0;j<ex_d->nRules;j++)
-  {
-    free(Theta_rules[j]);
-  }
-  free(Theta_rules);
-  PL_succeed;
-}
 
 static foreign_t init_par(example_data * ex_d, term_t ruleHeadsArg)
 {
@@ -2478,8 +2349,6 @@ install_t install()
   PL_register_foreign("reorder",1,reorder,0);
   PL_register_foreign("make_query_var",3,make_query_var,0);
   PL_register_foreign("em",9,EM,0);
-  PL_register_foreign("randomize",1,randomize,0);
-  PL_register_foreign("randomize",2,randomize_init,0);
   PL_register_foreign("rand_seed",1,rand_seed,0);
 //  PL_register_foreign("deref",1,rec_deref,0);
 //  PL_register_foreign("garbage_collect",2,garbage_collect,0);

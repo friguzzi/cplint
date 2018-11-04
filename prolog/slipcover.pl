@@ -1022,29 +1022,6 @@ interpolate(I,N,Pos,R0,P0,TPA,FPA,TPB,FPB,A0,A):-
   I1 is I+1,
   interpolate(I1,N,Pos,R,P,TPA,FPA,TPB,FPB,A1,A).
 
-/*
-randomize([],[]):-!.
-
-randomize([rule(N,V,NH,HL,BL,LogF)|T],[rule(N,V,NH,HL1,BL,LogF)|T1]):-
-  length(HL,L),
-  Int is 1.0/L,
-  randomize_head(Int,HL,0,HL1),
-  randomize(T,T1).
-
-randomize_head(_Int,['':_],P,['':PNull1]):-!,
-  PNull is 1.0-P,
-  (PNull>=0.0->
-    PNull1 =PNull
-  ;
-    PNull1=0.0
-  ).
-
-randomize_head(Int,[H:_|T],P,[H:PH1|NT]):-
-  PMax is 1.0-P,
-  random(0,PMax,PH1),
-  P1 is P+PH1,
-  randomize_head(Int,T,P1,NT).
-*/
 
 
 update_head([],[],_N,[]):-!.
