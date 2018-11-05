@@ -15,12 +15,7 @@
   map_bdd_dot_string/6,
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
-  onec/2,zeroc/2,andc/4,bdd_notc/3,
-  orc/3,
   get_var_n/6,get_abd_var_n/6,
-  or_list/3,
-  ret_probc/3,equalityc/4,
-  or_listc/3,
   load/1,load_file/1,
   op(600,xfy,'::'),
   op(1150,fx,action),
@@ -117,80 +112,7 @@ load(File):-
     )
   ).
 
-/**
- * orc(++A:couple,++B:couple,--AorB:couple) is det
- *
- * A and B are couples (Environment, BDDA) and  (Environment, BDDB) respectively
- * Returns in AorB a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
- * representing the disjunction of BDDs BDDA and BDDB.
- */
-orc((Env,A),(_,B),(Env,C)):-
-  or(Env,A,B,C).
 
-/**
- * onec(++Environment:int,--One:couple) is det
- *
- * Returns in One a couple (Environment,BDD) where BDD is pointer to a BDD belonging to environment Environment
- * representing the one Boolean function
- */
-onec(Env,(Env,One)):-
-  one(Env,One).
-
-/**
- * zeroc(++Environment:int,--Zero:couple) is det
- *
- * Returns in Zero a couple (Environment,BDD) where BDD is pointer to a BDD belonging to environment Environment
- * representing the zero Boolean function
- */
-zeroc(Env,(Env,Zero)):-
-  zero(Env,Zero).
-
-/**
- * andc(++Environment:int,++A:couple,++B:couple,--AandB:couple) is semidet
- * 
- * A and B are couples (Environment, BDDA) and  (Environment, BDDB) respectively
- * Returns in AandB a couple (Environment, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment Environment
- * representing the conjunction of BDDs BDDA and BDDB.
- * fails if BDDB represents the zero function
- */
-andc(Env,(_,A),(_,B),(Env,C)):-
-  (zero(Env,B)->
-    fail
-  ;
-    and(Env,A,B,C)
-  ).
-
-andcnf(Env,(_,A),(_,B),(Env,C)):-
-  and(Env,A,B,C).
-/**
- * bdd_notc(++Environment:int,++EBDD:couple,--NotEBDD:couple) is det
- *
- * EBDD is a couple (Environment,A)
- * Returns in NotEBDD a couple  (Environment,NotA) where NotA is
- * pointer to a BDD belonging to environment Environment
- * representing the negation of BDD A
- */
-bdd_notc(Env,(_,A),(Env,NA)):-
-  bdd_not(Env,A,NA).
-
-/**
- * equalityc(++Environment:int,++Variable:int,++Value:int,--EBDD:couple) is det
- *
- * Returns in EBDD a couple (Environment,BDD) where BDD belongs to environment Environment
- * and represents the equation Variable=Value.
- */
-equalityc(Env,V,N,(Env,B)):-
-  equality(Env,V,N,B).
-
-/**
- * ret_probc(++Environment:int,++EBDD:couple,-Probability:float) is det
- * 
- * EBDD is a couple (Environment,BDD)
- * Returns the Probability of BDD belonging to environment Environment
- * Uses 
- */
-ret_probc(Env,(_,BDD),P):-
-  ret_prob(Env,BDD,P).
 
 
 /**
@@ -1059,43 +981,7 @@ get_probs([_H:P|T], [P1|T1]) :-
   get_probs(T, T1).
 */
 
-/**
- * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
- *
- * Returns in BDD a pointer to a BDD belonging to environment Environment
- * representing the disjunction of all the BDDs in ListOfBDDs
- */
-or_list([H],_Env,H):-!.
 
-or_list([H|T],Env,B):-
-  or_list1(T,Env,H,B).
-
-
-or_list1([],_Env,B,B).
-
-or_list1([H|T],Env,B0,B1):-
-  or(Env,B0,H,B2),
-  or_list1(T,Env,B2,B1).
-
-/**
- * or_listc(++ListOfBDDs:list,++Environment,--BDD:int) is det
- *
- * Returns in BDD a couple (Env,B) with B a pointer to a
- * BDD belonging to environment Environment
- * representing the disjunction of all the BDDs in
- * ListOfBDDs (a list of couples (Env,BDD))
- */
-or_listc([H],_Env,H):-!.
-
-or_listc([H|T],Env,B):-
-  or_listc1(T,Env,H,B).
-
-
-or_listc1([],_Env,B,B).
-
-or_listc1([H|T],Env,B0,B1):-
-  orc(B0,H,B2),
-  or_listc1(T,Env,B2,B1).
 
 /**
  * set_pita(:Parameter:atom,+Value:term) is det
