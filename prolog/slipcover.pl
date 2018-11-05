@@ -48,14 +48,13 @@ SLIPCOVER
 Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 */
-:-reexport(library(pita)).
+:-reexport(library(bddem)).
 :-use_module(library(auc)).
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
-%:-use_module(library(pita)).
 :-use_module(library(apply)).
 :-set_prolog_flag(unknown,warning).
 
@@ -2307,11 +2306,11 @@ generate_rules_fact([],_Env,_VC,_R,_Probs,_N,[],_Module,_M).
 
 generate_rules_fact([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module,M):-!,
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,BDD))).
 
 generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module,M):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact(T,Env,VC,R,Probs,N1,Clauses,Module,M).
 
@@ -2320,23 +2319,23 @@ generate_rules_fact_db([],_Env,_VC,_R,_Probs,_N,[],_Module,_M).
 
 generate_rules_fact_db([Head:_P1,'':_P2],Env,VC,R,Probs,N,[Clause],Module,M):-!,
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))).
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,BDD))).
 
 generate_rules_fact_db([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module,M):-
   add_bdd_arg_db(Head,Env,BDD,_DB,Module,Head1),
-  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,BDD))),
+  Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,BDD))),
   N1 is N+1,
   generate_rules_fact_db(T,Env,VC,R,Probs,N1,Clauses,Module,M).
 
 
 generate_clause(Head,Env,Body,VC,R,Probs,BDDAnd,N,Clause,Module,M):-
   add_bdd_arg(Head,Env,BDD,Module,Head1),
-  Clause=(Head1:-(Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,B),slipcover:andc(Env,BDDAnd,B,BDD))).
 
 
 generate_clause_db(Head,Env,Body,VC,R,Probs,DB,BDDAnd,N,Clause,Module,M):-
   add_bdd_arg_db(Head,Env,BDD,DBH,Module,Head1),
-  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,N,B),pita:andc(Env,BDDAnd,B,BDD))).
+  Clause=(Head1:-(DBH>=1,DB is DBH-1,Body,slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,N,B),slipcover:andc(Env,BDDAnd,B,BDD))).
 
 
 generate_rules([],_Env,_Body,_VC,_R,_Probs,_BDDAnd,_N,[],_Module,_M).
@@ -2391,9 +2390,9 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module,M):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
-(((neg(H1);\+ H1),pita:onec(Env,BDDN));
-  (H2,pita:bdd_notc(Env,BDDH,BDDN))),
-  pita:andc(Env,BDD,BDDN,BDD2)
+(((neg(H1);\+ H1),slipcover:onec(Env,BDDN));
+  (H2,slipcover:bdd_notc(Env,BDDH,BDDN))),
+  slipcover:andc(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module,M):-
   given(M,H),!,
   add_mod_arg(H,Module,H1),
@@ -2407,8 +2406,8 @@ process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
-[H1,pita:bdd_notc(Env,BDDH,BDDN),
-  pita:andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module,M):-!,
+[H1,slipcover:bdd_notc(Env,BDDH,BDDN),
+  slipcover:andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module,M):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
@@ -2421,7 +2420,7 @@ process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Env,Module,M):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
 process_body([H|T],BDD,BDD1,Vars,Vars1,
-[((H1,pita:onec(Env,BDDH));H2),pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
+[((H1,slipcover:onec(Env,BDDH));H2),slipcover:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
   given(M,H),!,
   add_mod_arg(H,Module,H1),
   add_bdd_arg(H,Env,BDDH,Module,H2),
@@ -2439,7 +2438,7 @@ process_body([H|T],BDD,BDD1,Vars,Vars1,[H1|Rest],Env,Module,M):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
 process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-[H1,pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
+[H1,slipcover:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module,M).
 
@@ -2454,9 +2453,9 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module,M):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
-  (((neg(H1);\+ H1),pita:onec(Env,BDDN));
-    (H2,pita:bdd_notc(Env,BDDH,BDDN))),
-  pita:andc(Env,BDD,BDDN,BDD2)
+  (((neg(H1);\+ H1),slipcover:onec(Env,BDDN));
+    (H2,slipcover:bdd_notc(Env,BDDH,BDDN))),
+  slipcover:andc(Env,BDD,BDDN,BDD2)
   |Rest],Env,Module,M):-
   given(M,H),!,
   add_mod_arg(H,Module,H1),
@@ -2470,8 +2469,8 @@ process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[H1,pita:bdd_notc(Env,BDDH,BDDN),
-  pita:andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module,M):-!,
+[H1,slipcover:bdd_notc(Env,BDDH,BDDN),
+  slipcover:andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module,M):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
@@ -2484,7 +2483,7 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Env,Module,M):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
-[((H1,pita:onec(Env,BDDH));H2),pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
+[((H1,slipcover:onec(Env,BDDH));H2),slipcover:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-
   given(M,H),!,
   add_mod_arg(H,Module,H1),
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H2),
@@ -2497,7 +2496,7 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[H1,pita:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-!, %agg. cut
+[H1,slipcover:andc(Env,BDD,BDDH,BDD2)|Rest],Env,Module,M):-!, %agg. cut
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module,M).
 
@@ -2737,7 +2736,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
   rule(N,HeadList,BodyList,Lit,Tun),Clauses):-!,
 % disjunctive clause with more than one head atom senza depth_bound
   process_body_cw(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Module),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -2753,7 +2752,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
 gen_clause_cw(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   process_body_cw(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Module),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   to_tabled(M,H,H1),
   add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
@@ -2787,7 +2786,7 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   M:local_setting(depth_bound,true),!,
 % disjunctive clause with more than one head atom e depth_bound
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -2809,7 +2808,7 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   rule(RI,HeadList,BodyList,Lit,Tun),Clauses):-!,
 % disjunctive clause with more than one head atom senza depth_bound
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -2832,7 +2831,7 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
   M:local_setting(depth_bound,true),!,
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   to_tabled(M,H,H1),
   add_bdd_arg_db(H1,Env,BDDAnd,DBH,Module,Head1),
@@ -2841,7 +2840,7 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :-
 gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !,%agg. cut
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   to_tabled(M,H,H1),
   add_bdd_arg(H1,Env,BDDAnd,Module,Head1),
@@ -2939,7 +2938,7 @@ gen_cl_db_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
@@ -2994,7 +2993,7 @@ gen_cl_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun
   process_body(BodyList,BDD,BDDAnd, [],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
@@ -3046,7 +3045,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   process_head_fixed(HeadListOr,M,0,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3067,7 +3066,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   process_head_fixed(HeadListOr,M,0,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3088,7 +3087,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3108,7 +3107,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList1,BodyList2),
+  append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3153,7 +3152,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   process_head_fixed(HeadListOr,M,0,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3175,7 +3174,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   process_head_fixed(HeadListOr,M,0,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3203,7 +3202,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[def_rule(H,BodyList,true)])) :-
   HeadList=[H:_],!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg_db(H,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
@@ -3217,7 +3216,7 @@ term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
   HeadList=[H:_],!,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg(H,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body1).
@@ -3232,7 +3231,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3253,7 +3252,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   process_head(HeadListOr,M,HeadList),
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
   extract_vars_list(List,[],VC),
@@ -3279,7 +3278,7 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
    ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
   add_bdd_arg_db(Head,Env,BDDAnd,DBH,Module,Head1),
   Clauses=(Head1 :- (DBH>=1,DB is DBH-1,Body1)).
@@ -3290,7 +3289,7 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
-  append([pita:onec(Env,BDD)],BodyList2,BodyList3),
+  append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,Env,BDDAnd,Module,Head1),
   Clauses=(Head1 :- Body2).
@@ -3392,7 +3391,7 @@ term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
 % disjunctive fact with a single head atom con prob.1 e db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (H:P),number(P),P=:=1.0, !,
-  list2and([pita:onec(Env,BDD)],Body1),
+  list2and([slipcover:onec(Env,BDD)],Body1),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   Clause=(Head1 :- Body1).
 
@@ -3401,7 +3400,7 @@ term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((user:term_expansion(_,_)) :- _ )),
   Head = (H:P),number(P),P=:=1.0, !,
-  list2and([pita:onec(Env,BDD)],Body1),
+  list2and([slipcover:onec(Env,BDD)],Body1),
   add_bdd_arg(H,Env,BDD,_Module,Head1),
   Clause=(Head1 :- Body1).
 
@@ -3418,9 +3417,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ).
 
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
@@ -3435,9 +3434,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ).
 
 
@@ -3473,9 +3472,9 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ).
 
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
@@ -3490,12 +3489,12 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
   (M:local_setting(single_var,true)->
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,[],Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ;
-    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),pita:equalityc(Env,V,0,BDD)))
+    Clause=(Head1:-(slipcover:get_sc_var_n(M,Env,R,VC,Probs,V),slipcover:equalityc(Env,V,0,BDD)))
   ).
 
-term_expansion_int(Head,M, ((Head1:-pita:onec(Env,One)),[def_rule(Head,[],true)])) :-
+term_expansion_int(Head,M, ((Head1:-slipcover:onec(Env,One)),[def_rule(Head,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % definite fact with db
@@ -3503,7 +3502,7 @@ term_expansion_int(Head,M, ((Head1:-pita:onec(Env,One)),[def_rule(Head,[],true)]
   (Head\= end_of_file),!,
   add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
 
-term_expansion_int(Head,M, ((Head1:-pita:onec(Env,One)),[def_rule(Head,[],true)])) :-
+term_expansion_int(Head,M, ((Head1:-slipcover:onec(Env,One)),[def_rule(Head,[],true)])) :-
   M:local_setting(compiling,on),
 % definite fact without db
   (Head \= ((user:term_expansion(_,_) ):- _ )),
@@ -3900,9 +3899,9 @@ write_body3(M,A,B):-
 tab(M,A/B,P):-
   length(Args0,B),
   (M:local_setting(depth_bound,true)->
-    ExtraArgs=[_,_,_,lattice(pita:orc/3)]
+    ExtraArgs=[_,_,_,lattice(slipcover:orc/3)]
   ;
-    ExtraArgs=[_,_,lattice(pita:orc/3)]
+    ExtraArgs=[_,_,lattice(slipcover:orc/3)]
   ),
   append(Args0,ExtraArgs,Args),
   P=..[A|Args],
@@ -3918,7 +3917,7 @@ tab(M,A/B,P):-
  * Generates the zero clause for predicate PredSpec. 
  * Module is the module of the input file.
  */
-zero_clause(M,A/B,(H:-maplist(nonvar,Args0),pita:zeroc(Env,BDD))):-
+zero_clause(M,A/B,(H:-maplist(nonvar,Args0),slipcover:zeroc(Env,BDD))):-
   B1 is B+1,
   length(Args0,B1),
   (M:local_setting(depth_bound,true)->
