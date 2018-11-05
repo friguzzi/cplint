@@ -91,7 +91,7 @@ details.
  */
 
 /**
- * end(++Context:int) is det
+ * end_ex(++Context:int) is det
  *
  * Terminates the context data structure for performing parameter learning.
  * Context is a pointer to a context data structure for performing
@@ -101,7 +101,7 @@ details.
  */
 
 /**
- * init_bdd(++Context:int,--Environment:int) is det
+ * init_ex(++Context:int,--Environment:int) is det
  *
  * Initializes an enviroment data structure for storing a BDD.
  * Context is an integer that is a pointer to a context data structure
@@ -111,16 +111,16 @@ details.
  */
 
 /**
- * end_bdd(++Environment:int) is det
+ * end_ex(++Environment:int) is det
  *
  * Terminates the evnironment data structure for storing a BDD.
- * Environment is a pointer to a data structure returned by init_bdd/2.
+ * Environment is a pointer to a data structure returned by init_ex/2.
  * It frees the memory occupied by the BDD.
  */
 
 
 /**
- * init_test(--Environment:int) is det
+ * init(--Environment:int) is det
  *
  * Initializes a data structure for storing a single BDD.
  * Returns an integer Environment that is a pointer to a data structure for
@@ -128,11 +128,11 @@ details.
  */
 
 /**
- * end_test(++Environment:int) is det
+ * end(++Environment:int) is det
  *
  * Terminates the environment data structure for storing a single BDD.
  * Environment is a pointer to a data structure returned by a call
- * to init_test/2.
+ * to init/2.
  */
 
 /**
@@ -386,9 +386,9 @@ prob_meta(M:Goal,P):-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   M:(asserta((Head1 :- Body2),Ref)),
-  init_test(Env),
+  init(Env),
   findall((Goal,P),get_p(M:Goal1,Env,P),L),
-  end_test(Env),
+  end(Env),
   erase(Ref),
   member((Goal,P),L).
 
@@ -410,9 +410,9 @@ abd_prob(M:Goal,P,Delta):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  init_test(Env),
+  init(Env),
   findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
-  end_test(Env),
+  end(Env),
   erase(Ref),
   member((Goal,P,Exp),L),
   from_assign_to_exp(Exp,M,Delta).
@@ -435,9 +435,9 @@ vit_prob(M:Goal,P,Delta):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  init_test(Env),
+  init(Env),
   findall((Goal,P,Exp),get_vit_p(M:Goal1,Env,P,Exp),L),
-  end_test(Env),
+  end(Env),
   erase(Ref),
   member((Goal,P,Exp0),L),
   reverse(Exp0,Exp),
@@ -457,7 +457,7 @@ vit_prob(M:Goal,P,Delta):-
  */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   abolish_all_tables,
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -465,7 +465,7 @@ vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   reverse(Exp0,Exp),
   from_assign_to_vit_exp(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+  end(Env).
 
 from_assign_to_vit_exp([],_M,[]).
 
@@ -501,12 +501,12 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_file(M:Goal,File,LV):-
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot(Env,BDD,File),
-  end_test(Env).
+  end(Env).
 
 /**
  * bdd_dot_string(:Query:atom,-DotString:string,-LV:list) is det
@@ -518,12 +518,12 @@ bdd_dot_file(M:Goal,File,LV):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+  end(Env).
 
 /**
  * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list) is det
@@ -538,13 +538,13 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   abolish_all_tables,
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV),
   create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+  end(Env).
 
 /**
  * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is det
@@ -560,7 +560,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   abolish_all_tables,
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -568,7 +568,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   ret_abd_prob(Env,BDD,P,Exp),
   from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+  end(Env).
 
 /**
  * map_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is nondet
@@ -584,7 +584,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
  * the rule number and the grounding substituion.
  */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
-  init_test(Env),
+  init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD0),!,
   findall([V,R,S],M:v(R,S,V),LV),
@@ -595,7 +595,7 @@ map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   reverse(Exp0,Exp),
   from_assign_to_map(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
-  end_test(Env).
+  end(Env).
 
 make_query_vars([],_M,_Env,C,C,[]).
 
@@ -656,13 +656,13 @@ prob_meta(M:Goal,M:Evidence,P):-
   list2and(BodyList3,Body2),
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
-  init_test(Env),
+  init(Env),
   (EvNoAct=true->
     findall((Goal,P),get_p(M:Goal1,Env,P),L)
   ;
     findall((Goal,P),get_cond_p(M:Goal1,M:EvNoAct,Env,P),L)
   ),
-  end_test(Env),
+  end(Env),
   retractall(M:NewEv),
   maplist(erase,UpdatedClausesRefs),
   erase(Ref),

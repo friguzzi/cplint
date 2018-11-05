@@ -61,12 +61,12 @@ kbest(M:Goals, K, Exps) :-
   convert_exps(BestK,M,Exps).
 
 compute_prob(Exps,M,P):-
-  init_test(Env),
+  init(Env),
   retractall(M:v(_,_,_)),
   maplist(exp2bdd(M,Env),Exps,LB),
   or_list(LB,Env,BDD),
   ret_prob(Env,BDD,P),
-  end_test(Env).
+  end(Env).
 
 exp2bdd(M,Env,_P-(Exp,_,_),BDD):-
   one(Env,One),

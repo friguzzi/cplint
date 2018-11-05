@@ -371,7 +371,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   write_rules3(Mod,[RH|R0],user_output),
   assert_all(Th1,Mod,Th1Ref),
   assert_all(R2,Mod,R2Ref),!,
-  init(ExData),
+  init_em(ExData),
   retractall(Mod:v(_,_,_)),
   length(DB,NEx),
   abolish_all_tables,
@@ -387,7 +387,7 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
   format3(Mod,"Score after EMBLEM = ~f~n",[Score]),
   retract_all(Th1Ref),
   retract_all(R2Ref),!,
-  end(ExData),
+  end_ex(ExData),
   update_theory(R2,Par,R3),
   write3(Mod,'Updated Theory\n'),
   write_rules3(Mod,R3,user_output),   %definite rules without probabilities in the head are not written
@@ -514,7 +514,7 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   write_rules2(M,R1,user_output),
   assert_all(Th0,M,Th0Ref),
   assert_all(R1,M,R1Ref),!,
-  init(ExData),
+  init_em(ExData),
   retractall(M:v(_,_,_)),
   length(DB,NEx),
   abolish_all_tables,
@@ -527,7 +527,7 @@ learn_params(DB,M,R0,R,Score):-  %Parameter Learning
   format3(M,"Initial score ~f~n",[CLL0]),
   M:local_setting(random_restarts_number,N),
   random_restarts(N,M,ExData,Nodes,-1e20,Score,initial,Par,LE),  %computes new parameters Par
-  end(ExData),
+  end_ex(ExData),
   update_theory_par(M,R1,Par,R),
   retract_all(Th0Ref),
   retract_all(R1Ref),!,
@@ -613,7 +613,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   generate_clauses_cw([R1],M,[R2],0,[],Th1),
   assert_all(Th1,M,Th1Ref),
   assert_all([R2],M,[R2Ref]),!,
-  init(ExData),
+  init_em(ExData),
   retractall(M:v(_,_,_)),
   length(DB,NEx),
   get_output_preds(R1,O),
@@ -627,7 +627,7 @@ score_clause_refinements([R1|T],M,Nrev,NRef,DB,NB0,NB,CL0,CL,CLBG0,CLBG):-
   format3(M,"Initial CLL ~f~n",[CLL0]),
   M:local_setting(random_restarts_REFnumber,N),
   random_restarts_ref(N,M,ExData,Nodes,CLL0,Score,initial,Par,LE),
-  end(ExData),
+  end_ex(ExData),
   update_theory([R2],Par,[R3]),
   write3(M,'Updated refinement\n'),
   write_rules3(M,[R3],user_output),
@@ -787,7 +787,7 @@ derive_bdd_nodes([H|T],M,ExData,E,Nodes0,Nodes,CLL0,CLL):-
   ;
     CardEx is 1.0
   ),
-  init_bdd(ExData,Env),
+  init_ex(ExData,Env),
   one(Env,One),
   get_node_list(GL,M,Env,One,BDD,CardEx),
   ret_prob(Env,BDD,HP),
@@ -797,7 +797,7 @@ derive_bdd_nodes([H|T],M,ExData,E,Nodes0,Nodes,CLL0,CLL):-
   ;
     CLL1 is CLL0+log(HP)*CardEx
   ),
-  end_bdd(ExData),
+  end_ex(ExData),
   append(Nodes0,[[BDD,CardEx]],Nodes1),
   derive_bdd_nodes(T,M,ExData,E,Nodes1,Nodes,CLL1,CLL).
 
@@ -844,12 +844,12 @@ derive_bdd_nodes_groupatoms([H|T],M,ExData,E,G,Nodes0,Nodes,CLL0,CLL,LE0,LE):-
 get_node_list_groupatoms([],_M,_ExData,[],_CE,_Gmax,CLL,CLL,LE,LE).
 
 get_node_list_groupatoms([H|T],M,ExData,[[BDD,CE1]|BDDT],CE,Gmax,CLL0,CLL,LE0,LE):-
-  init_bdd(ExData,Env),
+  init_ex(ExData,Env),
   one(Env,One),
   get_bdd_group([H|T],M,Env,T1,Gmax,G,One,BDD,CE,LE0,LE1),  %output:BDD,CLL
   CE1 is CE*(Gmax-G),
   ret_prob(Env,BDD,HP),
-  end_bdd(ExData),
+  end_ex(ExData),
   (HP =:=0.0->
     M:local_setting(logzero,LZ),
     CLL2 is CLL0+LZ*CE1
@@ -3721,11 +3721,11 @@ neg_ex([H|T],M,[HT|TT],At1,C):-
 compute_CLL_atoms([],_M,_N,CLL,CLL,[]):-!.
 
 compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
-  init_test(Env),
+  init(Env),
   abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
-  end_test(Env),!,
+  end(Env),!,
   PG1 is 1-PG,
   (PG1=:=0.0->
     M:local_setting(logzero,LZ),
@@ -3737,11 +3737,11 @@ compute_CLL_atoms([\+ H|T],M,N,CLL0,CLL1,[PG- (\+ H)|T1]):-!,
   compute_CLL_atoms(T,M,N1,CLL2,CLL1,T1).
 
 compute_CLL_atoms([H|T],M,N,CLL0,CLL1,[PG-H|T1]):-
-  init_test(Env),
+  init(Env),
   abolish_all_tables,
   get_node(H,M,Env,BDD),!,
   ret_prob(Env,BDD,PG),
-  end_test(Env),!,
+  end(Env),!,
   (PG=:=0.0->
     M:local_setting(logzero,LZ),
     CLL2 is CLL0+LZ
