@@ -74,7 +74,6 @@ details.
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
-:-use_foreign_library(foreign(bddem),install).
 
 :- style_check(-discontiguous).
 
