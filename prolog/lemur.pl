@@ -1,50 +1,41 @@
-/***************************************************************************************************
-  MCLPADS
-	http://www.di.uniba.it/~ndm/mclpads/
-
-	Copyright (c) 2013 University of Bari "Aldo Moro"
-  Author: Nicola Di Mauro
-
-	**************************************************************************************************
-
-	This code is part of the SLIPCOVER code https://sites.google.com/a/unife.it/ml/slipcover
-	Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
-	Parts of this code are thaken from the SLIPCOVER source code
-
-	***************************************************************************************************
-
-  The MCLPADS Software is made available under the terms and conditions of the Artistic License 2.0.
-	LICENSEE shall acknowledge University of Bari "Aldo Moro" as the provider of the Software.
-
-***************************************************************************************************/
-
-/*:- include(slipcover_lemur).*/
-
-/**************************************
-	 __BEGIN__
-	 New source code for MCLPADS
- **************************************/
 
 :-module(lemur,[set_lm/2,setting_lm/2,
   induce_lm/2]).
+
+
+/** <module> lemur
+
+This module performs learning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs using the LEMUR algorithm of
+
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. 
+Bandit-based Monte-Carlo structure learning of probabilistic logic programs. 
+Machine Learning, 100(1):127-156, July 2015
+
+See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
+http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+details.
+
+@author Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi
+@license Artistic License 2.0
+@copyright Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi
+*/
 :-reexport(library(slipcover)).
 
-/*slipcover_lemur.pl declarations start*/
 :-use_module(library(lists)).
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
-:-use_module(library(pita)).
 
-/*
- declarations start*/
+
 :- set_prolog_flag(discontiguous_warnings,on).
 :- set_prolog_flag(single_var_warnings,on).
 :- set_prolog_flag(unknown,warning).
 
 :- dynamic db/1.
 :- dynamic lm_input_mod/1.
+
 
 :- meta_predicate induce_lm(:,-).
 :- meta_predicate induce_rules(:,-).
@@ -546,7 +537,7 @@ tree_policy(ID,M,NodeID,DB,Od,Nd):-
   ;
     Od1 is Od + 1,
     minmaxvalue(Childs,M,MinV,MaxV),
-    %mean_value_level(Childs,Mvl),
+    %mean_value_level(Childs,M,Mvl),
     once(uct(Childs, M,VISITED, MinV, MaxV, BestChild)),
     %once(uct(Childs, VISITED, BestChild)),
     tree_policy(BestChild,M,NodeID,DB,Od1, Nd),
@@ -656,8 +647,8 @@ minmaxvalue([C|R],M,PrevMin,PrevMax,MinV,MaxV):-
   minmaxvalue(R,M,Min1,Max1,MinV,MaxV).
 
 
-mean_value_level(Cs,M):-
-  mean_value_level1(Cs,Me),
+mean_value_level(Cs,Mod,M):-
+  mean_value_level1(Cs,Mod,Me),
   length(Me,L),
   sum_list(Me,S),
   ( L=:=0->
@@ -667,17 +658,17 @@ mean_value_level(Cs,M):-
   ).
 
 
-mean_value_level1([],[]).
+mean_value_level1([],_Mod,[]).
 
-mean_value_level1([C|R],M1):-
-  node(C, _, _ , 1, _, _Visits, _Reward),
+mean_value_level1([C|R],Mod,M1):-
+  Mod:node(C, _, _ , 1, _, _Visits, _Reward),
   !,
-  mean_value_level1(R,M1).
+  mean_value_level1(R,Mod,M1).
 
-mean_value_level1([C|R],[M|Rm]):-
-  node(C, _, _ , _, _, Visits, Reward),
+mean_value_level1([C|R],Mod,[M|Rm]):-
+  Mod:node(C, _, _ , _, _, Visits, Reward),
   !,
-  mean_value_level1(R,Rm),
+  mean_value_level1(R,Mod,Rm),
   ( Visits=:=0->
     M is sign(Reward)*1e20
   ;
@@ -858,7 +849,7 @@ backup(NodeID,M,Reward,[Parent|R]):-
   ( retract(M:node(NodeID, Childs, Parent , PSLL, MLN, Visited, Backscore)) ->
     true
   ;
-    format2(M,user_error,"\nNo node with ID ~w in backup",[NodeID]),
+    format2(M,"\nNo node with ID ~w in backup",[NodeID]),
     throw(no_node_id(NodeID))
   ),
   ( PSLL=:=1->
@@ -1097,15 +1088,6 @@ user:term_expansion((:- lemur), []) :-!,
     zero_clauses/1,tabled/1)),
   retractall(M:tabled(_)),
   style_check(-discontiguous).
-
-user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
-  prolog_load_context(module, M),
-  input_mod(M),!,
-  list2and(L,Conj),
-  maplist(tab(M),L,L1),
-  maplist(zero_clause(M),L,LZ),
-  assert(M:zero_clauses(LZ)),
-  list2and(L1,Conj1).
 
 user:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
