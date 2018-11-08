@@ -82,6 +82,7 @@ details.
 */
 
 :- reexport(library(cplint_util)).
+:- reexport(library(clpr)).
 
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
