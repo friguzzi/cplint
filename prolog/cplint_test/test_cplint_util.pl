@@ -7,7 +7,7 @@
 
 test_util:-
 	run_tests([
-    beta
+    beta,av
   ]).
 
 
@@ -53,3 +53,17 @@ test(bar):-
 
 :- end_tests(beta).
 
+:- begin_tests(av, []).
+
+:-ensure_loaded(library(cplint_util)).
+
+test(av1):-
+  average([1,1],1).
+
+test(av2):-
+  average([1-1,1-1],1).
+
+test(av3):-
+  average([[1,1]-1,[1,1]-1],[1,1]).
+
+:- end_tests(av).
