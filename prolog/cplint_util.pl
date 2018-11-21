@@ -20,6 +20,8 @@
   beta/2,
   to_atom/2,
   average/2,
+  variance/2,
+  variance/3,
   agg_val/3]).
 
 :- use_module(library(matrix)).
@@ -428,7 +430,9 @@ comp_lgamma(X,LnG):-
  * * a list of numbers
  * * a list of couples number-weight, in which case each number is multiplied by the weight
  *   before being summed
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers. 
+ * * a list of lists,  in which case lists are considered as matrices of numbers and averaged
+ *   element-wise
+ * * a list of couples list-weight, in which case the list is considered as a matrix of numbers. 
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -437,6 +441,14 @@ average([H|T],Av):-
   sum_list([H|T],Sum),
   length([H|T],N),
   Av is Sum/N.
+
+average([H|T],E):-
+  is_list(H),!,
+  length(H,N),
+  list0(N,L0),
+  foldl(vector_sum,[H|T],L0,Sum),
+  length([H|T],NV),
+  matrix_div_scal([Sum],NV,[E]).
 
 average([H-W|T],E):-
   is_list(H),!,
@@ -460,6 +472,46 @@ single_value_vect(H-N,S0,S):-
 
 
 agg_val(_ -N,S,S+N).
+
+vector_sum(A,B,C):-
+  matrix_sum([A],[B],[C]).
+
+/**
+ * variance(+Values:list,-Average:float,-Variance:float) is det
+ * variance(+Values:list,-Variance:float) is det
+ *
+ * Computes the variance (and the average) of Values.
+ * Values can be
+ * 
+ * * a list of numbers
+ * * a list of couples number-weight, in which case each number is multiplied by the weight
+ *   before being considered
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers. 
+ *   The matrix in each element of List must have the same dimension and are aggregated element-
+ *   wise
+ */
+variance(L,Var):-
+  variance(L,_Av,Var).
+
+variance(L,Av,Var):-
+  average(L,Av),
+  maplist(sq_diff(Av),L,LS), 
+  average(LS,Var).
+
+sq_diff(Av,A,S):-
+  number(A),!,
+  S is (A-Av)^2.
+
+sq_diff(Av,A-W,S):-
+  number(A),!,
+  S is (A*W-Av)^2.
+
+sq_diff(Av,A-W,S):-
+  maplist(mult(W),A,AW),
+  maplist(sq_diff,Av,AW,S).
+
+mult(W,A,A1):-
+  A1 is A*W.
 
 :- multifile sandbox:safe_primitive/1.
 sandbox:safe_primitive(cplint_util:bar(_,_)).
