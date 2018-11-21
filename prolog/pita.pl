@@ -1087,7 +1087,7 @@ to_table(M,Heads,[],Heads):-
 to_table(M,Heads,ProcTabDir,Heads1):-
   maplist(tab_dir(M),Heads,TabDirList,Heads1L),
   append(TabDirList,TabDir),
-  maplist(term_expansion,TabDir,ProcTabDirL),
+  maplist(system:term_expansion,TabDir,ProcTabDirL),
   append(ProcTabDirL,ProcTabDir),
   append(Heads1L,Heads1).
 
@@ -1307,6 +1307,7 @@ system:term_expansion((Head :- Body),
 
 system:term_expansion((Head :- Body),
   [rule_by_num(R,HeadList,BodyList,VC1)|Clauses]):-
+	  %trace,
     ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % disjunctive clause with more than one head atom senza depth_bound
