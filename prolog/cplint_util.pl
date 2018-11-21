@@ -22,6 +22,8 @@
   average/2,
   variance/2,
   variance/3,
+  std_dev/2,
+  std_dev/3,
   agg_val/3]).
 
 :- use_module(library(matrix)).
@@ -479,8 +481,10 @@ vector_sum(A,B,C):-
 /**
  * variance(+Values:list,-Average:float,-Variance:float) is det.
  * variance(+Values:list,-Variance:float) is det.
+ * std_dev(+Values:list,-Average:float,-Dev:float) is det.
+ * std_dev(+Values:list,-Dev:float) is det.
  *
- * Computes the variance (and the average) of Values.
+ * Computes the variance or standard deviation (and the average) of Values.
  * Values can be
  * 
  * * a list of numbers
@@ -497,6 +501,23 @@ variance(L,Av,Var):-
   average(L,Av),
   maplist(sq_diff(Av),L,LS), 
   average(LS,Var).
+
+std_dev(L,Dev):-
+  std_dev(L,_Av,Dev).
+  
+std_dev(L,Av,Dev):-
+  variance(L,Av,Var),
+  root(Var,Dev).
+
+root(Var,Dev):-
+  number(Var),!,
+  Dev is sqrt(Var).
+
+root(Var,Dev):-
+  maplist(sqroot,Var,Dev).
+
+sqroot(A,B):-
+  B is sqrt(A).
 
 sq_diff(Av,A,S):-
   number(A),!,
