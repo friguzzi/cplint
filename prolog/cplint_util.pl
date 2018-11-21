@@ -18,7 +18,11 @@
   value/2,
   bin/5,
   beta/2,
-  to_atom/2]).
+  to_atom/2,
+  average/2,
+  agg_val/3]).
+
+:- use_module(library(matrix)).
 /** <module> cplint_util
 
 Utility module for cplint
@@ -414,6 +418,48 @@ beta(Par,B):-
 
 comp_lgamma(X,LnG):-
   LnG is lgamma(X).
+
+/**
+ * average(+Values:list,-Average:float) is det
+ *
+ * Computes the average of Values.
+ * Values can be
+ * 
+ * * a list of numbers
+ * * a list of couples number-weight, in which case each number is multiplied by the weight
+ *   before being summed
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers. 
+ *   The matrix in each element of List must have the same dimension and are aggregated element-
+ *   wise
+ */
+average([H|T],Av):-
+  number(H),!,
+  sum_list([H|T],Sum),
+  length([H|T],N),
+  Av is Sum/N.
+
+average([H-W|T],E):-
+  is_list(H),!,
+  length(H,N),
+  list0(N,L0),
+  foldl(single_value_vect,[H-W|T],L0,Sum),
+  foldl(agg_val,[H-W|T],0,SW),
+  matrix_div_scal([Sum],SW,[E]).
+
+average(ValList,E):-
+  foldl(single_value_cont,ValList,0,Sum),
+  foldl(agg_val,ValList,0,SW),
+  E is Sum/SW.
+
+
+single_value_cont(H-N,S,S+N*H).
+
+single_value_vect(H-N,S0,S):-
+  matrix_mult_scal([H],N,[H1]),
+  matrix_sum([H1],[S0],[S]).
+
+
+agg_val(_ -N,S,S+N).
 
 :- multifile sandbox:safe_primitive/1.
 sandbox:safe_primitive(cplint_util:bar(_,_)).
