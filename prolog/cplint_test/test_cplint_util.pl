@@ -66,4 +66,13 @@ test(av2):-
 test(av3):-
   average([[1,1]-1,[1,1]-1],[1,1]).
 
+test(v1):-
+  variance([1,1],1,0).
+
+test(v2):-
+  variance([1-1,1-1],1,0).
+
+test(v3):-
+  variance([[1,1]-1,[1,1]-1],[1,1],[0,0]).
+
 :- end_tests(av).

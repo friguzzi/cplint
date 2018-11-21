@@ -477,8 +477,8 @@ vector_sum(A,B,C):-
   matrix_sum([A],[B],[C]).
 
 /**
- * variance(+Values:list,-Average:float,-Variance:float) is det
- * variance(+Values:list,-Variance:float) is det
+ * variance(+Values:list,-Average:float,-Variance:float) is det.
+ * variance(+Values:list,-Variance:float) is det.
  *
  * Computes the variance (and the average) of Values.
  * Values can be
