@@ -447,13 +447,13 @@ get_next_rule_number(PName,R):-
   R1 is R+1,
   assert(PName:rule_n(R1)).
 
-user:term_expansion(end_of_file, end_of_file) :-
+system:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   retractall(vit_input_mod(M)),
   style_check(+discontiguous).
 
-user:term_expansion((:- viterbi), []) :-!,
+system:term_expansion((:- viterbi), []) :-!,
   prolog_load_context(module, M),
   retractall(M:local_viterbi_setting(_,_)),
   findall(local_viterbi_setting(P,V),default_setting_viterbi(P,V),L),
@@ -467,27 +467,27 @@ user:term_expansion((:- viterbi), []) :-!,
   retractall(M:rule(_,_,_,_,_,_,_,_)),
   style_check(-discontiguous).
 
-user:term_expansion((:- begin_plp), []) :-
+system:term_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   assert(M:vit_on).
 
-user:term_expansion((:- end_plp), []) :-
+system:term_expansion((:- end_plp), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   retractall(M:vit_on).
 
-user:term_expansion((:- begin_lpad), []) :-
+system:term_expansion((:- begin_lpad), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   assert(M:vit_on).
 
-user:term_expansion((:- end_lpad), []) :-
+system:term_expansion((:- end_lpad), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   retractall(M:vit_on).
 
-user:term_expansion((Head :- Body), []):-
+system:term_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 % disjunctive clause with more than one head atom
   Head = (_;_), !,
@@ -503,7 +503,7 @@ user:term_expansion((Head :- Body), []):-
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
 
-user:term_expansion((Head :- Body), []):-
+system:term_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	(Head=(_:_); Head=(_::_)),  !,
 	list2or(HeadListOr, Head),
@@ -517,12 +517,12 @@ user:term_expansion((Head :- Body), []):-
 	assert_rules(HeadList, M,0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
-user:term_expansion((Head :- Body), []):-
+system:term_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	list2and(BodyList, Body),
 	assert(M:def_rule(Head, BodyList)).
 
-user:term_expansion(Head , []):-
+system:term_expansion(Head , []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	Head=(_;_), !,
 	list2or(HeadListOr, Head),
@@ -534,7 +534,7 @@ user:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-user:term_expansion(Head , []):-
+system:term_expansion(Head , []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	(Head=(_:_); Head=(_::_)), !,
 	list2or(HeadListOr, Head),
@@ -546,7 +546,7 @@ user:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-user:term_expansion(Head, []):-
+system:term_expansion(Head, []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	assert(M:def_rule(Head, [])).
 

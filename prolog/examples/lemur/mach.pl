@@ -82,7 +82,7 @@ input_cw(not_replaceable/1).
 input_cw(worn/1).
 input_cw(not_worn/1).
 input_cw(none_worn/0).
-%input(one_worn/0).
+input(class/1).
 
 determination(class/1,replaceable/1).
 determination(class/1,not_replaceable/1).

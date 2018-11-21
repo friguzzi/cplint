@@ -3123,7 +3123,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[Rule])) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1 with individual pars
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (H:A),
   A=..[t,_P|_],
   !,
@@ -3145,7 +3145,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1, fixed par
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (H:p(_)),
   !,
   list2or(HeadListOr, Head),
@@ -3167,7 +3167,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1, fixed par
   M:local_setting(compiling,on),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (H:p(_)),
   !,
   list2or(HeadListOr, Head),
@@ -3189,14 +3189,14 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
 term_expansion_int((Head :- Body),M, ([],[])) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non è caricata nella teoria e non è conteggiata in NR
   M:local_setting(compiling,on),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (_H:P),number(P),P=:=0.0, !.
 
 term_expansion_int((Head :- Body),M, (Clauses,[def_rule(H,BodyList,true)])) :-
 % disjunctive clause with a single head atom e depth_bound con prob =1
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
   HeadList=[H:_],!,
@@ -3210,7 +3210,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[def_rule(H,BodyList,true)])) :-
 term_expansion_int((Head :- Body), M,(Clauses,[def_rule(H,BodyList,true)])) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   M:local_setting(compiling,on),
-   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+   ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
   HeadList=[H:_],!,
@@ -3225,7 +3225,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
@@ -3246,7 +3246,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tunable)])) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   M:local_setting(compiling,on),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   Head = (H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
@@ -3267,7 +3267,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
 term_expansion_int((Head :- Body),M,(Clauses,[])) :-
 % definite clause for db facts
   M:local_setting(compiling,on),
-  ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
   Clauses=(Head1 :- Body).
 
@@ -3275,7 +3275,7 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
 % definite clause with depth_bound
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
-   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
+   ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,Module,M),
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
@@ -3286,7 +3286,7 @@ term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
 term_expansion_int((Head :- Body),M,(Clauses,[def_rule(Head,BodyList,true)])) :-
 % definite clause senza DB
   M:local_setting(compiling,on),
-  ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,Module,M),
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
@@ -3382,14 +3382,14 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
 term_expansion_int(Head,M,([],[])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 0
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (_H:P),number(P),P=:=0.0, !.
 
 term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (H:P),number(P),P=:=1.0, !,
   list2and([slipcover:onec(Env,BDD)],Body1),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
@@ -3398,7 +3398,7 @@ term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
 term_expansion_int(Head,M,(Clause,[def_rule(H,[],true)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom con prob. 1, senza db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (H:P),number(P),P=:=1.0, !,
   list2and([slipcover:onec(Env,BDD)],Body1),
   add_bdd_arg(H,Env,BDD,_Module,Head1),
@@ -3408,7 +3408,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db, fixed par
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H:p(_)), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
@@ -3425,7 +3425,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db, fixed par
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H:p(_)), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
@@ -3463,7 +3463,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
@@ -3480,7 +3480,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
 term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   M:local_setting(compiling,on),
 % disjunctive fact with a single head atom e prob. generiche, senza db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
@@ -3498,14 +3498,14 @@ term_expansion_int(Head,M, ((Head1:-slipcover:onec(Env,One)),[def_rule(Head,[],t
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
 % definite fact with db
-  (Head \= ((user:term_expansion(_,_) ):- _ )),
+  (Head \= ((system:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
   add_bdd_arg_db(Head,Env,One,_DB,_Module,Head1).
 
 term_expansion_int(Head,M, ((Head1:-slipcover:onec(Env,One)),[def_rule(Head,[],true)])) :-
   M:local_setting(compiling,on),
 % definite fact without db
-  (Head \= ((user:term_expansion(_,_) ):- _ )),
+  (Head \= ((system:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
   add_bdd_arg(Head,Env,One,_Module,Head1).
 
@@ -3928,7 +3928,7 @@ zero_clause(M,A/B,(H:-maplist(nonvar,Args0),slipcover:zeroc(Env,BDD))):-
   append(Args0,ExtraArgs,Args),
   H=..[A|Args].
 
-user:term_expansion((:- sc), []) :-!,
+system:term_expansion((:- sc), []) :-!,
   prolog_load_context(module, M),
   retractall(M:local_setting(_,_)),
   findall(local_setting(P,V),default_setting_sc(P,V),L),
@@ -3947,7 +3947,7 @@ user:term_expansion((:- sc), []) :-!,
   retractall(M:tabled(_)),
   style_check(-discontiguous).
 
-user:term_expansion(end_of_file, C) :-
+system:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   make_dynamic(M),
@@ -3958,18 +3958,18 @@ user:term_expansion(end_of_file, C) :-
   %retractall(input_mod(M)),
   append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
-user:term_expansion((:- begin_bg), []) :-
+system:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   assert(M:bg_on).
 
-user:term_expansion(C, M:bgc(C)) :-
+system:term_expansion(C, M:bgc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_bg),
   input_mod(M),
   M:bg_on,!.
 
-user:term_expansion((:- end_bg), []) :-
+system:term_expansion((:- end_bg), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:bg_on),
@@ -3983,18 +3983,18 @@ user:term_expansion((:- end_bg), []) :-
     assert(M:bg(L))
   ).
 
-user:term_expansion((:- begin_in), []) :-
+system:term_expansion((:- begin_in), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   assert(M:in_on).
 
-user:term_expansion(C, M:inc(C)) :-
+system:term_expansion(C, M:inc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_in),
   input_mod(M),
   M:in_on,!.
 
-user:term_expansion((:- end_in), []) :-
+system:term_expansion((:- end_in), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:in_on),
@@ -4008,35 +4008,37 @@ user:term_expansion((:- end_in), []) :-
     assert(M:in(L))
   ).
 
-user:term_expansion(begin(model(I)), []) :-
+system:term_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
-user:term_expansion(end(model(_I)), []) :-
+system:term_expansion(end(model(_I)), []) :-
   prolog_load_context(module, M),
   input_mod(M),!,
   retractall(M:model(_)).
 
-user:term_expansion(output(P/A), [(:- table P1),output(P/A)]) :-
+system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
+  term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-user:term_expansion(input(P/A), [(:- table P1),input(P/A)]) :-
+system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
+  term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-user:term_expansion(At, A) :-
+system:term_expansion(At, A) :-
   prolog_load_context(module, M),
   input_mod(M),
   M:model(Name),

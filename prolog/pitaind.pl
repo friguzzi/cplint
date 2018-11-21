@@ -867,18 +867,18 @@ act(M,A/B):-
 tab(A/B,A/B1):-
   B1 is B + 2.
 
-user:term_expansion(end_of_file, end_of_file) :-
+system:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   retractall(pitaind_input_mod(M)),
   style_check(+discontiguous).
 
-user:term_expansion((:- action Conj), []) :-!,
+system:term_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
   list2and(L,Conj),
   maplist(act(M),L).
 
-user:term_expansion((:- pitaind), []) :-!,
+system:term_expansion((:- pitaind), []) :-!,
   prolog_load_context(module, M),
   retractall(M:local_pitaind_setting(_,_)),
   findall(local_pitaind_setting(P,V),default_setting_pitaind(P,V),L),
@@ -891,38 +891,38 @@ user:term_expansion((:- pitaind), []) :-!,
   M:(dynamic v/3),
   style_check(-discontiguous).
 
-user:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+system:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   list2and(L,Conj),
   maplist(tab,L,L1),
   list2and(L1,Conj1).
 
-user:term_expansion((:- begin_plp), []) :-
+system:term_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   assert(M:pitaind_on).
 
-user:term_expansion((:- end_plp), []) :-
+system:term_expansion((:- end_plp), []) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   retractall(M:pitaind_on).
 
-user:term_expansion((:- begin_lpad), []) :-
+system:term_expansion((:- begin_lpad), []) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   assert(M:pitaind_on).
 
-user:term_expansion((:- end_lpad), []) :-
+system:term_expansion((:- end_lpad), []) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),!,
   retractall(M:pitaind_on).
 
-user:term_expansion(values(A,B), values(A,B)) :-
+system:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),
   pitaind_input_mod(M),M:pitaind_on,!.
 
-user:term_expansion((Head :- Body), Clauses):-
+system:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive clause with more than one head atom e depth_bound
@@ -943,7 +943,7 @@ user:term_expansion((Head :- Body), Clauses):-
     generate_rules_db(HeadList,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
    ).
 
-user:term_expansion((Head :- Body), Clauses):-
+system:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
@@ -963,19 +963,19 @@ user:term_expansion((Head :- Body), Clauses):-
     generate_rules(HeadList,Body1,VC,R,Probs,BDDAnd,0,Clauses,M)
   ).
 
-user:term_expansion((Head :- Body), []) :-
+system:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   (Head = (_:P);Head=(P::_)),
   ground(P),
   P=:=0.0, !.
 
-user:term_expansion((Head :- Body), Clauses) :-
+system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e depth_bound
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
@@ -986,10 +986,10 @@ user:term_expansion((Head :- Body), Clauses) :-
   add_bdd_arg_db(H,BDDAnd,DBH,M,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :-
+system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
-   ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+   ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[H:_],!,
@@ -1000,11 +1000,11 @@ user:term_expansion((Head :- Body), Clauses) :-
   add_bdd_arg(H,BDDAnd,M,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body), Clauses) :-
+system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   (Head = (H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -1022,10 +1022,10 @@ user:term_expansion((Head :- Body), Clauses) :-
     generate_clause_db(H,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
   ).
 
-user:term_expansion((Head :- Body), Clauses) :-
+system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
-  ((Head:-Body) \= ((user:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   (Head = (H:_);Head = (_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -1043,18 +1043,18 @@ user:term_expansion((Head :- Body), Clauses) :-
     generate_clause(H,Body2,VC,R,Probs,BDDAnd,0,Clauses,M)
   ).
 
-/*user:term_expansion((Head :- Body),Clauses) :-
+/*system:term_expansion((Head :- Body),Clauses) :-
 % definite clause for db facts
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
-  ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),
   Head=db(Head1),!,
   Clauses=(Head1 :- Body).
 */
-user:term_expansion((Head :- Body),Clauses) :-
+system:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
-   ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
+   ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,M),
   append([onec(BDD)],BodyList2,BodyList3),
@@ -1062,10 +1062,10 @@ user:term_expansion((Head :- Body),Clauses) :-
   add_bdd_arg_db(Head,BDDAnd,DBH,M,Head1),
   Clauses=(Head1 :- Body1).
 
-user:term_expansion((Head :- Body),Clauses) :-
+system:term_expansion((Head :- Body),Clauses) :-
 % definite clause senza DB
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
-  ((Head:-Body) \= ((user:term_expansion(_,_)) :- _ )),!,
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,M),
   append([onec(BDD)],BodyList2,BodyList3),
@@ -1073,7 +1073,7 @@ user:term_expansion((Head :- Body),Clauses) :-
   add_bdd_arg(Head,BDDAnd,M,Head1),
   Clauses=(Head1 :- Body2).
 
-user:term_expansion(Head,Clauses) :-
+system:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive FACT with more than one head atom e db
@@ -1089,7 +1089,7 @@ extract_vars_list(HeadList,[],VC),
     generate_rules_fact_db(HeadList,VC,R,Probs,0,Clauses,M)
   ).
 
-user:term_expansion(Head,Clauses) :-
+system:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
@@ -1104,10 +1104,10 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,VC,R,Probs,0,Clauses,M)
   ).
 
-user:term_expansion(Head,Clauses) :-
+system:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with uniform distr
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
   Head=(H:uniform(Var,D0)),!,
@@ -1123,10 +1123,10 @@ user:term_expansion(Head,Clauses) :-
   ).
 
 
-user:term_expansion(Head,Clauses) :-
+system:term_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with guassia distr
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
@@ -1139,19 +1139,19 @@ user:term_expansion(Head,Clauses) :-
     generate_rules_fact_vars(HeadList,R,Probs,0,Clauses,M)
   ).
 
-user:term_expansion(Head,[]) :-
+system:term_expansion(Head,[]) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with a single head atom con prob. 0
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
 
-user:term_expansion(Head,Clause) :-
+system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (H:P); Head = (P::H)),
   ground(P),
   P=:=1.0, !,
@@ -1159,10 +1159,10 @@ user:term_expansion(Head,Clause) :-
   add_bdd_arg_db(H,BDD,_DB,M,Head1),
   Clause=(Head1 :- Body1).
 
-user:term_expansion(Head,Clause) :-
+system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with a single head atom con prob. 1, senza db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (H:P);Head =(P::H)),
   ground(P),
   P=:=1.0, !,
@@ -1170,11 +1170,11 @@ user:term_expansion(Head,Clause) :-
   add_bdd_arg(H,BDD,M,Head1),
   Clause=(Head1 :- Body1).
 
-user:term_expansion(Head,Clause) :-
+system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -1188,10 +1188,10 @@ user:term_expansion(Head,Clause) :-
     Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equality(V,0,BDD)))
   ).
 
-user:term_expansion(Head,Clause) :-
+system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with a single head atom e prob. generiche, senza db
-  (Head \= ((user:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -1205,27 +1205,27 @@ user:term_expansion(Head,Clause) :-
     Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equality(V,0,BDD)))
   ).
 
-user:term_expansion((:- set_pitaind(P,V)), []) :-!,
+system:term_expansion((:- set_pitaind(P,V)), []) :-!,
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   set_pitaind(P,V).
 
-user:term_expansion((:- set_sw(A,B)), []) :-!,
+system:term_expansion((:- set_sw(A,B)), []) :-!,
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   set_sw(M:A,B).
 
 
-user:term_expansion(Head, (Head1:-onec(One))) :-
+system:term_expansion(Head, (Head1:-onec(One))) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % definite fact with db
-  (Head \= ((user:term_expansion(_,_) ):- _ )),
+  (Head \= ((system:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
   add_bdd_arg_db(Head,One,_DB,M,Head1).
 
-user:term_expansion(Head, (Head1:-onec(One))) :-
+system:term_expansion(Head, (Head1:-onec(One))) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % definite fact without db
-  (Head \= ((user:term_expansion(_,_) ):- _ )),
+  (Head \= ((system:term_expansion(_,_) ):- _ )),
   (Head\= end_of_file),
   add_bdd_arg(Head,One,M,Head1).
 

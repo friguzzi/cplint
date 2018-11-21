@@ -1070,7 +1070,7 @@ setting_lm(M:P,V):-
 
 
 
-user:term_expansion((:- lemur), []) :-!,
+system:term_expansion((:- lemur), []) :-!,
   prolog_load_context(module, M),
   retractall(M:local_setting(_,_)),
   findall(local_setting(P,V),default_setting_lm(P,V),L),
@@ -1089,25 +1089,25 @@ user:term_expansion((:- lemur), []) :-!,
   retractall(M:tabled(_)),
   style_check(-discontiguous).
 
-user:term_expansion(end_of_file, end_of_file) :-
+system:term_expansion(end_of_file, end_of_file) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   make_dynamic(M),
   retractall(lm_input_mod(M)),
   style_check(+discontiguous).
 
-user:term_expansion((:- begin_bg), []) :-
+system:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   assert(M:bg_on).
 
-user:term_expansion(C, M:bgc(C)) :-
+system:term_expansion(C, M:bgc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_bg),
   lm_input_mod(M),
   M:bg_on,!.
 
-user:term_expansion((:- end_bg), []) :-
+system:term_expansion((:- end_bg), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:bg_on),
@@ -1121,18 +1121,18 @@ user:term_expansion((:- end_bg), []) :-
     assert(M:bg(L))
   ).
 
-user:term_expansion((:- begin_in), []) :-
+system:term_expansion((:- begin_in), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   assert(M:in_on).
 
-user:term_expansion(C, M:inc(C)) :-
+system:term_expansion(C, M:inc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_in),
   lm_input_mod(M),
   M:in_on,!.
 
-user:term_expansion((:- end_in), []) :-
+system:term_expansion((:- end_in), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:in_on),
@@ -1146,35 +1146,37 @@ user:term_expansion((:- end_in), []) :-
     assert(M:in(L))
   ).
 
-user:term_expansion(output(P/A), [(:- table P1),output(P/A)]) :-
+system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
+  term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-user:term_expansion(input(P/A), [(:- table P1),input(P/A)]) :-
+system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
+  term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-user:term_expansion(begin(model(I)), []) :-
+system:term_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
-user:term_expansion(end(model(_I)), []) :-
+system:term_expansion(end(model(_I)), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:model(_)).
 
-user:term_expansion(At, A) :-
+system:term_expansion(At, A) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:model(Name),
