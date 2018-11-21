@@ -504,14 +504,12 @@ sq_diff(Av,A,S):-
 
 sq_diff(Av,A-W,S):-
   number(A),!,
-  S is (A*W-Av)^2.
+  S is W*(A-Av)^2.
 
 sq_diff(Av,A-W,S):-
-  maplist(mult(W),A,AW),
-  maplist(sq_diff,Av,AW,S).
+  maplist(sq_diff,Av,A,S0),
+  matrix_mult_scal([S0],W,[S]).
 
-mult(W,A,A1):-
-  A1 is A*W.
 
 :- multifile sandbox:safe_primitive/1.
 sandbox:safe_primitive(cplint_util:bar(_,_)).
