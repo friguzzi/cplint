@@ -84,6 +84,8 @@ details.
 :- reexport(library(cplint_util)).
 :- reexport(library(clpr)).
 
+:- use_module(library(bddem)).
+
 :-meta_predicate s(:,-).
 :-meta_predicate mc_prob(:,-).
 :-meta_predicate mc_prob(:,-,+).
@@ -2606,13 +2608,7 @@ sample_gauss(R,VC,Mean,Variance,S):-
  */
 gauss(Mean,Variance,S):-
   number(Mean),!,
-  random(U1),
-  random(U2),
-  R is sqrt(-2*log(U1)),
-  Theta is 2*pi*U2,
-  S0 is R*cos(Theta),
-  StdDev is sqrt(Variance),
-  S is StdDev*S0+Mean.
+  gauss_sample(Mean,Variance,S).
 
 gauss([Mean1,Mean2],Covariance,[X1,X2]):-!,
   random(U1),
@@ -2690,57 +2686,10 @@ sample_gamma(R,VC,_Shape,_Scale,S):-
   S=S0.
 
 sample_gamma(R,VC,Shape,Scale,S):-
-  gamma(Shape,Scale,S0),
+  gamma_sample(Shape,Scale,S0),
   assertz(sampled(R,VC,S0)),
   S=S0.
 
-/**
- * gamma(+Shape:float,+Scale:float,-S:float) is det
- *
- * samples a value from a Gamma density function with shape Shape and
- * scale Scale returns it in S
- */
-gamma(A,Scale,S):-
-  (A>=1->
-    gamma_gt1(A,S1)
-  ;
-    random(U),
-    A1 is A+1,
-    gamma_gt1(A1,S0),
-    S1 is S0*U^(1/A)
-  ),
-  S is Scale*S1.
-
-gamma_gt1(A,S):-
-  D is A-1.0/3.0,
-  C is 1.0/sqrt(9.0*D),
-  cycle_gamma(D,C,S).
-
-cycle_gamma(D,C,S):-
-  getv(C,X,V),
-  random(U),
-  S0 is D*V,
-  (U<1-0.0331*X^4->
-    S=S0
-  ;
-    LogU is log(U),
-    LogV is log(V),
-    (LogU<0.5*X^2+D*(1-V+LogV)->
-      S=S0
-    ;
-      cycle_gamma(D,C,S)
-    )
-  ).
-
-getv(C,X,V):-
-  gauss(0.0,1.0,X0),
-  V0 is (1+C*X0)^3,
-  (V0=<0->
-    getv(C,X,V)
-  ;
-    V=V0,
-    X=X0
-  ).
 
 gamma_density(K,Scale,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
@@ -2773,8 +2722,8 @@ sample_beta(R,VC,A,B,S):-
  * https://en.wikipedia.org/wiki/Beta_distribution#Generating_beta-distributed_random_variates
  */
 beta(Alpha,Beta,S):-
-  gamma(Alpha,1,X),
-  gamma(Beta,1,Y),
+  gamma_sample(Alpha,1,X),
+  gamma_sample(Beta,1,Y),
   S is X/(X+Y).
 
 beta_density(Alpha,Beta,X,D):-
@@ -2892,34 +2841,9 @@ sample_dirichlet(R,VC,_Par,S):-
   S=S0.
 
 sample_dirichlet(R,VC,Par,S):-
-  dirichlet(Par,S0),
+  dirichlet_sample(Par,S0),
   assertz(sampled(R,VC,S0)),
   S=S0.
-
-/**
- * dirichlet(+Par:list,-S:float) is det
- *
- * samples a value from a Dirichlet probability density with parameters
- * Par and returns it in S
- */
-dirichlet(Par,S):-
-  maplist(get_gamma,Par,Gammas),
-  sumlist(Gammas,Sum),
-  maplist(divide(Sum),Gammas,S).
-
-divide(S0,A,S):-
-  S is A/S0.
-
-get_gamma(A,G):-
-  gamma(A,1.0,G).
-
-dirichlet_density(Par,S,D):-
-  beta(Par,B),
-  foldl(prod,S,Par,1,D0),
-  D is D0*B.
-
-prod(X,A,P0,P0*X^(A-1)).
-
 
 /**
  * sample_geometric(+R:int,+VC:list,+P:float,-S:int) is det
