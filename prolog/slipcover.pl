@@ -136,6 +136,11 @@ default_setting_sc(single_var,true). %false:1 variable for every grounding of a 
 default_setting_sc(prob_approx,false). %if true, it limits the number of different solutions found when computing the probability
 default_setting_sc(approx_value,100).
 
+default_setting_sc(alpha,0.0).
+% Sets the type of parameter initialization for EM on Environment:
+% if alpha is 0.0, it uses a truncated Dirichlet process
+% if alpha is a float > 0.0, it uses a symmetric Dirichlet distribution
+% with that value as parameter
 
 /**
  * induce(:TrainFolds:list_of_atoms,-P:probabilistic_program) is det
@@ -883,6 +888,8 @@ random_restarts(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(epsilon_em,EA),
   M:local_setting(epsilon_em_fraction,ER),
   M:local_setting(iter,Iter),
+  M:local_setting(alpha,Alpha),
+  initial_values(ExData,Alpha),
   em(ExData,LS1,Nodes,EA,ER,Iter,CLL,Par1,ExP),
   score(M,LE,ExP,CLL,ScoreR),
   format3(M,"Random_restart: Score ~f~n",[ScoreR]),
@@ -905,6 +912,8 @@ random_restarts_ref(N,M,ExData,Nodes,Score0,Score,Par0,Par,LE):-
   M:local_setting(epsilon_em,EA),
   M:local_setting(epsilon_em_fraction,ER),
   M:local_setting(iterREF,Iter),
+  M:local_setting(alpha,Alpha),
+  initial_values(ExData,Alpha),
   em(ExData,LS1,Nodes,EA,ER,Iter,CLLR,Par1,ExP),
   score(M,LE,ExP,CLLR,ScoreR),
   format3(M,"Random_restart: Score ~f~n",[ScoreR]),
