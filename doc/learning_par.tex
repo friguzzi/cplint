@@ -46,5 +46,11 @@ variables in clauses (as defined in \cite{DBLP:journals/ai/Cohen95}).
 \item \verb|mcts_maxrestarts|  (values: integer, default value: 20, valid for LEMUR): maximum number of Monte-Carlo tree search restarts
 \item \verb|neg_ex| (values:  \verb|given|, \verb|cw|, default value: \verb|cw|): if  set to \verb|given|, the negative examples in testing
 are taken from the test folds interpretations, i.e., those examples \verb|ex| stored as \verb|neg(ex)|; if set to \verb|cw|, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+\item \verb|alpha| (values: floating point $\geq 0$, default value: 0): parameter of the 
+symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is
+used to sample parameters: the probability of being true of  each Boolean random variable 
+used to represent multivalued
+random variables is sampled uniformly and independently in [0,1]. If it takes a value $\geq 0$, the parameters are sampled from
+a symmetric Dirichlet distribution, i.e. a Dirichlet distribution  with vector of parameters $(\alpha,\ldots,\alpha)$.
 \item \verb|verbosity| (values: integer in [1,3], default value: 1): level of verbosity of the algorithms.
 \end{itemize}

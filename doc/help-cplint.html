@@ -734,7 +734,8 @@ pos:0.000448807 :-
   circle(B).
 :- end_in.</code></pre>
 <p>If you specify both a <code>in/1</code> fact and a section, the clauses of the two will be combined.</p>
-<p>The annotations of the head atoms of the initial program can be probabilities, as in the example above, in this case the parameters do not matter as they are first randomized.</p>
+<p>The annotations of the head atoms of the initial program can be probabilities, as in the example above, in this case the parameters do not matter as they are first randomized. The type of randomization depends on the setting <code>alpha</code>. If it takes value 0, a truncated Dirichlet process is used to initialize the parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled and independently uniformly in [0,1].</p>
+<p>If it takes a value <span class="math inline">\(\geq 0\)</span>, the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters <span class="math inline">\((\alpha,\ldots,\alpha)\)</span>.</p>
 <p>The annotations of the head atoms of the initial program can also be <code>p(&lt;prob&gt;)</code> with <code>&lt;prob&gt;</code> a probability, in this case the parameter is fixed so it is not tuned by learning, as in</p>
 <pre><code>in([(pos:0.5 :-
  	circle(A),
@@ -993,6 +994,7 @@ fold(test,[490,491,...]).</code></pre>
 <li><p><code>mcts_iter</code> (values: integer, default value: 20, valid for LEMUR): number of Monte-Carlo tree search iterations</p></li>
 <li><p><code>mcts_maxrestarts</code> (values: integer, default value: 20, valid for LEMUR): maximum number of Monte-Carlo tree search restarts</p></li>
 <li><p><code>neg_ex</code> (values: <code>given</code>, <code>cw</code>, default value: <code>cw</code>): if set to <code>given</code>, the negative examples in testing are taken from the test folds interpretations, i.e., those examples <code>ex</code> stored as <code>neg(ex)</code>; if set to <code>cw</code>, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.</p></li>
+<li><p><code>alpha</code> (values: floating point <span class="math inline">\(\geq 0\)</span>, default value: 0): parameter of the symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is used to sample parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled uniformly and independently in [0,1]. If it takes a value <span class="math inline">\(\geq 0\)</span>, the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters <span class="math inline">\((\alpha,\ldots,\alpha)\)</span>.</p></li>
 <li><p><code>verbosity</code> (values: integer in [1,3], default value: 1): level of verbosity of the algorithms.</p></li>
 </ul>
 <h1 id="download-query-results-through-an-api">Download Query Results through an API</h1>

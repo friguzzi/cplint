@@ -146,6 +146,14 @@ If you specify both a \verb|in/1| fact and a section, the clauses of the two wil
 
 The annotations of the head atoms of the initial program can be 
  probabilities, as in the example above, in this case the  parameters do not matter as they are first randomized.
+The type of randomization depends on the setting \verb|alpha|.
+If it takes value 0, a truncated Dirichlet process is
+used to initialize the parameters: the probability of being true of  each Boolean random variable 
+used to represent multivalued
+random variables is sampled and independently uniformly in [0,1].
+
+If it takes a value $\geq 0$, the parameters are sampled from
+a symmetric Dirichlet distribution, i.e. a Dirichlet distribution  with vector of parameters $(\alpha,\ldots,\alpha)$.
 
 The annotations of the head atoms of the initial program can also be 
  \verb|p(<prob>)| with \verb|<prob>| a probability, in this case the parameter is fixed so it is not tuned by learning, as
