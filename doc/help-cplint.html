@@ -177,7 +177,7 @@ emit(NextS,I,V) :-
 init(S):gaussian(S,0,1).
 trans_err(_,E):gaussian(E,0,2).
 obs_err(_,E):gaussian(E,0,1).</code></pre>
-<p>Continuous random variables are involved in arithmetic expressions (in <code>trans/3</code> and <code>emit/3</code>). It is often convenient, as in this case, to use CLP(R) constraints (by including the directive <code>:- use_module(library(clpr)).</code>) as in this way the expressions can be used in multiple directions and the same clauses can be used both to sample and to evaluate the weight the sample on the basis of evidence, otherwise different clauses have to be written. In case random variables are not sufficiently instantiated to exploit expressions for inferring the values of other variables, inference will return an error.</p>
+<p>Continuous random variables are involved in arithmetic expressions (in <code>trans/3</code> and <code>emit/3</code>). It is often convenient, as in this case, to use CLP(R) constraints (by including the directive <code>:- use_module(library(clpr)).</code>) as in this way the expressions can be used in multiple directions and the same clauses can be used both to sample and to evaluate the weight of the sample on the basis of evidence, otherwise different clauses have to be written. In case random variables are not sufficiently instantiated to exploit expressions for inferring the values of other variables, inference will return an error.</p>
 <h3 id="dc">Distributional Clauses Syntax</h3>
 <p>You can also use the syntax of Distributional Clauses (DC) <span class="citation">[<a href="#ref-Nitti2016">13</a>]</span>. Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in</p>
 <pre><code>T~Density&#39; := Body.</code></pre>
