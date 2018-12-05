@@ -4035,7 +4035,7 @@ system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
-  term_expansion((:- table P1),TabDir),
+  system:term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
 system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
@@ -4044,7 +4044,7 @@ system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
-  term_expansion((:- table P1),TabDir),
+  system:term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
 system:term_expansion(At, A) :-
