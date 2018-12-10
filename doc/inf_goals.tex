@@ -499,7 +499,7 @@ mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,
   -Prob:float) is det
 \end{verbatim}
 samples \verb|Query|  a number of \verb|Samples| times given that \verb|Evidence|
-(a conjunction of atoms is allowed here). is true.
+(a conjunction of atoms is allowed here) is true.
 The predicate returns in \verb|Prob| the probability that the query is true.
 It performs likelihood weighting: each sample is weighted by the
 likelihood of evidence in the sample.
@@ -507,7 +507,7 @@ For example
 \begin{verbatim}
 ?- mc_lw_sample(nation(a),student_gpa(4.0),1000,P).
 \end{verbatim}
-from \href{http://cplint.eu/example/inference/indian_gpa.pl}{\texttt{indian\_gpa.pl}} samples 1000 the query
+from \href{http://cplint.eu/example/inference/indian_gpa.pl}{\texttt{indian\_gpa.pl}} samples 1000 times the query
 \verb|nation(a)| given that \verb|student_gpa(4.0)| has been observed.
 
 

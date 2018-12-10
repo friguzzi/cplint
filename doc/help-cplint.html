@@ -492,9 +492,9 @@ mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
 <p>The predicate</p>
 <pre><code>mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,
   -Prob:float) is det</code></pre>
-<p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> (a conjunction of atoms is allowed here). is true. The predicate returns in <code>Prob</code> the probability that the query is true. It performs likelihood weighting: each sample is weighted by the likelihood of evidence in the sample. For example</p>
+<p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> (a conjunction of atoms is allowed here) is true. The predicate returns in <code>Prob</code> the probability that the query is true. It performs likelihood weighting: each sample is weighted by the likelihood of evidence in the sample. For example</p>
 <pre><code>?- mc_lw_sample(nation(a),student_gpa(4.0),1000,P).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/indian_gpa.pl"><code>indian_gpa.pl</code></a> samples 1000 the query <code>nation(a)</code> given that <code>student_gpa(4.0)</code> has been observed.</p>
+<p>from <a href="http://cplint.eu/example/inference/indian_gpa.pl"><code>indian_gpa.pl</code></a> samples 1000 times the query <code>nation(a)</code> given that <code>student_gpa(4.0)</code> has been observed.</p>
 <p>The predicate</p>
 <pre><code>mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,
   -ValList) is det</code></pre>
