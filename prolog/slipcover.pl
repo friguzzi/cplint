@@ -61,9 +61,9 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 
 :- dynamic db/1.
 
-:- dynamic input_mod/1.
+:- dynamic sc_input_mod/1.
 
-:- thread_local  input_mod/1.
+:- thread_local  sc_input_mod/1.
 
 :- meta_predicate induce(:,-).
 :- meta_predicate induce_rules(:,-).
@@ -3942,7 +3942,7 @@ system:term_expansion((:- sc), []) :-!,
   retractall(M:local_setting(_,_)),
   findall(local_setting(P,V),default_setting_sc(P,V),L),
   assert_all(L,M,_),
-  assert(input_mod(M)),
+  assert(sc_input_mod(M)),
   retractall(M:rule_sc_n(_)),
   assert(M:rule_sc_n(0)),
   retractall(M:rule_ng_sc_n(_)),
@@ -3958,29 +3958,30 @@ system:term_expansion((:- sc), []) :-!,
 
 system:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
+  retractall(sc_input_mod(M)),
   make_dynamic(M),
   findall(LZ,M:zero_clauses(LZ),L0),
   append(L0,L),
   retractall(M:zero_clauses(_)),
 %  retractall(M:tabled(_)),
-  %retractall(input_mod(M)),
+  %retractall(sc_input_mod(M)),
   append(L,[(:- style_check(+discontiguous)),end_of_file],C).
 
 system:term_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   assert(M:bg_on).
 
 system:term_expansion(C, M:bgc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_bg),
-  input_mod(M),
+  sc_input_mod(M),
   M:bg_on,!.
 
 system:term_expansion((:- end_bg), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   retractall(M:bg_on),
   findall(C,M:bgc(C),L),
   retractall(M:bgc(_)),
@@ -3994,18 +3995,18 @@ system:term_expansion((:- end_bg), []) :-
 
 system:term_expansion((:- begin_in), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   assert(M:in_on).
 
 system:term_expansion(C, M:inc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_in),
-  input_mod(M),
+  sc_input_mod(M),
   M:in_on,!.
 
 system:term_expansion((:- end_in), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   retractall(M:in_on),
   findall(C,M:inc(C),L),
   retractall(M:inc(_)),
@@ -4019,19 +4020,19 @@ system:term_expansion((:- end_in), []) :-
 
 system:term_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
 system:term_expansion(end(model(_I)), []) :-
   prolog_load_context(module, M),
-  input_mod(M),!,
+  sc_input_mod(M),!,
   retractall(M:model(_)).
 
 system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
   prolog_load_context(module, M),
-  input_mod(M),
+  sc_input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
@@ -4040,7 +4041,7 @@ system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
 
 system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
   prolog_load_context(module, M),
-  input_mod(M),
+  sc_input_mod(M),
   M:local_setting(tabling,auto),!,
   tab(M,P/A,P1),
   zero_clause(M,P/A,Z),
@@ -4049,7 +4050,7 @@ system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
 
 system:term_expansion(At, A) :-
   prolog_load_context(module, M),
-  input_mod(M),
+  sc_input_mod(M),
   M:model(Name),
   At \= (_ :- _),
   At \= end_of_file,
