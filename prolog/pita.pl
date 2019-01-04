@@ -1395,7 +1395,7 @@ system:term_expansion((Head :- Body), Clauses) :-
   generate_clause_db(H1,Env,Body2,VC1,R,Probs,DB,BDDAnd,0,Clauses0,M),
   append(TabDir,[Clauses0],Clauses).
 
-system:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1),Clauses]) :-
+system:term_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
