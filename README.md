@@ -10,7 +10,7 @@ You can try it online at [http://cplint.eu](http://cplint.eu).
 
 Installation
 ------------
-This is an SWI-Prolog ([http://www.swi-prolog.org/](http://www.swi-prolog.org/)) pack.
+This is an [SWI-Prolog](http://www.swi-prolog.org/) pack.
 
 It can be installed with `pack_install/1`
 
