@@ -13,6 +13,7 @@
   abd_bdd_dot_string/4,
   abd_bdd_dot_string/6,
   map_bdd_dot_string/6,
+  map/3,
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
@@ -53,6 +54,7 @@ details.
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-,-,-).
+:-meta_predicate map(:,-,-).
 :-meta_predicate map_bdd_dot_string(:,-,-,-,-,-).
 :-meta_predicate vit_bdd_dot_string(:,-,-,-,-).
 :-meta_predicate msw(:,-,-,-).
@@ -333,6 +335,17 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   end(Env).
 
 /**
+ * map(:Query:atom,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the explanation of the ground query Query
+ *  with Maximum A Posteriori (MAP) probability.
+ * It returns the explanation in Delta together with its Probability
+ */
+map(M:Goal,P,MAP):-
+  map_int(Goal,M,_LV,_LAV,P,MAP,Env,_BDD),
+  end(Env).
+
+/**
  * map_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the explanation of the ground query Query
@@ -346,18 +359,24 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
  * the rule number and the grounding substituion.
  */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
+  map_int(Goal,M,LV,LAV,P,MAP,Env,BDD),
+  create_dot_string(Env,BDD,Dot),
+  end(Env).
+
+
+map_int(Goal,M,LV,LAV,P,MAP,Env,BDD):-
+  abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
-  Out=(_,BDD0),!,
+  (Out=(_,BDD0)),!,
   findall([V,R,S],M:v(R,S,V),LV),
   one(Env,One),
   make_query_vars(LV,M,Env,One,Cons,LAV),
   and(Env,BDD0,Cons,BDD),
   ret_map_prob(Env,BDD,P,Exp0),
   reverse(Exp0,Exp),
-  from_assign_to_map(Exp,M,MAP),
-  create_dot_string(Env,BDD,Dot),
-  end(Env).
+  from_assign_to_map(Exp,M,MAP).
+
 
 make_query_vars([],_M,_Env,C,C,[]).
 
@@ -1708,6 +1727,7 @@ sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
+sandbox:safe_meta(pita:map(_,_,_), []).
 sandbox:safe_meta(pita:map_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:vit_bdd_dot_string(_,_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
