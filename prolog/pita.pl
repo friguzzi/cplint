@@ -265,6 +265,7 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_file(M:Goal,File,LV):-
+  abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
@@ -282,6 +283,7 @@ bdd_dot_file(M:Goal,File,LV):-
  * the rule number and the grounding substituion.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
+  abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
@@ -1638,10 +1640,6 @@ system:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ),
   Clauses0=[(Head1:-(get_var_n(M,Env,R,VC1,Probs,V),equalityc(Env,V,0,BDD)))],
   append(TabDir,Clauses0,Clauses).
-
-system:term_expansion((:- set_pita(P,V)), []) :-!,
-  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-  set_pita(P,V).
 
 system:term_expansion((:- set_sw(A,B)), []) :-!,
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
