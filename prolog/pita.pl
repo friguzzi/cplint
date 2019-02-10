@@ -529,6 +529,8 @@ update_clauses(M,P/A-Constants,UC,CA):-
   A1 is A+2,
   functor(G1,P,A1),
   G=..[_|Args],
+  G1=..[_|Args1],
+  append(Args,[_,_],Args1),
   findall((G1,B,Ref),M:clause(G1,B,Ref),LC),
   maplist(get_const(Args),Constants,ConstraintsL),
   list2and(ConstraintsL,Constraints),
