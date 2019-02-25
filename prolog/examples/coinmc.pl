@@ -58,7 +58,7 @@ toss(coin).
 % faliures
 
 ?- mc_rejection_sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).
-% take 1000 sample of heads(coin) given that biasdd(coin) is true
+% take 1000 sample of heads(coin) given that biased(coin) is true
 % Use rejection sampling
 % F = 387,
 % P = 0.613,
