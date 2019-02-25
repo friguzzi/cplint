@@ -38,10 +38,22 @@ test_pita:-
     meta,
     pcfg,
     var_objdb,
-    card
+    card,
+    dt_viral
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
+
+:- begin_tests(dt_viral, []).
+
+:-ensure_loaded(library(examples/dt_viral)).
+
+test(best_st):-
+  run((dtproblog_solve(Strategy,ExpValue),close_to(P,3.21097),perm(Strategy,[marketed(martijn),marketed(guy),marketed(theo),marketed(ingo)]))).
+
+
+:- end_tests(dt_viral).
+
 
 :- begin_tests(coin, []).
 

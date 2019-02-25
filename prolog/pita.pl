@@ -19,6 +19,7 @@
   get_var_n/6,get_abd_var_n/6,
   load/1,load_file/1,
   op(600,xfy,'::'),
+  op(600,xfy,'=>'),
   op(1150,fx,action),
   op(1200,fy,map_query),
   op(1200,fy,abducible),
@@ -1234,6 +1235,18 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
     S=VC
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
+
+system:term_expansion(Head:-Body,(dec(H):-Body)) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
+% decision
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  Head = (? :: H).
+
+system:term_expansion(Head:-Body,(util(H,U):-Body)) :-
+  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
+% decision
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  Head = (H => U).
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
