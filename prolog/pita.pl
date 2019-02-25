@@ -1236,13 +1236,13 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
-system:term_expansion(Head:-Body,(dec(H):-Body)) :-
+system:term_expansion(Head:-Body,('$dec'(H):-Body)) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (? :: H).
 
-system:term_expansion(Head:-Body,(util(H,U):-Body)) :-
+system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
 % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
