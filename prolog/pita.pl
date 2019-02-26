@@ -1,6 +1,3 @@
-
-
-
 :- module(pita,[
   prob/2, 
   prob/3,
@@ -18,6 +15,8 @@
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
   load/1,load_file/1,
+  test_decision/2, % per test
+  op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
   op(1150,fx,action),
@@ -67,6 +66,8 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
+
+% :- dynamic utility/2.
 
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
@@ -127,6 +128,14 @@ load_file(File):-
   begin_lpad_pred,
   user:consult(File),
   end_lpad_pred.
+
+/**
+ * Decision theory
+ * */
+test_decision(DecisionList,UtilList):-
+  findall(D,'$dec'(D),DecisionList),
+  findall([U,B],'$util'(U,B),UtilList).
+
 
 /**
  * prob_meta(:Query:atom,-Probability:float) is nondet
@@ -1237,16 +1246,29 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
 system:term_expansion(Head:-Body,('$dec'(H):-Body)) :-
-  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-% decision
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (? :: H).
 
 system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
-  prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-% decision
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (H => U).
+
+% not needed, i can use findall/3 with utility
+% system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
+%   prolog_load_context(module, M),
+%   pita_input_mod(M),
+%   M:pita_on,
+%   % decision
+%   (Head \= ((system:term_expansion(_,_)) :- _ )),
+%   Head = (utility(H,U)).
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
