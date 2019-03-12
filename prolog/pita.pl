@@ -15,7 +15,7 @@
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
   load/1,load_file/1,
-  test_decision/2, % per test
+  test_decision/2,
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -29,7 +29,7 @@
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
-It reads probabilistic program andcomputes the probability of queries.
+It reads probabilistic program and computes the probability of queries.
 
 See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
 http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
@@ -133,8 +133,8 @@ load_file(File):-
  * Decision theory
  * */
 test_decision(DecisionList,UtilList):-
-  findall(D,'$dec'(D),DecisionList),
-  findall([U,B],'$util'(U,B),UtilList).
+  findall([A,B,C],dec(A,B,C),DecisionList),
+  findall([D,E],'$util'(D,E),UtilList).
 
 
 /**
@@ -225,8 +225,8 @@ vit_prob(M:Goal,P,Delta):-
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
 
  */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
@@ -271,8 +271,8 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
  * The predicate builds the BDD for Query and writes its dot representation
  * to file FileName and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 bdd_dot_file(M:Goal,File,LV):-
   abolish_all_tables,
@@ -289,8 +289,8 @@ bdd_dot_file(M:Goal,File,LV):-
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   abolish_all_tables,
@@ -309,8 +309,8 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to abductive variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   abolish_all_tables,
@@ -331,8 +331,8 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to abductive variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   abolish_all_tables,
@@ -367,8 +367,8 @@ map(M:Goal,P,MAP):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to query variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   map_int(Goal,M,LV,LAV,P,MAP,Env,BDD),
@@ -692,7 +692,7 @@ retract_all([H|T]):-
  * get_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
- * index Rule, grouding substitution Substitution and head distribution
+ * index Rule, grounding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_var_n(M,Env,R,S,Probs0,V):-
@@ -723,10 +723,23 @@ get_var_n(M,Env,R,S,Probs0,V):-
   ).
 
 /**
+ * get_decision_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,-Variable:int) is det
+ * 
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule in environment Environment. 
+ */
+ get_decision_var_n(M,Env,R,S,V):-
+  ( M:dec(R,S,V) ->
+    true ;
+    add_decision_var(Env,R,V),
+    assert(M:dec(R,S,V))
+  ).
+
+/**
  * get_abd_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
- * index Rule, grouding substitution Substitution and head distribution
+ * index Rule, grounding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_abd_var_n(M,Env,R,S,Probs0,V):-
@@ -757,7 +770,7 @@ msw(M:A,B,Env,BDD):-
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 /**
@@ -776,7 +789,7 @@ msw(M:A,B,Env,BDD,_DB):-
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 combine(V,P,V:P).
@@ -1245,30 +1258,46 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
-system:term_expansion(Head:-Body,('$dec'(H):-Body)) :-
+% decision facts
+system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equality(Env,V,0,BDD))) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  Head = (? :: H), !,
+  write("? :: fact "), write(Head),writeln(Body),
+  get_next_rule_number(M,R),
+  extract_vars(H,S),
+  add_bdd_arg(H,Env,BDD,M,Head1).
+
+% decision facts without body
+system:term_expansion(Head,(Head1:-(get_dec_var_n(M,Env,R,S,V),equality(Env,V,0,BDD)))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (? :: H).
+  Head = (? :: H), !,
+  write("? :: fact "), writeln(Head),
+  get_next_rule_number(M,R),
+  extract_vars(H,S),
+  add_bdd_arg(H,Env,BDD,M,Head1).
 
+% utility attributes with body
 system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
-  % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (H => U).
+  Head = (H => U), !.
 
-% not needed, i can use findall/3 with utility
-% system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
-%   prolog_load_context(module, M),
-%   pita_input_mod(M),
-%   M:pita_on,
-%   % decision
-%   (Head \= ((system:term_expansion(_,_)) :- _ )),
-%   Head = (utility(H,U)).
+% utility attributes without body
+system:term_expansion(Head,'$util'(H,U)) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  Head = (H => U), !.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1416,7 +1445,7 @@ system:term_expansion((Head :- Body), Clauses) :-
 system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-   ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[_H:_],!,
@@ -1488,7 +1517,7 @@ system:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   M:local_pita_setting(depth_bound,true),
-   ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
