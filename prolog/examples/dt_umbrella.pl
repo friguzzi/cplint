@@ -13,7 +13,7 @@
 broken_umbrella :- umbrella, rain, wind.
 dry :- rain, raincoat.
 dry :- rain, umbrella, \+(broken_umbrella).
-dry :- not(rain).
+dry :- \+(rain).
 
 % utility(broken_umbrella, -40).
 % utility(raincoat, -20).

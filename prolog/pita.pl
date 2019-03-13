@@ -147,53 +147,56 @@ test_decision(DecisionList,UtilList):-
  */
 dt_solve(Strategy,Cost):-
   abolish_all_tables,
-  % process_body(),
-  % init(Env),
   prolog_load_context(module, M),
   findall([H,U],'$util'(H,U),LUtils),  
   % TODO: convert maplist?
   % BddList e BddAndList vuote
   process_body_rec(Env,M,LUtils,[],BddList,[],BddAndList,[],BodyListList),
-  write("BddList: "), writeln(BddList),nl,
-  write("BddAndList: "), writeln(BddAndList),nl,
-  write("BodyListList: "), writeln(BodyListList),nl,
+  % write("BddList: "), writeln(BddList),nl,
+  % write("BddAndList: "), writeln(BddAndList),nl,
+  % write("BodyListList: "), writeln(BodyListList),nl,
   % TODO: convert maplist? 
   append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL
-  write("BLL: "), writeln(BLL),nl,
+  % write("BLL: "), writeln(BLL),nl,
   maplist(list2and,BLL,Body),
-  write("Body: "), writeln(Body),nl,
+  % write("Body: "), writeln(Body),nl,
   % TODO: convert maplist?
-  add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), % output HeadList
-  write("HeadList: "), writeln(HeadList),nl,
+  % RIMOSSO
+  % add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), % output HeadList
+  % write("HeadList: "), writeln(HeadList),nl,
   % TODO: convert maplist?
   % asserta_rec(M,HeadList,Body,[],LRef), % <-------------------- ERRORS
   % write("Lref: "),writeln(LRef),nl,
   init(Env),
-  zeroc(Env,ZA),
-  write("ZA: "), writeln(ZA),
-  ZA = (_,ZeroADD),
-  generate_solution(Env,Body,LUtils,ZeroADD,Strategy,Cost),
+  generate_solution(Env,M,Body,LUtils,[],Strategy,Cost),
   % maplist(erase,LRef),
-  writeln("Fine").
+  end(Env).
 
 % compute the solution for dt problem
-% generate_solution/6
-% generate_solution(Env,BddList,CostList,CurrentAdd,Solution,Cost)
+% generate_solution/7
+% generate_solution(Env,M,BddList,CostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
-generate_solution(Env,[],[],Add,Solution,Cost):-
+generate_solution(Env,_,[],[],Add,Solution,Cost):-
+  create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
-generate_solution(Env,[CurrentBDD|TB],[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
-  write("CurrentBDD: "),writeln(CurrentBDD),
-  write("Cost: "), writeln(Cost),
-  prolog_load_context(module, M),
-  get_node(M:G,Env,Out),
-  write("Out: "),writeln(Out),
+generate_solution(Env,M,[CurrentBDD|TB],[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
+  % write("CurrentBDD: "),writeln(CurrentBDD),
   write("Goal: "),writeln(G),
-  ( Out=(_,BDD) *-> true; BDD = Out),
+  write("Cost: "), writeln(Cost),
+  get_node(M:G,Env,Out),
+  % write("Out: "),writeln(Out),
+  Out=(_,BDD),
   probability_dd(Env,BDD,AddConv),
   add_prod(Env,AddConv,Cost,AddScaled), 
-  add_sum(Env,CurrentAdd,AddScaled,AddOut),
-  generate_solution(Env,TB,TC,AddOut,Solution,OptCost).
+  create_dot(Env,AddConv,"a.dot"),
+  % create_dot(Env,AddScaled,"b.dot"),
+  create_dot(Env,AddScaled,"cost.dot"),
+  (CurrentAdd = [] -> 
+    AddOut = AddScaled ;
+    add_sum(Env,CurrentAdd,AddScaled,AddOut)
+  ),
+  create_dot(Env,AddOut,"out.dot"),
+  generate_solution(Env,M,TB,TC,AddOut,Solution,OptCost).
 
 % TODO: convert into maplist?
 % asserta_rec/5
@@ -1361,7 +1364,8 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
 % decision facts
-system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equality(Env,V,0,BDD))) :-
+% scambiato equality con equalityc
+system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
@@ -1373,7 +1377,8 @@ system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalit
   add_bdd_arg(H,Env,BDD,M,Head1).
 
 % decision facts without body
-system:term_expansion(Head,(Head1:-(get_dec_var_n(M,Env,R,S,V),equality(Env,V,0,BDD)))) :-
+% scambiato equality con equalityc
+system:term_expansion(Head,(Head1:-(get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
