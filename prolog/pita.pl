@@ -14,8 +14,10 @@
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
+  get_dec_var_n/5,
   load/1,load_file/1,
-  test_decision/2,
+  test_decision/2, % <-- remove
+  dt_solve/2,
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -136,6 +138,104 @@ test_decision(DecisionList,UtilList):-
   findall([A,B,C],dec(A,B,C),DecisionList),
   findall([D,E],'$util'(D,E),UtilList).
 
+/**
+ * dt_solve(-Strategy:list,-Cost) 
+ * 
+ * The predicate computes the best solution for the decision theory
+ * problem. It returns the best strategy in Strategy and it cost
+ * in Cost. 
+ */
+dt_solve(Strategy,Cost):-
+  abolish_all_tables,
+  % process_body(),
+  % init(Env),
+  prolog_load_context(module, M),
+  findall([H,U],'$util'(H,U),LUtils),  
+  % TODO: convert maplist?
+  % BddList e BddAndList vuote
+  process_body_rec(Env,M,LUtils,[],BddList,[],BddAndList,[],BodyListList),
+  write("BddList: "), writeln(BddList),nl,
+  write("BddAndList: "), writeln(BddAndList),nl,
+  write("BodyListList: "), writeln(BodyListList),nl,
+  % TODO: convert maplist? 
+  append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL
+  write("BLL: "), writeln(BLL),nl,
+  maplist(list2and,BLL,Body),
+  write("Body: "), writeln(Body),nl,
+  % TODO: convert maplist?
+  add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), % output HeadList
+  write("HeadList: "), writeln(HeadList),nl,
+  % TODO: convert maplist?
+  % asserta_rec(M,HeadList,Body,[],LRef), % <-------------------- ERRORS
+  % write("Lref: "),writeln(LRef),nl,
+  init(Env),
+  zeroc(Env,ZA),
+  write("ZA: "), writeln(ZA),
+  ZA = (_,ZeroADD),
+  generate_solution(Env,Body,LUtils,ZeroADD,Strategy,Cost),
+  % maplist(erase,LRef),
+  writeln("Fine").
+
+% compute the solution for dt problem
+% generate_solution/6
+% generate_solution(Env,BddList,CostList,CurrentAdd,Solution,Cost)
+% output Solution, Cost
+generate_solution(Env,[],[],Add,Solution,Cost):-
+  ret_strategy(Env,Add,Solution,Cost).
+generate_solution(Env,[CurrentBDD|TB],[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
+  write("CurrentBDD: "),writeln(CurrentBDD),
+  write("Cost: "), writeln(Cost),
+  prolog_load_context(module, M),
+  get_node(M:G,Env,Out),
+  write("Out: "),writeln(Out),
+  write("Goal: "),writeln(G),
+  ( Out=(_,BDD) *-> true; BDD = Out),
+  probability_dd(Env,BDD,AddConv),
+  add_prod(Env,AddConv,Cost,AddScaled), 
+  add_sum(Env,CurrentAdd,AddScaled,AddOut),
+  generate_solution(Env,TB,TC,AddOut,Solution,OptCost).
+
+% TODO: convert into maplist?
+% asserta_rec/5
+% asserta_rec(M,HeadList,Body,CurrentLRef,OutLRef)
+% output OutLRef
+asserta_rec(_,[],[],L,L).
+asserta_rec(M,[H|TH],[B|TB],LR,LRO):-
+  M:(asserta((H :- B),Ref)),
+  append(LR,Ref,L),
+  asserta_rec(M,TH,TB,L,LRO).
+  
+% TODO: convert into maplist?
+% add_bdd_arg_rec/6
+% add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), 
+% output HeadList
+add_bdd_arg_rec(_,_,[],[],L,L).
+add_bdd_arg_rec(Env,M,[[G,_]|TG],[A|TA],LH,LO):-
+  add_bdd_arg(G,Env,A,M,H1),
+  append(LH,[H1],LT),
+  add_bdd_arg_rec(Env,M,TG,TA,LT,LO).
+
+% TODO: convert into maplist?
+% append_one_rec/5
+% append_one_rec(Env,BddList,BodyList,CurrentOutput,ListOutput)
+append_one_rec(_,[],[],L,L).
+append_one_rec(Env,[BDD|T],[B|TB],L,LO):-
+  append([onec(Env,BDD)],B,LT),
+  append(L,[LT],L1),
+  append_one_rec(Env,T,TB,L1,LO).
+
+% TODO: convert into maplist?
+% process_body_rec/9
+% process_body_rec(Env,M,ListOfUtilities,CurrentBddList,FinalBddList,CurrentBddAndList,FinalBddAndList,CurrentBodyList,FinalBodyListList)
+% output FinalBddList, FinalBddAndList, FinalBodyListList
+process_body_rec(_,_,[],L1,L1,L2,L2,L3,L3).
+process_body_rec(Env,M,[[Goal,_]|T],CBddL,FBddL,CBddAndL,FBddAndL,CBodyL,FBodyLL):-
+  process_body([Goal],BDD,BDDAnd,[],_,BodyList,Env,M),
+  append(CBddL,[BDD],LB),
+  append(CBddAndL,[BDDAnd],LBA),
+  append(CBodyL,[BodyList],BList),
+  process_body_rec(Env,M,T,LB,FBddL,LBA,FBddAndL,BList,FBodyLL).
+  
 
 /**
  * prob_meta(:Query:atom,-Probability:float) is nondet
@@ -593,8 +693,10 @@ get_abd_p(M:Goal,Env,P,Exp):-
   ret_abd_prob(Env,BDD,P,Exp).
 
 get_vit_p(M:Goal,Env,P,Exp):-
+  write("Vit Goal: "),writeln(Goal),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),
+  write("Vit Out: "),writeln(Out),
   ret_vit_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
@@ -706,7 +808,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
       assert(M:v(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 get_var_n(M,Env,R,S,Probs0,V):-
@@ -719,16 +821,16 @@ get_var_n(M,Env,R,S,Probs0,V):-
       assert(M:v(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 /**
- * get_decision_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,-Variable:int) is det
+ * get_dec_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,-Variable:int) is det
  * 
  * Returns the index Variable of the random variable associated to rule with
  * index Rule in environment Environment. 
  */
- get_decision_var_n(M,Env,R,S,V):-
+ get_dec_var_n(M,Env,R,S,V):-
   ( M:dec(R,S,V) ->
     true ;
     add_decision_var(Env,R,V),
@@ -752,7 +854,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
       assert(M:av(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 /**
@@ -1190,7 +1292,7 @@ system:term_expansion((:- pita), []) :-!,
   retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
-  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4,
+  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
     zero_clauses/1, pita_on/0, tabled/1),
   retractall(M:query_rule(_,_,_,_)),
   style_check(-discontiguous).
