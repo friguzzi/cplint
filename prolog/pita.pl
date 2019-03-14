@@ -1351,7 +1351,6 @@ system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalit
   Head = (? :: H), !,
   get_next_rule_number(M,R),
   extract_vars(H,S),
-  assert(dec(H)),
   add_bdd_arg(H,Env,BDD,M,Head1).
 
 % decision facts without body
