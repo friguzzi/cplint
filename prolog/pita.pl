@@ -16,7 +16,6 @@
   get_var_n/6,get_abd_var_n/6,
   get_dec_var_n/5,
   load/1,load_file/1,
-  test_decision/2, % <-- remove
   dt_solve/2,
   op(500,fx,'?'),
   op(600,xfy,'::'),
@@ -132,13 +131,6 @@ load_file(File):-
   end_lpad_pred.
 
 /**
- * Decision theory
- * */
-test_decision(DecisionList,UtilList):-
-  findall([A,B,C],dec(A,B,C),DecisionList),
-  findall([D,E],'$util'(D,E),UtilList).
-
-/**
  * dt_solve(-Strategy:list,-Cost) 
  * 
  * The predicate computes the best solution for the decision theory
@@ -149,54 +141,38 @@ dt_solve(Strategy,Cost):-
   abolish_all_tables,
   prolog_load_context(module, M),
   findall([H,U],'$util'(H,U),LUtils),  
-  % TODO: convert maplist?
-  % BddList e BddAndList vuote
   process_body_rec(Env,M,LUtils,[],BddList,[],BddAndList,[],BodyListList),
-  % write("BddList: "), writeln(BddList),nl,
-  % write("BddAndList: "), writeln(BddAndList),nl,
-  % write("BodyListList: "), writeln(BodyListList),nl,
-  % TODO: convert maplist? 
-  append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL
-  % write("BLL: "), writeln(BLL),nl,
+  append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL 
   maplist(list2and,BLL,Body),
-  % write("Body: "), writeln(Body),nl,
-  % TODO: convert maplist?
-  % RIMOSSO
-  % add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), % output HeadList
-  % write("HeadList: "), writeln(HeadList),nl,
-  % TODO: convert maplist?
-  % asserta_rec(M,HeadList,Body,[],LRef), % <-------------------- ERRORS
-  % write("Lref: "),writeln(LRef),nl,
+  add_bdd_arg_rec(Env,M,0,LUtils,BddAndList,[],HeadList), % output HeadList
+  asserta_rec(M,HeadList,Body,[],LRef), % output LRef 
   init(Env),
-  generate_solution(Env,M,Body,LUtils,[],Strategy,Cost),
-  % maplist(erase,LRef),
+  generate_solution(Env,M,LUtils,[],Strategy,Cost),
+  maplist(erase,LRef),
   end(Env).
 
 % compute the solution for dt problem
-% generate_solution/7
-% generate_solution(Env,M,BddList,CostList,CurrentAdd,Solution,Cost)
+% generate_solution/6
+% generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
-generate_solution(Env,_,[],[],Add,Solution,Cost):-
+generate_solution(Env,_,[],Add,Solution,Cost):-
   create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
-generate_solution(Env,M,[CurrentBDD|TB],[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
-  % write("CurrentBDD: "),writeln(CurrentBDD),
-  write("Goal: "),writeln(G),
-  write("Cost: "), writeln(Cost),
+generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
+  % write("Goal: "),writeln(G),
+  % write("Cost: "), writeln(Cost),
   get_node(M:G,Env,Out),
-  % write("Out: "),writeln(Out),
   Out=(_,BDD),
-  probability_dd(Env,BDD,AddConv),
-  add_prod(Env,AddConv,Cost,AddScaled), 
-  create_dot(Env,AddConv,"a.dot"),
-  % create_dot(Env,AddScaled,"b.dot"),
-  create_dot(Env,AddScaled,"cost.dot"),
+  probability_dd(Env,BDD,AddConv),  
+  % create_dot(Env,AddConv,"bdd.dot"),
+  add_prod(Env,AddConv,Cost,AddScaled),   
+  % create_dot(Env,AddScaled,"add.dot"),
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
-  create_dot(Env,AddOut,"out.dot"),
-  generate_solution(Env,M,TB,TC,AddOut,Solution,OptCost).
+  % create_dot(Env,AddOut,"out.dot"),
+  generate_solution(Env,M,TC,AddOut,Solution,OptCost).
 
 % TODO: convert into maplist?
 % asserta_rec/5
@@ -205,18 +181,22 @@ generate_solution(Env,M,[CurrentBDD|TB],[[G,Cost]|TC],CurrentAdd,Solution,OptCos
 asserta_rec(_,[],[],L,L).
 asserta_rec(M,[H|TH],[B|TB],LR,LRO):-
   M:(asserta((H :- B),Ref)),
-  append(LR,Ref,L),
+  append(LR,[Ref],L),
   asserta_rec(M,TH,TB,L,LRO).
   
 % TODO: convert into maplist?
 % add_bdd_arg_rec/6
 % add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), 
 % output HeadList
-add_bdd_arg_rec(_,_,[],[],L,L).
-add_bdd_arg_rec(Env,M,[[G,_]|TG],[A|TA],LH,LO):-
-  add_bdd_arg(G,Env,A,M,H1),
+add_bdd_arg_rec(_,_,_,[],[],L,L).
+add_bdd_arg_rec(Env,M,I,[[G,_]|TG],[A|TA],LH,LO):-
+  term_variables(G,VG),
+  atomic_concat('$goal',I,NewGoal),
+  Goal1=..[NewGoal|VG],
+  add_bdd_arg(Goal1,Env,A,M,H1),
   append(LH,[H1],LT),
-  add_bdd_arg_rec(Env,M,TG,TA,LT,LO).
+  I1 is I+1,
+  add_bdd_arg_rec(Env,M,I1,TG,TA,LT,LO).
 
 % TODO: convert into maplist?
 % append_one_rec/5
@@ -233,7 +213,7 @@ append_one_rec(Env,[BDD|T],[B|TB],L,LO):-
 % output FinalBddList, FinalBddAndList, FinalBodyListList
 process_body_rec(_,_,[],L1,L1,L2,L2,L3,L3).
 process_body_rec(Env,M,[[Goal,_]|T],CBddL,FBddL,CBddAndL,FBddAndL,CBodyL,FBodyLL):-
-  process_body([Goal],BDD,BDDAnd,[],_,BodyList,Env,M),
+  process_body([Goal],BDD,BDDAnd,[],_V,BodyList,Env,M),
   append(CBddL,[BDD],LB),
   append(CBddAndL,[BDDAnd],LBA),
   append(CBodyL,[BodyList],BList),
@@ -696,10 +676,8 @@ get_abd_p(M:Goal,Env,P,Exp):-
   ret_abd_prob(Env,BDD,P,Exp).
 
 get_vit_p(M:Goal,Env,P,Exp):-
-  write("Vit Goal: "),writeln(Goal),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),
-  write("Vit Out: "),writeln(Out),
   ret_vit_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
@@ -1371,21 +1349,20 @@ system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalit
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (? :: H), !,
-  write("? :: fact "), write(Head),writeln(Body),
   get_next_rule_number(M,R),
   extract_vars(H,S),
+  assert(dec(H)),
   add_bdd_arg(H,Env,BDD,M,Head1).
 
 % decision facts without body
 % scambiato equality con equalityc
-system:term_expansion(Head,(Head1:-(get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)))) :-
+system:term_expansion(Head,(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head = (? :: H), !,
-  write("? :: fact "), writeln(Head),
   get_next_rule_number(M,R),
   extract_vars(H,S),
   add_bdd_arg(H,Env,BDD,M,Head1).
