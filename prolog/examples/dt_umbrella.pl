@@ -12,7 +12,7 @@
 decision(umbrella).
 decision(raincoat).
 
-broken_umbrella :- umbrella, rain, wind.
+broken_umbrella :- rain, wind, umbrella.
 dry :- rain, raincoat.
 dry :- rain, umbrella, \+(broken_umbrella).
 dry :- \+(rain).
@@ -26,5 +26,10 @@ utility(dry, 60).
 % raincoat => -20.
 % umbrella => -2.
 % dry => 60.
+
+% query:
+% dt_solve(Strategy,Cost)
+% Strategy = umbrella
+% Cost = 43.0
 
 :- end_lpad.

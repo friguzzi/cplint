@@ -17,7 +17,6 @@
   get_dec_var_n/5,
   load/1,load_file/1,
   dt_solve/2,
-  dt_evaluate_strategy/2,
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -68,8 +67,7 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
-:-meta_predicate dt_solve(-,-).
-:-meta_predicate dt_evaluate_strategy(+,-).
+:-meta_predicate dt_solve(:,-).
 
 % :- dynamic utility/2.
 
@@ -140,18 +138,12 @@ load_file(File):-
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. 
  */
-dt_solve(Strategy,Cost):-
+dt_solve(M:Strategy,Cost):-
   abolish_all_tables,
-  prolog_load_context(module, M),
-  findall([H,U],'$util'(H,U),LUtils),  
-  process_body_rec(Env,M,LUtils,[],BddList,[],BddAndList,[],BodyListList),
-  append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL 
-  maplist(list2and,BLL,Body),
-  add_bdd_arg_rec(Env,M,0,LUtils,BddAndList,[],HeadList), % output HeadList
-  asserta_rec(M,HeadList,Body,[],LRef), % output LRef 
+  findall([H,U],M:'$util'(H,U),LUtils),  
+  writeln(LUtils),
   init(Env),
   generate_solution(Env,M,LUtils,[],Strategy,Cost),
-  maplist(erase,LRef),
   end(Env).
 
 % compute the solution for dt problem
@@ -159,64 +151,18 @@ dt_solve(Strategy,Cost):-
 % generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
 generate_solution(Env,_,[],Add,Solution,Cost):-
-  create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
+
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
-  write("Goal: "),writeln(G),
-  % write("Cost: "), writeln(Cost),
   get_node(M:G,Env,Out),
   Out=(_,BDD),
   probability_dd(Env,BDD,AddConv),  
-  create_dot(Env,AddConv,"bdd.dot"),
   add_prod(Env,AddConv,Cost,AddScaled),   
-  create_dot(Env,AddScaled,"add.dot"),
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
-  create_dot(Env,AddOut,"out.dot"),
   generate_solution(Env,M,TC,AddOut,Solution,OptCost).
-
-% asserta_rec/5
-% asserta_rec(M,HeadList,Body,CurrentLRef,OutLRef)
-% output OutLRef
-asserta_rec(_,[],[],L,L).
-asserta_rec(M,[H|TH],[B|TB],LR,LRO):-
-  M:(asserta((H :- B),Ref)),
-  append(LR,[Ref],L),
-  asserta_rec(M,TH,TB,L,LRO).
-  
-% add_bdd_arg_rec/6
-% add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), 
-% output HeadList
-add_bdd_arg_rec(_,_,_,[],[],L,L).
-add_bdd_arg_rec(Env,M,I,[[G,_]|TG],[A|TA],LH,LO):-
-  term_variables(G,VG),
-  atomic_concat('$goal',I,NewGoal),
-  Goal1=..[NewGoal|VG],
-  add_bdd_arg(Goal1,Env,A,M,H1),
-  append(LH,[H1],LT),
-  I1 is I+1,
-  add_bdd_arg_rec(Env,M,I1,TG,TA,LT,LO).
-
-% append_one_rec/5
-% append_one_rec(Env,BddList,BodyList,CurrentOutput,ListOutput)
-append_one_rec(_,[],[],L,L).
-append_one_rec(Env,[BDD|T],[B|TB],L,LO):-
-  append([onec(Env,BDD)],B,LT),
-  append(L,[LT],L1),
-  append_one_rec(Env,T,TB,L1,LO).
-
-% process_body_rec/9
-% process_body_rec(Env,M,ListOfUtilities,CurrentBddList,FinalBddList,CurrentBddAndList,FinalBddAndList,CurrentBodyList,FinalBodyListList)
-% output FinalBddList, FinalBddAndList, FinalBodyListList
-process_body_rec(_,_,[],L1,L1,L2,L2,L3,L3).
-process_body_rec(Env,M,[[Goal,_]|T],CBddL,FBddL,CBddAndL,FBddAndL,CBodyL,FBodyLL):-
-  process_body([Goal],BDD,BDDAnd,[],_V,BodyList,Env,M),
-  append(CBddL,[BDD],LB),
-  append(CBddAndL,[BDDAnd],LBA),
-  append(CBodyL,[BodyList],BList),
-  process_body_rec(Env,M,T,LB,FBddL,LBA,FBddAndL,BList,FBodyLL).
 
 /**
  * dt_evaluate_strategy(+Strategy:List,-Cost:float) is det
@@ -224,7 +170,7 @@ process_body_rec(Env,M,[[Goal,_]|T],CBddL,FBddL,CBddAndL,FBddAndL,CBodyL,FBodyLL
  * Computes the cost of the selected strategy
  */
 % TODO
-dt_evaluate_strategy(LS,Cost).
+% dt_evaluate_strategy(LS,Cost).
 
 /**
  * prob_meta(:Query:atom,-Probability:float) is nondet
@@ -708,6 +654,7 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
+  % TODO: add retract util
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -1887,6 +1834,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
+sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 
 
