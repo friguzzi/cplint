@@ -10,7 +10,7 @@
 ? :: umbrella.
 ? :: raincoat.
 
-broken_umbrella :- umbrella, rain, wind.
+broken_umbrella :-  rain, wind, umbrella.
 dry :- rain, raincoat.
 dry :- rain, umbrella, \+(broken_umbrella).
 dry :- \+(rain).

@@ -67,6 +67,7 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
+:-meta_predicate dt_solve(:,+).
 
 % :- dynamic utility/2.
 
@@ -137,18 +138,11 @@ load_file(File):-
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. 
  */
-dt_solve(Strategy,Cost):-
+dt_solve(M:Strategy,Cost):-
   abolish_all_tables,
-  prolog_load_context(module, M),
-  findall([H,U],'$util'(H,U),LUtils),  
-  process_body_rec(Env,M,LUtils,[],BddList,[],BddAndList,[],BodyListList),
-  append_one_rec(Env,BddList,BodyListList,[],BLL), % output BLL 
-  maplist(list2and,BLL,Body),
-  add_bdd_arg_rec(Env,M,0,LUtils,BddAndList,[],HeadList), % output HeadList
-  asserta_rec(M,HeadList,Body,[],LRef), % output LRef 
+  findall([H,U],M:'$util'(H,U),LUtils),  
   init(Env),
   generate_solution(Env,M,LUtils,[],Strategy,Cost),
-  maplist(erase,LRef),
   end(Env).
 
 % compute the solution for dt problem
@@ -158,20 +152,22 @@ dt_solve(Strategy,Cost):-
 generate_solution(Env,_,[],Add,Solution,Cost):-
   create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
+
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
   % write("Goal: "),writeln(G),
   % write("Cost: "), writeln(Cost),
   get_node(M:G,Env,Out),
   Out=(_,BDD),
+  create_dot(Env,BDD,"b.dot"),
   probability_dd(Env,BDD,AddConv),  
-  % create_dot(Env,AddConv,"bdd.dot"),
-  add_prod(Env,AddConv,Cost,AddScaled),   
-  % create_dot(Env,AddScaled,"add.dot"),
+   create_dot(Env,AddConv,"bdd.dot"),trace,
+  add_prod(Env,AddConv,Cost,AddScaled),
+ create_dot(Env,AddScaled,"add.dot"),trace,
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
-  % create_dot(Env,AddOut,"out.dot"),
+   create_dot(Env,AddOut,"out.dot"),
   generate_solution(Env,M,TC,AddOut,Solution,OptCost).
 
 % TODO: convert into maplist?
@@ -1881,6 +1877,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
+sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 
 
