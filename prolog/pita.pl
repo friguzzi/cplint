@@ -17,6 +17,7 @@
   get_dec_var_n/5,
   load/1,load_file/1,
   dt_solve/2,
+  dt_evaluate_strategy/2,
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -67,6 +68,8 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
+:-meta_predicate dt_solve(-,-).
+:-meta_predicate dt_evaluate_strategy(+,-).
 
 % :- dynamic utility/2.
 
@@ -131,7 +134,7 @@ load_file(File):-
   end_lpad_pred.
 
 /**
- * dt_solve(-Strategy:list,-Cost) 
+ * dt_solve(-Strategy:list,-Cost:float) 
  * 
  * The predicate computes the best solution for the decision theory
  * problem. It returns the best strategy in Strategy and it cost
@@ -159,22 +162,21 @@ generate_solution(Env,_,[],Add,Solution,Cost):-
   create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
-  % write("Goal: "),writeln(G),
+  write("Goal: "),writeln(G),
   % write("Cost: "), writeln(Cost),
   get_node(M:G,Env,Out),
   Out=(_,BDD),
   probability_dd(Env,BDD,AddConv),  
-  % create_dot(Env,AddConv,"bdd.dot"),
+  create_dot(Env,AddConv,"bdd.dot"),
   add_prod(Env,AddConv,Cost,AddScaled),   
-  % create_dot(Env,AddScaled,"add.dot"),
+  create_dot(Env,AddScaled,"add.dot"),
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
-  % create_dot(Env,AddOut,"out.dot"),
+  create_dot(Env,AddOut,"out.dot"),
   generate_solution(Env,M,TC,AddOut,Solution,OptCost).
 
-% TODO: convert into maplist?
 % asserta_rec/5
 % asserta_rec(M,HeadList,Body,CurrentLRef,OutLRef)
 % output OutLRef
@@ -184,7 +186,6 @@ asserta_rec(M,[H|TH],[B|TB],LR,LRO):-
   append(LR,[Ref],L),
   asserta_rec(M,TH,TB,L,LRO).
   
-% TODO: convert into maplist?
 % add_bdd_arg_rec/6
 % add_bdd_arg_rec(Env,M,LUtils,BddAndList,[],HeadList), 
 % output HeadList
@@ -198,7 +199,6 @@ add_bdd_arg_rec(Env,M,I,[[G,_]|TG],[A|TA],LH,LO):-
   I1 is I+1,
   add_bdd_arg_rec(Env,M,I1,TG,TA,LT,LO).
 
-% TODO: convert into maplist?
 % append_one_rec/5
 % append_one_rec(Env,BddList,BodyList,CurrentOutput,ListOutput)
 append_one_rec(_,[],[],L,L).
@@ -207,7 +207,6 @@ append_one_rec(Env,[BDD|T],[B|TB],L,LO):-
   append(L,[LT],L1),
   append_one_rec(Env,T,TB,L1,LO).
 
-% TODO: convert into maplist?
 % process_body_rec/9
 % process_body_rec(Env,M,ListOfUtilities,CurrentBddList,FinalBddList,CurrentBddAndList,FinalBddAndList,CurrentBodyList,FinalBodyListList)
 % output FinalBddList, FinalBddAndList, FinalBodyListList
@@ -218,7 +217,14 @@ process_body_rec(Env,M,[[Goal,_]|T],CBddL,FBddL,CBddAndL,FBddAndL,CBodyL,FBodyLL
   append(CBddAndL,[BDDAnd],LBA),
   append(CBodyL,[BodyList],BList),
   process_body_rec(Env,M,T,LB,FBddL,LBA,FBddAndL,BList,FBodyLL).
-  
+
+/**
+ * dt_evaluate_strategy(+Strategy:List,-Cost:float) is det
+ *
+ * Computes the cost of the selected strategy
+ */
+% TODO
+dt_evaluate_strategy(LS,Cost).
 
 /**
  * prob_meta(:Query:atom,-Probability:float) is nondet
@@ -1348,7 +1354,7 @@ system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalit
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (? :: H), !,
+  (Head = (? :: H) ; Head = decision(H)), !,
   get_next_rule_number(M,R),
   extract_vars(H,S),
   add_bdd_arg(H,Env,BDD,M,Head1).
@@ -1361,7 +1367,7 @@ system:term_expansion(Head,(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,
   M:pita_on,
   % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (? :: H), !,
+  (Head = (? :: H) ; Head = decision(H)), !,
   get_next_rule_number(M,R),
   extract_vars(H,S),
   add_bdd_arg(H,Env,BDD,M,Head1).
@@ -1372,7 +1378,7 @@ system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (H => U), !.
+  (Head = (H => U) ; Head = utility(H,U)), !.
 
 % utility attributes without body
 system:term_expansion(Head,'$util'(H,U)) :-
@@ -1380,7 +1386,7 @@ system:term_expansion(Head,'$util'(H,U)) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (H => U), !.
+  (Head = (H => U) ; Head = utility(H,U)), !.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
