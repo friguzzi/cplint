@@ -9,3 +9,4 @@ doc/manual.blg
 doc/manual.log
 doc/manual.out
 
+*.dot
