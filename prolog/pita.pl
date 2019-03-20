@@ -132,7 +132,7 @@ load_file(File):-
   end_lpad_pred.
 
 /**
- * dt_solve(-Strategy:list,-Cost:float) 
+ * dt_solve(-Strategy:list,-Cost:float) is det
  * 
  * The predicate computes the best solution for the decision theory
  * problem. It returns the best strategy in Strategy and it cost
@@ -141,27 +141,44 @@ load_file(File):-
 dt_solve(M:Strategy,Cost):-
   abolish_all_tables,
   findall([H,U],M:'$util'(H,U),LUtils),  
-  writeln(LUtils),
   init(Env),
-  generate_solution(Env,M,LUtils,[],Strategy,Cost),
-  end(Env).
+  generate_solution(Env,M,LUtils,[],St,Cost),
+  findall([A,C],dec(A,_,C),L),
+  writeln(LUtils),
+  writeln(L),
+  end(Env),
+  findall([H,R],M:rule_by_num(H,R,_,_),LR),
+  writeln(LR),
+  maplist(pair(M),St,Strategy). % sembra funzionare
+  % Strategy = St.
+
+pair(M,A,B):- M:rule_by_num(A,B,_,_).
 
 % compute the solution for dt problem
 % generate_solution/6
 % generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
-generate_solution(Env,_,[],Add,Solution,Cost):-
+generate_solution(Env,_,[],Add,Solution,Cost):- !,
+  create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost).
 
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
-  probability_dd(Env,BDD,AddConv),  
-  add_prod(Env,AddConv,Cost,AddScaled),   
+  writeln("Pre"),
+  debug_cudd_var(Env,_),
+  create_dot(Env,BDD,"bdd.dot"),
+  probability_dd(Env,BDD,AddConv),
+  create_dot(Env,AddConv,"addconv.dot"),
+  writeln("Post"),
+  debug_cudd_var(Env,_),nl,
+  add_prod(Env,AddConv,Cost,AddScaled),
+  create_dot(Env,AddScaled,"addscaled.dot"),
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
+  create_dot(Env,AddOut,"addout.dot"),nl,
   generate_solution(Env,M,TC,AddOut,Solution,OptCost).
 
 /**
@@ -644,6 +661,7 @@ get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -654,7 +672,7 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  % TODO: add retract util
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -768,6 +786,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
   ( M:dec(R,S,V) ->
     true ;
     add_decision_var(Env,R,V),
+    % writeln("New dec var"),
     assert(M:dec(R,S,V))
   ).
 
@@ -1295,29 +1314,31 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
 % decision facts
-% scambiato equality con equalityc
 system:term_expansion(Head:-Body,(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), !,
+  % (Head = (? :: H) ; Head = decision(H)), !,
+  Head = (? :: H), !,
+  extract_vars_list([H],_,S), % <---
   get_next_rule_number(M,R),
-  extract_vars(H,S),
-  add_bdd_arg(H,Env,BDD,M,Head1).
+  add_bdd_arg(H,Env,BDD,M,Head1),
+  assert(M:rule_by_num(R,H,Body,[])). % da asserire nella term exp?
 
 % decision facts without body
-% scambiato equality con equalityc
 system:term_expansion(Head,(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD))) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), !,
+  % (Head = (? :: H) ; Head = decision(H)), !,
+  Head = (? :: H), !,
+  extract_vars_list([H],_,S), % <---
   get_next_rule_number(M,R),
-  extract_vars(H,S),
-  add_bdd_arg(H,Env,BDD,M,Head1).
+  add_bdd_arg(H,Env,BDD,M,Head1),
+  assert(M:rule_by_num(R,H,[],[])). % da asserire nella term exp?
 
 % utility attributes with body
 system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
@@ -1326,6 +1347,7 @@ system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (H => U) ; Head = utility(H,U)), !.
+  % Head = (H => U), !.
 
 % utility attributes without body
 system:term_expansion(Head,'$util'(H,U)) :-
@@ -1334,6 +1356,7 @@ system:term_expansion(Head,'$util'(H,U)) :-
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (H => U) ; Head = utility(H,U)), !.
+  % Head = (H => U), !.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
