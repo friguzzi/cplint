@@ -170,8 +170,9 @@ generate_solution(Env,_,[],Add,Solution,Cost,MaxN,Precise):- !,
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost,MaxN,Precise):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
-  % findall([H,U],M:'$util'(H,U),LUtils),  
-  % write('Utils: '), writeln(LUtils),
+  writeln(BDD),
+  findall([H,U],M:'$util'(H,U),LUtils),  
+  write('Utils: '), writeln(LUtils),
   % findall([H,R],M:rule_by_num(H,R,_,_),LR),
   % write('Rule by num: '),writeln(LR),
   % findall([A,B,C],dec(A,B,C),L),
@@ -1212,8 +1213,75 @@ tab_dir(M,H:P,[],[H1:P]):-
   atomic_concat(F,' tabled',F1),
   H1=..[F1|Args].
 
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal except
+% (?)::H and H:P
+tab_dir(M,(?)::H,[],[H1]):-
+  M:tabled(H),!,
+  H=..[F|Args],
+  atomic_concat(F,' tabled',F1),
+  H1=..[F1|Args].
+
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal except
+% (?)::H and '$util'(A,B)
+tab_dir(M,H,[],[H1]):-
+  M:tabled(H),!,
+  H=..[F|Args],
+  F = utility,
+  atomic_concat(F,' tabled',F1),
+  H1=..[F1|Args].
+
 
 tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
+  functor(H,F,A0),
+  functor(PT,F,A0),  
+  PT=..[F|Args0],
+  atomic_concat(F,' tabled',F1),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[_,_,lattice(orc/3)]
+  ;
+    ExtraArgs=[_,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F1|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal
+% except variable n 2 and 4.
+tab_dir(M,(?)::H,[(:- table HT)],[H1]):-
+  functor(H,F,A0),
+  functor(PT,F,A0),  
+  PT=..[F|Args0],
+  atomic_concat(F,' tabled',F1),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[_,_,lattice(orc/3)]
+  ;
+    ExtraArgs=[_,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F1|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
+% tab dir for utility variables
+% merge with the previous one?
+% the predicates are equal
+% except variable n 2 and 4.
+tab_dir(M,H,[(:- table HT)],[H1]):-
+  H=..[F|_],
+  F = utility,
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
@@ -1325,43 +1393,95 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
-% decision facts with body
-% TODO
-system:term_expansion(Head:-Body,[(Head1:-Body,get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)),rule_by_num(R,H,Body,[])]) :-
+% decision facts with body and ground variables
+% ? :: a:- b.
+% TODO: check if H is ground 
+system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :- 
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
+  ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (? :: H) ; Head = decision(H)), !,
+  % format('~w ~w ~w ~w ~w ~n', ["Here: ", "Head: ", Head, "Body: ", Body]),
   % Head = (? :: H), !,
-  extract_vars_list([H],_,S), % <---
+  list2and(BodyList, Body),
+  % format('~w ~w ~n', ["BodyList: ",BodyList]),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  % format('~w ~w ~n', ["BodyList1: ",BodyList1]),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  % format('~w ~w ~n', ["BodyList2: ",BodyList2]),
+  list2and(BodyList2,Body1),
+  % format('~w ~w ~n', ["Body1: ",Body1]),
+  append([Head],BodyList,List),
+  % format('~w ~w ~n', ["List: ",List]),
+  extract_vars_list(List,[],VC),
   get_next_rule_number(M,R),
-  add_bdd_arg(H,Env,BDD,M,Head1).
+  % gtrace,
+  to_table(M,[Head],TabDir,HeadList1),
+  % format('~w ~w ~n', ["Tabdir: ",TabDir]),
+  % format('~w ~w ~n', ["HeadList1: ",HeadList1]),
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BO,M,Head1),
+  Clause = (Head1:-(Body1,get_dec_var_n(M,Env,R,VC,V), equalityc(Env,V,0,B), andc(Env,BDDAnd,B,BO))).
+  % format('~w ~w ~n', ["Head1: ",Head1]).  
 
-% decision facts without body
+% decision facts without body and ground variables
+% ? :: a.
+% TODO: check if H is ground 
 system:term_expansion(Head,[(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)),rule_by_num(R,H,[],[])]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
-  % decision
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (? :: H) ; Head = decision(H)), !,
-  % Head = (? :: H), !,
-  extract_vars_list([H],_,S), % <---
+  extract_vars_list([H],_,S),   
   get_next_rule_number(M,R),
+  % format('~w ~w ~n', ["Head: ",H]),
+  % gtrace,
   add_bdd_arg(H,Env,BDD,M,Head1).
+  % format('~w ~w ~n', ["Head1: ",Head1]).  
+
 
 % utility attributes with body
-% TODO
-system:term_expansion(Head:-Body,('$util'(H,U):-Body)) :-
+% utility(a,N):- b.
+% TODO: check if a is ground and N is number 
+system:term_expansion(Head:-Body,[Clause,rule_by_num(R,Head2,Body1,[]),TabDir,'$util'(H,U)]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), !.
-  % Head = (H => U), !.
+  (Head = (H => U) ; Head = utility(H,U)), !,
+  % gtrace,
+  % gtrace,
+  list2and(BodyList, Body),
+  % format('~w ~w ~n', ["BodyList: ",BodyList]),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  % format('~w ~w ~n', ["BodyList1: ",BodyList1]),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  % format('~w ~w ~n', ["BodyList2: ",BodyList2]),
+  list2and(BodyList2,Body1),
+  % format('~w ~w ~n', ["Body1: ",Body1]),
+  append([Head],BodyList,List),
+  % format('~w ~w ~n', ["List: ",List]),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  % gtrace,
+  to_table(M,[Head],TabDir,HeadList1),
+  % format('~w ~w ~n', ["Tabdir: ",TabDir]),
+  % format('~w ~w ~n', ["HeadList1: ",HeadList1]),
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BO,M,Head2),
+  Clause = (Head2:-(Body1,get_var_n(M,Env,R,VC,V),equalityc(Env,V,0,B),andc(Env,BDDAnd,B,BO))).
+  % writeln("HERE"),
+  % format('~w ~w ~n', ["Clause: ",Clause]),    
+  % format('~w ~w ~n', ["Head: ",Head]),  
+  % format('~w ~w ~n', ["Head2: ",Head2]),
+  % writeln("DONE").
 
 % utility attributes without body
+% utility(a,N).
+% TODO: check if a is ground and N is number 
 system:term_expansion(Head,'$util'(H,U)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
@@ -1370,13 +1490,18 @@ system:term_expansion(Head,'$util'(H,U)) :-
   (Head = (H => U) ; Head = utility(H,U)), !.
   % Head = (H => U), !.
 
+% disjunctive facts with more than one head and body
+% TODO
+% a;b;c;... :- d.
+
 % disjunctive facts with more than one head
 % TODO
 % a;b;c.
 
-% disjunctive facts with more than one head and body
-% TODO
-% a;b;c :- d.
+% TODO: managing something like
+% ? :: f(A):- g(A).
+% utility(f(A),N):- g(A).
+% with non ground variables
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
