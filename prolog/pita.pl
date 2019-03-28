@@ -17,7 +17,7 @@
   get_dec_var_n/5,
   load/1,load_file/1,
   dt_solve/2,
-  dt_solve/4,
+  % dt_solve/4,
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -69,7 +69,7 @@ details.
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
 :-meta_predicate dt_solve(:,-).
-:-meta_predicate dt_solve(:,-,+,+).
+% :-meta_predicate dt_solve(:,-,+,+).
 
 % :- dynamic utility/2.
 
@@ -147,12 +147,13 @@ dt_solve(M:Strategy,Cost,MaxN,Precise):-
   findall([H,U],M:'$util'(H,U),LUtils),  
   init(Env),
   generate_solution(Env,M,LUtils,[],St,Cost,MaxN,Precise),
-  findall([A,B,C],dec(A,B,C),L),
-  writeln(LUtils),
-  writeln(L),
+  % findall([A,B,C],dec(A,B,C),L),
+  % write('Utils: '), writeln(LUtils),
+  % write('Decision: '), writeln(L),
   end(Env),
-  findall([H,R],M:rule_by_num(H,R,_,_),LR),
-  writeln(LR),
+  % findall([H,R],M:rule_by_num(H,R,_,_),LR),
+  % write('Rule by num: '),writeln(LR),
+  % format('Stratgy: ~w ~n', [St]),
   maplist(pair(M),St,Strategy). % sembra funzionare
   % Strategy = St.
 
@@ -163,12 +164,18 @@ pair(M,A,B):- M:rule_by_num(A,B,_,_).
 % generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
 generate_solution(Env,_,[],Add,Solution,Cost,MaxN,Precise):- !,
-  create_dot(Env,Add,"final.dot"),
+  % create_dot(Env,Add,"final.dot"),
   ret_strategy(Env,Add,Solution,Cost,MaxN,Precise).
 
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost,MaxN,Precise):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
+  % findall([H,U],M:'$util'(H,U),LUtils),  
+  % write('Utils: '), writeln(LUtils),
+  % findall([H,R],M:rule_by_num(H,R,_,_),LR),
+  % write('Rule by num: '),writeln(LR),
+  % findall([A,B,C],dec(A,B,C),L),
+  % write('Decision: '), writeln(L),
   % writeln("Pre"),
   % debug_cudd_var(Env,_),
   % create_dot(Env,BDD,"bdd.dot"),
@@ -787,6 +794,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
  * index Rule in environment Environment. 
  */
  get_dec_var_n(M,Env,R,S,V):-
+  % format('~w ~w ~w ~w ~w ~w ~n', ["R: ",R, "S: ", S, "V: ", V]),
   ( M:dec(R,S,V) ->
     true ;
     add_decision_var(Env,R,V),
@@ -1364,9 +1372,11 @@ system:term_expansion(Head,'$util'(H,U)) :-
 
 % disjunctive facts with more than one head
 % TODO
+% a;b;c.
 
 % disjunctive facts with more than one head and body
 % TODO
+% a;b;c :- d.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
