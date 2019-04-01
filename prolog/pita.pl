@@ -170,9 +170,9 @@ generate_solution(Env,_,[],Add,Solution,Cost,MaxN,Precise):- !,
 generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost,MaxN,Precise):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
-  writeln(BDD),
-  findall([H,U],M:'$util'(H,U),LUtils),  
-  write('Utils: '), writeln(LUtils),
+  % writeln(BDD),
+  % findall([H,U],M:'$util'(H,U),LUtils),  
+  % write('Utils: '), writeln(LUtils),
   % findall([H,R],M:rule_by_num(H,R,_,_),LR),
   % write('Rule by num: '),writeln(LR),
   % findall([A,B,C],dec(A,B,C),L),
@@ -1395,14 +1395,13 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
 
 % decision facts with body and ground variables
 % ? :: a:- b.
-% TODO: check if H is ground 
 system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :- 
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), !,
+  (Head = (? :: H) ; Head = decision(H)), ground(H), !, % <------  
   % format('~w ~w ~w ~w ~w ~n', ["Here: ", "Head: ", Head, "Body: ", Body]),
   % Head = (? :: H), !,
   list2and(BodyList, Body),
@@ -1428,13 +1427,12 @@ system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
 
 % decision facts without body and ground variables
 % ? :: a.
-% TODO: check if H is ground 
 system:term_expansion(Head,[(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)),rule_by_num(R,H,[],[])]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), !,
+  (Head = (? :: H) ; Head = decision(H)), ground(H), !, % <---------  
   extract_vars_list([H],_,S),   
   get_next_rule_number(M,R),
   % format('~w ~w ~n', ["Head: ",H]),
@@ -1445,13 +1443,12 @@ system:term_expansion(Head,[(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0
 
 % utility attributes with body
 % utility(a,N):- b.
-% TODO: check if a is ground and N is number 
-system:term_expansion(Head:-Body,[Clause,rule_by_num(R,Head2,Body1,[]),TabDir,'$util'(H,U)]) :-
+system:term_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), !,
+  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !,
   % gtrace,
   % gtrace,
   list2and(BodyList, Body),
@@ -1487,21 +1484,45 @@ system:term_expansion(Head,'$util'(H,U)) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), !.
+  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !. 
   % Head = (H => U), !.
 
 % disjunctive facts with more than one head and body
 % TODO
-% a;b;c;... :- d.
+% ? :: a; ? :: b; ? :: c; ... :- d.
 
 % disjunctive facts with more than one head
 % TODO
-% a;b;c.
+% ?:: a; ?:: b; ? :: c.
 
 % TODO: managing something like
 % ? :: f(A):- g(A).
 % utility(f(A),N):- g(A).
 % with non ground variables
+system:term_expansion(Head:-Body,Clause) :- 
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head = (? :: _) ; Head = decision(_)), !,
+  findall(Head:-Body, call(Body), LGroundClauses),
+  % writeln(LGroundClauses),
+  maplist(system:term_expansion,LGroundClauses,Clause).
+  % gtrace,
+  % writeln(Clause).
+
+% % utility
+% utility(A,N):- f(A).
+% system:term_expansion(Head:-Body,Clause) :-
+%   prolog_load_context(module, M),
+%   pita_input_mod(M),
+%   M:pita_on,
+%   (Head \= ((system:term_expansion(_,_)) :- _ )),
+%   (Head = (H => U) ; Head = utility(H,U)), number(U), !,
+%   findall(Head:-Body, call(Body), LGroundClauses),
+%   writeln(LGroundClauses),
+%   maplist(system:term_expansion,LGroundClauses,Clause).
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
