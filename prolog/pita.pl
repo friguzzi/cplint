@@ -18,6 +18,7 @@
   load/1,load_file/1,
   dt_solve/2,
   % dt_solve/4,
+  op(450,fx,'?::'),
   op(500,fx,'?'),
   op(600,xfy,'::'),
   op(600,xfy,'=>'),
@@ -147,14 +148,14 @@ dt_solve(M:Strategy,Cost,MaxN,Precise):-
   findall([H,U],M:'$util'(H,U),LUtils),  
   init(Env),
   generate_solution(Env,M,LUtils,[],St,Cost,MaxN,Precise),
-  % findall([A,B,C],dec(A,B,C),L),
+  findall([A,B,C],M:dec(A,B,C),L),
   % write('Utils: '), writeln(LUtils),
-  % write('Decision: '), writeln(L),
+  write('Decision: '), writeln(L),
   end(Env),
   % findall([H,R],M:rule_by_num(H,R,_,_),LR),
   % write('Rule by num: '),writeln(LR),
   % format('Stratgy: ~w ~n', [St]),
-  maplist(pair(M),St,Strategy). % sembra funzionare
+  maplist(pair(M),St,Strategy).
   % Strategy = St.
 
 pair(M,A,B):- M:rule_by_num(A,B,_,_).
@@ -673,7 +674,7 @@ get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  retractall(M:dec(_,_,_)),
+  % retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -684,7 +685,7 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  retractall(M:dec(_,_,_)),
+  % retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -795,12 +796,12 @@ get_var_n(M,Env,R,S,Probs0,V):-
  * index Rule in environment Environment. 
  */
  get_dec_var_n(M,Env,R,S,V):-
-  % format('~w ~w ~w ~w ~w ~w ~n', ["R: ",R, "S: ", S, "V: ", V]),
+  % format('R: ~w - S: ~w - V: ~w - M: ~w ~n', [R,S,V,M]),
   ( M:dec(R,S,V) ->
     true ;
     add_decision_var(Env,R,V),
     % writeln("New dec var"),
-    assert(M:dec(R,S,V))
+    asserta(M:dec(R,S,V))
   ).
 
 /**
@@ -1217,12 +1218,12 @@ tab_dir(M,H:P,[],[H1:P]):-
 % merge with the previous one?
 % the predicates are equal except
 % (?)::H and H:P
-tab_dir(M,(?)::H,[],[H1]):-
+tab_dir(M,HT,[],[H1]):-
+  (HT = ?::H ; HT = (?)::H),  
   M:tabled(H),!,
   H=..[F|Args],
   atomic_concat(F,' tabled',F1),
   H1=..[F1|Args].
-
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal except
@@ -1257,7 +1258,8 @@ tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
 % merge with the previous one?
 % the predicates are equal
 % except variable n 2 and 4.
-tab_dir(M,(?)::H,[(:- table HT)],[H1]):-
+tab_dir(M,HT1,[(:- table HT)],[H1]):-
+  (HT1 = ?::H ; HT1 = (?)::H),
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
@@ -1401,9 +1403,12 @@ system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
   M:pita_on,
   ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), ground(H), !, % <------  
-  % format('~w ~w ~w ~w ~w ~n', ["Here: ", "Head: ", Head, "Body: ", Body]),
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !, % <------ 
+  % nl, 
+  % format('~w ~w ~w ~w ~w ~w ~n', ["Here: ", "Head: ", Head, "Body: ", Body, H]),
   % Head = (? :: H), !,
+  % writeln("HERE"),
+
   list2and(BodyList, Body),
   % format('~w ~w ~n', ["BodyList: ",BodyList]),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
@@ -1432,7 +1437,7 @@ system:term_expansion(Head,[(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H)), ground(H), !, % <---------  
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !, % <---------  
   extract_vars_list([H],_,S),   
   get_next_rule_number(M,R),
   % format('~w ~w ~n', ["Head: ",H]),
@@ -1462,9 +1467,10 @@ system:term_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   append([Head],BodyList,List),
   % format('~w ~w ~n', ["List: ",List]),
   extract_vars_list(List,[],VC),
+  % format('~w ~w ~n', ["VC: ",VC]),
   get_next_rule_number(M,R),
   % gtrace,
-  to_table(M,[Head],TabDir,HeadList1),
+  to_table(M,[Head],TabDir,HeadList1),  % <---------------------- iF HEAD = H => U does NOT WORKS
   % format('~w ~w ~n', ["Tabdir: ",TabDir]),
   % format('~w ~w ~n', ["HeadList1: ",HeadList1]),
   HeadList1 = [H1],
@@ -1497,29 +1503,31 @@ system:term_expansion(Head,'$util'(H,U)) :-
 
 % TODO: managing something like
 % ? :: f(A):- g(A).
-% utility(f(A),N):- g(A).
-% with non ground variables
-system:term_expansion(Head:-Body,Clause) :- 
-  prolog_load_context(module, M),
-  pita_input_mod(M),
-  M:pita_on,
-  ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: _) ; Head = decision(_)), !,
-  findall(Head:-Body, call(Body), LGroundClauses),
-  % writeln(LGroundClauses),
-  maplist(system:term_expansion,LGroundClauses,Clause).
-  % gtrace,
-  % writeln(Clause).
+% decision(f(A),N):- g(A).
+% % with non ground variables
+% system:term_expansion(Head:-Body,Clause) :- 
+%   prolog_load_context(module, M),
+%   pita_input_mod(M),
+%   M:pita_on,
+%   ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
+%   (Head \= ((system:term_expansion(_,_)) :- _ )),
+%   (Head = (? :: _) ; Head = decision(_) ; Head = (?::_)), !,
+%   % writeln("HERE"),
+%   findall(Head:-Body, call(Body), LGroundClauses),
+%   % writeln(LGroundClauses),
+%   maplist(system:term_expansion,LGroundClauses,Clause).
+%   % gtrace,
+%   % writeln(Clause).
 
 % % utility
-% utility(A,N):- f(A).
+% % utility(A,N):- f(A).
+% % TODO
 % system:term_expansion(Head:-Body,Clause) :-
 %   prolog_load_context(module, M),
 %   pita_input_mod(M),
 %   M:pita_on,
 %   (Head \= ((system:term_expansion(_,_)) :- _ )),
-%   (Head = (H => U) ; Head = utility(H,U)), number(U), !,
+%   (Head = (H => U) ; Head = utility(H,U)), number(U), \+ground(H), !,
 %   findall(Head:-Body, call(Body), LGroundClauses),
 %   writeln(LGroundClauses),
 %   maplist(system:term_expansion,LGroundClauses,Clause).

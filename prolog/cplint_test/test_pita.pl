@@ -39,21 +39,39 @@ test_pita:-
     pcfg,
     var_objdb,
     card,
-    dt_viral
+    dt_umbrella,
+    dt_winning,
+    dt_weather
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
 
-:- begin_tests(dt_viral, []).
+% :- begin_tests(dt_viral, []).
 
-:-ensure_loaded(library(examples/dt_viral)).
+% :-ensure_loaded(library(examples/dt_viral)).
 
-test(best_st):-
-  run((dtproblog_solve(Strategy,ExpValue),close_to(P,3.21097),perm(Strategy,[marketed(martijn),marketed(guy),marketed(theo),marketed(ingo)]))).
+% test(best_st):-
+%   run((dtproblog_solve(Strategy,ExpValue),close_to(P,3.21097),perm(Strategy,[marketed(martijn),marketed(guy),marketed(theo),marketed(ingo)]))).
 
+% :- end_tests(dt_viral).
 
-:- end_tests(dt_viral).
+:- begin_tests(dt_winning, []).
+:-ensure_loaded(library(examples/dt_winning)).
+test(best_st_wnning):-
+  run((dt_solve(Strategy,ExpValue),close_to(ExpValue,17.25),perm(Strategy,[play1]))).
+:- end_tests(dt_winning).
 
+:- begin_tests(dt_umbrella, []).
+:-ensure_loaded(library(examples/dt_umbrella)).
+test(best_st_umbrella):-
+  run((dt_solve(Strategy,ExpValue),close_to(ExpValue,43),perm(Strategy,[umbrella]))).
+:- end_tests(dt_umbrella).
+
+:- begin_tests(dt_weather, []).
+:-ensure_loaded(library(examples/dt_weather)).
+test(best_st_weather):-
+  run((dt_solve(Strategy,ExpValue),close_to(ExpValue,77),perm(Strategy,[decide_u(rainy)]))).
+:- end_tests(dt_weather).
 
 :- begin_tests(coin, []).
 

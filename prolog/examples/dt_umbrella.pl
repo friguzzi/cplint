@@ -1,3 +1,5 @@
+% From [Van den Broeck et al., 2010].
+
 :- use_module(library(pita)).
 
 :- pita.
@@ -11,7 +13,7 @@
 ? :: umbrella.
 ? :: raincoat.
 
-broken_umbrella :- umbrella,rain,wind.
+broken_umbrella :- rain,umbrella,wind.
 dry :- rain, raincoat.
 dry :- rain, umbrella, \+(broken_umbrella).
 dry :- \+(rain).
