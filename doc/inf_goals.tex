@@ -444,6 +444,9 @@ of \href{http://cplint.eu/example/inference/arithm.pl}{\texttt{arithm.pl}}
 computes the expectation of argument \verb|Y| of \verb|eval(2,Y)| given that
 \verb|eval(1,3)| is true by taking 1000 samples using Metropolis-Hastings MCMC.
 
+Note that conditional inference  is not allowed for PRISM programs with the setting \verb|prism_memoization| set to
+\verb|false|, as sampled values are not stored in that case and conditioning would have no effect.
+
 \subsection{Conditional Queries on Continuous Variables}
 \label{condqcont}
 

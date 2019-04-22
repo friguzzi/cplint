@@ -30,6 +30,7 @@ Moreover, \verb|pita| has the parameters
 \begin{itemize}
 \item \verb|depth_bound|: if \texttt{true}, the depth of the derivation of the goal is limited to the value of the \texttt{depth} parameter.  Default value \texttt{false}.
 \item  \texttt{depth}: maximum depth of derivations when  \verb|depth_bound| is set to \texttt{true}. Default value \texttt{5}.
+\item \verb|prism_memoization|: \verb|false|: original prism semantics, \verb|true|: semantics with memoization
 \end{itemize}
 If \verb|depth_bound| is set to \verb|true|, derivations are depth-bounded so you can query also programs
 containing infinite loops, for example programs where queries have an infinite number of explanations. However the probability that is returned is guaranteed only to be a lower bound,
@@ -50,6 +51,7 @@ even if the width of the confidence interval is less than \verb|min_error|, the 
 This would lead to non-termination in cases where the probability is 0 or 1. 
 \verb|max_samples| ensures termination.
  Default value \verb|10e4|.
+\item \verb|prism_memoization|: \verb|false|: original prism semantics, \verb|true|: semantics with memoization
 \end{itemize}
 The example \href{http://cplint.eu/example/inference/markov_chain.pl}{\texttt{markov\_chain.pl}}
 shows that \verb|mcintyre| can perform inference in presence of an infinite number of explanations for 

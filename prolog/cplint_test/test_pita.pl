@@ -5,6 +5,7 @@
 test_pita:-
 	run_tests([coin,
     coinmsw,
+    coinmsw_memo,
     dice,
     epidemic,
     earthquake,
@@ -77,6 +78,17 @@ test(r_c_t):-
   run((prob(res(coin,tails),P),close_to(P,0.49))).
 
 :- end_tests(coinmsw).
+
+:- begin_tests(coinmsw_memo, []).
+
+:-ensure_loaded(library(examples/coinmsw_memo)).
+
+test(r_c_h):-
+  run((prob(res(coin,heads),fairness(coin,fair),P),close_to(P,0.5))).
+test(r_c_t):-
+  run((prob(res(coin,tails),fairness(coin,fair),P),close_to(P,0.5))).
+
+:- end_tests(coinmsw_memo).
 
 :- begin_tests(dice, []).
 

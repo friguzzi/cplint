@@ -110,8 +110,10 @@ The distribution over values is specified using directives for \verb|set_sw/2| o
 \end{verbatim}
 where \verb|T| is a term (possibly containing variables) and \verb|LP| is a list of
 probability values.
-Remember that in PRISM each call to \verb|msw/2| refers to a different random
+Remember that usually in PRISM each call to \verb|msw/2| refers to a different random
 variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog.
+This behavior can be changed with the setting \verb|prism_memoization|: if set to \verb|true| then 
+memoization is performed. Its default value is \verb|false|, i.e., no memoization.
 
 For example, the coin example above in PRISM syntax becomes
 (\href{http://cplint.eu/example/inference/coinmsw.pl}{\texttt{coinmsw.pl}})

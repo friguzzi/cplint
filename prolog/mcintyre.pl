@@ -160,6 +160,8 @@ details.
 
 
 :-meta_predicate rejection_montecarlo(+,+,+,:,:,-,-).
+:-meta_predicate set_mc(:,+).
+:-meta_predicate setting_mc(:,-).
 
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
@@ -235,7 +237,7 @@ default_setting_mc(compiling,off).
 default_setting_mc(depth_bound,false).  %if true, it limits the derivation of the example to the value of 'depth'
 default_setting_mc(depth,2).
 default_setting_mc(single_var,false). %false:1 variable for every grounding of a rule; true: 1 variable for rule (even if a rule has more groundings),simpler.
-
+default_setting_mc(prism_memoization,false). %false: original prism semantics, true: semantics with memoization
 /**
  * mc_load(++File:atom) is det
  *
@@ -600,6 +602,7 @@ mc_sample(M:Goal,S,T,F,P):-
  *   Number of failueres
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
+  test_prism(M),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
   mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
@@ -623,6 +626,7 @@ mc_rejection_sample(M:Goal,M:Evidence,S,P):-
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
 mc_rejection_sample(M:Goal,M:Evidence0,S,T,F,P):-
+  test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   rejection_montecarlo(S,0, 0, M:Goal,M:Evidence, N, T),
   P is T / N,
@@ -888,6 +892,7 @@ gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
  *   a world sampled at random.
  */
 mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options):-
+  test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
   option(bar(Chart),Options,no),
@@ -930,6 +935,7 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
+  test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
   option(bar(Chart),Options,no),
@@ -1074,6 +1080,7 @@ gibbs_sample_arg(K0,M:Goal,Block, Arg,V0,V):-
  *   Number of failueres
  */
 mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
+  test_prism(M),
   option(lag(L),Options,1),
   option(mix(Mix),Options,0),
   option(successes(T),Options,_T),
@@ -1330,6 +1337,7 @@ mc_sample_arg(M:Goal,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
+  test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   empty_assoc(Values0),
   rejection_sample_arg(S,M:Goal,M:Evidence,Arg, Values0,Values),
@@ -1379,6 +1387,7 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
+  test_prism(M),
   option(mix(Mix),Options,0),
   option(lag(L),Options,1),
   option(bar(Chart),Options,no),
@@ -1743,6 +1752,7 @@ get_values(M,I,V):-
  * likelihood of evidence in the sample.
  */
 mc_lw_sample(M:Goal,M:Evidence0,S,P):-
+  test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   erase_samples,
   lw_sample_bool(S,M:Goal,M:Evidence,ValList),
@@ -1769,6 +1779,7 @@ value_cont_single(H-W,S,S+H*W).
  * likelihood of evidence in the sample.
  */
 mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
   foldl(agg_val,ValList0,0,Sum),
@@ -1793,6 +1804,7 @@ mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
  * weight is returned, useful when the evidence is very unlikely.
  */
 mc_lw_sample_arg_log(M:Goal,M:Evidence0,S,Arg,ValList):-
+  test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList),
   maplist(erase,UpdatedClausesRefs),
@@ -3306,7 +3318,13 @@ add_arg(A,Arg,A1):-
  * This is a predicate for programs in the PRISM syntax
  */
 set_sw(M:A,B):-
+  M:local_mc_setting(prism_memoization,false),!,
   assert(M:sw(A,B)).
+
+set_sw(M:A,B):-
+  M:local_mc_setting(prism_memoization,true),
+  get_next_rule_number(M,R),
+  assert(M:sw(R,A,B)).
 
 /**
  * msw(:Var:term,?Value:term) is det
@@ -3316,8 +3334,13 @@ set_sw(M:A,B):-
  */
 msw(M:A,B):-
   M:values(A,V),
-  M:sw(A,D),
+  M:sw(A,D),!,
   sample_msw(V,D,B).
+
+msw(M:A,B):-
+  M:values(A,V),
+  M:sw(R,A,D),
+  sample_msw(V,R,A,D,B).
 
 sample_msw(real,norm(Mean,Variance),V):-!,
   gauss(Mean,Variance,S),
@@ -3328,11 +3351,23 @@ sample_msw(Values,Dist,V):-
   sample(VD,N),
   nth0(N,Values,V).
 
+sample_msw(real,R,A,norm(Mean,Variance),V):-!,
+  sample_gauss(R,A,Mean,Variance,V).
+
+sample_msw(Values,R,A,Dist,V):-
+  maplist(combine,Values,Dist,VD),
+  sample_discrete(R,A,VD,V).
+
 combine(V,P,V:P).
 
 msw_weight(M:A,B,W):-
   M:values(A,V),
-  M:sw(A,D),
+  M:sw(A,D),!,
+  msw_weight(V,D,B,W).
+
+msw_weight(M:A,B,W):-
+  M:values(A,V),
+  M:sw(_R,A,D),
   msw_weight(V,D,B,W).
 
 msw_weight(real,norm(Mean,Variance),V,W):-!,
@@ -3341,6 +3376,14 @@ msw_weight(real,norm(Mean,Variance),V,W):-!,
 msw_weight(Values,Dist,V,W):-
   maplist(combine,Values,Dist,VD),
   member(V:W,VD).
+
+
+test_prism(M):-
+  (M:local_mc_setting(prism_memoization,false),current_predicate(M:values/2)->
+    throw(error("This predicate doesn't support PRISM programs without memoization."))
+  ;
+    true
+  ).
 
 act(M,A/B):-
   M:(dynamic A/B).
@@ -3368,7 +3411,7 @@ system:term_expansion((:- mc), []) :-!,
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
-  dynamic((M:samp/3,M:mem/4)),
+  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3)),
   retractall(M:samp(_,_,_)),
   style_check(-discontiguous).
 

@@ -6,6 +6,8 @@
 :-use_module(library(cplint_test/cplint_test)).
 
 test_list([
+    coinmsw_mc,
+    coinmsw_mc_memo,
     coinmc,
     threesideddicemc,
     markov_chain,
@@ -425,3 +427,24 @@ test(exp):-
 
 :- end_tests(binomial).
 
+:- begin_tests(coinmsw_mc, []).
+
+:-ensure_loaded(library(examples/coinmsw_mc)).
+
+test(mc_sample):-
+  run((mc_sample(res(coin,heads),1000,P),close_to(P,0.51))).
+
+:- end_tests(coinmsw_mc).
+
+
+:- begin_tests(coinmsw_mc_memo, []).
+
+:-ensure_loaded(library(examples/coinmsw_mc_memo)).
+
+test(lw):-
+  run((mc_lw_sample(res(coin,heads),fairness(coin,fair),1000,P),close_to(P,0.5))).
+
+test(mh):-
+  run((mc_mh_sample(res(coin,heads),fairness(coin,fair),200,P,[mix(100),lag(3)]),close_to(P,0.5))).
+
+:- end_tests(coinmsw_mc_memo).
