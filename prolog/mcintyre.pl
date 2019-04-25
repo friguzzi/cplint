@@ -602,7 +602,6 @@ mc_sample(M:Goal,S,T,F,P):-
  *   Number of failueres
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
-  test_prism(M),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
   mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
@@ -815,6 +814,7 @@ check_sam(M,(R,S)):-
  *   Number of failueres
  */
 mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
+  test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
   option(successes(T),Options,_T),
@@ -1574,6 +1574,7 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
  * the particle by the likelihood of the evidence element.
  */
 mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
+  test_prism(M),
   Goal=[G1|GR],!,
   Evidence=[Ev1|EvR],
   Arg=[A1|AR],
