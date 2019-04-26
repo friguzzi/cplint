@@ -41,8 +41,8 @@
   mc_lw_expectation/5,
   mc_particle_sample_arg/5,
   mc_particle_expectation/5,
+  gaussian/5,
   gaussian/4,
-  gaussian/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -1598,7 +1598,7 @@ take_samples_gl(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples_gl(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
-  discrete(V,SInd),
+  discrete(V,_M,SInd),
   restore_samples(M,I,SInd),
   save_samples_tab(M,I1,S1),
   take_samples_gl(M,S1,S,I,I1,W,V).
@@ -1668,7 +1668,7 @@ take_samples(_M,S,S,_I,_I1,_W,_V):-!.
 
 take_samples(M,S0,S,I,I1,W,V):-
   S1 is S0+1,
-  discrete(V,SInd),
+  discrete(V,_M,SInd),
   restore_samples(M,I,SInd),
   save_samples_tab(M,I1,S1),
   M:value_particle(I,SInd,Arg),!,
@@ -1927,12 +1927,12 @@ lw_sample_weight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
     take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    (is_discrete(Distr)->
+    (is_discrete(M,Distr)->
       check(R,VC,M,S)
     ;
       true
     ),
-    call(Distr,S,D),
+    call(Distr,M,S,D),
     W is W0*D
    ).
 
@@ -2002,12 +2002,12 @@ lw_sample_logweight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
     take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    (is_discrete(Distr)->
+    (is_discrete(M,Distr)->
       check(R,VC,M,S)
     ;
       true
     ),
-    call(Distr,S,D),
+    call(Distr,M,S,D),
     W is W0+log(D)
    ).
 
@@ -2385,12 +2385,12 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
  *
  * Returns in S a sample from a distribution uniform in (Lower,Upper)
  */
-uniform(L,U,S):-
+uniform(L,U,_M,S):-
   number(L),
   random(V),
   S is L+V*(U-L).
 
-uniform(L,U,_S,D):-
+uniform(L,U,_M,_S,D):-
   D is 1/(U-L).
 
 /**
@@ -2398,13 +2398,13 @@ uniform(L,U,_S,D):-
  *
  * Returns in S a value from Values chosen uniformly
  */
-uniform(Values,S):-
+uniform(Values,M,S):-
   length(Values,Len),Prob is 1.0/Len,
   maplist(add_prob(Prob),Values,Dist),
-  discrete(Dist,S).
+  discrete(Dist,M,S).
 
 
-uniform(Values,_S,D):-
+uniform(Values,_M,_S,D):-
   length(Values,L),
   D is 1.0/L.
 
@@ -2422,7 +2422,7 @@ take_a_sample(R,VC,M,_Distr,S):-
   S=S0.
 
 take_a_sample(R,VC,M,Distr,S):-
-  call(Distr,S0),
+  call(Distr,M,S0),
   assertz(M:sampled(R,VC,S0)),
   S=S0.
 
@@ -2432,7 +2432,7 @@ take_a_sample(R,VC,M,Distr,S):-
  * samples a value from a Gaussian with mean Mean and variance
  * Variance and returns it in S
  */
-gaussian(Mean,Variance,S):-
+gaussian(Mean,Variance,_M,S):-
   number(Mean),!,
   random(U1),
   random(U2),
@@ -2442,7 +2442,7 @@ gaussian(Mean,Variance,S):-
   StdDev is sqrt(Variance),
   S is StdDev*S0+Mean.
 
-gaussian([Mean1,Mean2],Covariance,[X1,X2]):-!,
+gaussian([Mean1,Mean2],Covariance,_M,[X1,X2]):-!,
   random(U1),
   random(U2),
   R is sqrt(-2*log(U1)),
@@ -2453,7 +2453,7 @@ gaussian([Mean1,Mean2],Covariance,[X1,X2]):-!,
   matrix_multiply(A,[[S0],[S1]],Az),
   matrix_sum([[Mean1],[Mean2]],Az,[[X1],[X2]]).
 
-gaussian(Mean,Covariance,X):-
+gaussian(Mean,Covariance,_M,X):-
   length(Mean,N),
   n_gaussian_var(0,N,Z),
   cholesky_decomposition(Covariance,A),
@@ -2490,12 +2490,12 @@ n_gaussian_var(N1,N,[Z1,Z2|T]):-
  * Computes the probability density of value S according to a Gaussian with
  * mean Mean and variance Variance and returns it in Density.
  */
-gaussian(Mean,Variance,S,D):-
+gaussian(Mean,Variance,_M,S,D):-
   number(Mean),!,
   StdDev is sqrt(Variance),
   D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
 
-gaussian(Mean,Covariance,S,D):-
+gaussian(Mean,Covariance,_M,S,D):-
   determinant(Covariance,Det),
   matrix_diff([Mean],[S],S_M),
   matrix_inversion(Covariance,Cov_1),
@@ -2512,7 +2512,7 @@ gaussian(Mean,Covariance,S,D):-
  * samples a value from a Gamma density function with shape Shape and
  * scale Scale returns it in S
  */
-gamma(A,Scale,S):-
+gamma(A,Scale,_M,S):-
   (A>=1->
     gamma_gt1(A,S1)
   ;
@@ -2545,7 +2545,7 @@ cycle_gamma(D,C,S):-
   ).
 
 getv(C,X,V):-
-  gaussian(0.0,1.0,X0),
+  gaussian(0.0,1.0,_M,X0),
   V0 is (1+C*X0)^3,
   (V0=<0->
     getv(C,X,V)
@@ -2554,7 +2554,7 @@ getv(C,X,V):-
     X=X0
   ).
 
-gamma(K,Scale,S,D):-
+gamma(K,Scale,_M,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
 
 /**
@@ -2567,12 +2567,12 @@ gamma(K,Scale,S,D):-
  * see also
  * https://en.wikipedia.org/wiki/Beta_distribution#Generating_beta-distributed_random_variates
  */
-beta(Alpha,Beta,S):-
-  gamma(Alpha,1,X),
-  gamma(Beta,1,Y),
+beta(Alpha,Beta,M,S):-
+  gamma(Alpha,1,M,X),
+  gamma(Beta,1,M,Y),
   S is X/(X+Y).
 
-beta(Alpha,Beta,X,D):-
+beta(Alpha,Beta,_M,X,D):-
   B is exp(lgamma(Alpha)+lgamma(Beta)-lgamma(Alpha+Beta)),
   D is X^(Alpha-1)*(1-X)^(Beta-1)/B.
 
@@ -2586,7 +2586,7 @@ beta(Alpha,Beta,X,D):-
  * Devroye, Luc (1986). "Discrete Univariate Distributions"
  * Non-Uniform Random Variate Generation. New York: Springer-Verlag. p. 505.
  */
-poisson(Lambda,X):-
+poisson(Lambda,_M,X):-
   P is exp(-Lambda),
   random(U),
   poisson_cycle(0,X,Lambda,P,P,U).
@@ -2600,7 +2600,7 @@ poisson_cycle(X0,X,L,P0,S0,U):-
   S is S0+P,
   poisson_cycle(X1,X,L,P,S,U).
 
-poisson(Lambda,X,P):-
+poisson(Lambda,_M,X,P):-
   fact(X,1,FX),
   P is (Lambda^X)*exp(-Lambda)/FX.
 
@@ -2617,9 +2617,9 @@ fact(N,F0,F):-
  * samples a value from a binomial probability distribution with parameters
  * N and P and returns it in S.
  */
-binomial(N,1.0,N):-!.
+binomial(N,1.0,_M,N):-!.
 
-binomial(N,P,X):-
+binomial(N,P,_M,X):-
   Pr0 is (1-P)^N,
   random(U),
   binomial_cycle(0,X,N,P,Pr0,Pr0,U).
@@ -2633,7 +2633,7 @@ binomial_cycle(X0,X,N,P,Pr0,CPr0,U):-
   CPr is CPr0+Pr,
   binomial_cycle(X1,X,N,P,Pr,CPr,U).
 
-binomial(N,P,X,Pr):-
+binomial(N,P,_M,X,Pr):-
   fact(N,1,FN),
   fact(X,1,FX),
   N_X is N-X,
@@ -2646,7 +2646,7 @@ binomial(N,P,X,Pr):-
  * samples a value from a Dirichlet probability density with parameters
  * Par and returns it in S
  */
-dirichlet(Par,S):-
+dirichlet(Par,_M,S):-
   maplist(get_gamma,Par,Gammas),
   sumlist(Gammas,Sum),
   maplist(divide(Sum),Gammas,S).
@@ -2655,9 +2655,9 @@ divide(S0,A,S):-
   S is A/S0.
 
 get_gamma(A,G):-
-  gamma(A,1.0,G).
+  gamma(A,1.0,_M,G).
 
-dirichlet(Par,S,D):-
+dirichlet(Par,_M,S,D):-
   beta(Par,B),
   foldl(prod,S,Par,1,D0),
   D is D0*B.
@@ -2671,7 +2671,7 @@ prod(X,A,P0,P0*X^(A-1)).
  * samples a value from a geometric probability distribution with parameters
  * P and returns it in I (I belongs to [1,infinity]
  */
-geometric(P,I):-
+geometric(P,_M,I):-
   geometric_val(1,P,I).
 
 geometric_val(N0,P,N):-
@@ -2683,7 +2683,7 @@ geometric_val(N0,P,N):-
     geometric_val(N1,P,N)
   ).
 
-geometric(P,I,D):-
+geometric(P,_M,I,D):-
   D is (1-P)^(I-1)*P.
 /**
  * finite(+Distribution:list,-S:float) is det
@@ -2691,11 +2691,11 @@ geometric(P,I,D):-
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
  */
-finite(D,S):-
-  discrete(D,S).
+finite(D,M,S):-
+  discrete(D,M,S).
 
-finite(D,S,Dens):-
-  discrete(D,S,Dens).
+finite(D,M,S,Dens):-
+  discrete(D,M,S,Dens).
 
 /**
  * discrete(+Distribution:list,-S:float) is det
@@ -2703,22 +2703,22 @@ finite(D,S,Dens):-
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
  */
-discrete(D,S):-
+discrete(D,_M,S):-
   random(U),
-  discrete(D,0,U,S).
+  discrete_int(D,0,U,S).
 
 
-discrete([S:_],_,_,S):-!.
+discrete_int([S:_],_,_,S):-!.
 
-discrete([S0:W|T],W0,U,S):-
+discrete_int([S0:W|T],W0,U,S):-
   W1 is W0+W,
   (U=<W1->
     S=S0
   ;
-    discrete(T,W1,U,S)
+    discrete_int(T,W1,U,S)
   ).
 
-discrete(D,S,Dens):-
+discrete(D,_M,S,Dens):-
   member(S:Dens,D).
 % discrete(_D,_S,1.0).
 /** 
@@ -2727,7 +2727,7 @@ discrete(D,S,Dens):-
  * Samples a value from exponential distribution with parameter Lambda 
  * 
 **/
-exponential(Lambda,V):-
+exponential(Lambda,_M,V):-
   V0 is 1 - exp(-Lambda),
   random(RandomVal),    
   exponential_(1,RandomVal,Lambda,V0,V).
@@ -2739,7 +2739,7 @@ exponential_(I,RandomVal,Lambda,_,V):-
   CurrentProb is 1 - exp(-Lambda*I1),
   exponential_(I1,RandomVal,Lambda,CurrentProb,V).
 
-exponential(Lambda,X,V):-
+exponential(Lambda,_M,X,V):-
   V is Lambda*exp(-Lambda*X).
 
 /**
@@ -2753,8 +2753,8 @@ exponential(Lambda,X,V):-
 
 % R number of failures
 % P probability of success
-pascal(R,P,Value):-
-  pascal(0,R,P,V0),
+pascal(R,P,_M,Value):-
+  pascal_int(0,R,P,V0),
   random(RandomVal),
   pascal_prob_(0,R,P,V0,RandomVal,Value).
 
@@ -2762,7 +2762,7 @@ pascal_prob_(I,_,_,CurrentProb,RandomVal,I):-
   RandomVal =< CurrentProb, !.
 pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
   I1 is I+1,
-  pascal(I1,R,P,V0),
+  pascal_int(I1,R,P,V0),
   CurrentProb1 is V0 + CurrentProb,
   pascal_prob_(I1,R,P,CurrentProb1,RandomVal,V).
 
@@ -2771,7 +2771,7 @@ pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
 * R number of failures
 * P probability of success
 */
-pascal(K,R,P,Value):-
+pascal_int(K,R,P,Value):-
   KR1 is K+R-1,
   binomial_coeff(KR1,K,Bin),
   Value is Bin*(P**K)*(1-P)**R.
@@ -2782,6 +2782,17 @@ binomial_coeff(N,K,Val):-
   NK is N-K,
   fact(NK,1,NKF),
   Val is NF/(KF*NKF).
+
+/**
+ * user(+Distr:atom,+M:module,-Value:int) is det
+ *
+ * samples a value from a user defined distribution
+ */
+user(Distr,M,S):-
+  call(M:Distr,S).
+
+user(Distr,M,S,D):-
+  call(M:Distr,S,D).
 
 generate_rules_fact([],HeadList,VC,M,R,_N,[Rule]):-
   Rule=(samp(R,VC,N):-(sample_head(R,VC,M,HeadList,N))).
@@ -2979,7 +2990,7 @@ msw(M:A,B):-
   sample_msw(V,M,R,A,D,B).
 
 sample_msw(real,norm(Mean,Variance),V):-!,
-  gaussian(Mean,Variance,S),
+  gaussian(Mean,Variance,_M,S),
   S=V.
 
 sample_msw(Values,Dist,V):-
@@ -3116,7 +3127,7 @@ system:term_expansion((Head:-Body),Clause) :-
   nonvar(Distr0),
   \+ number(Distr0),
   Distr0=..[D,Var|Pars],
-  is_dist(D),!,
+  is_dist(M,D),!,
   Distr=..[D|Pars],
   extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -3191,7 +3202,7 @@ system:term_expansion(Head,Clause) :-
   nonvar(Distr0),
   \+ number(Distr0),
   Distr0=..[D,Var|Pars],
-  is_dist(D),!,
+  is_dist(M,D),!,
   Distr=..[D|Pars],
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
@@ -3301,7 +3312,7 @@ builtin_int(G):-
   predicate_property(G,imported_from(clpfd)).
 
 
-is_dist(D):-
+is_dist(_M,D):-
   member(D,[
     finite,
     discrete,
@@ -3314,8 +3325,10 @@ is_dist(D):-
     binomial,
     geometric,
     exponential,
-    pascal
+    pascal,
+    user
     ]),!.
+
 
 switch_finite(D0,D):-
   D0=..[F,Arg0],
@@ -3325,7 +3338,7 @@ switch_finite(D0,D):-
 
 switch_finite(D,D).
 
-is_discrete(D):-
+is_discrete(_M,D):-
   functor(D,F,A),
   member(F/A,[
     finite/1,
@@ -3335,7 +3348,10 @@ is_discrete(D):-
     binomial/2,
     geometric/1,
     pascal/2
-    ]).  
+    ]),!.
+
+is_discrete(M,D):-
+  M:disc(D).
 /**
  * swap(?Term1:term,?Term2:term) is det
  *
