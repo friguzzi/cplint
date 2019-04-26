@@ -25,7 +25,7 @@ stands for
 \begin{verbatim}
 h1:1 :- Body.
 \end{verbatim}
-The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \href{http://cplint.eu/example/inference/coin.pl}{\texttt{coin.pl}})
+The coin example of  \cite{VenVer04-ICLP04-IC} is represented as (file \href{http://cplint.eu/e/coin.pl}{\texttt{coin.pl}})
 \begin{verbatim}
 heads(Coin):1/2 ; tails(Coin):1/2 :- 
   toss(Coin),\+biased(Coin).
@@ -49,7 +49,7 @@ that, given a list of numbers, computes its arithmetic mean.
 
 The body of rules may also contain the predicate \verb|prob/2| that computes the
 probability of an atom, thus allowing nested probability computations.
-For example (\href{http://cplint.eu/example/inference/meta.pl}{\texttt{meta.pl}})
+For example (\href{http://cplint.eu/e/meta.pl}{\texttt{meta.pl}})
 \begin{verbatim}
 a:0.2:-
   prob(b,P),
@@ -58,7 +58,7 @@ a:0.2:-
 is a valid rule.
 
 Moreover, the probabilistic annotations can be variables, as in 
-(\href{http://cplint.eu/example/inference/flexprob.pl}{\texttt{flexprob.pl}}))
+(\href{http://cplint.eu/e/flexprob.pl}{\texttt{flexprob.pl}})
 \begin{verbatim}
 red(Prob):Prob.
 
@@ -116,7 +116,7 @@ This behavior can be changed with the setting \verb|prism_memoization|: if set t
 memoization is performed. Its default value is \verb|false|, i.e., no memoization.
 
 For example, the coin example above in PRISM syntax becomes
-(\href{http://cplint.eu/example/inference/coinmsw.pl}{\texttt{coinmsw.pl}})
+(\href{http://cplint.eu/e/coinmsw.pl}{\texttt{coinmsw.pl}})
 \begin{verbatim}
 values(throw(_),[heads,tails]).
 :- set_sw(throw(fair),[0.5,0.5]).
@@ -180,7 +180,7 @@ $$\left[\begin{array}{rr}
 
 
 
-For example, \href{http://cplint.eu/example/inference/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}} defines a mixture of two Gaussians:
+For example, \href{http://cplint.eu/e/gaussian_mixture.pl}{\texttt{gaussian\_mixture.pl}} defines a mixture of two Gaussians:
 \begin{verbatim}
 heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
@@ -194,7 +194,7 @@ one with mean 0 and variance 1 with probability 0.6 and one with
 mean 5 and variance 2 with probability 0.4.
 
 The parameters of the distribution atoms can be taken from the probabilistic
-atom, the example \href{http://cplint.eu/example/inference/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
+atom, the example \href{http://cplint.eu/e/gauss_mean_est.pl}{\texttt{gauss\_mean\_est.pl}}
 \begin{verbatim}
 val(I,X) :-
   mean(M),
@@ -207,7 +207,7 @@ sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Gau
 variance 5.
 
 Any operation is allowed on continuous random variables. The example below
-(\href{http://cplint.eu/example/inference/kalman_filter.pl}{\texttt{kalman\_filter.pl}}) encodes a Kalman filter:
+(\href{http://cplint.eu/e/kalman_filter.pl}{\texttt{kalman\_filter.pl}}) encodes a Kalman filter:
 \begin{verbatim}
 kf(N,O, T) :-
   init(S),
@@ -259,8 +259,8 @@ disc(predicate).
 \end{verbatim}
 also  after \verb|:- end_lpad.|
 
-See for example \href{http://cplint.eu/example/inference/gauss_mean_est_user.pl}{\texttt{gauss\_mean\_est\_user.pl}} and
-\href{http://cplint.eu/example/inference/binomial_user.pl}{\texttt{binomial\_user.pl}}.
+See for example \href{http://cplint.eu/e/gauss_mean_est_user.pl}{\texttt{gauss\_mean\_est\_user.pl}} and
+\href{http://cplint.eu/e/binomial_user.pl}{\texttt{binomial\_user.pl}}.
 
 \subsubsection{Distributional Clauses Syntax}
 \label{dc}
@@ -281,7 +281,7 @@ where \verb|L| is a list of values and \verb|D| is a list of couples \verb|P:V| 
 If \verb|Body| is empty, as in regular Prolog, the implication symbol \verb|:=| can be omitted.
 
 The Indian GPA problem from \url{http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa}in distributional clauses syntax  (\url{https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl})
-takes the form (\href{http://cplint.eu/example/inference/indian_gpadc.pl}{\texttt{indian\_gpadc.pl}}):
+takes the form (\href{http://cplint.eu/e/indian_gpadc.pl}{\texttt{indian\_gpadc.pl}}):
 \begin{verbatim}
 is_density_A:0.95;is_discrete_A:0.05.
 % the probability distribution of GPA scores for American students is

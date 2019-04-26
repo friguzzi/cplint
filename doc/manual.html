@@ -82,7 +82,7 @@ fabrizio.riguzzi@unife.it</h2>
 <pre><code>h1 :- Body.</code></pre>
 <p>stands for</p>
 <pre><code>h1:1 :- Body.</code></pre>
-<p>The coin example of <span class="citation">[<a href="#ref-VenVer04-ICLP04-IC">24</a>]</span> is represented as (file <a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
+<p>The coin example of <span class="citation">[<a href="#ref-VenVer04-ICLP04-IC">24</a>]</span> is represented as (file <a href="http://cplint.eu/e/coin.pl"><code>coin.pl</code></a>)</p>
 <pre><code>heads(Coin):1/2 ; tails(Coin):1/2 :- 
   toss(Coin),\+biased(Coin).
 
@@ -96,12 +96,12 @@ toss(coin).</code></pre>
 <p>Moreover, the bodies of rules may contain built-in predicates, predicates from the libraries <code>lists</code>, <code>apply</code> and <code>clpr/nf_r</code> plus the predicate</p>
 <pre><code>average/2</code></pre>
 <p>that, given a list of numbers, computes its arithmetic mean.</p>
-<p>The body of rules may also contain the predicate <code>prob/2</code> that computes the probability of an atom, thus allowing nested probability computations. For example (<a href="http://cplint.eu/example/inference/meta.pl"><code>meta.pl</code></a>)</p>
+<p>The body of rules may also contain the predicate <code>prob/2</code> that computes the probability of an atom, thus allowing nested probability computations. For example (<a href="http://cplint.eu/e/meta.pl"><code>meta.pl</code></a>)</p>
 <pre><code>a:0.2:-
   prob(b,P),
   P&gt;0.2.</code></pre>
 <p>is a valid rule.</p>
-<p>Moreover, the probabilistic annotations can be variables, as in (<a href="http://cplint.eu/example/inference/flexprob.pl"><code>flexprob.pl</code></a>))</p>
+<p>Moreover, the probabilistic annotations can be variables, as in (<a href="http://cplint.eu/e/flexprob.pl"><code>flexprob.pl</code></a>)</p>
 <pre><code>red(Prob):Prob.
 
 draw_red(R, G):-
@@ -125,7 +125,7 @@ draw_red(R, G):-
 <p>where <code>T</code> is a term (possibly containing variables) and <code>L</code> is a list of values. The distribution over values is specified using directives for <code>set_sw/2</code> of the form</p>
 <pre><code>:- set_sw(T,LP).</code></pre>
 <p>where <code>T</code> is a term (possibly containing variables) and <code>LP</code> is a list of probability values. Remember that usually in PRISM each call to <code>msw/2</code> refers to a different random variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog. This behavior can be changed with the setting <code>prism_memoization</code>: if set to <code>true</code> then memoization is performed. Its default value is <code>false</code>, i.e., no memoization.</p>
-<p>For example, the coin example above in PRISM syntax becomes (<a href="http://cplint.eu/example/inference/coinmsw.pl"><code>coinmsw.pl</code></a>)</p>
+<p>For example, the coin example above in PRISM syntax becomes (<a href="http://cplint.eu/e/coinmsw.pl"><code>coinmsw.pl</code></a>)</p>
 <pre><code>values(throw(_),[heads,tails]).
 :- set_sw(throw(fair),[0.5,0.5]).
 :- set_sw(throw(biased),[0.6,0.4]).
@@ -158,21 +158,21 @@ toss(coin).</code></pre>
 1&amp;0\\
 0&amp;1
 \end{array}\right]\]</span>.</p>
-<p>For example, <a href="http://cplint.eu/example/inference/gaussian_mixture.pl"><code>gaussian_mixture.pl</code></a> defines a mixture of two Gaussians:</p>
+<p>For example, <a href="http://cplint.eu/e/gaussian_mixture.pl"><code>gaussian_mixture.pl</code></a> defines a mixture of two Gaussians:</p>
 <pre><code>heads:0.6;tails:0.4.
 g(X): gaussian(X,0, 1).
 h(X): gaussian(X,5, 2).
 mix(X) :- heads, g(X).
 mix(X) :- tails, h(X).</code></pre>
 <p>The argument <code>X</code> of <code>mix(X)</code> follows a distribution that is a mixture of two Gaussian, one with mean 0 and variance 1 with probability 0.6 and one with mean 5 and variance 2 with probability 0.4.</p>
-<p>The parameters of the distribution atoms can be taken from the probabilistic atom, the example <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a></p>
+<p>The parameters of the distribution atoms can be taken from the probabilistic atom, the example <a href="http://cplint.eu/e/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a></p>
 <pre><code>val(I,X) :-
   mean(M),
   val(I,M,X).
 mean(M): gaussian(M,1.0, 5.0).
 val(_,M,X): gaussian(X,M, 2.0).</code></pre>
 <p>states that for an index <code>I</code> the continuous variable <code>X</code> is sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Gaussian with mean 1 and variance 5.</p>
-<p>Any operation is allowed on continuous random variables. The example below (<a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a>) encodes a Kalman filter:</p>
+<p>Any operation is allowed on continuous random variables. The example below (<a href="http://cplint.eu/e/kalman_filter.pl"><code>kalman_filter.pl</code></a>) encodes a Kalman filter:</p>
 <pre><code>kf(N,O, T) :-
   init(S),
   kf_part(0, N, S,O,T).
@@ -199,7 +199,7 @@ obs_err(_,E):gaussian(E,0,1).</code></pre>
 <p>If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate <code>predicate/n+s</code> such that <code>predicate(Parameters,Var),Dens</code>, when called with <code>Parameters</code> and <code>Var</code> instantiated, returns in <code>Dens</code> the value of the probability density of <code>Var</code>. Moreover, if the density is discrete, the program must include the fact</p>
 <pre><code>disc(predicate).</code></pre>
 <p>also after <code>:- end_lpad.</code></p>
-<p>See for example <a href="http://cplint.eu/example/inference/gauss_mean_est_user.pl"><code>gauss_mean_est_user.pl</code></a> and <a href="http://cplint.eu/example/inference/binomial_user.pl"><code>binomial_user.pl</code></a>.</p>
+<p>See for example <a href="http://cplint.eu/e/gauss_mean_est_user.pl"><code>gauss_mean_est_user.pl</code></a> and <a href="http://cplint.eu/e/binomial_user.pl"><code>binomial_user.pl</code></a>.</p>
 <h3 id="dc">Distributional Clauses Syntax</h3>
 <p>You can also use the syntax of Distributional Clauses (DC) <span class="citation">[<a href="#ref-Nitti2016">13</a>]</span>. Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in</p>
 <pre><code>T~Density&#39; := Body.</code></pre>
@@ -207,7 +207,7 @@ obs_err(_,E):gaussian(E,0,1).</code></pre>
 <pre><code>T~uniform(L) := Body.
 T~finite(D) := Body.</code></pre>
 <p>where <code>L</code> is a list of values and <code>D</code> is a list of couples <code>P:V</code> with <code>P</code> a probability and <code>V</code> a value. If <code>Body</code> is empty, as in regular Prolog, the implication symbol <code>:=</code> can be omitted.</p>
-<p>The Indian GPA problem from <a href="http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa" class="uri">http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa</a>in distributional clauses syntax (<a href="https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl" class="uri">https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl</a>) takes the form (<a href="http://cplint.eu/example/inference/indian_gpadc.pl"><code>indian_gpadc.pl</code></a>):</p>
+<p>The Indian GPA problem from <a href="http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa" class="uri">http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa</a>in distributional clauses syntax (<a href="https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl" class="uri">https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl</a>) takes the form (<a href="http://cplint.eu/e/indian_gpadc.pl"><code>indian_gpadc.pl</code></a>):</p>
 <pre><code>is_density_A:0.95;is_discrete_A:0.05.
 % the probability distribution of GPA scores for American students is
 % continuous with probability 0.95 and discrete with probability 0.05
@@ -254,7 +254,7 @@ student_gpa(G) :- nation(i),indian_gpa(G).
 <h1 id="semantics">Semantics</h1>
 <p>The semantics of LPADs for the case of programs without functions symbols can be given as follows. An LPAD defines a probability distribution over normal logic programs called <em>worlds</em>. A world is obtained from an LPAD by first grounding it, by selecting a single head atom for each ground clause and by including in the world the clause with the selected head atom and the body. The probability of a world is the product of the probabilities associated to the heads selected. The probability of a ground atom (the query) is given by the sum of the probabilities of the worlds where the query is true.</p>
 <p>If the LPAD contains function symbols, the definition is more complex, see <span class="citation">[<a href="#ref-DBLP:journals/ai/Poole97">15</a>,<a href="#ref-Rig15-PLP-IW">18</a>,<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>.</p>
-<p>For the semantics of programs with continuous random variables, see <span class="citation">[<a href="#ref-TLP:8688161">10</a>]</span> that defines the probability space for <span class="math inline">\(N\)</span> continuous random variables by considering the Borel <span class="math inline">\(\sigma\)</span>-algebra over <span class="math inline">\(\mathbb{R}^N\)</span> and defines a Lebesgue measure on this set as the probability measure. The probability space is lifted to cover the entire program using the least model semantics of constraint logic programs. Alternatively, <span class="citation">[<a href="#ref-Nitti2016">13</a>]</span> defines the semantics of distributional clauses by resorting to a stochastic <span class="math inline">\(Tp\)</span> operator. <code>cplint</code> allows more freedom than distributional clauses in the use of continuous random variables in expressions, for example <a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a> would not be allowed by distributional clauses.</p>
+<p>For the semantics of programs with continuous random variables, see <span class="citation">[<a href="#ref-TLP:8688161">10</a>]</span> that defines the probability space for <span class="math inline">\(N\)</span> continuous random variables by considering the Borel <span class="math inline">\(\sigma\)</span>-algebra over <span class="math inline">\(\mathbb{R}^N\)</span> and defines a Lebesgue measure on this set as the probability measure. The probability space is lifted to cover the entire program using the least model semantics of constraint logic programs. Alternatively, <span class="citation">[<a href="#ref-Nitti2016">13</a>]</span> defines the semantics of distributional clauses by resorting to a stochastic <span class="math inline">\(Tp\)</span> operator. <code>cplint</code> allows more freedom than distributional clauses in the use of continuous random variables in expressions, for example <a href="http://cplint.eu/e/kalman_filter.pl"><code>kalman_filter.pl</code></a> would not be allowed by distributional clauses.</p>
 <h1 id="inf">Inference</h1>
 <p><code>cplint</code> answers queries using the module <code>pita</code> or <code>mcintyre</code>. The first performs the program transformation technique of <span class="citation">[<a href="#ref-RigSwi10-ICLP10-IC">16</a>]</span>. Differently from that work, techniques alternative to tabling and answer subsumption are used. The latter performs approximate inference by sampling using a different program transformation technique and is described in <span class="citation">[<a href="#ref-Rig13-FI-IJ">17</a>]</span>. Only <code>mcintyre</code> is able to handle continuous random variables.</p>
 <p>For answering queries, you have to prepare a Prolog file where you first load the inference module (for example <code>pita</code>), initialize it with a directive (for example <code>:- pita</code>) and then enclose the LPAD clauses in <code>:-begin_lpad.</code> or <code>:-begin_plp.</code> and <code>:-end_lpad.</code> or <code>:-end_plp.</code> For example, the coin program above can be stored in <a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a> for performing inference with <code>pita</code> as follows</p>
@@ -312,9 +312,9 @@ female(elen).
 female(cathy).</code></pre>
 <p>Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over <span class="math inline">\(n\)</span> atoms, the values of the aggregation are potentially <span class="math inline">\(2^n\)</span>). The Yap version of <code>cplint</code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see <a href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html" class="uri">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <p>In <code>mcintyre</code> you can query database clauses in the body of probabilistic clauses without any special syntax. You can also use <code>findall/3</code>.</p>
-<p>To run a query, you can simply load the Prolog file, for example <a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>, as</p>
+<p>To run a query, you can simply load the Prolog file, for example <a href="http://cplint.eu/e/coin.pl"><code>coin.pl</code></a>, as</p>
 <pre><code>?- [coin].</code></pre>
-<p>Note that supplying <a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a> as an argument to the <code>swipl</code> command currently returns errors due to bad interaction between <code>pita</code> and the top-level. The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.</p>
+<p>Note that supplying <a href="http://cplint.eu/e/coin.pl"><code>coin.pl</code></a> as an argument to the <code>swipl</code> command currently returns errors due to bad interaction between <code>pita</code> and the top-level. The program is loaded correctly anyway but it is recommended to load it from the top-level to avoid these errors.</p>
 <h2 id="uncondq">Unconditional Queries</h2>
 <p>The unconditional probability of an atom can be asked using <code>pita</code> with the predicate</p>
 <pre><code>prob(:Query:atom,-Probability:float) is nondet</code></pre>
@@ -331,7 +331,7 @@ female(cathy).</code></pre>
 <pre><code>?- mc_prob(heads(coin),P,[]).</code></pre>
 <p>You can also use</p>
 <pre><code>mc_prob(:Query:atom,-Probability:float) is det</code></pre>
-<p>which is equivalent to <code>mc_prob/3</code> with an empty option list. In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalent to calling the first with an empty option list.</p>
+<p>which is equivalent to <code>mc_prob/3</code> with an empty option list. In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalente to calling the first with an empty option list.</p>
 <p>With <code>mcintyre</code>, you can also take a given number of samples with</p>
 <pre><code>mc_sample(:Query:atom,+Samples:int,-Probability:float,
   Options:list) is det</code></pre>
@@ -341,7 +341,7 @@ female(cathy).</code></pre>
 <li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
 </ul>
-<p>For example (<a href="http://cplint.eu/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
+<p>For example (<a href="http://cplint.eu/e/coinmc.pl"><code>coinmc.pl</code></a>)</p>
 <pre><code>?- mc_sample(heads(coin),1000,P,[successes(S),failures(F)]).</code></pre>
 <p>that samples <code>heads(coin)</code> 1000 times and returns in <code>S</code> the number of successes, in <code>F</code> the number of failures and in <code>P</code> the estimated probability (<code>S/1000</code>). As another example, the call</p>
 <pre><code>?- mc_sample(heads(coin),1000,Prob).</code></pre>
@@ -360,7 +360,7 @@ female(cathy).</code></pre>
 <p>Moreover, you can sample arguments of queries with</p>
 <pre><code>mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,
   -Values:list,+Options:list) is det</code></pre>
-<p>The predicate samples <code>Query</code> a number of <code>Samples</code> times. <code>Arg</code> should be a variable in <code>Query</code>. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random and <code>N</code> is the number of samples returning that list of values. If <code>L</code> is the empty list, it means that for that sample the query failed. If <code>L</code> is a list with a single element, it means that for that sample the query is determinate. If, in all couples <code>L-N</code>, <code>L</code> is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. This is one of the assumptions taken for programs of the PRISM system <span class="citation">[<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>. For example <a href="http://cplint.eu/example/inference/pcfglr.pl"><code>pcfglr.pl</code></a> and <a href="http://cplint.eu/example/inference/plcg.pl"><code>plcg.pl</code></a> satisfy this constraint while <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> and <a href="http://cplint.eu/example/inference/var_obj.pl"><code>var_obj.pl</code></a> doesn’t.</p>
+<p>The predicate samples <code>Query</code> a number of <code>Samples</code> times. <code>Arg</code> should be a variable in <code>Query</code>. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random and <code>N</code> is the number of samples returning that list of values. If <code>L</code> is the empty list, it means that for that sample the query failed. If <code>L</code> is a list with a single element, it means that for that sample the query is determinate. If, in all couples <code>L-N</code>, <code>L</code> is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. This is one of the assumptions taken for programs of the PRISM system <span class="citation">[<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>. For example <a href="http://cplint.eu/e/pcfglr.pl"><code>pcfglr.pl</code></a> and <a href="http://cplint.eu/e/plcg.pl"><code>plcg.pl</code></a> satisfy this constraint while <a href="http://cplint.eu/e/markov_chain.pl"><code>markov_chain.pl</code></a> and <a href="http://cplint.eu/e/var_obj.pl"><code>var_obj.pl</code></a> doesn’t.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
 <li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
@@ -369,7 +369,7 @@ female(cathy).</code></pre>
 </ul>
 <p>An example of use of <code>mc_sample_arg/4</code> is</p>
 <pre><code>?- mc_sample_arg(reach(s0,0,S),50,S,Values).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> that takes 50 samples of <code>L</code> in <code>findall(S,(reach(s0,0,S),L)</code>.</p>
+<p>of <a href="http://cplint.eu/e/markov_chain.pl"><code>markov_chain.pl</code></a> that takes 50 samples of <code>L</code> in <code>findall(S,(reach(s0,0,S),L)</code>.</p>
 <p>You can sample arguments of queries also with</p>
 <pre><code>mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,
   -Values:list) is det</code></pre>
@@ -399,7 +399,7 @@ female(cathy).</code></pre>
 <p>that computes the expected value of <code>Arg</code> in <code>Query</code> by sampling. It takes <code>N</code> samples of <code>Query</code> and sums up the value of <code>Arg</code> for each sample. The overall sum is divided by <code>N</code> to give <code>Exp</code>.</p>
 <p>An example of use of the above predicate is</p>
 <pre><code>?- mc_expectation(eventually(elect,T),1000,T,E).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
+<p>of <a href="http://cplint.eu/e/pctl_slep.pl"><code>pctl_slep.pl</code></a> that returns in <code>E</code> the expected value of <code>T</code> by taking 1000 samples.</p>
 <p>The predicate</p>
 <pre><code>mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,
   -Exp:float) is det</code></pre>
@@ -412,7 +412,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <p>The BDD can be drawn in <code>cplint</code> on SWISH by using the <code>graphviz</code> renderer by including</p>
 <pre><code>:- use_rendering(graphviz).</code></pre>
 <p>before <code>:- pita.</code></p>
-<p>For example (<a href="http://cplint.eu/example/inference/coin.pl"><code>coin.pl</code></a>)</p>
+<p>For example (<a href="http://cplint.eu/e/coin.pl"><code>coin.pl</code></a>)</p>
 <pre><code>?- bdd_dot_string(heads(coin),BDD,Var).</code></pre>
 <p>returns the BDD for the query <code>heads(coin)</code> and the list of associations between rule groundings and multivalued variables.</p>
 <h2 id="condq">Conditional Queries on Discrete Variables</h2>
@@ -443,7 +443,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
 <li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
 </ul>
-<p>as in (<a href="http://cplint.eu/example/inference/coinmc.pl"><code>coinmc.pl</code></a>)</p>
+<p>as in (<a href="http://cplint.eu/e/coinmc.pl"><code>coinmc.pl</code></a>)</p>
 <pre><code>?- mc_rejection_sample(heads(coin),biased(coin),1000,P,
   [successes(S),failures(F)]).</code></pre>
 <p>that takes 1000 samples where <code>biased(coin)</code> is true and returns in <code>S</code> the number of samples where <code>heads(coin)</code> is true, in <code>F</code> the number of samples where <code>heads(coin)</code> is false and in <code>P</code> the estimated probability (<code>S/1000</code>).</p>
@@ -461,7 +461,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <li><p><code>bar(-BarChar:dict)</code> BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
 </ul>
 <p>With <code>Mix</code> specified it takes <code>Mix+Samples</code> samples and discards the first <code>Mix</code>.</p>
-<p>For example (<a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a>)</p>
+<p>For example (<a href="http://cplint.eu/e/arithm.pl"><code>arithm.pl</code></a>)</p>
 <pre><code>?- mc_mh_sample(eval(2,4),eval(1,3),10000,P,
   [successes(T), failures(F)]).</code></pre>
 <p>takes 10000 accepted samples and returns in <code>T</code> the number of samples where <code>eval(2,4)</code> is true, in <code>F</code> the number of samples where <code>eval(2,4)</code> is false and in <code>P</code> the estimated probability (<code>T/10000</code>).</p>
@@ -494,7 +494,7 @@ mc_gibbs_sample_arg(:Query:atom,+Samples:int,
   ?Arg:var,-Values:list,+Options:list) is det</code></pre>
 <p>An example of use of the above predicates is</p>
 <pre><code>?- mc_mh_sample_arg(eval(2,Y),eval(1,3),1000,Y,V,[]).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a>.</p>
+<p>of <a href="http://cplint.eu/e/arithm.pl"><code>arithm.pl</code></a>.</p>
 <p>To compute conditional expectations, use</p>
 <pre><code>mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,
   ?Arg:var,-Exp:float) is det
@@ -504,13 +504,13 @@ mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
   ?Arg:var,-Exp:float,+Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example</p>
 <pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).</code></pre>
-<p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a> computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
+<p>of <a href="http://cplint.eu/e/arithm.pl"><code>arithm.pl</code></a> computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
 <p>Note that conditional inference is not allowed for PRISM programs with the setting <code>prism_memoization</code> set to <code>false</code>, as sampled values are not stored in that case and conditioning would have no effect.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
 <p>For example</p>
 <pre><code>?- mc_sample_arg(val(0,X),1000,X,L).</code></pre>
-<p>from (<a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a>)) samples 1000 values for <code>X</code> in <code>value(0,X)</code> and returns them in <code>L</code>.</p>
+<p>from (<a href="http://cplint.eu/e/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a>)) samples 1000 values for <code>X</code> in <code>value(0,X)</code> and returns them in <code>L</code>.</p>
 <p>When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis-Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0. Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering <span class="citation">[<a href="#ref-fung1990weighing">9</a>,<a href="#ref-koller2009probabilistic">11</a>,<a href="#ref-Nitti2016">13</a>]</span> to obtain samples of continuous arguments of a goal.</p>
 <p>For each sample to be taken, likelihood weighting uses a meta-interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample. This meta-interpreter is similar to the one used to generate the first sample in Metropolis-Hastings.</p>
 <p>Then a different meta-interpreter is used to evaluate the weight of the sample. This meta-interpreter starts with the evidence as the query and a weight of 1. Each time the meta-interpreter encounters a probabilistic choice over a continuous variable, it first checks whether a value has already been sampled. If so, it computes the probability density of the sampled value and multiplies the weight by it. If the value has not been sampled, it takes a sample and records it, leaving the weight unchanged. In this way, each sample in the result has a weight that is 1 for the prior distribution and that may be different from the posterior distribution, reflecting the influence of evidence.</p>
@@ -520,13 +520,13 @@ mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
   -Prob:float) is det</code></pre>
 <p>samples <code>Query</code> a number of <code>Samples</code> times given that <code>Evidence</code> (a conjunction of atoms is allowed here) is true. The predicate returns in <code>Prob</code> the probability that the query is true. It performs likelihood weighting: each sample is weighted by the likelihood of evidence in the sample. For example</p>
 <pre><code>?- mc_lw_sample(nation(a),student_gpa(4.0),1000,P).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/indian_gpa.pl"><code>indian_gpa.pl</code></a> samples 1000 times the query <code>nation(a)</code> given that <code>student_gpa(4.0)</code> has been observed.</p>
+<p>from <a href="http://cplint.eu/e/indian_gpa.pl"><code>indian_gpa.pl</code></a> samples 1000 times the query <code>nation(a)</code> given that <code>student_gpa(4.0)</code> has been observed.</p>
 <p>The predicate</p>
 <pre><code>mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,
   -ValList) is det</code></pre>
 <p>returns in <code>ValList</code> a list of couples <code>V-W</code> where <code>V</code> is a value of <code>Arg</code> for which <code>Query</code> succeeds and <code>W</code> is the weight computed by likelihood weighting according to <code>Evidence</code> (a conjunction of atoms is allowed here). For example</p>
 <pre><code>?- mc_lw_sample_arg(val(0,X),(val(1,9),val(2,8)),100,X,L).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>val(0,X)</code> given that <code>val(1,9)</code> and <code>val(2,8)</code> have been observed.</p>
+<p>from <a href="http://cplint.eu/e/gauss_mean_est.pl"><code>gauss_mean_est.pl</code></a> samples 100 values for <code>X</code> in <code>val(0,X)</code> given that <code>val(1,9)</code> and <code>val(2,8)</code> have been observed.</p>
 <p>You can compute conditional expectations using likelihood weighting with</p>
 <pre><code>mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,
   -Exp:float) is det</code></pre>
@@ -542,7 +542,7 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
   kf_fin(4,T4)],
   [kf_o(1,O1),kf_o(2,O2),kf_o(3,O3),kf_o(4,O4)],100,
   [T1,T2,T3,T4],[F1,F2,F3,F4]).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/kalman_filter.pl"><code>kalman_filter.pl</code></a> performs particle filtering for a Kalman filter with four observations. For each observation, the value of the state at the same time point is sampled. The list of samples is returned in <code>[F1,F2,F3,F4]</code>, with each element being the sample for a time point.</p>
+<p>from <a href="http://cplint.eu/e/kalman_filter.pl"><code>kalman_filter.pl</code></a> performs particle filtering for a Kalman filter with four observations. For each observation, the value of the state at the same time point is sampled. The list of samples is returned in <code>[F1,F2,F3,F4]</code>, with each element being the sample for a time point.</p>
 <p>The predicate</p>
 <pre><code>mc_particle_sample(:Query:atom,:Evidence:list,
   +Samples:int,-Prob:float) is det</code></pre>
@@ -558,7 +558,7 @@ mc_particle_sample_arg([kf_fin(1,T1),kf_fin(2,T2),kf_fin(3,T3),
 <p>When performing causal reasoning, action literals must be enclosed in the <code>do/1</code> functor and included in the evidence conjunction. More than one action can be included (each with in a separate <code>do/1</code> term) and actions and observations can be freely mixed. All conditional inference goals can be used except those for particle filtering.</p>
 <p>For example</p>
 <pre><code>?- prob(recovery,do(drug),P).</code></pre>
-<p>from <a href="http://cplint.eu/example/inference/simpson.swinb"><code>simpson.swinb</code></a> computes the probability of recovery of a patient given that the action of administering a drug has been performed.</p>
+<p>from <a href="http://cplint.eu/e/simpson.swinb"><code>simpson.swinb</code></a> computes the probability of recovery of a patient given that the action of administering a drug has been performed.</p>
 <h2 id="graphing">Graphing the Results</h2>
 <p>In <code>cplint</code> on SWISH you can draw graphs for visualizing the results either with <a href="http://www.c3js.org/">C3.js</a> or with <a href="https://www.r-project.org/">R</a>. Similar predicates are avaiiable for the two methods. There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.</p>
 <h3 id="using-c3.js">Using C3.js</h3>
@@ -650,19 +650,19 @@ argbar_r/1</code></pre>
 <li><p><code>depth</code>: maximum depth of derivations when <code>depth_bound</code> is set to <code>true</code>. Default value <code>5</code>.</p></li>
 <li><p><code>prism_memoization</code>: <code>false</code>: original prism semantics, <code>true</code>: semantics with memoization</p></li>
 </ul>
-<p>If <code>depth_bound</code> is set to <code>true</code>, derivations are depth-bounded so you can query also programs containing infinite loops, for example programs where queries have an infinite number of explanations. However the probability that is returned is guaranteed only to be a lower bound, see for example <a href="http://cplint.eu/example/inference/markov_chaindb.pl"><code>markov_chaindb.pl</code></a></p>
+<p>If <code>depth_bound</code> is set to <code>true</code>, derivations are depth-bounded so you can query also programs containing infinite loops, for example programs where queries have an infinite number of explanations. However the probability that is returned is guaranteed only to be a lower bound, see for example <a href="http://cplint.eu/e/markov_chaindb.pl"><code>markov_chaindb.pl</code></a></p>
 <p><code>mcintyre</code> has the parameters</p>
 <ul>
 <li><p><code>min_error</code>: minimal width of the binomial proportion confidence interval for the probability of the query. When the confidence interval for the probability of the query is below <code>min_error</code>, the computation stops. Default value <code>0.01</code>.</p></li>
 <li><p><code>k</code>: the number of samples to take before checking whether the the binomial proportion confidence interval is below <code>min_error</code>. Default value <code>1000</code>. <code>max_samples</code>: the maximum number of samples to take. This is used when the probability of the query is very close to 0 or 1. In fact <code>mcintyre</code> also checks for the validity of the the binomial proportion confidence interval: if less than 5 failures or successes are sampled, even if the width of the confidence interval is less than <code>min_error</code>, the computation continues. This would lead to non-termination in cases where the probability is 0 or 1. <code>max_samples</code> ensures termination. Default value <code>10e4</code>.</p></li>
 <li><p><code>prism_memoization</code>: <code>false</code>: original prism semantics, <code>true</code>: semantics with memoization</p></li>
 </ul>
-<p>The example <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> shows that <code>mcintyre</code> can perform inference in presence of an infinite number of explanations for the goal. Differently from <code>pita</code>, no depth bound is necessary, as the probability of selecting the infinite computation branch is 0. However, also <code>mcintyre</code> may not terminate if loops not involving probabilistic predicates are present.</p>
+<p>The example <a href="http://cplint.eu/e/markov_chain.pl"><code>markov_chain.pl</code></a> shows that <code>mcintyre</code> can perform inference in presence of an infinite number of explanations for the goal. Differently from <code>pita</code>, no depth bound is necessary, as the probability of selecting the infinite computation branch is 0. However, also <code>mcintyre</code> may not terminate if loops not involving probabilistic predicates are present.</p>
 <p>If you want to set the seed of the random number generator, you can use SWI-Prolog predicates <code>setrand/1</code> and <code>getrand/1</code>, see <a href="http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1">SWI-Prolog manual</a>.</p>
 <h2 id="tabling">Tabling</h2>
 <p>You can also use tabling in inference to speed up the computation and/or avoid loops, see the <a href="http://www.swi-prolog.org/pldoc/man?section=tabling">SWI-Prolog manual</a>.</p>
 <p>To do so you have to use the <code>tabling</code> library module and declare some of the predicates as tabled. The tabling declarations go after the <code>:-pita.</code> or <code>:- mc.</code> directives.</p>
-<p>For example, to compute the probability of paths in undirected graphs you can use the program (<a href="http://cplint.eu/example/inference/path_tabling.swinb"><code>path_tabling.swinb</code></a>)</p>
+<p>For example, to compute the probability of paths in undirected graphs you can use the program (<a href="http://cplint.eu/e/path_tabling.swinb"><code>path_tabling.swinb</code></a>)</p>
 <pre><code>:- use_module(library(pita)).
 :- use_module(library(tabling)).
 :- pita.
@@ -701,9 +701,9 @@ arc(a,e):0.1.
 <li><p>example interpretations</p></li>
 </ul>
 <p>The preamble must come first, the order of the other parts can be changed.</p>
-<p>For example, consider the Bongard problems of <span class="citation">[<a href="#ref-RaeLae95-ALT95">6</a>]</span>. <a href="http://cplint.eu/example/learning/bongard.pl"><code>bongard.pl</code></a> and <a href="http://cplint.eu/example/learning/bongardkeys.pl"><code>bongardkeys.pl</code></a> represent a Bongard problem for SLIPCOVER. <a href="http://cplint.eu/example/lemur/bongard.pl"><code>bongard.pl</code></a> and <a href="http://cplint.eu/example/lemur/bongardkeys.pl"><code>bongardkeys.pl</code></a> represent a Bongard problem for LEMUR.</p>
+<p>For example, consider the Bongard problems of <span class="citation">[<a href="#ref-RaeLae95-ALT95">6</a>]</span>. <a href="http://cplint.eu/e/bongard.pl"><code>bongard.pl</code></a> and <a href="http://cplint.eu/e/bongardkeys.pl"><code>bongardkeys.pl</code></a> represent a Bongard problem for SLIPCOVER. <a href="http://cplint.eu/example/lemur/bongard.pl"><code>bongard.pl</code></a> and <a href="http://cplint.eu/example/lemur/bongardkeys.pl"><code>bongardkeys.pl</code></a> represent a Bongard problem for LEMUR.</p>
 <h3 id="preamble">Preamble</h3>
-<p>In the preamble, the SLIPCOVER library is loaded with (see <a href="http://cplint.eu/example/learning/bongard.pl"><code>bongard.pl</code></a>):</p>
+<p>In the preamble, the SLIPCOVER library is loaded with (see <a href="http://cplint.eu/e/bongard.pl"><code>bongard.pl</code></a>):</p>
 <pre><code>:- use_module(library(slipcover)).</code></pre>
 <p>Now you can initialize SLIPCOVER with</p>
 <pre><code>:- sc.</code></pre>
@@ -735,11 +735,11 @@ component(C):-
 component(C):-
   not_replaceable(C).
 :- end_bg.</code></pre>
-<p>from the <a href="http://cplint.eu/example/learning/mach.pl"><code>mach.pl</code></a> example. If you specify both a <code>bg/1</code> fact and a section, the clauses of the two will be combined.</p>
+<p>from the <a href="http://cplint.eu/e/mach.pl"><code>mach.pl</code></a> example. If you specify both a <code>bg/1</code> fact and a section, the clauses of the two will be combined.</p>
 <p>Moreover, you can specify an initial program with a fact of the form</p>
 <pre><code>in(&lt;list of terms representing clauses&gt;).</code></pre>
 <p>The initial program is used in parameter learning for providing the structure. Remember to enclose each clause in parentheses because <code>:-</code> has the highest precedence.</p>
-<p>For example, <a href="http://cplint.eu/example/learning/bongard.pl"><code>bongard.pl</code></a> has the initial program</p>
+<p>For example, <a href="http://cplint.eu/e/bongard.pl"><code>bongard.pl</code></a> has the initial program</p>
 <pre><code>in([(pos:0.197575 :-
        circle(A),
        in(B,A)),
@@ -855,7 +855,7 @@ one_worn:-
   worn(_).
 none_worn:-
   \+ one_worn.</code></pre>
-<p>from <a href="http://cplint.eu/example/learning/mach.pl"><code>mach.pl</code></a> and add the new predicate in a <code>modeb/2</code> fact</p>
+<p>from <a href="http://cplint.eu/e/mach.pl"><code>mach.pl</code></a> and add the new predicate in a <code>modeb/2</code> fact</p>
 <pre><code>modeb(*,not_worn(-comp)).
 modeb(*,none_worn).</code></pre>
 <p>Note that successful negative literals do not instantiate the variables, so if you want a variable appearing in a negative literal to be an output variable you must instantiate before calling the negative literals. The new predicates must also be declared as input</p>
@@ -863,7 +863,7 @@ modeb(*,none_worn).</code></pre>
 input_cw(none_worn/0).</code></pre>
 <p>Lookahead can also be specified with facts of the form</p>
 <pre><code>lookahead(&lt;literal&gt;,&lt;list of literals&gt;).</code></pre>
-<p>In this case when a literal matching <code>&lt;literal&gt;</code> is added to the body of clause during refinement, then also the literals matching <code>&lt;list of literals&gt;</code> will be added. An example of such declaration (from <a href="http://cplint.eu/example/learning/muta.pl"><code>muta.pl</code></a>) is</p>
+<p>In this case when a literal matching <code>&lt;literal&gt;</code> is added to the body of clause during refinement, then also the literals matching <code>&lt;list of literals&gt;</code> will be added. An example of such declaration (from <a href="http://cplint.eu/e/muta.pl"><code>muta.pl</code></a>) is</p>
 <pre><code>lookahead(logp(_),[(_=_))]).</code></pre>
 <p>Note that <code>&lt;list of literals&gt;</code> is copied with <code>copy_term/2</code> before matching, so variables in common between <code>&lt;literal&gt;</code> and <code>&lt;list of literals&gt;</code> may not be in common in the refined clause.</p>
 <p>It is also possible to specify that a literal can only be added together with other literals with facts of the form</p>
@@ -906,7 +906,7 @@ config(2,o2,up).
 in(2,o2,o3).
 triangle(2,o1).
 config(2,o1,up).</code></pre>
-<p>which is contained in the <a href="http://cplint.eu/example/learning/bongardkeys.pl"><code>bongardkeys.pl</code></a> This is also how model <code>2</code> above is stored in SWI-Prolog database. The two modalities, models and keys, can be mixed in the same file. Facts for <code>int/1</code> are not asserted for interpretations in the key modality but can be added by the user explicitly.</p>
+<p>which is contained in the <a href="http://cplint.eu/e/bongardkeys.pl"><code>bongardkeys.pl</code></a> This is also how model <code>2</code> above is stored in SWI-Prolog database. The two modalities, models and keys, can be mixed in the same file. Facts for <code>int/1</code> are not asserted for interpretations in the key modality but can be added by the user explicitly.</p>
 <p>Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument. For example (<code>carc.pl</code>) contains</p>
 <pre><code>connected(_M,Ring1,Ring2):-
   Ring1 \= Ring2,
@@ -916,7 +916,7 @@ config(2,o1,up).</code></pre>
 symbond(Mod,A,B,T):- bond(Mod,A,B,T).
 symbond(Mod,A,B,T):- bond(Mod,B,A,T).</code></pre>
 <p>where the first argument of all the atoms is the model.</p>
-<p>Example <a href="http://cplint.eu/example/learning/registration.pl"><code>registration.pl</code></a> contains for example</p>
+<p>Example <a href="http://cplint.eu/e/registration.pl"><code>registration.pl</code></a> contains for example</p>
 <pre><code>party(M,P):-
   participant(M,_, _, P, _).</code></pre>
 <p>that defines intensionally the target predicate <code>party/1</code>. Here <code>M</code> is the model and <code>participant/4</code> is defined in the interpretations. You can also define intensionally the negative examples with</p>
@@ -928,7 +928,7 @@ fold(test,[490,491,...]).</code></pre>
 <p>As the input file is a Prolog program, you can define intensionally the folds as in</p>
 <pre><code>fold(all,F):-
   findall(I,int(I),F).</code></pre>
-<p><code>fold/2</code> is dynamic so you can also write (<a href="http://cplint.eu/example/learning/registration.pl"><code>registration.pl</code></a>)</p>
+<p><code>fold/2</code> is dynamic so you can also write (<a href="http://cplint.eu/e/registration.pl"><code>registration.pl</code></a>)</p>
 <pre><code>:- fold(all,F),
    sample(4,F,FTr,FTe),
    assert(fold(rand_train,FTr)),
@@ -945,7 +945,7 @@ fold(test,[490,491,...]).</code></pre>
 <p>To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call</p>
 <pre><code>induce(+List_of_folds:list,-P:list) is det</code></pre>
 <p>where <code>List_of_folds</code> is a list of the folds for training and <code>P</code> will contain the learned program.</p>
-<p>For example <a href="http://cplint.eu/example/learning/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
+<p>For example <a href="http://cplint.eu/e/bongard.pl"><code>bongard.pl</code></a>, you can perform structure learning on the <code>train</code> fold with</p>
 <pre><code>?- induce([train],P).</code></pre>
 <p>A program can also be tested on a test set with <code>test/7</code> or <code>test_prob/6</code> as described below.</p>
 <p>Between two executions of <code>induce/2</code> you should exit SWI-Prolog to have a clean database.</p>
