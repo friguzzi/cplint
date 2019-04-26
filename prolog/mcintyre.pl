@@ -34,25 +34,15 @@
   mc_rejection_expectation/5,
   set_mc/2,setting_mc/2,
   mc_load/1,mc_load_file/1,
-  sample_gauss/6,
-  sample_uniform/6,
-  sample_dirichlet/5,
-  sample_geometric/5,
-  sample_gamma/6,
-  sample_poisson/5,
-  sample_binomial/6,
-  sample_beta/6,
-  sample_discrete/5,
-  sample_exponential/5,
-  sample_pascal/6,
+  take_a_sample/5,
   sample_head/5,
   mc_lw_sample_arg/5,
   mc_lw_sample_arg_log/5,
   mc_lw_expectation/5,
   mc_particle_sample_arg/5,
   mc_particle_expectation/5,
-  gauss_density/4,
-  gauss/3,
+  gaussian/4,
+  gaussian/3,
   add_prob/3,
   op(600,xfy,'::'),
   op(600,xfy,'~'),
@@ -1163,38 +1153,8 @@ initial_sample(M:msw(A,B)):-!,
 initial_sample(_M:(sample_head(R,VC,M,HL,NH))):-!,
   sample_head(R,VC,M,HL,NH).
 
-initial_sample(_M:sample_gauss(R,VC,M,Mean,Variance,S)):-!,
-  sample_gauss(R,VC,M,Mean,Variance,S).
-
-initial_sample(_M:sample_geometric(R,VC,M,Par,S)):-!,
-  sample_geometric(R,VC,M,Par,S).
-
-initial_sample(_M:sample_dirichlet(R,VC,M,Par,S)):-!,
-  sample_dirichlet(R,VC,M,Par,S).
-
-initial_sample(_M:sample_discrete(R,VC,M,D,S)):-!,
-  sample_discrete(R,VC,M,D,S).
-
-initial_sample(_M:sample_poisson(R,VC,M,Lambda,S)):-!,
-  sample_poisson(R,VC,M,Lambda,S).
-
-initial_sample(_M:sample_binomial(R,VC,M,N,P,S)):-!,
-  sample_binomial(R,VC,M,N,P,S).
-
-initial_sample(_M:sample_beta(R,VC,M,Alpha,Beta,S)):-!,
-  sample_beta(R,VC,M,Alpha,Beta,S).
-
-initial_sample(_M:sample_gamma(R,VC,M,Shape,Scale,S)):-!,
-  sample_gamma(R,VC,M,Shape,Scale,S).
-
-initial_sample(_M:sample_uniform(R,VC,M,L,U,S)):-!,
-  sample_uniform(R,VC,M,L,U,S).
-
-initial_sample(_M:sample_exponential(R,VC,M,Lambda,S)):-!,
-  sample_exponential(R,VC,M,Lambda,S).
-
-initial_sample(_M:sample_pascal(R,VC,M,N,P,S)):-!,
-  sample_pascal(R,VC,M,N,P,S).
+initial_sample(_M:take_a_sample(R,VC,M,Distr,S)):-!,
+  take_a_sample(R,VC,M,Distr,S).
 
 initial_sample(M:(G1,G2)):-!,
   initial_sample(M:G1),
@@ -1227,8 +1187,8 @@ initial_sample_neg(_M:(sample_head(R,VC,M,HL,N))):-!,
   sample_head(R,VC,M,HL,NH),
   NH\=N.
 
-initial_sample_neg(_M:sample_gauss(R,VC,M,Mean,Variance,S)):-!,
-  sample_gauss(R,VC,M,Mean,Variance,S).
+initial_sample_neg(_M:take_a_sample(R,VC,M,Distr,S)):-!,
+  take_a_sample(R,VC,M,Distr,S).
 
 
 initial_sample_neg(M:(G1,G2)):-!,
@@ -1896,42 +1856,8 @@ lw_sample(M:G):-
 lw_sample(_M:(sample_head(R,VC,M,HL,N))):-!,
   sample_head(R,VC,M,HL,N).
 
-lw_sample(_M:sample_gauss(R,VC,M,Mean,Variance,S)):-!,
-  sample_gauss(R,VC,M,Mean,Variance,S).
-
-lw_sample(_M:sample_poisson(R,VC,M,Lambda,S)):-!,
-  sample_poisson(R,VC,M,Lambda,S).
-
-lw_sample(_M:sample_binomial(R,VC,M,N,P,S)):-!,
-  sample_binomial(R,VC,M,N,P,S).
-
-lw_sample(_M:sample_beta(R,VC,M,Alpha,Beta,S)):-!,
-  sample_beta(R,VC,M,Alpha,Beta,S).
-
-lw_sample(_M:sample_gamma(R,VC,M,Shape,Scale,S)):-!,
-  sample_gamma(R,VC,M,Shape,Scale,S).
-
-lw_sample(_M:sample_dirichlet(R,VC,M,Par,S)):-!,
-  sample_dirichlet(R,VC,M,Par,S).
-
-lw_sample(_M:sample_geometric(R,VC,M,Par,S)):-!,
-  sample_geometric(R,VC,M,Par,S).
-
-lw_sample(_M:sample_uniform(R,VC,M,L,U,S)):-!,
-  sample_uniform(R,VC,M,L,U,S).
-
-lw_sample(_M:sample_exponential(R,VC,M,Lambda,S)):-!,
-  sample_exponential(R,VC,M,Lambda,S).
-
-lw_sample(_M:sample_pascal(R,VC,M,N,P,S)):-!,
-  sample_pascal(R,VC,M,N,P,S).
-
-%lw_sample(_M:sample_discrete(R,VC,M,D,S)):-!,
-%  sample_discrete(R,VC,M,D,S).
-
-lw_sample(_M:sample_discrete(R,VC,M,D,S)):-!,
-  sample_head(R,VC,M,D,SN),
-  nth0(SN,D,S:_P).
+lw_sample(_M:take_a_sample(R,VC,M,Distr,S)):-!,
+  take_a_sample(R,VC,M,Distr,S).
 
 lw_sample(M:(G1,G2)):-!,
   lw_sample(M:G1),
@@ -1988,103 +1914,21 @@ lw_sample_weight(M:msw(A,B),W0,W):-!,
   ).
 
 lw_sample_weight(_M:(sample_head(R,VC,M,HL,N)),W0,W):-!,
+  % sample_head(R,VC,M,HL,N0),
+  % N=N0,
   check(R,VC,M,N),
+%  W=W0.
   nth0(N,HL,_:P),
   W is W0*P.
 
-lw_sample_weight(_M:sample_discrete(R,VC,M,D,S),W0,W):-!,
-  sample_head(R,VC,M,D,SN),
-  nth0(SN,D,S:P),
-  W is W0*P.
 
-
-lw_sample_weight(_M:sample_uniform(R,VC,M,L,U,S),W0,W):-!,
+lw_sample_weight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
   (var(S)->
-    sample_uniform(R,VC,M,L,U,S),
+    take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    uniform_density(L,U,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_gauss(R,VC,M,Mean,Variance,S),W0,W):-!,
-  (is_var(S)->
-    sample_gauss(R,VC,M,Mean,Variance,S),
-    W=W0
-  ;
-    gauss_density(Mean,Variance,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_poisson(R,VC,M,Lambda,S),W0,W):-!,
-  (var(S)->
-    sample_poisson(R,VC,M,Lambda,S),
-    W=W0
-  ;
-    poisson_prob(Lambda,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_binomial(R,VC,M,N,P,S),W0,W):-!,
-  (var(S)->
-    sample_binomial(R,VC,M,N,P,S),
-    W=W0
-  ;
-    binomial_prob(N,P,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_gamma(R,VC,M,Shape,Scale,S),W0,W):-!,
-  (var(S)->
-    sample_gamma(R,VC,M,Shape,Scale,S),
-    W=W0
-  ;
-    gamma_density(Shape,Scale,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_beta(R,VC,M,Alpha,Beta,S),W0,W):-!,
-  (var(S)->
-    sample_beta(R,VC,M,Alpha,Beta,S),
-    W=W0
-  ;
-    beta_density(Alpha,Beta,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_dirichlet(R,VC,M,Par,S),W0,W):-!,
-  (var(S)->
-    sample_dirichlet(R,VC,M,Par,S),
-    W=W0
-  ;
-    dirichlet_density(Par,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_geometric(R,VC,M,Par,S),W0,W):-!,
-  (var(S)->
-    sample_geometric(R,VC,M,Par,S),
-    W=W0
-  ;
-    geometric_density(Par,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_exponential(R,VC,M,Lambda,S),W0,W):-!,
-  (var(S)->
-    sample_exponential(R,VC,M,Lambda,S),
-    W=W0
-  ;
-    exponential_prob(Lambda,S,D),
-    W is W0*D
-   ).
-
-lw_sample_weight(_M:sample_pascal(R,VC,M,N,P,S),W0,W):-!,
-  (var(S)->
-    sample_pascal(R,VC,M,N,P,S),
-    W=W0
-  ;
-    pascal_prob(N,P,S,D),
+    check(R,VC,M,S),
+    call(Distr,S,D),
     W is W0*D
    ).
 
@@ -2142,66 +1986,20 @@ lw_sample_logweight(M:msw(A,B),W0,W):-!,
   ).
 
 lw_sample_logweight(_M:(sample_head(R,VC,M,HL,N)),W0,W):-!,
+  sample_head(R,VC,M,HL,N0),
+  N=N0,
   check(R,VC,M,N),
+ % W=W0.
   nth0(N,HL,_:P),
   W is W0+log(P).
 
-lw_sample_logweight(_M:sample_discrete(R,VC,M,D,S),W0,W):-!,
-  sample_head(R,VC,M,D,SN),
-  nth0(SN,D,S:P),
-  W is W0+log(P).
-
-lw_sample_logweight(_M:sample_uniform(R,VC,M,L,U,S),W0,W):-!,
+lw_sample_logweight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
   (var(S)->
-    sample_uniform(R,VC,M,L,U,S),
+    take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    uniform_density(L,U,D),
-    W is W0+log(D)
-   ).
-
-lw_sample_logweight(_M:sample_beta(R,VC,M,Alpha,Beta,S),W0,W):-!,
-  (var(S)->
-    sample_beta(R,VC,M,Alpha,Beta,S),
-    W=W0
-  ;
-    beta_density(Alpha,Beta,S,D),
-    W is W0+log(D)
-   ).
-
-lw_sample_logweight(_M:sample_gauss(R,VC,M,Mean,Variance,S),W0,W):-!,
-  (var(S)->
-    sample_gauss(R,VC,M,Mean,Variance,S),
-    W=W0
-  ;
-    gauss_density(Mean,Variance,S,D),
-    W is W0+log(D)
-   ).
-
-lw_sample_logweight(_M:sample_gamma(R,VC,M,Shape,Scale,S),W0,W):-!,
-  (var(S)->
-    sample_gamma(R,VC,M,Shape,Scale,S),
-    W=W0
-  ;
-    gamma_density(Shape,Scale,S,D),
-    W is W0+log(D)
-   ).
-
-lw_sample_logweight(_M:sample_geometric(R,VC,M,Par,S),W0,W):-!,
-  (var(S)->
-    sample_geometric(R,VC,M,Par,S),
-    W=W0
-  ;
-    geometric_density(Par,S,D),
-    W is W0+log(D)
-   ).
-
-lw_sample_logweight(_M:sample_dirichlet(R,VC,M,Par,S),W0,W):-!,
-  (var(S)->
-    sample_dirichlet(R,VC,M,Par,S),
-    W=W0
-  ;
-    dirichlet_density(Par,S,D),
+    check(R,VC,M,S),
+    call(Distr,S,D),
     W is W0+log(D)
    ).
 
@@ -2575,49 +2373,58 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
 /**
- * sample_uniform(+R:int,+VC:list,+M:module,+Lower:float,+Upper:float,-S:float) is det
+ * uniform(+Lower:float,+Upper:float,-S:float) is det
  *
  * Returns in S a sample from a distribution uniform in (Lower,Upper)
- * associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
  */
-sample_uniform(R,VC,M,_L,_U,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_uniform(R,VC,M,L,U,S):-
+uniform(L,U,S):-
+  number(L),
   random(V),
-  S0 is L+V*(U-L),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
+  S is L+V*(U-L).
 
-uniform_density(L,U,D):-
+uniform(L,U,_S,D):-
   D is 1/(U-L).
 
 /**
- * sample_gauss(+R:int,+VC:list,+M:module,+Mean:float,+Variance:float,-S:float) is det
+ * uniform(+Values:list,-S:float) is det
+ *
+ * Returns in S a value from Values chosen uniformly
+ */
+uniform(Values,S):-
+  length(Values,Len),Prob is 1.0/Len,
+  maplist(add_prob(Prob),Values,Dist),
+  discrete(Dist,S).
+
+
+uniform(Values,_S,D):-
+  length(Values,L),
+  D is 1.0/L.
+
+%uniform(_Values,_S,1.0).
+/**
+ * take_a_sample(+R:int,+VC:list,+M:module,+Mean:float,+Variance:float,-S:float) is det
  *
  * Returns in S a sample for a Gaussian variable with mean Mean and variance
  * Variance associated to rule R with substitution VC. If the variable
  * has already been sampled, it retrieves the sampled value, otherwise
  * it takes a new sample and records it for rule R with substitution VC.
  */
-sample_gauss(R,VC,M,_Mean,_Variance,S):-
+take_a_sample(R,VC,M,_Distr,S):-
   M:sampled(R,VC,S0),!,
   S=S0.
 
-sample_gauss(R,VC,M,Mean,Variance,S):-
-  gauss(Mean,Variance,S0),
+take_a_sample(R,VC,M,Distr,S):-
+  call(Distr,S0),
   assertz(M:sampled(R,VC,S0)),
   S=S0.
+
 /**
- * gauss(+Mean:float,+Variance:float,-S:float) is det
+ * gaussian(+Mean:float,+Variance:float,-S:float) is det
  *
  * samples a value from a Gaussian with mean Mean and variance
  * Variance and returns it in S
  */
-gauss(Mean,Variance,S):-
+gaussian(Mean,Variance,S):-
   number(Mean),!,
   random(U1),
   random(U2),
@@ -2627,7 +2434,7 @@ gauss(Mean,Variance,S):-
   StdDev is sqrt(Variance),
   S is StdDev*S0+Mean.
 
-gauss([Mean1,Mean2],Covariance,[X1,X2]):-!,
+gaussian([Mean1,Mean2],Covariance,[X1,X2]):-!,
   random(U1),
   random(U2),
   R is sqrt(-2*log(U1)),
@@ -2638,9 +2445,9 @@ gauss([Mean1,Mean2],Covariance,[X1,X2]):-!,
   matrix_multiply(A,[[S0],[S1]],Az),
   matrix_sum([[Mean1],[Mean2]],Az,[[X1],[X2]]).
 
-gauss(Mean,Covariance,X):-
+gaussian(Mean,Covariance,X):-
   length(Mean,N),
-  n_gauss_var(0,N,Z),
+  n_gaussian_var(0,N,Z),
   cholesky_decomposition(Covariance,A),
   transpose([Z],ZT),
   matrix_multiply(A,ZT,Az),
@@ -2648,9 +2455,9 @@ gauss(Mean,Covariance,X):-
   matrix_sum(MT,Az,XT),
   transpose(XT,[X]).
 
-n_gauss_var(N,N,[]):-!.
+n_gaussian_var(N,N,[]):-!.
 
-n_gauss_var(N1,N,[Z]):-
+n_gaussian_var(N1,N,[Z]):-
   N1 is N-1,!,
   random(U1),
   random(U2),
@@ -2658,7 +2465,7 @@ n_gauss_var(N1,N,[Z]):-
   Theta is 2*pi*U2,
   Z is R*cos(Theta).
 
-n_gauss_var(N1,N,[Z1,Z2|T]):-
+n_gaussian_var(N1,N,[Z1,Z2|T]):-
   N2 is N1+2,
   random(U1),
   random(U2),
@@ -2666,21 +2473,21 @@ n_gauss_var(N1,N,[Z1,Z2|T]):-
   Theta is 2*pi*U2,
   Z1 is R*cos(Theta),
   Z2 is R*sin(Theta),
-  n_gauss_var(N2,N,T).
+  n_gaussian_var(N2,N,T).
 
 
 /**
- * gauss_density(+Mean:float,+Variance:float,+S:float,-Density:float) is det
+ * gaussian(+Mean:float,+Variance:float,+S:float,-Density:float) is det
  *
  * Computes the probability density of value S according to a Gaussian with
  * mean Mean and variance Variance and returns it in Density.
  */
-gauss_density(Mean,Variance,S,D):-
+gaussian(Mean,Variance,S,D):-
   number(Mean),!,
   StdDev is sqrt(Variance),
   D is 1/(StdDev*sqrt(2*pi))*exp(-(S-Mean)*(S-Mean)/(2*Variance)).
 
-gauss_density(Mean,Covariance,S,D):-
+gaussian(Mean,Covariance,S,D):-
   determinant(Covariance,Det),
   matrix_diff([Mean],[S],S_M),
   matrix_inversion(Covariance,Cov_1),
@@ -2690,22 +2497,6 @@ gauss_density(Mean,Covariance,S,D):-
   length(Mean,K),
   D is 1/sqrt((2*pi)^K*Det)*exp(-V/2).
 
-/**
- * sample_gamma(+R:int,+VC:list,+M:module,+Shape:float,+Scale:float,-S:float) is det
- *
- * Returns in S a sample for a Gamma distributed variable with shape Shape and
- * scale Scale associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_gamma(R,VC,M,_Shape,_Scale,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_gamma(R,VC,M,Shape,Scale,S):-
-  gamma(Shape,Scale,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * gamma(+Shape:float,+Scale:float,-S:float) is det
@@ -2746,7 +2537,7 @@ cycle_gamma(D,C,S):-
   ).
 
 getv(C,X,V):-
-  gauss(0.0,1.0,X0),
+  gaussian(0.0,1.0,X0),
   V0 is (1+C*X0)^3,
   (V0=<0->
     getv(C,X,V)
@@ -2755,25 +2546,8 @@ getv(C,X,V):-
     X=X0
   ).
 
-gamma_density(K,Scale,S,D):-
+gamma(K,Scale,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
-
-/**
- * sample_beta(+R:int,+VC:list,+M:module,+Alpha:float,+Beta:float,-S:float) is det
- *
- * Returns in S a sample for a beta distributed variable with parameters
- * Alpha and Beta associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_beta(R,VC,M,_A,_B,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_beta(R,VC,M,A,B,S):-
-  beta(A,B,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * beta(+Alpha:float,+Beta:float,-S:float) is det
@@ -2790,27 +2564,10 @@ beta(Alpha,Beta,S):-
   gamma(Beta,1,Y),
   S is X/(X+Y).
 
-beta_density(Alpha,Beta,X,D):-
+beta(Alpha,Beta,X,D):-
   B is exp(lgamma(Alpha)+lgamma(Beta)-lgamma(Alpha+Beta)),
   D is X^(Alpha-1)*(1-X)^(Beta-1)/B.
 
-
-/**
- * sample_poisson(+R:int,+VC:list,+M:module,+Lambda:float,-S:int) is det
- *
- * Returns in S a sample for a Poisson distributed variable with parameter
- * lambda Lambda associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_poisson(R,VC,M,_L,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_poisson(R,VC,M,L,S):-
-  poisson(L,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * poisson(+Lambda:float,-S:int) is det
@@ -2835,7 +2592,7 @@ poisson_cycle(X0,X,L,P0,S0,U):-
   S is S0+P,
   poisson_cycle(X1,X,L,P,S,U).
 
-poisson_prob(Lambda,X,P):-
+poisson(Lambda,X,P):-
   fact(X,1,FX),
   P is (Lambda^X)*exp(-Lambda)/FX.
 
@@ -2845,23 +2602,6 @@ fact(N,F0,F):-
   F1 is F0*N,
   N1 is N-1,
   fact(N1,F1,F).
-
-/**
- * sample_binomial(+R:int,+VC:list,+M:module,+N:int,+P:float,-S:int) is det
- *
- * Returns in S a sample for a binomial distributed variable with parameters
- * N and P associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_binomial(R,VC,M,_N,_P,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_binomial(R,VC,M,N,P,S):-
-  binomial(N,P,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * binomial(+N:int,+P:float,-S:int) is det
@@ -2885,29 +2625,12 @@ binomial_cycle(X0,X,N,P,Pr0,CPr0,U):-
   CPr is CPr0+Pr,
   binomial_cycle(X1,X,N,P,Pr,CPr,U).
 
-binomial_prob(N,P,X,Pr):-
+binomial(N,P,X,Pr):-
   fact(N,1,FN),
   fact(X,1,FX),
   N_X is N-X,
   fact(N_X,1,FN_X),
   Pr is P^X*(1-P)^N_X*FN/(FX*FN_X).
-
-/**
- * sample_dirichlet(+R:int,+VC:list,+M:module,+Par:list,-S:float) is det
- *
- * Returns in S a sample for a Dirichlet distributed variable with parameters
- * Par associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_dirichlet(R,VC,M,_Par,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_dirichlet(R,VC,M,Par,S):-
-  dirichlet(Par,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * dirichlet(+Par:list,-S:float) is det
@@ -2926,30 +2649,13 @@ divide(S0,A,S):-
 get_gamma(A,G):-
   gamma(A,1.0,G).
 
-dirichlet_density(Par,S,D):-
+dirichlet(Par,S,D):-
   beta(Par,B),
   foldl(prod,S,Par,1,D0),
   D is D0*B.
 
 prod(X,A,P0,P0*X^(A-1)).
 
-
-/**
- * sample_geometric(+R:int,+VC:list,+M:module,+P:float,-S:int) is det
- *
- * Returns in S a sample for a geometrically distributed variable with
- * parameter P associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_geometric(R,VC,M,_Par,S):-
-  M:sampled(R,VC,S0),!,
-  S=S0.
-
-sample_geometric(R,VC,M,Par,S):-
-  geometric(Par,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
 
 /**
  * geometric(+P:float,-I:int) is det
@@ -2969,26 +2675,19 @@ geometric_val(N0,P,N):-
     geometric_val(N1,P,N)
   ).
 
-geometric_density(P,I,D):-
+geometric(P,I,D):-
   D is (1-P)^(I-1)*P.
-
 /**
- * sample_discrete(+R:int,+VC:list,+M:module,+Distribution:list,-S:float) is det
+ * finite(+Distribution:list,-S:float) is det
  *
- * Returns in S a sample from a discrete distribution Distribution (a list
- * of couples Val:Prob) associated to rule R with substitution VC.
- * If the variable has already been sampled, it retrieves the sampled
- * value, otherwise it takes a new sample and records it for rule R with
- * substitution VC.
+ * samples a value from a discrete distribution Distribution (a list
+ * of couples Val:Prob) and returns it in S
  */
-sample_discrete(R,VC,M,_D,S):-
-  M:sampled(R,VC,S1),!,
-  S=S1.
+finite(D,S):-
+  discrete(D,S).
 
-sample_discrete(R,VC,M,D,S):-
-  discrete(D,S0),
-  assertz(M:sampled(R,VC,S0)),
-  S=S0.
+finite(D,S,Dens):-
+  discrete(D,S,Dens).
 
 /**
  * discrete(+Distribution:list,-S:float) is det
@@ -3011,24 +2710,9 @@ discrete([S0:W|T],W0,U,S):-
     discrete(T,W1,U,S)
   ).
 
-
-
-/**
- * sample_exponential(+R:int,+VC:list,+M:module,+Lambda:float,-S:int) is det
- *
- * Returns in S a sample for a exponential distributed variable with parameters
- * Lambda associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_exponential(R,VC,M,_,S):-
-  M:sampled(R,VC,S),!.
-
-sample_exponential(R,VC,M,Lambda,S):-
-  exponential(Lambda,S),
-  assertz(M:sampled(R,VC,S)).
-
-
+discrete(D,S,Dens):-
+  member(S:Dens,D).
+% discrete(_D,_S,1.0).
 /** 
  * exponential(+Lambda:float, -V:int) is det
  *
@@ -3047,24 +2731,8 @@ exponential_(I,RandomVal,Lambda,_,V):-
   CurrentProb is 1 - exp(-Lambda*I1),
   exponential_(I1,RandomVal,Lambda,CurrentProb,V).
 
-exponential_prob(X,Lambda,V):-
+exponential(Lambda,X,V):-
   V is Lambda*exp(-Lambda*X).
-
-
-/**
- * sample_pascal(+R:int,+VC:list,+M:module,+N:int,+P:float,-S:int) is det
- *
- * Returns in S a sample for a pascal distributed variable with parameters
- * N and P associated to rule R with substitution VC. If the variable
- * has already been sampled, it retrieves the sampled value, otherwise
- * it takes a new sample and records it for rule R with substitution VC.
- */
-sample_pascal(R,VC,M,_N,_P,S):-
-  M:sampled(R,VC,S),!.
-
-sample_pascal(R,VC,M,N,P,S):-
-  pascal(N,P,S),
-  assertz(M:sampled(R,VC,S)).
 
 /**
  * pascal(+R:int,+P:float,-Value:int) is det
@@ -3078,7 +2746,7 @@ sample_pascal(R,VC,M,N,P,S):-
 % R number of failures
 % P probability of success
 pascal(R,P,Value):-
-  pascal_prob(0,R,P,V0),
+  pascal(0,R,P,V0),
   random(RandomVal),
   pascal_prob_(0,R,P,V0,RandomVal,Value).
 
@@ -3086,7 +2754,7 @@ pascal_prob_(I,_,_,CurrentProb,RandomVal,I):-
   RandomVal =< CurrentProb, !.
 pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
   I1 is I+1,
-  pascal_prob(I1,R,P,V0),
+  pascal(I1,R,P,V0),
   CurrentProb1 is V0 + CurrentProb,
   pascal_prob_(I1,R,P,CurrentProb1,RandomVal,V).
 
@@ -3095,7 +2763,7 @@ pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
 * R number of failures
 * P probability of success
 */
-pascal_prob(K,R,P,Value):-
+pascal(K,R,P,Value):-
   KR1 is K+R-1,
   binomial_coeff(KR1,K,Bin),
   Value is Bin*(P**K)*(1-P)**R.
@@ -3121,58 +2789,17 @@ generate_rules_fact([Head:_P|T],HeadList,VC,M,R,N,[Clause|Clauses]):-
   generate_rules_fact(T,HeadList,VC,M,R,N1,Clauses).
 
 
+generate_clause_distr(Head,Body,VC,M,R,Var,Distr,Clause):-
+  Clause=[(Head:-(Body,take_a_sample(R,VC,M,Distr,Var))),
+  (samp(R,VC,Var):-take_a_sample(R,VC,M,Distr,Var))].
+
+
 generate_clause_samp(Head,Body,HeadList,VC,M,R,N,[Clause,Rule]):-
   generate_clause(Head,Body,HeadList,VC,M,R,N,Clause),
   Rule=(samp(R,VC,Val):-sample_head(R,VC,M,HeadList,Val)).
 
 generate_clause(Head,Body,HeadList,VC,M,R,N,Clause):-
   Clause=[(Head:-(Body,sample_head(R,VC,M,HeadList,N)))].
-
-generate_clause_gauss(Head,Body,VC,M,R,Var,Mean,Variance,Clause):-
-  Clause=[(Head:-(Body,sample_gauss(R,VC,M,Mean,Variance,Var))),
-  (samp(R,VC,Var):-sample_gauss(R,VC,M,Mean,Variance,Var))].
-
-generate_clause_uniform(Head,Body,VC,M,R,Var,L,U,Clause):-
-  Clause=[(Head:-(Body,sample_uniform(R,VC,M,L,U,Var))),
-  (samp(R,VC,Var):-sample_uniform(R,VC,M,L,U,Var))].
-
-generate_clause_gamma(H1,Body,VC,M,R,Shape,Scale,Var,Clause):-
-      Clause=[(H1:-(Body,sample_gamma(R,VC,M,Shape,Scale,Var))),
-      (samp(R,VC,Var):-sample_gamma(R,VC,M,Shape,Scale,Var))].
-
-generate_clause_beta(H1,Body,VC,M,R,Alpha,Beta,Var,Clause):-
-  Clause=[(H1:-(Body,sample_beta(R,VC,M,Alpha,Beta,Var))),
-  (samp(R,VC,Var):-sample_beta(R,VC,M,Alpha,Beta,Var))].
-
-generate_clause_poisson(H1,Body,VC,M,R,Lambda,Var,Clause):-
-  Clause=[(H1:-(Body,sample_poisson(R,VC,M,Lambda,Var))),
-  (samp(R,VC,Var):-sample_poisson(R,VC,M,Lambda,Var))].
-
-generate_clause_binomial(H1,Body,VC,M,R,N,P,Var,Clause):-
-  Clause=[(H1:-(Body,sample_binomial(R,VC,M,N,P,Var))),
-  (samp(R,VC,Var):-sample_binomial(R,VC,M,N,P,Var))].
-
-generate_clause_discrete_uniform(H1,Body,VC,M,R,D0,Var,Clause):-
-  Clause=[(H1:-Body,length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,M,D,Var)),
-  (samp(R,VC,Var):-length(D0,Len),Prob is 1.0/Len,
-      maplist(add_prob(Prob),D0,D),sample_discrete(R,VC,M,D,Var))].
-
-generate_clause_discrete(H1,Body,VC,M,R,D,Var,Clause):-
-  Clause=[(H1:-Body,sample_discrete(R,VC,M,D,Var)),
-  (samp(R,VC,Var):-sample_discrete(R,VC,M,D,Var))].
-
-generate_clause_finite(H1,Body,VC,M,R,D0,Var,Clause):-
-  Clause=[(H1:-Body,maplist(swap,D0,D),sample_discrete(R,[],M,D,Var)),
-    (samp(R,VC,Var):-maplist(swap,D0,D),sample_discrete(R,VC,M,D,Var))].
-
-generate_clause_geometric(H1,Body,VC,M,R,Par,Var,Clause):-
-  Clause=[(H1:-Body,sample_geometric(R,VC,M,Par,Var)),
-    (samp(R,VC,Var):-sample_geometric(R,VC,M,Par,Var))].
-
-generate_clause_dirichlet(H1,Body,VC,M,R,Par,Var,Clause):-
-  Clause=[(H1:-Body,sample_dirichlet(R,VC,M,Par,Var)),
-    (samp(R,VC,Var):-sample_dirichlet(R,VC,M,Par,Var))].
 
 
 generate_rules([],_Body,HeadList,VC,M,R,_N,[Rule]):-
@@ -3344,7 +2971,7 @@ msw(M:A,B):-
   sample_msw(V,M,R,A,D,B).
 
 sample_msw(real,norm(Mean,Variance),V):-!,
-  gauss(Mean,Variance,S),
+  gaussian(Mean,Variance,S),
   S=V.
 
 sample_msw(Values,Dist,V):-
@@ -3353,11 +2980,11 @@ sample_msw(Values,Dist,V):-
   nth0(N,Values,V).
 
 sample_msw(real,M,R,A,norm(Mean,Variance),V):-!,
-  sample_gauss(R,A,M,Mean,Variance,V).
+  take_a_sample(R,A,M,gaussian(Mean,Variance),V).
 
 sample_msw(Values,M,R,A,Dist,V):-
   maplist(combine,Values,Dist,VD),
-  sample_discrete(R,A,M,VD,V).
+  take_a_sample(R,A,M,discrete(VD),V).
 
 combine(V,P,V:P).
 
@@ -3433,175 +3060,6 @@ system:term_expansion((:- end_lpad), []) :-
   mc_input_mod(M),!,
   retractall(M:mc_on).
 
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(L,U)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_uniform(H1,Body,[],M,R,Var,L,U,Clause)
-  ;
-    generate_clause_uniform(H1,Body,VC,M,R,Var,L,U,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gamma distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~gamma(Shape,Scale)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gamma(H1,Body,[],M,R,Shape,Scale,Var,Clause)
-  ;
-    generate_clause_gamma(H1,Body,VC,M,R,Shape,Scale,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with beta distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~beta(Alpha,Beta)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_beta(H1,Body,[],M,R,Alpha,Beta,Var,Clause)
-  ;
-    generate_clause_beta(H1,Body,VC,M,R,Alpha,Beta,Var,Clause)
-  ).
-
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with poisson distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~poisson(Lambda)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_poisson(H1,Body,[],M,R,Lambda,Var,Clause)
-  ;
-    generate_clause_poisson(H1,Body,VC,M,R,Lambda,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with binomial distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~binomial(N,P)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_binomial(H1,Body,[],M,R,N,P,Var,Clause)
-  ;
-    generate_clause_binomial(H1,Body,VC,M,R,N,P,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(D0)),!,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete_uniform(H1,Body,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_discrete_uniform(H1,Body,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~finite(D0)),!,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_finite(H1,Body,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_finite(H1,Body,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with geometric distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~geometric(Par)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([H,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_geometric(H1,Body,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_geometric(H1,Body,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with dirichlet distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~dirichlet(Par)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([H,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_dirichlet(H1,Body,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_dirichlet(H1,Body,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gaussian distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~gaussian(Mean,Variance)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H1,Body,[],M,R,Var,Mean,Variance,Clause)
-  ;
-    generate_clause_gauss(H1,Body,VC,M,R,Var,Mean,Variance,Clause)
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with exponential distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~exponential(Lambda)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_exponential(R,[],M,Lambda,Var))
-  ;
-    Clause=(H1:-Body,sample_exponential(R,VC,M,Lambda,Var))
-  ).
-
-system:term_expansion((Head:=Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with pascal distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~pascal(N,P)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head,Body],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-Body,sample_pascal(R,[],M,N,P,Var))
-  ;
-    Clause=(H1:-Body,sample_pascal(R,VC,M,N,P,Var))
-  ).
-
 system:term_expansion((Head:=Body),(H1:-Body)) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
@@ -3609,234 +3067,24 @@ system:term_expansion((Head:=Body),(H1:-Body)) :-
   Head=(H~val(Var)), !,
   add_arg(H,Var,H1).
 
-system:term_expansion((Head:=Body),(Head:- Body)) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,!.
 
-system:term_expansion((Head:-Body),Clause) :-
+system:term_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
+% fact with distr
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:gaussian(Mean,Variance)), !,
+  Head=(H~Distr0), !,
   add_arg(H,Var,H1),
+  switch_finite(Distr0,Distr),
   extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H1,Body,[],M,R,Var,Mean,Variance,Clause)
+    generate_clause_distr(H1,Body,[],M,R,Var,Distr,Clause)
   ;
-    generate_clause_gauss(H1,Body,VC,M,R,Var,Mean,Variance,Clause)
+    generate_clause_distr(H1,Body,VC,M,R,Var,Distr,Clause)
   ).
 
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:uniform(Var,L,U)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_uniform(H,Body,[],M,R,Var,L,U,Clause)
-  ;
-    generate_clause_uniform(H,Body,VC,M,R,Var,L,U,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gamma distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:gamma(Var,Shape,Scale)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gamma(H,Body,[],M,R,Shape,Scale,Var,Clause)
-  ;
-    generate_clause_gamma(H,Body,VC,M,R,Shape,Scale,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with beta distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:beta(Var,Alpha,Beta)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_beta(H,Body,[],M,R,Alpha,Beta,Var,Clause)
-  ;
-    generate_clause_beta(H,Body,VC,M,R,Alpha,Beta,Var,Clause)
-  ).
-
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with poisson distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:poisson(Var,Lambda)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_poisson(H,Body,[],M,R,Lambda,Var,Clause)
-  ;
-    generate_clause_poisson(H,Body,VC,M,R,Lambda,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with binomial distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:A),
-  nonvar(A),
-  Head=(H:binomial(Var,N,P)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_binomial(H,Body,[],M,R,N,P,Var,Clause)
-  ;
-    generate_clause_binomial(H,Body,VC,M,R,N,P,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:uniform(Var,D0)),!,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete_uniform(H,Body,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_discrete_uniform(H,Body,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with discrete distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete(H,Body,[],M,R,D,Var,Clause)
-  ;
-    generate_clause_discrete(H,Body,VC,M,R,D,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with uniform discrete distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:uniform(Var,D0)),!,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete_uniform(H,Body,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_discrete_uniform(H,Body,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with dirichlet distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !,
-  extract_vars_list([H,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_dirichlet(H,Body,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_dirichlet(H,Body,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with geometriv distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:geometric(Var,Par)), !,
-  extract_vars_list([H,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_geometric(H,Body,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_geometric(H,Body,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gaussian distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H,Body,[],M,R,Var,Mean,Variance,Clause)
-  ;
-    generate_clause_gauss(H,Body,VC,M,R,Var,Mean,Variance,Clause)
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with exponential distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:P),
-  nonvar(P),
-  Head=(H:exponential(Var,Lambda)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_exponential(R,[],M,Lambda,Var))
-  ;
-    Clause=(H:-Body,sample_exponential(R,VC,M,Lambda,Var))
-  ).
-
-system:term_expansion((Head:-Body),Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with pascal distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head = (_:A),
-  nonvar(A),
-  Head=(H:pascal(Var,N,P)), !,
-  extract_vars_list([Head,Body],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H:-Body,sample_pascal(R,[],M,N,P,Var))
-  ;
-    Clause=(H:-Body,sample_pascal(R,VC,M,N,P,Var))
-  ).
+system:term_expansion((Head:=Body),(Head:- Body)) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,!.
 
 system:term_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3852,6 +3100,25 @@ system:term_expansion((Head :- Body), Clauses):-
     generate_rules(HeadList,Body,HeadList,VC,M,R,0,Clauses)
   ).
 
+system:term_expansion((Head:-Body),Clause) :-
+  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
+% rule with distr
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  Head=(H:Distr0),
+  nonvar(Distr0),
+  \+ number(Distr0),
+  Distr0=..[D,Var|Pars],
+  is_dist(D),!,
+  Distr=..[D|Pars],
+  extract_vars_list([Head,Body],[],VC0),
+  delete_equal(VC0,Var,VC),
+  get_next_rule_number(M,R),
+  (M:local_mc_setting(single_var,true)->
+    generate_clause_distr(H,Body,[],M,R,Var,Distr,Clause)
+  ;
+    generate_clause_distr(H,Body,VC,M,R,Var,Distr,Clause)
+  ).
+
 system:term_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -3859,8 +3126,6 @@ system:term_expansion((Head :- Body), []) :-
   (Head = (_:P);Head=(P::_)),
   ground(P),
   P=:=0.0, !.
-
-
 
 
 system:term_expansion((Head :- Body), Clauses) :-
@@ -3895,368 +3160,40 @@ system:term_expansion(Head,Clauses) :-
 
 system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% fact with uniform distr
+% fact with distr
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(L,U)), !,
+  Head=(H~Distr0),
+  nonvar(Distr0),
+  !,
+  switch_finite(Distr0,Distr),
   add_arg(H,Var,H1),
   extract_vars_list(Head,[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    generate_clause_uniform(H1,true,[],M,R,Var,L,U,Clause)
+    generate_clause_distr(H1,true,[],M,R,Var,Distr,Clause)
   ;
-    generate_clause_uniform(H1,true,VC,M,R,Var,L,U,Clause)
+    generate_clause_distr(H1,true,VC,M,R,Var,Distr,Clause)
   ).
 
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gamma distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~gamma(Shape,Scale)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gamma(H1,true,[],M,R,Shape,Scale,Var,Clause)
-  ;
-    generate_clause_gamma(H1,true,VC,M,R,Shape,Scale,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with beta distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~beta(Alpha,Beta)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_beta(H1,true,[],M,R,Alpha,Beta,Var,Clause)
-  ;
-    generate_clause_beta(H1,true,VC,M,R,Alpha,Beta,Var,Clause)
-  ).
-
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with poisson distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~poisson(Lambda)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_poisson(H1,true,[],M,R,Lambda,Var,Clause)
-  ;
-    generate_clause_poisson(H1,true,VC,M,R,Lambda,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with exponential distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~exponential(Lambda)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_exponential(R,[],M,Lambda,Var))
-  ;
-    Clause=(H1:-sample_exponential(R,VC,M,Lambda,Var))
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with pascal distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~pascal(N,P)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H1:-sample_pascal(R,[],M,N,P,Var))
-  ;
-    Clause=(H1:-sample_pascal(R,VC,M,N,P,Var))
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with binomial distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~binomial(N,P)), !,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_binomial(H1,true,[],M,R,N,P,Var,Clause)
-  ;
-    generate_clause_binomial(H1,true,VC,M,R,N,P,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~uniform(D0)),!,
-  add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete_uniform(H1,true,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_discrete_uniform(H1,true,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~finite(D0)),!,
-  add_arg(H,Var,H1),
-  extract_vars_list([Head],[],VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_finite(H1,true,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_finite(H1,true,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gaussian distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H~gaussian(Mean,Variance)), !,
-  extract_vars_list([Head],[],VC),
-  add_arg(H,Var,H1),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H1,true,[],M,R,Var,Mean,Variance,Clause)
-  ;
-    generate_clause_gauss(H1,true,VC,M,R,Var,Mean,Variance,Clause)
-  ).
 system:term_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with dirichlet distr
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !,
-  extract_vars_list([H],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_dirichlet(H,true,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_dirichlet(H,true,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with geometric distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:geometric(Var,Par)), !,
-  extract_vars_list([H],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_geometric(H,true,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_geometric(H,true,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H,true,[],M,R,Var,Mean,Variance,Clause)
-  ;
-    generate_clause_gauss(H,true,VC,M,R,Var,Mean,Variance,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% fact with uniform distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:uniform(Var,L,U)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_uniform(H,true,[],M,R,Var,L,U,Clause)
-  ;
-    generate_clause_uniform(H,true,VC,M,R,Var,L,U,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gamma distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:gamma(Var,Shape,Scale)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gamma(H,true,[],M,R,Shape,Scale,Var,Clause)
-  ;
-    generate_clause_gamma(H,true,VC,M,R,Shape,Scale,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with beta distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:beta(Var,Alpha,Beta)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_beta(H,true,[],M,R,Alpha,Beta,Var,Clause)
-  ;
-    generate_clause_beta(H,true,VC,M,R,Alpha,Beta,Var,Clause)
-  ).
-
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with poisson distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:poisson(Var,Lambda)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_poisson(H,true,[],M,R,Lambda,Var,Clause)
-  ;
-    generate_clause_poisson(H,true,VC,M,R,Lambda,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with binomial distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:A),
-  nonvar(A),
-  Head=(H:binomial(Var,N,P)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_binomial(H,true,[],M,R,N,P,Var,Clause)
-  ;
-    generate_clause_binomial(H,true,VC,M,R,N,P,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:uniform(Var,D0)),!,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete_uniform(H,true,[],M,R,D0,Var,Clause)
-  ;
-    generate_clause_discrete_uniform(H,true,VC,M,R,D0,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
+  Head=(H:Distr0),
+  nonvar(Distr0),
+  \+ number(Distr0),
+  Distr0=..[D,Var|Pars],
+  is_dist(D),!,
+  Distr=..[D|Pars],
   extract_vars_list([Head],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
-    generate_clause_discrete(H,true,[],M,R,D,Var,Clause)
+    generate_clause_distr(H,true,[],M,R,Var,Distr,Clause)
   ;
-    generate_clause_discrete(H,true,VC,M,R,D,Var,Clause)
+    generate_clause_distr(H,true,VC,M,R,Var,Distr,Clause)
   ).
 
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with dirichlet distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:dirichlet(Var,Par)), !,
-  extract_vars_list([H],[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_dirichlet(H,true,[],M,R,Par,Var,Clause)
-  ;
-    generate_clause_dirichlet(H,true,VC,M,R,Par,Var,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with gaussian distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:gaussian(Var,Mean,Variance)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    generate_clause_gauss(H,true,[],M,R,Var,Mean,Variance,Clause)
-  ;
-    generate_clause_gauss(H,true,VC,M,R,Var,Mean,Variance,Clause)
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with exponential distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:P),
-  nonvar(P),
-  Head=(H:exponential(Var,Lambda)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_exponential(R,[],M,Lambda,Var))
-  ;
-    Clause=(H:-sample_exponential(R,VC,M,Lambda,Var))
-  ).
-
-system:term_expansion(Head,Clause) :-
-  prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-% disjunctive fact with pascal distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
-  Head=(H:A),
-  nonvar(A),
-  Head=(H:pascal(Var,N,P)), !,
-  extract_vars_list(Head,[],VC0),
-  delete_equal(VC0,Var,VC),
-  get_next_rule_number(M,R),
-  (M:local_mc_setting(single_var,true)->
-    Clause=(H:-sample_pascal(R,[],M,N,P,Var))
-  ;
-    Clause=(H:-sample_pascal(R,VC,M,N,P,Var))
-  ).
 
 system:term_expansion(Head,[]) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
@@ -4356,7 +3293,29 @@ builtin_int(G):-
   predicate_property(G,imported_from(clpfd)).
 
 
+is_dist(D):-
+  member(D,[
+    finite,
+    discrete,
+    uniform,
+    gaussian,
+    dirichlet,
+    gamma,
+    beta,
+    poisson,
+    binomial,
+    geometric,
+    exponential,
+    pascal
+    ]),!.
 
+switch_finite(D0,D):-
+  D0=..[F,Arg0],
+  (F=finite;F=discrete),!,
+  maplist(swap,Arg0,Arg),
+  D=..[F,Arg].
+
+switch_finite(D,D).
 
 /**
  * swap(?Term1:term,?Term2:term) is det
