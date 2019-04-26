@@ -1927,7 +1927,11 @@ lw_sample_weight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
     take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    check(R,VC,M,S),
+    (is_discrete(Distr)->
+      check(R,VC,M,S)
+    ;
+      true
+    ),
     call(Distr,S,D),
     W is W0*D
    ).
@@ -1998,7 +2002,11 @@ lw_sample_logweight(_M:take_a_sample(R,VC,M,Distr,S),W0,W):-!,
     take_a_sample(R,VC,M,Distr,S),
     W=W0
   ;
-    check(R,VC,M,S),
+    (is_discrete(Distr)->
+      check(R,VC,M,S)
+    ;
+      true
+    ),
     call(Distr,S,D),
     W is W0+log(D)
    ).
@@ -3317,6 +3325,17 @@ switch_finite(D0,D):-
 
 switch_finite(D,D).
 
+is_discrete(D):-
+  functor(D,F,A),
+  member(F/A,[
+    finite/1,
+    discrete/1,
+    uniform/1,
+    poisson/1,
+    binomial/2,
+    geometric/1,
+    pascal/2
+    ]).  
 /**
  * swap(?Term1:term,?Term2:term) is det
  *
