@@ -180,6 +180,12 @@ init(S):gaussian(S,0,1).
 trans_err(_,E):gaussian(E,0,2).
 obs_err(_,E):gaussian(E,0,1).</code></pre>
 <p>Continuous random variables are involved in arithmetic expressions (in <code>trans/3</code> and <code>emit/3</code>). It is often convenient, as in this case, to use CLP(R) constraints (by including the directive <code>:- use_module(library(clpr)).</code>) as in this way the expressions can be used in multiple directions and the same clauses can be used both to sample and to evaluate the weight of the sample on the basis of evidence, otherwise different clauses have to be written. In case random variables are not sufficiently instantiated to exploit expressions for inferring the values of other variables, inference will return an error.</p>
+<p>Moreover, user defined distributions are allowed with the syntax:</p>
+<pre><code>A:user(Var,Density):-Body.</code></pre>
+<p>where <code>Var</code> appears in <code>A</code> and will contain the sampled value and <code>Density</code> is an atom of the form <code>predicate(Parameters)</code>. If <code>predicate</code> in <code>predicate(Parameters)</code> has arity <span class="math inline">\(n\)</span>, then the user has to define predicate <code>predicate/n+1</code> such that <code>predicate(Parameters,Var)</code>, when called with <code>Parameters</code> instantiated, returns in <code>Var</code> a value sampled from the user defined density. The definition of <code>predicate/n+1</code> should appear after <code>:- end_lpad.</code></p>
+<p>If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate <code>predicate/n+s</code> such that <code>predicate(Parameters,Var),Dens</code>, when called with <code>Parameters</code> and <code>Var</code> instantiated, returns in <code>Dens</code> the value of the probability density of <code>Var</code>. Moreover, if the density is discrete, the program must include the fact</p>
+<pre><code>disc(predicate).</code></pre>
+<p>also after <code>:- end_lpad.</code></p>
 <h3 id="dc">Distributional Clauses Syntax</h3>
 <p>You can also use the syntax of Distributional Clauses (DC) <span class="citation">[<a href="#ref-Nitti2016">13</a>]</span>. Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in</p>
 <pre><code>T~Density&#39; := Body.</code></pre>

@@ -241,6 +241,24 @@ In case random variables are not sufficiently instantiated to
 exploit expressions for inferring the values of other variables, 
 inference will return an error.
 
+
+Moreover, user defined distributions are allowed with the syntax:
+\begin{verbatim}
+A:user(Var,Density):-Body.
+\end{verbatim}
+where \verb|Var| appears in \verb|A| and will contain the sampled value and \verb|Density| is an atom of the form \verb|predicate(Parameters)|.
+If  \verb|predicate| in \verb|predicate(Parameters)| has arity $n$, then the user has to define predicate \verb|predicate/n+1| such that \verb|predicate(Parameters,Var)|, when
+called with \verb|Parameters| instantiated, returns in \verb|Var| a value sampled from the user defined density.
+The definition of \verb|predicate/n+1| should appear after \verb|:- end_lpad.|
+
+If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate \verb|predicate/n+s| such that \verb|predicate(Parameters,Var),Dens|, when
+called  with \verb|Parameters| and \verb|Var| instantiated, returns in \verb|Dens| the value of the probability density of \verb|Var|.
+Moreover, if the density is discrete, the program must include the fact
+\begin{verbatim}
+disc(predicate).
+\end{verbatim}
+also  after \verb|:- end_lpad.|
+
 \subsubsection{Distributional Clauses Syntax}
 \label{dc}
 You can also use the syntax of Distributional Clauses (DC) \cite{Nitti2016}.

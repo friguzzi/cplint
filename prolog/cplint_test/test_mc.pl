@@ -8,6 +8,8 @@
 test_list([
     coinmsw_mc,
     coinmsw_mc_memo,
+    binomial,
+    binomial_user,
     coinmc,
     threesideddicemc,
     markov_chain,
@@ -18,6 +20,7 @@ test_list([
     gaussian_mixture,
     kalman_filter,
     gauss_mean_est,
+    gauss_mean_est_user,
     slp_pdcg,
     indian_gpa,
     indian_gpadc,
@@ -252,6 +255,17 @@ test(part_exp_value_0_X):-
 	run((mc_particle_expectation(val(0,X),[val(1,9),val(2,8)],2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
 :- end_tests(gauss_mean_est).
 
+:- begin_tests(gauss_mean_est_user, []).
+
+:-ensure_loaded(library(examples/gauss_mean_est_user)).
+test(lw_exp_value_0_X):-
+  run((mc_lw_expectation(val(0,X),(val(1,9),val(2,8)),2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
+test(exp_value_0_X):-
+	run((mc_expectation(val(0,X),2000,X,E),relatively_close_to(E,0.9698875384639362,0.25))).
+test(part_exp_value_0_X):-
+	run((mc_particle_expectation(val(0,X),[val(1,9),val(2,8)],2000,X,E),relatively_close_to(E,7.166960047178755,0.25))).
+:- end_tests(gauss_mean_est_user).
+
 :- begin_tests(slp_pdcg, []).
 
 :-ensure_loaded(library(examples/slp_pdcg)).
@@ -426,6 +440,16 @@ test(exp):-
 
 
 :- end_tests(binomial).
+
+:- begin_tests(binomial_user, []).
+
+:-ensure_loaded(library(examples/binomial_user)).
+
+test(exp):-
+  run((mc_expectation(a(X),1000,X,E),close_to(E,10))).
+
+
+:- end_tests(binomial_user).
 
 :- begin_tests(coinmsw_mc, []).
 

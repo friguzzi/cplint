@@ -3058,7 +3058,7 @@ system:term_expansion((:- mc), []) :-!,
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
-  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1)),
+  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1, M:disc/1)),
   retractall(M:samp(_,_,_)),
   style_check(-discontiguous).
 
@@ -3351,7 +3351,8 @@ is_discrete(_M,D):-
     ]),!.
 
 is_discrete(M,D):-
-  M:disc(D).
+  functor(D,F,_A),
+  M:disc(F).
 /**
  * swap(?Term1:term,?Term2:term) is det
  *
