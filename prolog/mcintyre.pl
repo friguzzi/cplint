@@ -3439,7 +3439,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(L,U)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_uniform(H1,Body,[],R,Var,L,U,Clause)
@@ -3453,7 +3453,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~gamma(Shape,Scale)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gamma(H1,Body,[],R,Shape,Scale,Var,Clause)
@@ -3467,7 +3467,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~beta(Alpha,Beta)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_beta(H1,Body,[],R,Alpha,Beta,Var,Clause)
@@ -3482,7 +3482,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~poisson(Lambda)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_poisson(H1,Body,[],R,Lambda,Var,Clause)
@@ -3496,7 +3496,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~binomial(N,P)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_binomial(H1,Body,[],R,N,P,Var,Clause)
@@ -3510,7 +3510,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~uniform(D0)),!,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_discrete_uniform(H1,Body,[],R,D0,Var,Clause)
@@ -3524,7 +3524,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~finite(D0)),!,
   add_arg(H,Var,H1),
-  extract_vars_list([Head],[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_finite(H1,Body,[],R,D0,Var,Clause)
@@ -3538,7 +3538,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~geometric(Par)), !,
   add_arg(H,Var,H1),
-  extract_vars_list([H],[],VC),
+  extract_vars_list([H,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_geometric(H1,Body,[],R,Par,Var,Clause)
@@ -3552,7 +3552,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~dirichlet(Par)), !,
   add_arg(H,Var,H1),
-  extract_vars_list([H],[],VC),
+  extract_vars_list([H,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_dirichlet(H1,Body,[],R,Par,Var,Clause)
@@ -3566,7 +3566,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~gaussian(Mean,Variance)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H1,Body,[],R,Var,Mean,Variance,Clause)
@@ -3580,7 +3580,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~exponential(Lambda)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_exponential(R,[],Lambda,Var))
@@ -3594,7 +3594,7 @@ system:term_expansion((Head:=Body),Clause) :-
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   Head=(H~pascal(N,P)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     Clause=(H1:-Body,sample_pascal(R,[],N,P,Var))
@@ -3620,7 +3620,7 @@ system:term_expansion((Head:-Body),Clause) :-
   nonvar(P),
   Head=(H:gaussian(Mean,Variance)), !,
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  extract_vars_list([Head,Body],[],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_gauss(H1,Body,[],R,Var,Mean,Variance,Clause)
@@ -3636,7 +3636,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:uniform(Var,L,U)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3652,7 +3652,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:gamma(Var,Shape,Scale)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3668,7 +3668,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:beta(Var,Alpha,Beta)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3685,7 +3685,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:poisson(Var,Lambda)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3701,7 +3701,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:A),
   nonvar(A),
   Head=(H:binomial(Var,N,P)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3717,7 +3717,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:uniform(Var,D0)),!,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3733,7 +3733,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   (Head=(H:discrete(Var,D));Head=(H:finite(Var,D))),!,
-  extract_vars_list([Head],[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3749,7 +3749,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:uniform(Var,D0)),!,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3765,7 +3765,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:dirichlet(Var,Par)), !,
-  extract_vars_list([H],[],VC0),
+  extract_vars_list([H,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3781,7 +3781,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:geometric(Var,Par)), !,
-  extract_vars_list([H],[],VC0),
+  extract_vars_list([H,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3797,7 +3797,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:gaussian(Var,Mean,Variance)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3813,7 +3813,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:P),
   nonvar(P),
   Head=(H:exponential(Var,Lambda)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3829,7 +3829,7 @@ system:term_expansion((Head:-Body),Clause) :-
   Head = (_:A),
   nonvar(A),
   Head=(H:pascal(Var,N,P)), !,
-  extract_vars_list(Head,[],VC0),
+  extract_vars_list([Head,Body],[],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
