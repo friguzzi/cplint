@@ -111,7 +111,7 @@ draw_red(R, G):-
 <pre><code>values(T,L).</code></pre>
 <p>where <code>T</code> is a term (possibly containing variables) and <code>L</code> is a list of values. The distribution over values is specified using directives for <code>set_sw/2</code> of the form</p>
 <pre><code>:- set_sw(T,LP).</code></pre>
-<p>where <code>T</code> is a term (possibly containing variables) and <code>LP</code> is a list of probability values. Remember that in PRISM each call to <code>msw/2</code> refers to a different random variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog.</p>
+<p>where <code>T</code> is a term (possibly containing variables) and <code>LP</code> is a list of probability values. Remember that usually in PRISM each call to <code>msw/2</code> refers to a different random variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog. This behavior can be changed with the setting <code>prism_memoization</code>: if set to <code>true</code> then memoization is performed. Its default value is <code>false</code>, i.e., no memoization.</p>
 <p>For example, the coin example above in PRISM syntax becomes (<a href="http://cplint.eu/example/inference/coinmsw.pl"><code>coinmsw.pl</code></a>)</p>
 <pre><code>values(throw(_),[heads,tails]).
 :- set_sw(throw(fair),[0.5,0.5]).
@@ -122,7 +122,7 @@ res(Coin,R):- toss(Coin),fairness(Coin,Fairness),msw(throw(Fairness),R).
 fairness(_Coin,Fairness) :- msw(fairness,Fairness).
 toss(coin).</code></pre>
 <h2 id="cont">Continuous Probability Densities</h2>
-<p><code>cplint</code> handles continuous random variables as well with its sampling inference module. To specify a probability density on an argument <code>Var</code> of an atom <code>A</code> you can used rules of the form</p>
+<p><code>cplint</code> handles continuous or integer random variables as well with its sampling inference module. To specify a probability density on an argument <code>Var</code> of an atom <code>A</code> you can used rules of the form</p>
 <pre><code>A:Density:- Body</code></pre>
 <p>where <code>Density</code> is a special atom identifying a probability density on variable <code>Var</code> and <code>Body</code> (optional) is a regular clause body. Allowed <code>Density</code> atoms are</p>
 <ul>
@@ -131,9 +131,11 @@ toss(coin).</code></pre>
 <li><p><code>dirichlet(Var,Par)</code>: <code>Var</code> is a list of real numbers following a Dirichlet distribution with <span class="math inline">\(\alpha\)</span> parameters specified by the list <code>Par</code></p></li>
 <li><p><code>gamma(Var,Shape,Scale)</code> <code>Var</code> follows a gamma distribution with shape parameter <code>Shape</code> and scale parameter <code>Scale</code>.</p></li>
 <li><p><code>beta(Var,Alpha,Beta)</code> <code>Var</code> follows a beta distribution with parameters <code>Alpha</code> and <code>Beta</code>.</p></li>
-<li><p><code>poisson(Var,Lambda)</code> <code>Var</code> follows a Poisson distribution with parameter <code>Lambda</code>.</p></li>
-<li><p><code>binomial(Var,N,P)</code> <code>Var</code> follows a binomial distribution with parameters <code>N</code> and <code>P</code>.</p></li>
-<li><p><code>geometric(Var,P)</code> <code>Var</code> follows a geometric distribution with parameter <code>P</code>.</p></li>
+<li><p><code>poisson(Var,Lambda)</code> <code>Var</code> follows a Poisson distribution with parameter <code>Lambda</code> (rate).</p></li>
+<li><p><code>binomial(Var,N,P)</code> <code>Var</code> follows a binomial distribution with parameters <code>N</code> (number of trials) and <code>P</code> (success probability).</p></li>
+<li><p><code>geometric(Var,P)</code> <code>Var</code> follows a geometric distribution with parameter <code>P</code> (success probability).</p></li>
+<li><p><code>exponential(Var,Lambda)</code> <code>Var</code> follows an exponential distribution with parameter <code>Lambda</code> (ate, or inverse scale).</p></li>
+<li><p><code>pascal(Var,R,P)</code> <code>Var</code> follows an exponential distribution with parameters <code>R</code> (number of failures) and <code>P</code> (success probability).</p></li>
 </ul>
 <p>For example</p>
 <pre><code>g(X): gaussian(X,0, 1).</code></pre>
@@ -480,6 +482,7 @@ mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,
 <p>where <code>Options</code> is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example</p>
 <pre><code>?- mc_mh_expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).</code></pre>
 <p>of <a href="http://cplint.eu/example/inference/arithm.pl"><code>arithm.pl</code></a> computes the expectation of argument <code>Y</code> of <code>eval(2,Y)</code> given that <code>eval(1,3)</code> is true by taking 1000 samples using Metropolis-Hastings MCMC.</p>
+<p>Note that conditional inference is not allowed for PRISM programs with the setting <code>prism_memoization</code> set to <code>false</code>, as sampled values are not stored in that case and conditioning would have no effect.</p>
 <h2 id="condqcont">Conditional Queries on Continuous Variables</h2>
 <p>When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables. In this way you can build a probability density of the sampled argument. When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.</p>
 <p>For example</p>
@@ -622,12 +625,14 @@ argbar_r/1</code></pre>
 <ul>
 <li><p><code>depth_bound</code>: if <code>true</code>, the depth of the derivation of the goal is limited to the value of the <code>depth</code> parameter. Default value <code>false</code>.</p></li>
 <li><p><code>depth</code>: maximum depth of derivations when <code>depth_bound</code> is set to <code>true</code>. Default value <code>5</code>.</p></li>
+<li><p><code>prism_memoization</code>: <code>false</code>: original prism semantics, <code>true</code>: semantics with memoization</p></li>
 </ul>
 <p>If <code>depth_bound</code> is set to <code>true</code>, derivations are depth-bounded so you can query also programs containing infinite loops, for example programs where queries have an infinite number of explanations. However the probability that is returned is guaranteed only to be a lower bound, see for example <a href="http://cplint.eu/example/inference/markov_chaindb.pl"><code>markov_chaindb.pl</code></a></p>
 <p><code>mcintyre</code> has the parameters</p>
 <ul>
 <li><p><code>min_error</code>: minimal width of the binomial proportion confidence interval for the probability of the query. When the confidence interval for the probability of the query is below <code>min_error</code>, the computation stops. Default value <code>0.01</code>.</p></li>
 <li><p><code>k</code>: the number of samples to take before checking whether the the binomial proportion confidence interval is below <code>min_error</code>. Default value <code>1000</code>. <code>max_samples</code>: the maximum number of samples to take. This is used when the probability of the query is very close to 0 or 1. In fact <code>mcintyre</code> also checks for the validity of the the binomial proportion confidence interval: if less than 5 failures or successes are sampled, even if the width of the confidence interval is less than <code>min_error</code>, the computation continues. This would lead to non-termination in cases where the probability is 0 or 1. <code>max_samples</code> ensures termination. Default value <code>10e4</code>.</p></li>
+<li><p><code>prism_memoization</code>: <code>false</code>: original prism semantics, <code>true</code>: semantics with memoization</p></li>
 </ul>
 <p>The example <a href="http://cplint.eu/example/inference/markov_chain.pl"><code>markov_chain.pl</code></a> shows that <code>mcintyre</code> can perform inference in presence of an infinite number of explanations for the goal. Differently from <code>pita</code>, no depth bound is necessary, as the probability of selecting the infinite computation branch is 0. However, also <code>mcintyre</code> may not terminate if loops not involving probabilistic predicates are present.</p>
 <p>If you want to set the seed of the random number generator, you can use SWI-Prolog predicates <code>setrand/1</code> and <code>getrand/1</code>, see <a href="http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1">SWI-Prolog manual</a>.</p>

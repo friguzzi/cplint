@@ -130,7 +130,7 @@ toss(coin).
 \subsection{Continuous Probability Densities}
 \label{cont}
 
-\verb|cplint| handles continuous random variables as well with its
+\verb|cplint| handles continuous or integer random variables as well with its
 sampling inference module.
 To specify a probability density on an argument \verb|Var| of an atom
 \verb|A| you can used rules of the form
@@ -152,11 +152,15 @@ with shape parameter \verb|Shape| and scale parameter \verb|Scale|.
 \item \verb|beta(Var,Alpha,Beta)|  \verb|Var| follows a beta distribution 
 with parameters \verb|Alpha| and \verb|Beta|.
 \item \verb|poisson(Var,Lambda)|  \verb|Var| follows a Poisson distribution 
-with parameter \verb|Lambda|.
+with parameter \verb|Lambda| (rate).
 \item \verb|binomial(Var,N,P)|  \verb|Var| follows a binomial distribution 
-with parameters \verb|N| and \verb|P|.
+with parameters \verb|N| (number of trials) and \verb|P| (success probability).
 \item \verb|geometric(Var,P)|  \verb|Var| follows a geometric distribution 
-with parameter \verb|P|.
+with parameter \verb|P| (success probability).
+\item \verb|exponential(Var,Lambda)|  \verb|Var| follows an exponential distribution 
+with parameter \verb|Lambda| (ate, or inverse scale).
+\item \verb|pascal(Var,R,P)|  \verb|Var| follows an exponential distribution 
+with parameters \verb|R| (number of failures) and  \verb|P| (success probability).
 \end{itemize}
 For example
 \begin{verbatim}
