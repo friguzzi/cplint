@@ -247,12 +247,16 @@ Moreover, user defined distributions are allowed with the syntax:
 A:user(Var,Density):-Body.
 \end{verbatim}
 where \verb|Var| appears in \verb|A| and will contain the sampled value and \verb|Density| is an atom of the form \verb|predicate(Parameters)|.
-If  \verb|predicate| in \verb|predicate(Parameters)| has arity $n$, then the user has to define predicate \verb|predicate/n+1| such that \verb|predicate(Parameters,Var)|, when
+If  \verb|predicate| in \verb|predicate(Parameters)| has arity \verb|n|, then the user has to define predicate \verb|predicate/n+1| such that \
+\begin{verbatim}
+predicate(Parameters,Var)
+\end{verbatim}
 called with \verb|Parameters| instantiated, returns in \verb|Var| a value sampled from the user defined density.
 The definition of \verb|predicate/n+1| should appear after \verb|:- end_lpad.|
 
-If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate \verb|predicate/n+s| such that \verb|predicate(Parameters,Var),Dens|, when
+If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate \verb|predicate/n+2| such that \verb|predicate(Parameters,Var,Dens)|, when
 called  with \verb|Parameters| and \verb|Var| instantiated, returns in \verb|Dens| the value of the probability density of \verb|Var|.
+The definition of \verb|predicate/n+2| should appear after \verb|:- end_lpad.|
 Moreover, if the density is discrete, the program must include the fact
 \begin{verbatim}
 disc(predicate).
