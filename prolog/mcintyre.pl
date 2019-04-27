@@ -3343,11 +3343,7 @@ is_discrete(_M,D):-
   member(F/A,[
     finite/1,
     discrete/1,
-    uniform/1,
-    poisson/1,
-    binomial/2,
-    geometric/1,
-    pascal/2
+    uniform/1
     ]),!.
 
 is_discrete(M,D):-
