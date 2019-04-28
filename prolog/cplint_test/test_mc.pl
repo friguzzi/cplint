@@ -396,7 +396,7 @@ test(taught_by_c1_p1):-
 test(topic_1_1_1):-
   run((mc_sample(topic(1,1,1),400,P),close_to(P,0.5,0.2))).
 test(topic_1_1_1_g):-
-  run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5,0.2))).
+  run((mc_gibbs_sample(topic(1,1,1),400,P),close_to(P,0.5,0.3))).
 
 test(topic_1_1_1_ww):-
   run((mc_mh_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
@@ -436,7 +436,7 @@ test(b):-
 :-ensure_loaded(library(examples/binomial)).
 
 test(exp):-
-  run((mc_expectation(a(X),1000,X,E),close_to(E,10))).
+  run((mc_expectation(a(X),1000,X,E),relatively_close_to(E,10))).
 
 
 :- end_tests(binomial).
@@ -446,7 +446,7 @@ test(exp):-
 :-ensure_loaded(library(examples/binomial_user)).
 
 test(exp):-
-  run((mc_expectation(a(X),1000,X,E),close_to(E,10))).
+  run((mc_expectation(a(X),1000,X,E),relatively_close_to(E,10))).
 
 
 :- end_tests(binomial_user).

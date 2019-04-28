@@ -2648,7 +2648,7 @@ binomial(N,P,_M,X,Pr):-
  */
 dirichlet(Par,_M,S):-
   maplist(get_gamma,Par,Gammas),
-  sumlist(Gammas,Sum),
+  sum_list(Gammas,Sum),
   maplist(divide(Sum),Gammas,S).
 
 divide(S0,A,S):-
@@ -3026,7 +3026,7 @@ msw_weight(Values,Dist,V,W):-
 
 
 test_prism(M):-
-  (M:local_mc_setting(prism_memoization,false),current_predicate(M:values/2)->
+  (M:local_mc_setting(prism_memoization,false),M:values(_,_)->
     throw(error("This predicate doesn't support PRISM programs without memoization."))
   ;
     true
@@ -3058,7 +3058,7 @@ system:term_expansion((:- mc), []) :-!,
   assert(mc_input_mod(M)),
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
-  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1, M:disc/1)),
+  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1, M:disc/1,M:values/2)),
   retractall(M:samp(_,_,_)),
   style_check(-discontiguous).
 
