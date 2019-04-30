@@ -841,7 +841,7 @@ gibbs_montecarlo(K,T,_Block,_G,_Ev,T):-
   K=<0,!.
 
 gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
-  remove_samples(M,Block,LS),
+  remove_samples(M,Block,_LS),
   save_samples_copy(M,Evidence),
   gibbs_sample_cycle(M:Evidence),
   delete_samples_copy(M,Evidence),
@@ -853,7 +853,7 @@ gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
   ),
   T1 is T0 + Succ,
   K1 is K0-1,
-  check_sampled(M,LS),
+%  check_sampled(M,LS),
   gibbs_montecarlo(K1, T1,Block,M:Goal,M:Evidence, T).
 
 
