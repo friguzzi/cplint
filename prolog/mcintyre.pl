@@ -471,21 +471,18 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
       Succ = Succ0,
       erase_samples(M),
       restore_samples(M,Goal)
-    ),
-    N1 is N0 + 1,
-    S1 is S0 + Succ,
+    )
   %format("Sample ~d Valid ~d~n",[N,Valid]),
   %flush_output,
-    K1 is K0-1
   ;
-    N1 = N0,
-    S1 = S0,
-    K1 = K0,
     NC1 = NC0,
     Succ = Succ0,
     erase_samples(M),
     restore_samples(M,Goal)
   ),
+  S1 is S0 + Succ,
+  K1 is K0-1,
+  N1 is N0 + 1,
   mh_montecarlo(L,K1,NC1,N1, S1,Succ, SuccNew,M:Goal,M:Evidence, N,S).
 
 accept(NC1,NC2):-
