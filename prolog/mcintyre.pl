@@ -361,14 +361,21 @@ count_samples(M,N):-
   length(L,N).
 
 
-resample(_M,0):-!.
+resample(_M,0,_):-!.
 
-resample(M,N):-
+resample(M,N,Same):-
   findall(sampled(Key,Sub,Val),M:sampled(Key,Sub,Val),L),
   sample_one(L,S),
   retractall(M:S),
+  S=sampled(KeyS,SubS,ValS),
+  M:samp(KeyS,SubS,NewValS),
+  (ValS=NewValS->
+    Same=1
+  ;
+    Same=0
+  ),
   N1 is N-1,
-  resample(M,N1).
+  resample(M,N1,Same).
 
 
 erase_samples(M):-
@@ -453,7 +460,11 @@ mh_montecarlo(_L,K,_NC0,N,S,Succ0,Succ0, _Goals,_Ev,N,S):-
   K=<0,!.
 
 mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
-  resample(M,L),
+  resample(M,L,Same),
+  (Same=1->
+    Succ=Succ0,
+    NC1=NC0
+  ;
   copy_term(Evidence,Ev1),
   (M:Ev1->
     copy_term(Goal,Goal1),
@@ -479,6 +490,7 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
     Succ = Succ0,
     erase_samples(M),
     restore_samples(M,Goal)
+  )
   ),
   S1 is S0 + Succ,
   K1 is K0-1,
