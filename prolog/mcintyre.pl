@@ -360,22 +360,24 @@ count_samples(M,N):-
   findall(a,M:sampled(_Key,_Sub,_Val),L),
   length(L,N).
 
-
-resample(_M,0,_):-!.
-
 resample(M,N,Same):-
+  resample_int(M,N,1,Same).
+
+resample_int(_M,0,Same,Same):-!.
+
+resample_int(M,N,Same0,Same):-
   findall(sampled(Key,Sub,Val),M:sampled(Key,Sub,Val),L),
   sample_one(L,S),
   retractall(M:S),
   S=sampled(KeyS,SubS,ValS),
   M:samp(KeyS,SubS,NewValS),
-  (ValS=NewValS->
-    Same=1
+  (ValS=NewValS,Same0=1->
+    Same1=1
   ;
-    Same=0
+    Same1=0
   ),
   N1 is N-1,
-  resample(M,N1,Same).
+  resample_int(M,N1,Same1,Same).
 
 
 erase_samples(M):-
