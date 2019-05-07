@@ -7,7 +7,7 @@
 :- begin_lpad.
 
 ? :: umbrella(sunny):-forecast(sunny).
-?::umbrella(rainy):-forecast(rainy).
+? :: umbrella(rainy):-forecast(rainy).
 ? :: umbrella(cloudy):-forecast(cloudy).
 
 0.7::weather(sunshine);0.3::weather(rain).

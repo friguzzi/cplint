@@ -24,11 +24,11 @@ raincoat => -20.
 umbrella => -2.
 dry => 60.
 
+:- end_lpad.
+
 /*
  * ?- dt_solve(Strategy,Value).
  * Expected result:
  * Strategy = [umbrella]
  * Value = 43.0
 */
-
-:- end_lpad.
