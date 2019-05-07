@@ -17,11 +17,11 @@
   get_dec_var_n/5,
   load/1,load_file/1,
   dt_solve/2,
-  % dt_solve/4,
-  op(450,fx,'?::'),
-  op(500,fx,'?'),
+  dt_solve_pruning/2,
+  % op(600,fx,'?'),
   op(600,xfy,'::'),
-  op(600,xfy,'=>'),
+  op(500,fx,'?::'),
+  op(600,xfx,'=>'),
   op(1150,fx,action),
   op(1200,fy,map_query),
   op(1200,fy,abducible),
@@ -70,7 +70,7 @@ details.
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
 :-meta_predicate dt_solve(:,-).
-% :-meta_predicate dt_solve(:,-,+,+).
+:-meta_predicate dt_solve_pruning(:,-).
 
 % :- dynamic utility/2.
 
@@ -142,57 +142,58 @@ load_file(File):-
  * in Cost. 
  */
 dt_solve(M:Strategy,Cost):-
-  dt_solve(M:Strategy,Cost,-1,-1).
-dt_solve(M:Strategy,Cost,MaxN,Precise):-
   abolish_all_tables,
   findall([H,U],M:'$util'(H,U),LUtils),  
   init(Env),
-  generate_solution(Env,M,LUtils,[],St,Cost,MaxN,Precise),
-  findall([A,B,C],M:dec(A,B,C),L),
-  % write('Utils: '), writeln(LUtils),
-  write('Decision: '), writeln(L),
+  % statistics(walltime,[Start|_]), 
+  generate_solution(Env,M,LUtils,[],St,Cost),
+  % statistics(walltime,[Stop|_]), 
   end(Env),
-  % findall([H,R],M:rule_by_num(H,R,_,_),LR),
-  % write('Rule by num: '),writeln(LR),
-  % format('Stratgy: ~w ~n', [St]),
   maplist(pair(M),St,Strategy).
-  % Strategy = St.
+  % Runtime is Stop - Start,
+  % format('Runtime: ~w~n',[Runtime]).
 
 pair(M,A,B):- M:rule_by_num(A,B,_,_).
+
+dt_solve_pruning(M:Strategy,Cost):-
+  abolish_all_tables,
+  findall(H,M:'$util'(H,_),LStrategy),  
+  findall(U,M:'$util'(_,U),LUtils),  
+  init(Env),
+  get_bdd(M,Env,LStrategy,[],LBDD),
+  % statistics(walltime,[Start|_]), 
+  compute_best_strategy(Env,LBDD,LUtils,St,Cost),
+  % statistics(walltime,[Stop|_]), 
+  end(Env),
+  maplist(pair(M),St,Strategy).
+  % Runtime is Stop - Start,
+  % format('Runtime: ~w~n',[Runtime]).
+
+get_bdd(_,_,[],L,L).
+get_bdd(M,Env,[G|T],L,LO):-
+  get_node(M:G,Env,Out),
+  Out=(_,BDD),
+  append(L,[BDD],LT),
+  get_bdd(M,Env,T,LT,LO).
 
 % compute the solution for dt problem
 % generate_solution/6
 % generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
 % output Solution, Cost
-generate_solution(Env,_,[],Add,Solution,Cost,MaxN,Precise):- !,
+generate_solution(Env,_,[],Add,Solution,Cost):- !,
   % create_dot(Env,Add,"final.dot"),
-  ret_strategy(Env,Add,Solution,Cost,MaxN,Precise).
+  ret_strategy(Env,Add,Solution,Cost).
 
-generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost,MaxN,Precise):-
+generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
-  % writeln(BDD),
-  % findall([H,U],M:'$util'(H,U),LUtils),  
-  % write('Utils: '), writeln(LUtils),
-  % findall([H,R],M:rule_by_num(H,R,_,_),LR),
-  % write('Rule by num: '),writeln(LR),
-  % findall([A,B,C],dec(A,B,C),L),
-  % write('Decision: '), writeln(L),
-  % writeln("Pre"),
-  % debug_cudd_var(Env,_),
-  % create_dot(Env,BDD,"bdd.dot"),
   probability_dd(Env,BDD,AddConv),
-  % create_dot(Env,AddConv,"addconv.dot"),
-  % writeln("Post"),
-  % debug_cudd_var(Env,_),nl,
   add_prod(Env,AddConv,Cost,AddScaled),
-  % create_dot(Env,AddScaled,"addscaled.dot"),
   (CurrentAdd = [] -> 
     AddOut = AddScaled ;
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
   ),
-  % create_dot(Env,AddOut,"addout.dot"),nl,
-  generate_solution(Env,M,TC,AddOut,Solution,OptCost,MaxN,Precise).
+  generate_solution(Env,M,TC,AddOut,Solution,OptCost).
 
 /**
  * dt_evaluate_strategy(+Strategy:List,-Cost:float) is det
@@ -674,7 +675,7 @@ get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  % retractall(M:dec(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -685,12 +686,13 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  % retractall(M:dec(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
   ;
     zeroc(Env,BDD)
+    % format("-------------------------Failed goal: ~w ~n",[M:Goal])
   ).
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
@@ -782,6 +784,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
     (M:v(R,S,V)->
       true
     ;
+      % format("P: ~w ~w ~n",[Probs,R]),
       add_var(Env,Probs,R,V),
       assert(M:v(R,S,V))
     )
@@ -796,13 +799,21 @@ get_var_n(M,Env,R,S,Probs0,V):-
  * index Rule in environment Environment. 
  */
  get_dec_var_n(M,Env,R,S,V):-
-  % format('R: ~w - S: ~w - V: ~w - M: ~w ~n', [R,S,V,M]),
+  % format('get_dec_var: R: ~w - S: ~w - V: ~w - M: ~w ~n', [R,S,V,M]),
   ( M:dec(R,S,V) ->
+  % findall([A,B,C],M:dec(A,B,C),LD),
+    % writeln(LD),
     true ;
     add_decision_var(Env,R,V),
     % writeln("New dec var"),
     asserta(M:dec(R,S,V))
   ).
+  % (M:v(R,S,V)->
+  %     true
+  %   ;
+  %     % add_var(Env,1,R,V),
+  %     assert(M:v(R,S,V))
+  % ).
 
 /**
  * get_abd_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
@@ -1123,7 +1134,7 @@ setting_pita(M:P,V):-
   M:local_pita_setting(P,V).
 
 extract_vars_list(L,[],V):-
-  rb_new(T),
+  rb_new(T),                  % <-- deprecated
   extract_vars_tree(L,T,T1),
   rb_keys(T1,V).
 
@@ -1142,6 +1153,7 @@ extract_vars_term(Variable, Var0, Var1) :-
 
 extract_vars_term(Term, Var0, Var1) :-
   Term=..[_F|Args],
+  % format('Term: ~w - Args: ~w ~n',[Term,Args]),
   extract_vars_tree(Args, Var0, Var1).
 
 
@@ -1396,55 +1408,40 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
 
 % decision facts with body and ground variables
-% ? :: a:- b.
+% ?::a:- b.
 system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :- 
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !, % <------ 
-  % nl, 
-  % format('~w ~w ~w ~w ~w ~w ~n', ["Here: ", "Head: ", Head, "Body: ", Body, H]),
-  % Head = (? :: H), !,
-  % writeln("HERE"),
-
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
   list2and(BodyList, Body),
-  % format('~w ~w ~n', ["BodyList: ",BodyList]),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
-  % format('~w ~w ~n', ["BodyList1: ",BodyList1]),
   append([onec(Env,BDD)],BodyList1,BodyList2),
-  % format('~w ~w ~n', ["BodyList2: ",BodyList2]),
   list2and(BodyList2,Body1),
-  % format('~w ~w ~n', ["Body1: ",Body1]),
   append([Head],BodyList,List),
-  % format('~w ~w ~n', ["List: ",List]),
   extract_vars_list(List,[],VC),
   get_next_rule_number(M,R),
-  % gtrace,
   to_table(M,[Head],TabDir,HeadList1),
-  % format('~w ~w ~n', ["Tabdir: ",TabDir]),
-  % format('~w ~w ~n', ["HeadList1: ",HeadList1]),
   HeadList1 = [H1],
   add_bdd_arg(H1,Env,BO,M,Head1),
   Clause = (Head1:-(Body1,get_dec_var_n(M,Env,R,VC,V), equalityc(Env,V,0,B), andc(Env,BDDAnd,B,BO))).
-  % format('~w ~w ~n', ["Head1: ",Head1]).  
 
 % decision facts without body and ground variables
-% ? :: a.
-system:term_expansion(Head,[(Head1:-get_dec_var_n(M,Env,R,S,V),equalityc(Env,V,0,BDD)),rule_by_num(R,H,[],[])]) :-
+% ?::a.
+system:term_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !, % <---------  
-  extract_vars_list([H],_,S),   
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,  
+  extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
   get_next_rule_number(M,R),
-  % format('~w ~w ~n', ["Head: ",H]),
-  % gtrace,
-  add_bdd_arg(H,Env,BDD,M,Head1).
-  % format('~w ~w ~n', ["Head1: ",Head1]).  
-
+  to_table(M,[Head],TabDir,HeadList1),
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BDD,M,Head1), 
+  Clause = (Head1:-(get_dec_var_n(M,Env,R,VC,V),equalityc(Env,V,0,BDD))).
 
 % utility attributes with body
 % utility(a,N):- b.
@@ -1454,83 +1451,26 @@ system:term_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
   (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !,
-  % gtrace,
-  % gtrace,
   list2and(BodyList, Body),
-  % format('~w ~w ~n', ["BodyList: ",BodyList]),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
-  % format('~w ~w ~n', ["BodyList1: ",BodyList1]),
   append([onec(Env,BDD)],BodyList1,BodyList2),
-  % format('~w ~w ~n', ["BodyList2: ",BodyList2]),
   list2and(BodyList2,Body1),
-  % format('~w ~w ~n', ["Body1: ",Body1]),
   append([Head],BodyList,List),
-  % format('~w ~w ~n', ["List: ",List]),
   extract_vars_list(List,[],VC),
-  % format('~w ~w ~n', ["VC: ",VC]),
   get_next_rule_number(M,R),
-  % gtrace,
   to_table(M,[Head],TabDir,HeadList1),  % <---------------------- iF HEAD = H => U does NOT WORKS
-  % format('~w ~w ~n', ["Tabdir: ",TabDir]),
-  % format('~w ~w ~n', ["HeadList1: ",HeadList1]),
   HeadList1 = [H1],
   add_bdd_arg(H1,Env,BO,M,Head2),
   Clause = (Head2:-(Body1,get_var_n(M,Env,R,VC,V),equalityc(Env,V,0,B),andc(Env,BDDAnd,B,BO))).
-  % writeln("HERE"),
-  % format('~w ~w ~n', ["Clause: ",Clause]),    
-  % format('~w ~w ~n', ["Head: ",Head]),  
-  % format('~w ~w ~n', ["Head2: ",Head2]),
-  % writeln("DONE").
 
 % utility attributes without body
 % utility(a,N).
-% TODO: check if a is ground and N is number 
 system:term_expansion(Head,'$util'(H,U)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !. 
-  % Head = (H => U), !.
-
-% disjunctive facts with more than one head and body
-% TODO
-% ? :: a; ? :: b; ? :: c; ... :- d.
-
-% disjunctive facts with more than one head
-% TODO
-% ?:: a; ?:: b; ? :: c.
-
-% TODO: managing something like
-% ? :: f(A):- g(A).
-% decision(f(A),N):- g(A).
-% % with non ground variables
-% system:term_expansion(Head:-Body,Clause) :- 
-%   prolog_load_context(module, M),
-%   pita_input_mod(M),
-%   M:pita_on,
-%   ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
-%   (Head \= ((system:term_expansion(_,_)) :- _ )),
-%   (Head = (? :: _) ; Head = decision(_) ; Head = (?::_)), !,
-%   % writeln("HERE"),
-%   findall(Head:-Body, call(Body), LGroundClauses),
-%   % writeln(LGroundClauses),
-%   maplist(system:term_expansion,LGroundClauses,Clause).
-%   % gtrace,
-%   % writeln(Clause).
-
-% % utility
-% % utility(A,N):- f(A).
-% % TODO
-% system:term_expansion(Head:-Body,Clause) :-
-%   prolog_load_context(module, M),
-%   pita_input_mod(M),
-%   M:pita_on,
-%   (Head \= ((system:term_expansion(_,_)) :- _ )),
-%   (Head = (H => U) ; Head = utility(H,U)), number(U), \+ground(H), !,
-%   findall(Head:-Body, call(Body), LGroundClauses),
-%   writeln(LGroundClauses),
-%   maplist(system:term_expansion,LGroundClauses,Clause).
+  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1931,7 +1871,11 @@ system:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   to_table(M,HeadList,TabDir,[H1:_]),
+  % write('headlist: '), writeln(HeadList),
+  % write('h1: '), writeln(H1),
   add_bdd_arg(H1,Env,BDD,M,Head1),%***test single_var
+  % write('head1: '), writeln(Head1),
+  % write('vc: '), writeln(VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -2032,7 +1976,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
 sandbox:safe_meta(pita:dt_solve(_,_),[]).
-sandbox:safe_meta(pita:dt_solve(_,_,_,_),[]).
+sandbox:safe_meta(pita:dt_solve_pruning(_,_),[]).
 
 
 
