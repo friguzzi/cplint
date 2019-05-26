@@ -6,12 +6,12 @@
 
 ?:: marketed(theo).
 ?:: marketed(bernd).
-?:: marketed(angelika). 
 ?:: marketed(guy).
 ?:: marketed(ingo).
+?:: marketed(angelika). 
+?:: marketed(martijn).
 ?:: marketed(laura).
 ?:: marketed(kurt).
-?:: marketed(martijn).
 
 utility(marketed(theo),-2).
 utility(marketed(bernd),-2).
@@ -24,11 +24,11 @@ utility(marketed(kurt),-2).
 
 utility(buys(theo),5).
 utility(buys(bernd),5).
-utility(buys(laura),5).
-utility(buys(ingo),5).
-utility(buys(martijn),5).
-utility(buys(angelika),5).
 utility(buys(guy),5).
+utility(buys(ingo),5).
+utility(buys(angelika),5).
+utility(buys(martijn),5).
+utility(buys(laura),5).
 utility(buys(kurt),5).
 
 0.2 :: buy_from_marketing(_).
