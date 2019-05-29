@@ -71,7 +71,7 @@ fabrizio.riguzzi@unife.it</h2>
 <p>Moreover, in order to make sure you have a foreign library that matches your architecture, run</p>
 <pre><code>?- pack_rebuild(cplint). </code></pre>
 <h1 id="syn">Syntax</h1>
-<p><code>cplint</code> permits the definition of discrete probability distributions and continuous probaility densities.</p>
+<p><code>cplint</code> permits the definition of discrete probability distributions and continuous probability densities.</p>
 <h2 id="discrete">Discrete Probability Distributions</h2>
 <p>LPAD and CP-logic programs consist of a set of annotated disjunctive clauses. Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon. For the rest, the usual syntax of Prolog is used. A general CP-logic clause has the form</p>
 <pre><code>h1:p1 ; ... ; hn:pn :- Body.</code></pre>
@@ -112,9 +112,9 @@ draw_red(R, G):-
 <pre><code>A:discrete(Var,D):-Body.</code></pre>
 <p>or</p>
 <pre><code>A:finite(Var,D):-Body.</code></pre>
-<p>where <code>A</code> is an atom containg variable <code>Var</code> and <code>D</code> is a list of couples <code>Value:Prob</code> assigning probability <code>Prob</code> to <code>Value</code>. Moreover, you can use</p>
+<p>where <code>A</code> is an atom containing variable <code>Var</code> and <code>D</code> is a list of couples <code>Value:Prob</code> assigning probability <code>Prob</code> to <code>Value</code>. Moreover, you can use</p>
 <pre><code>A:uniform(Var,D):-Body.</code></pre>
-<p>where <code>A</code> is an atom containg variable <code>Var</code> and <code>D</code> is a list of values each taking the same probability (1 over the length of <code>D</code>).</p>
+<p>where <code>A</code> is an atom containing variable <code>Var</code> and <code>D</code> is a list of values each taking the same probability (1 over the length of <code>D</code>).</p>
 <h3 id="problog-syntax">ProbLog Syntax</h3>
 <p>You can also use ProbLog <span class="citation">[<a href="#ref-DBLP:conf/ijcai/RaedtKT07">7</a>]</span> syntax, so a general clause takes the form</p>
 <pre><code>p1::h1 ; ... ; pn::hn :- Body</code></pre>
@@ -339,7 +339,7 @@ female(cathy).</code></pre>
   Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_sample/4</code>:</p>
 <ul>
-<li><p><code>successes(-Successes:int)</code> Number of succesess</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
 <li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
 </ul>
@@ -355,7 +355,7 @@ female(cathy).</code></pre>
 <ul>
 <li><p><code>block(+Block:int)</code> Perform blocked Gibbs: <code>Block</code> variables are sampled together, default value 1</p></li>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
-<li><p><code>successes(-Successes:int)</code> Number of succesess</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
 <li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 </ul>
 <p><code>mc_gibbs_sample/3</code> is equivalent to <code>mc_gibbs_sample/4</code> with an empty option list.</p>
@@ -365,8 +365,8 @@ female(cathy).</code></pre>
 <p>The predicate samples <code>Query</code> a number of <code>Samples</code> times. <code>Arg</code> should be a variable in <code>Query</code>. The predicate returns in <code>Values</code> a list of couples <code>L-N</code> where <code>L</code> is the list of values of <code>Arg</code> for which <code>Query</code> succeeds in a world sampled at random and <code>N</code> is the number of samples returning that list of values. If <code>L</code> is the empty list, it means that for that sample the query failed. If <code>L</code> is a list with a single element, it means that for that sample the query is determinate. If, in all couples <code>L-N</code>, <code>L</code> is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. This is one of the assumptions taken for programs of the PRISM system <span class="citation">[<a href="#ref-DBLP:journals/jair/SatoK01">20</a>]</span>. For example <a href="http://cplint.eu/e/pcfglr.pl"><code>pcfglr.pl</code></a> and <a href="http://cplint.eu/e/plcg.pl"><code>plcg.pl</code></a> satisfy this constraint while <a href="http://cplint.eu/e/markov_chain.pl"><code>markov_chain.pl</code></a> and <a href="http://cplint.eu/e/var_obj.pl"><code>var_obj.pl</code></a> doesn’t.</p>
 <p><code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
-<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> <code>BarChart</code> is a dict for rendering with c3 as a bar chart with with a bar for each possible value of <code>L</code>, the list of values of <code>Arg</code> for which the query succeeds in a world sampled at random. The size of the bar is the number of samples returning that list of values.</p></li>
 </ul>
 <p>An example of use of <code>mc_sample_arg/4</code> is</p>
@@ -442,8 +442,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
   -Probability:float,+Options:list) is det</code></pre>
 <p>where <code>Options</code> is a list of options, the following are recognised by <code>mc_sample_arg/5</code>:</p>
 <ul>
-<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 </ul>
 <p>as in (<a href="http://cplint.eu/e/coinmc.pl"><code>coinmc.pl</code></a>)</p>
 <pre><code>?- mc_rejection_sample(heads(coin),biased(coin),1000,P,
@@ -458,8 +458,8 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <ul>
 <li><p><code>mix(+Mix:int)</code> The first Mix samples are discarded (mixing time), default value 0</p></li>
 <li><p><code>lag(+Lag:int)</code> lag between each sample, Lag sampled choices are forgotten, default value 1</p></li>
-<li><p><code>successes(-Successes:int)</code> Number of succeses</p></li>
-<li><p><code>failures(-Failures:int)</code> Number of failueres</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
+<li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 <li><p><code>bar(-BarChar:dict)</code> BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.</p></li>
 </ul>
 <p>With <code>Mix</code> specified it takes <code>Mix+Samples</code> samples and discards the first <code>Mix</code>.</p>
@@ -474,7 +474,7 @@ bdd_dot_string(:Query:atom,-DotString:string,-Var:list) is nondet</code></pre>
 <ul>
 <li><p><code>block(+Block:int)</code> Perform blocked Gibbs: <code>Block</code> variables are sampled together, default value 1</p></li>
 <li><p><code>mix(+Mix:int)</code> The first <code>Mix</code> samples are discarded (mixing time), default value 0</p></li>
-<li><p><code>successes(-Successes:int)</code> Number of succesess</p></li>
+<li><p><code>successes(-Successes:int)</code> Number of successes</p></li>
 <li><p><code>failures(-Failures:int)</code> Number of failures</p></li>
 </ul>
 <p>Moreover, you can sample arguments of queries with rejection sampling, Metropolis-Hastings MCMC or Gibbs sampling using</p>
