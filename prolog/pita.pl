@@ -105,6 +105,7 @@ default_setting_pita(tabling,auto).
   auto
   explicit
 */
+default_setting_pita(prism_memoization,false). %false: original prism semantics, true: semantics with memoization
 /**
  * load(++File:atom) is det
  *
@@ -860,16 +861,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
  * This is a predicate for programs in the PRISM syntax
  */
 msw(M:A,B,Env,BDD):-
-  M:values(A,Values),
-  M:sw(R,A,Probs0),
-  (ground(Probs0)->
-    maplist(is,Probs,Probs0),
-    add_var(Env,Probs,R,V),
-    nth0(N,Values,B),
-    equalityc(Env,V,N,BDD)
-  ;
-    throw(error('Non ground probabilities not instantiated by the body'))
-  ).
+  msw_int(M,A,B,Env,BDD).
 
 /**
  * msw(:Var:term,?Value:term,++Environment:int,--BDD:int,?DB:int) is det
@@ -879,16 +871,29 @@ msw(M:A,B,Env,BDD):-
  * This is a predicate for programs in the PRISM syntax
  */
 msw(M:A,B,Env,BDD,_DB):-
+  msw_int(M,A,B,Env,BDD).
+
+msw_int(M,A,B,Env,BDD):-
   M:values(A,Values),
   M:sw(R,A,Probs0),
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    add_var(Env,Probs,R,V),
+    ((M:local_pita_setting(prism_memoization,true),M:v(R,A,V))->
+      true
+    ;
+      add_var(Env,Probs,R,V)
+    ),
+    (M:local_pita_setting(prism_memoization,true)->
+      assert(M:v(R,A,V))
+    ;
+      true
+    ),
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
     throw(error('Non ground probabilities not instantiated by the body'))
   ).
+
 
 combine(V,P,V:P).
 

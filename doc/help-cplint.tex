@@ -37,7 +37,7 @@ can be used with bash to download the results for a query in CSV.  The call
 below downloads a CSV file for the coin example.
 \begin{verbatim}
 $ bash swish-ask.sh --server=http://cplint.eu \   
-  example/inference/coin.pl Prob "prob(heads(coin),Prob)"
+  e/coin.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
 The script can ask queries against Prolog scripts stored in 
 \url{http://cplint.eu} by specifying
@@ -51,13 +51,13 @@ $ bash swish-ask.sh --server=http://cplint.eu \
 \end{verbatim}
 Example programs can be used by specifying the folder portion of the url of the example,
 as in the first coin example above where the url for the program is 
-\url{http://cplint.eu/example/inference/coin.pl}.
+\url{http://cplint.eu/e/coin.pl}.
 
 You can also use an url for the program as in 
 \begin{verbatim}
 $ bash swish-ask.sh --server=http://cplint.eu \
   https://raw.githubusercontent.com/friguzzi/swish/\  
-  master/example/inference/coin.pl Prob "prob(heads(coin),Prob)"
+  master/e/coin.pl Prob "prob(heads(coin),Prob)"
 \end{verbatim}
 Results can be downloaded in JSON using the option \verb|--json-s| or
 \verb|--json-html|.
@@ -76,7 +76,7 @@ be called as:
 ?- pengine_rpc('http://cplint.eu',
      prob(heads(coin),Prob),
      [ src_url('https://raw.githubusercontent.com/friguzzi/swish/\  
-master/example/inference/coin.pl'),
+master/e/coin.pl'),
      application(swish)
      ]).
 Prob = 0.51.
