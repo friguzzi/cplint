@@ -1,6 +1,3 @@
-
-
-
 :- module(pita,[
   prob/2, 
   prob/3,
@@ -17,8 +14,14 @@
   vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
+  get_dec_var_n/5,
   load/1,load_file/1,
+  dt_solve_complete/2, % complete solution without pruning
+  dt_solve/2,
+  % op(600,fx,'?'),
   op(600,xfy,'::'),
+  op(500,fx,'?::'),
+  op(600,xfx,'=>'),
   op(1150,fx,action),
   op(1200,fy,map_query),
   op(1200,fy,abducible),
@@ -29,7 +32,7 @@
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
-It reads probabilistic program andcomputes the probability of queries.
+It reads probabilistic program and computes the probability of queries.
 
 See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
 http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
@@ -66,6 +69,10 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
+:-meta_predicate dt_solve_complete(:,-).
+:-meta_predicate dt_solve(:,-).
+
+% :- dynamic utility/2.
 
 :-use_module(library(lists)).
 :-use_module(library(rbtrees)).
@@ -98,6 +105,7 @@ default_setting_pita(tabling,auto).
   auto
   explicit
 */
+default_setting_pita(prism_memoization,false). %false: original prism semantics, true: semantics with memoization
 /**
  * load(++File:atom) is det
  *
@@ -126,6 +134,93 @@ load_file(File):-
   begin_lpad_pred,
   user:consult(File),
   end_lpad_pred.
+
+/**
+ * dt_solve_complete(-Strategy:list,-Cost:float) is det
+ * 
+ * The predicate computes the best solution for the decision theory
+ * problem. It returns the best strategy in Strategy and it cost
+ * in Cost. Complete solution without pruning.
+ */
+dt_solve_complete(M:Strategy,Cost):-
+  % writeln("----- FIX -----"),
+  abolish_all_tables,
+  findall([H,U],M:'$util'(H,U),LUtils),  
+  init(Env),
+  statistics(walltime,[Start|_]), 
+  % add_const(Env,0,ZeroAdd),
+  % writeln("passed"),
+  % writeln(ZeroBdd),
+  % generate_solution(Env,M,LUtils,ZeroAdd,St,Cost),
+  generate_solution(Env,M,LUtils,[],St,Cost),
+  statistics(walltime,[Stop|_]), 
+  end(Env),
+  Runtime is Stop - Start,
+  format('Runtime: ~w~n',[Runtime]),
+  maplist(pair(M),St,Strategy).
+
+pair(M,A,B):- M:rule_by_num(A,B,_,_).
+split([A,B],A,B).
+
+/**
+ * dt_solve(-Strategy:list,-Cost:float) is det
+ * 
+ * The predicate computes the best solution for the decision theory
+ * problem. It returns the best strategy in Strategy and it cost
+ * in Cost. Solution with pruning.
+ */
+dt_solve(M:Strategy,Cost):-
+  abolish_all_tables,
+  % findall(H,M:'$util'(H,_),LStrategy),  
+  % findall(U,M:'$util'(_,U),LUtils),  
+  findall([S,U],M:'$util'(S,U),L),
+  % writeln(L),
+  maplist(split,L,LStrategy,LUtils),
+  init(Env),
+  get_bdd(M,Env,LStrategy,[],LBDD),
+  statistics(walltime,[Start|_]), 
+  compute_best_strategy(Env,LBDD,LUtils,St,Cost),
+  statistics(walltime,[Stop|_]), 
+  end(Env),
+  Runtime is Stop - Start,
+  format('Runtime: ~w~n',[Runtime]),
+  maplist(pair(M),St,Strategy).
+
+get_bdd(_,_,[],L,L).
+get_bdd(M,Env,[G|T],L,LO):-
+  get_node(M:G,Env,Out),
+  Out=(_,BDD),
+  append(L,[BDD],LT),
+  get_bdd(M,Env,T,LT,LO).
+
+% compute the solution for dt problem
+% generate_solution/6
+% generate_solution(Env,M,GoalCostList,CurrentAdd,Solution,Cost)
+% output Solution, Cost
+generate_solution(Env,_,[],Add,Solution,Cost):- !,
+  % create_dot(Env,Add,"final.dot"),
+  ret_strategy(Env,Add,Solution,Cost).
+
+generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
+  get_node(M:G,Env,Out),
+  Out=(_,BDD),
+  probability_dd(Env,BDD,AddConv),
+  add_prod(Env,AddConv,Cost,AddScaled),
+  (CurrentAdd = [] -> 
+    AddOut = AddScaled ;
+    % writeln(CurrentAdd),
+    add_sum(Env,CurrentAdd,AddScaled,AddOut)
+    % writeln("sum"),
+  ),
+  generate_solution(Env,M,TC,AddOut,Solution,OptCost).
+
+/**
+ * dt_evaluate_strategy(+Strategy:List,-Cost:float) is det
+ *
+ * Computes the cost of the selected strategy
+ */
+% TODO
+% dt_evaluate_strategy(LS,Cost).
 
 /**
  * prob_meta(:Query:atom,-Probability:float) is nondet
@@ -215,8 +310,8 @@ vit_prob(M:Goal,P,Delta):-
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
 
  */
 vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
@@ -261,8 +356,8 @@ from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
  * The predicate builds the BDD for Query and writes its dot representation
  * to file FileName and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 bdd_dot_file(M:Goal,File,LV):-
   abolish_all_tables,
@@ -279,8 +374,8 @@ bdd_dot_file(M:Goal,File,LV):-
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and a list in LV with the association of variables to rules.
  * LV is a list of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 bdd_dot_string(M:Goal,dot(Dot),LV):-
   abolish_all_tables,
@@ -299,8 +394,8 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to abductive variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
   abolish_all_tables,
@@ -321,8 +416,8 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to abductive variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   abolish_all_tables,
@@ -357,8 +452,8 @@ map(M:Goal,P,MAP):-
  * in DotString and lists LV and LAV, the association of variables to rules
  * and to query variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
- * the mutlivalued variable number,
- * the rule number and the grounding substituion.
+ * the multivalued variable number,
+ * the rule number and the grounding substitution.
  */
 map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
   map_int(Goal,M,LV,LAV,P,MAP,Env,BDD),
@@ -599,6 +694,7 @@ get_node(M:Goal,Env,BDD):-
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -609,11 +705,13 @@ get_node(M:Goal,Env,BDD):-
 get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
   ;
     zeroc(Env,BDD)
+    % format("-------------------------Failed goal: ~w ~n",[M:Goal])
   ).
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
@@ -682,7 +780,7 @@ retract_all([H|T]):-
  * get_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
- * index Rule, grouding substitution Substitution and head distribution
+ * index Rule, grounding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_var_n(M,Env,R,S,Probs0,V):-
@@ -696,7 +794,7 @@ get_var_n(M,Env,R,S,Probs0,V):-
       assert(M:v(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 get_var_n(M,Env,R,S,Probs0,V):-
@@ -705,18 +803,42 @@ get_var_n(M,Env,R,S,Probs0,V):-
     (M:v(R,S,V)->
       true
     ;
+      % format("P: ~w ~w ~n",[Probs,R]),
       add_var(Env,Probs,R,V),
       assert(M:v(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
+
+/**
+ * get_dec_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,-Variable:int) is det
+ * 
+ * Returns the index Variable of the random variable associated to rule with
+ * index Rule in environment Environment. 
+ */
+ get_dec_var_n(M,Env,R,S,V):-
+  % format('get_dec_var: R: ~w - S: ~w - V: ~w - M: ~w ~n', [R,S,V,M]),
+  ( M:dec(R,S,V) ->
+  % findall([A,B,C],M:dec(A,B,C),LD),
+    % writeln(LD),
+    true ;
+    add_decision_var(Env,R,V),
+    % writeln("New dec var"),
+    asserta(M:dec(R,S,V))
+  ).
+  % (M:v(R,S,V)->
+  %     true
+  %   ;
+  %     % add_var(Env,1,R,V),
+  %     assert(M:v(R,S,V))
+  % ).
 
 /**
  * get_abd_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,++Probabilities:list,-Variable:int) is det
  *
  * Returns the index Variable of the random variable associated to rule with
- * index Rule, grouding substitution Substitution and head distribution
+ * index Rule, grounding substitution Substitution and head distribution
  * Probabilities in environment Environment.
  */
 get_abd_var_n(M,Env,R,S,Probs0,V):-
@@ -729,7 +851,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
       assert(M:av(R,S,V))
     )
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
 
 /**
@@ -739,16 +861,7 @@ get_abd_var_n(M,Env,R,S,Probs0,V):-
  * This is a predicate for programs in the PRISM syntax
  */
 msw(M:A,B,Env,BDD):-
-  M:values(A,Values),
-  M:sw(R,A,Probs0),
-  (ground(Probs0)->
-    maplist(is,Probs,Probs0),
-    add_var(Env,Probs,R,V),
-    nth0(N,Values,B),
-    equalityc(Env,V,N,BDD)
-  ;
-    throw(error('Non ground probailities not instantiated by the body'))
-  ).
+  msw_int(M,A,B,Env,BDD).
 
 /**
  * msw(:Var:term,?Value:term,++Environment:int,--BDD:int,?DB:int) is det
@@ -758,16 +871,29 @@ msw(M:A,B,Env,BDD):-
  * This is a predicate for programs in the PRISM syntax
  */
 msw(M:A,B,Env,BDD,_DB):-
+  msw_int(M,A,B,Env,BDD).
+
+msw_int(M,A,B,Env,BDD):-
   M:values(A,Values),
   M:sw(R,A,Probs0),
   (ground(Probs0)->
     maplist(is,Probs,Probs0),
-    add_var(Env,Probs,R,V),
+    ((M:local_pita_setting(prism_memoization,true),M:v(R,A,V))->
+      true
+    ;
+      add_var(Env,Probs,R,V)
+    ),
+    (M:local_pita_setting(prism_memoization,true)->
+      assert(M:v(R,A,V))
+    ;
+      true
+    ),
     nth0(N,Values,B),
     equalityc(Env,V,N,BDD)
   ;
-    throw(error('Non ground probailities not instantiated by the body'))
+    throw(error('Non ground probabilities not instantiated by the body'))
   ).
+
 
 combine(V,P,V:P).
 
@@ -1031,7 +1157,7 @@ setting_pita(M:P,V):-
   M:local_pita_setting(P,V).
 
 extract_vars_list(L,[],V):-
-  rb_new(T),
+  rb_new(T),                  % <-- deprecated
   extract_vars_tree(L,T,T1),
   rb_keys(T1,V).
 
@@ -1050,6 +1176,7 @@ extract_vars_term(Variable, Var0, Var1) :-
 
 extract_vars_term(Term, Var0, Var1) :-
   Term=..[_F|Args],
+  % format('Term: ~w - Args: ~w ~n',[Term,Args]),
   extract_vars_tree(Args, Var0, Var1).
 
 
@@ -1122,8 +1249,76 @@ tab_dir(M,H:P,[],[H1:P]):-
   atomic_concat(F,' tabled',F1),
   H1=..[F1|Args].
 
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal except
+% (?)::H and H:P
+tab_dir(M,HT,[],[H1]):-
+  (HT = ?::H ; HT = (?)::H),  
+  M:tabled(H),!,
+  H=..[F|Args],
+  atomic_concat(F,' tabled',F1),
+  H1=..[F1|Args].
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal except
+% (?)::H and '$util'(A,B)
+tab_dir(M,H,[],[H1]):-
+  M:tabled(H),!,
+  H=..[F|Args],
+  F = utility,
+  atomic_concat(F,' tabled',F1),
+  H1=..[F1|Args].
+
 
 tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
+  functor(H,F,A0),
+  functor(PT,F,A0),  
+  PT=..[F|Args0],
+  atomic_concat(F,' tabled',F1),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[_,_,lattice(orc/3)]
+  ;
+    ExtraArgs=[_,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F1|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
+% tab dir for decision variables
+% merge with the previous one?
+% the predicates are equal
+% except variable n 2 and 4.
+tab_dir(M,HT1,[(:- table HT)],[H1]):-
+  (HT1 = ?::H ; HT1 = (?)::H),
+  functor(H,F,A0),
+  functor(PT,F,A0),  
+  PT=..[F|Args0],
+  atomic_concat(F,' tabled',F1),
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[_,_,lattice(orc/3)]
+  ;
+    ExtraArgs=[_,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F1|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
+% tab dir for utility variables
+% merge with the previous one?
+% the predicates are equal
+% except variable n 2 and 4.
+tab_dir(M,H,[(:- table HT)],[H1]):-
+  H=..[F|_],
+  F = utility,
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
@@ -1167,7 +1362,7 @@ system:term_expansion((:- pita), []) :-!,
   retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
-  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4,
+  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
     zero_clauses/1, pita_on/0, tabled/1),
   retractall(M:query_rule(_,_,_,_)),
   style_check(-discontiguous).
@@ -1234,6 +1429,71 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
     S=VC
   ),
   Clause=(Head1:-(get_abd_var_n(M,Env,R,S,Probs,V),equalityc(Env,V,0,BDD))).
+
+% decision facts with body and ground variables
+% ?::a:- b.
+system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :- 
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  ((Head:- Body) \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append([Head],BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  to_table(M,[Head],TabDir,HeadList1),
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BO,M,Head1),
+  Clause = (Head1:-(Body1,get_dec_var_n(M,Env,R,VC,V), equalityc(Env,V,0,B), andc(Env,BDDAnd,B,BO))).
+
+% decision facts without body and ground variables
+% ?::a.
+system:term_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,  
+  extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
+  get_next_rule_number(M,R),
+  to_table(M,[Head],TabDir,HeadList1),
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BDD,M,Head1), 
+  Clause = (Head1:-(get_dec_var_n(M,Env,R,VC,V),equalityc(Env,V,0,BDD))).
+
+% utility attributes with body
+% utility(a,N):- b.
+system:term_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !,
+  list2and(BodyList, Body),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
+  append([onec(Env,BDD)],BodyList1,BodyList2),
+  list2and(BodyList2,Body1),
+  append([Head],BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  to_table(M,[Head],TabDir,HeadList1),  % <---------------------- iF HEAD = H => U does NOT WORKS
+  HeadList1 = [H1],
+  add_bdd_arg(H1,Env,BO,M,Head2),
+  Clause = (Head2:-(Body1,get_var_n(M,Env,R,VC,V),equalityc(Env,V,0,B),andc(Env,BDDAnd,B,BO))).
+
+% utility attributes without body
+% utility(a,N).
+system:term_expansion(Head,'$util'(H,U)) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !.
 
 system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
@@ -1381,7 +1641,7 @@ system:term_expansion((Head :- Body), Clauses) :-
 system:term_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-   ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
   HeadList=[_H:_],!,
@@ -1453,7 +1713,7 @@ system:term_expansion((Head :- Body),Clauses) :-
 % definite clause with depth_bound
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   M:local_pita_setting(depth_bound,true),
-   ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
+  ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,
   list2and(BodyList, Body),
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),
@@ -1634,7 +1894,11 @@ system:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   to_table(M,HeadList,TabDir,[H1:_]),
+  % write('headlist: '), writeln(HeadList),
+  % write('h1: '), writeln(H1),
   add_bdd_arg(H1,Env,BDD,M,Head1),%***test single_var
+  % write('head1: '), writeln(Head1),
+  % write('vc: '), writeln(VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -1734,6 +1998,8 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
+sandbox:safe_meta(pita:dt_solve_complete(_,_),[]).
+sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 
 

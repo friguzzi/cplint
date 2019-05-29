@@ -21,6 +21,14 @@ Exp=[
   rule(0, red, [red:0.4, '':0.6], []),
   rule(1, green, [green:0.9, '':0.09999999999999998], [])])).
 
+test(win_all):-
+  run((viterbi_all(win,P,Exp),close_to(P,0.108),
+Exp=[
+  rule(0, red, [red:0.4, '':0.6], []),
+  rule(1, green, [green:0.9, '':0.09999999999999998], []),
+  rule(2,blue,[blue:0.5,'':0.5],[]),
+  rule(3,yellow,[yellow:0.6,'':0.4],[])
+])).
 :- end_tests(vit_win).
 
 :- begin_tests(vit_hmm, []).
@@ -47,6 +55,10 @@ test(h_c):-
 Exp = [rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5], [toss(coin), \+biased(coin)]),
 	rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], [])])).
 
+test(h_c_all):-
+  run((viterbi_all(heads(coin),Prob,Exp),close_to(Prob,0.27),
+Exp = [rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5], [toss(coin), \+biased(coin)]),
+	rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []), rule(1,  heads(coin), [heads(coin):0.6, tails(coin):0.4], [toss(coin), biased(coin)]) ])).
 :- end_tests(vit_coin).
 
 :- begin_tests(vit_mendel, []).

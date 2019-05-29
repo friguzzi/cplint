@@ -1,5 +1,6 @@
 
-:- module(viterbi,[ viterbi/3,
+:- module(viterbi,[ viterbi/3, 
+  viterbi_all/3,
   op(600,xfy,'::')
     ]).
 /** <module> kbest
@@ -19,15 +20,30 @@ of the query
 :- thread_local vit_input_mod/1.
 
 :-meta_predicate viterbi(:,-,-).
+:-meta_predicate viterbi_all(:,-,-).
 
 
 
 default_setting_viterbi(epsilon_parsing, 1e-5).
+
+/**
+ * viterbi_all(:Query:conjunction,+K:int,-Exp:list) is nondet
+ *
+ * The predicate computes the most probable explanation of the conjunction of literals Query.
+ * It returns the explanation in Exp. It completes the explanation with the most probable
+ * values of the random variables not included in the explanation, thus performing MPE, i.e.,
+ * a value is chosen for all probabilistic clauses. For clauses not included in the explanation
+ * that are nonground, it considers their nonground version, thus not performing MPE exactly. 
+ */
+viterbi_all(M:Goals,Prob,Exp):-
+  viterbi(M:Goals,Prob0,Exp0),
+  complete_exp(Exp0,Prob0,M,Exp,Prob).
+
 /**
  * viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
  *
  * The predicate computes the most probable explanation of the conjunction of literals Query.
- * It returns the explanation in Exp
+ * It returns the explanation in Exp.
  */
 viterbi(M:Goals,Prob,Exp):-
   retractall(M:best_prob(_)),
@@ -44,6 +60,30 @@ viterbi(M:Goals,Prob,Exp):-
   convert_exp(Exp0,M,Exp),
   retractall(M:best_prob(_)),
   retractall(M:best_exp(_)).
+
+complete_exp(Exp0,Prob0,M,Exp,Prob):-
+  findall((R,S),(M:rule_by_num(R,S,_,Head,Body),\+ member(rule(R,_,Head,Body),Exp0)),L)->
+  maplist(find_max(M),L,Exp1),
+  foldl(mult,Exp1,Prob0,Prob),
+  convert_exp(Exp1,M,Exp2),
+  append(Exp0,Exp2,Exp).
+
+mult((_,_,_,P1),P0,P):-
+  P is P0*P1.
+
+find_max(M,(R,S),(R,S,N,P)):-
+	M:rule_by_num(R,S,[_|Numbers],[_:P0|Head],_Body),
+  foldl(get_max,Head,Numbers,(P0,0),(P,N)).
+
+get_max(_:P,N,(P0,N0),(P1,N1)):-
+  (P>P0->
+    N1=N,
+    P1=P
+  ;
+    N1=N0,
+    P1=P0
+  ).
+  
 
 convert_exp([],_M,[]).
 
@@ -553,3 +593,4 @@ system:term_expansion(Head, []):-
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(viterbi:viterbi(_,_,_), []).
+sandbox:safe_meta(viterbi:viterbi_all(_,_,_), []).
