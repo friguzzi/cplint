@@ -1256,7 +1256,7 @@ tab_dir(M,HT,[],[H]):-
 % (?)::H and '$util'(A,B)
 tab_dir(M,H,[],[H]):-
   M:tabled(H),!,
-  H=..[F|Args],
+  H=..[F|_],
   F = utility.
 
 
