@@ -37,7 +37,7 @@ trans(s4,_,s3).
 markov_chain(digraph(G)):-
     findall(edge(A -> B,[label=P]),
       (clause(trans(A,_,B),
-        (sample_head(_,_,Probs,N))),
+        (sample_head(_,_,_,Probs,N))),
         nth0(N,Probs,_:P)),
       G0),
     findall(edge(A -> B,[label=1.0]),

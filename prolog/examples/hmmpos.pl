@@ -98,7 +98,7 @@ state_diagram(digraph(G)):-
     maplist(nodelab,Nodes,NodesLab),
     findall(edge(A -> B,[label=P]),
       (clause(trans(A,B,_),
-        sample_head(_,_,Probs,N)),
+        sample_head(_,_,_,Probs,N)),
         nth0(N,Probs,_:P)),
       Edges),
     append(NodesLab,Edges,G).

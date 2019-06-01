@@ -307,8 +307,7 @@ zero_clauses_actions(M,do(\+ A),Ref):-
 assert_actions(M,do(A),Ref):-
   A=..[P|Args],
   append(Args,[BDD],Args1),
-  atomic_concat(P,' tabled',P1),
-  A1=..[P1|Args1],
+  A1=..[P|Args1],
   M:assertz((A1:-onec(BDD)),Ref).
 
 update_clauses(M,P/0- _,[RefZ],[(H:-zeroc(BDD))|LCA]):-!,
@@ -354,11 +353,10 @@ get_pred_const(do(Do0),AP0,AP):-
   ),
   functor(Do,F,A),
   Do=..[_|Args],
-  atomic_concat(F,' tabled',F1),
-  (get_assoc(F1/A,AP0,V)->
-    put_assoc(F1/A,AP0,[Args|V],AP)
+  (get_assoc(F/A,AP0,V)->
+    put_assoc(F/A,AP0,[Args|V],AP)
   ;
-    put_assoc(F1/A,AP0,[Args],AP)
+    put_assoc(F/A,AP0,[Args],AP)
   ).
 
 

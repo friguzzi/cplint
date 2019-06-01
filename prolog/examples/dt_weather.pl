@@ -35,4 +35,4 @@ utility(line4,0).
  * Expected result:
  * Strategy = [decide_u(rainy)]
  * Value = 77.0
-*/
+*/ 

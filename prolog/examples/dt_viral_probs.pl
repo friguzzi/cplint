@@ -4,14 +4,14 @@
 
 :- begin_lpad.
 
-marketed(bernd).
 marketed(theo).
+marketed(bernd).
 marketed(guy).
 marketed(ingo).
 marketed(angelika).
-% marketed(martijn).
-% marketed(laura).
-% marketed(kurt).
+marketed(martijn).
+marketed(laura).
+marketed(kurt).
 
 % Probabilistic facts
 0.2 :: buy_from_marketing(_). % :- format('market: ~w ~n',[X]).
@@ -34,7 +34,6 @@ trusts_directed(laura,guy).
 trusts_directed(laura,martijn).
 trusts_directed(kurt,bernd).
 
-
 buys(X):-
     marketed(X),
     buy_from_marketing(X).
@@ -43,25 +42,14 @@ buys(X):-
     buy_from_trust(X,Y),
     buys(Y). 
 
-
-
-buys(X):-
-    marketed(X),
-    buy_from_marketing(X).
-buys(X):-
-    trusts(X,Y),
-    buy_from_trust(X,Y),
-    buys(Y).
-
 :- end_lpad.
 
-query:-
-    prob(buys(theo),PT),
+compute_probs(PB,PI,PT,PA,PG,PM,PL,PK):-
+    prob(buys(bernd),PB),
     prob(buys(ingo),PI),
+    prob(buys(theo),PT),
     prob(buys(angelika),PA),
     prob(buys(guy),PG),
-    prob(buys(bernd),PB),
     prob(buys(martijn),PM),
     prob(buys(laura),PL),
-    prob(buys(kurt),PK),
-    format('Ingo: ~w ~nTheo: ~w ~nAngelika: ~w ~nGuy: ~w ~nBerndt: ~w ~nMartijn: ~w ~nLaura: ~w~nKurt: ~w ~n',[PI,PT,PA,PG,PB,PM,PL,PK]).
+    prob(buys(kurt),PK).
