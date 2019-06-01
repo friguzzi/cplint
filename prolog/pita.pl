@@ -170,23 +170,16 @@ split([A,B],A,B).
  * in Cost. Solution with pruning.
  */
 dt_solve(M:Strategy,Cost):-
-  abolish_all_tables,
-  % findall(H,M:'$util'(H,_),LStrategy),  
-  % findall(U,M:'$util'(_,U),LUtils),  
+  abolish_all_tables, 
   findall([S,U],M:'$util'(S,U),L),
-  % writeln(L),
   maplist(split,L,LStrategy,LUtils),
   init(Env),
   get_bdd(M,Env,LStrategy,[],LBDD),
-  statistics(walltime,[Start|_]), 
   compute_best_strategy(Env,LBDD,LUtils,St,Cost),
-  statistics(walltime,[Stop|_]), 
   end(Env),
-  Runtime is Stop - Start,
-  format('Runtime: ~w~n',[Runtime]),
   maplist(pair(M),St,Strategy).
 
-get_bdd(_,_,[],L,L).
+get_bdd(_,_,[],L,L):- !.
 get_bdd(M,Env,[G|T],L,LO):-
   get_node(M:G,Env,Out),
   Out=(_,BDD),
