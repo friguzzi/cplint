@@ -1,0 +1,83 @@
+Predicates List
+===============
+
+MCINTYRE
+--------
+
+-  :code:`mc_prob/2`
+-  :code:`mc_prob/3`
+-  :code:`mc_rejection_sample/5`
+-  :code:`mc_rejection_sample/4`
+-  :code:`mc_sample/3`
+-  :code:`mc_sample/4`
+-  :code:`mc_sample_arg/4`
+-  :code:`mc_sample_arg/5`
+-  :code:`mc_mh_sample/4`
+-  :code:`mc_mh_sample/5`
+-  :code:`mc_lw_sample/4`
+-  :code:`mc_gibbs_sample/5`
+-  :code:`mc_gibbs_sample/4`
+-  :code:`mc_gibbs_sample/3`
+-  :code:`mc_rejection_sample_arg/6`
+-  :code:`mc_rejection_sample_arg/5`
+-  :code:`mc_mh_sample_arg/5`
+-  :code:`mc_mh_sample_arg/6`
+-  :code:`mc_gibbs_sample_arg/4`
+-  :code:`mc_gibbs_sample_arg/5`
+-  :code:`mc_gibbs_sample_arg/6`
+-  :code:`mc_sample_arg_first/4`
+-  :code:`mc_sample_arg_first/5`
+-  :code:`mc_sample_arg_one/4`
+-  :code:`mc_sample_arg_one/5`
+-  :code:`mc_sample_arg_raw/4`
+-  :code:`mc_expectation/4`
+-  :code:`mc_mh_expectation/5`
+-  :code:`mc_mh_expectation/6`
+-  :code:`mc_gibbs_expectation/4`
+-  :code:`mc_gibbs_expectation/5`
+-  :code:`mc_gibbs_expectation/6`
+-  :code:`mc_rejection_expectation/5`
+-  :code:`set_mc/2`setting_mc/2`
+-  :code:`mc_load_file/1`
+-  :code:`mc_load/1`
+-  :code:`take_a_sample/5`
+-  :code:`sample_head/5`
+-  :code:`mc_lw_sample_arg/5`
+-  :code:`mc_lw_sample_arg_log/5`
+-  :code:`mc_lw_expectation/5`
+-  :code:`mc_particle_sample_arg/5`
+-  :code:`mc_particle_expectation/5`
+-  :code:`gaussian/5`
+-  :code:`gaussian/4`
+-  :code:`add_prob/3`
+-  :code:`~= /2`
+-  :code:`swap/2`
+-  :code:`msw/2`
+-  :code:`set_sw/2`
+
+PITA
+----
+-  :code:`prob/2` 
+-  :code:`prob/3`
+-  :code:`prob_meta/2` 
+-  :code:`prob_meta/3`
+-  :code:`abd_prob/3`
+-  :code:`vit_prob/3`
+-  :code:`bdd_dot_file/3`
+-  :code:`bdd_dot_string/3`
+-  :code:`abd_bdd_dot_string/4`
+-  :code:`abd_bdd_dot_string/6`
+-  :code:`map_bdd_dot_string/6`
+-  :code:`map/3`
+-  :code:`vit_bdd_dot_string/5`
+-  :code:`setting_pita/2`
+-  :code:`setting_pita/2`
+-  :code:`get_var_n/6`
+-  :code:`get_abd_var_n/6`
+-  :code:`get_dec_var_n/5`
+-  :code:`load_file/1`
+-  :code:`load_file/1`
+-  :code:`dt_solve/2`
+-  :code:`msw/4`
+-  :code:`msw/5`
+

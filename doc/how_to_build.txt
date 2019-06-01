@@ -14,3 +14,4 @@ all the biblio entries must be written without dash (-)
 
 Style ref:
     https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
+    https://www.sphinx-doc.org/en/stable/theming.html
