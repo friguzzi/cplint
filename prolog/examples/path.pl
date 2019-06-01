@@ -41,7 +41,7 @@ edge(a,e):0.1.
 
 graph(digraph([rankdir='LR'|G])):-
     findall(edge((A -> B),[label=P]),
-      clause('edge tabled'(A,B,_,_),(get_var_n(_,_,_,_,[P|_],_),_)),
+      clause(edge(A,B,_,_),(get_var_n(_,_,_,_,[P|_],_),_)),
       G).
 
 

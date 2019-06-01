@@ -600,8 +600,7 @@ zero_clauses_actions(M,do(\+ A),Ref):-
 assert_actions(M,do(A),Ref):-
   A=..[P|Args],
   append(Args,[Env,BDD],Args1),
-  atomic_concat(P,' tabled',P1),
-  A1=..[P1|Args1],
+  A1=..[P|Args1],
   M:assertz((A1:-onec(Env,BDD)),Ref).
 
 update_clauses(M,P/0- _,[RefZ],[(H:-zeroc(Env,BDD))|LCA]):-!,
@@ -649,11 +648,10 @@ get_pred_const(do(Do0),AP0,AP):-
   ),
   functor(Do,F,A),
   Do=..[_|Args],
-  atomic_concat(F,' tabled',F1),
-  (get_assoc(F1/A,AP0,V)->
-    put_assoc(F1/A,AP0,[Args|V],AP)
+  (get_assoc(F/A,AP0,V)->
+    put_assoc(F/A,AP0,[Args|V],AP)
   ;
-    put_assoc(F1/A,AP0,[Args],AP)
+    put_assoc(F/A,AP0,[Args],AP)
   ).
 
 
@@ -1199,8 +1197,7 @@ act(M,A/B):-
   ;
     B1 is B + 2
   ),
-  atomic_concat(A,' tabled',A1),
-  M:(dynamic A1/B1).
+  M:(dynamic A/B1).
 
 tab(M,A/B,P):-
   length(Args0,B),
@@ -1236,39 +1233,30 @@ to_table(M,Heads,ProcTabDir,Heads1):-
 
 tab_dir(_M,'':_,[],[]):-!.
 
-tab_dir(M,H:P,[],[H1:P]):-
-  M:tabled(H),!,
-  H=..[F|Args],
-  atomic_concat(F,' tabled',F1),
-  H1=..[F1|Args].
+tab_dir(M,H:P,[],[H:P]):-
+  M:tabled(H),!.
 
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal except
 % (?)::H and H:P
-tab_dir(M,HT,[],[H1]):-
+tab_dir(M,HT,[],[H]):-
   (HT = ?::H ; HT = (?)::H),  
-  M:tabled(H),!,
-  H=..[F|Args],
-  atomic_concat(F,' tabled',F1),
-  H1=..[F1|Args].
+  M:tabled(H),!.
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal except
 % (?)::H and '$util'(A,B)
-tab_dir(M,H,[],[H1]):-
+tab_dir(M,H,[],[H]):-
   M:tabled(H),!,
-  H=..[F|Args],
-  F = utility,
-  atomic_concat(F,' tabled',F1),
-  H1=..[F1|Args].
+  H=..[F|_],
+  F = utility.
 
 
 tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
-  atomic_concat(F,' tabled',F1),
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
   ;
@@ -1277,7 +1265,7 @@ tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
   append(Args0,ExtraArgs,Args),
   HT=..[F|Args],
   H=..[_|ArgsH],
-  H1=..[F1|ArgsH],
+  H1=..[F|ArgsH],
   assert(M:tabled(PT)),
   zero_clause(M,F/A0,LZ),
   assert(M:zero_clauses(LZ)).
@@ -1291,7 +1279,6 @@ tab_dir(M,HT1,[(:- table HT)],[H1]):-
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
-  atomic_concat(F,' tabled',F1),
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
   ;
@@ -1300,7 +1287,7 @@ tab_dir(M,HT1,[(:- table HT)],[H1]):-
   append(Args0,ExtraArgs,Args),
   HT=..[F|Args],
   H=..[_|ArgsH],
-  H1=..[F1|ArgsH],
+  H1=..[F|ArgsH],
   assert(M:tabled(PT)),
   zero_clause(M,F/A0,LZ),
   assert(M:zero_clauses(LZ)).
@@ -1315,7 +1302,6 @@ tab_dir(M,H,[(:- table HT)],[H1]):-
   functor(H,F,A0),
   functor(PT,F,A0),  
   PT=..[F|Args0],
-  atomic_concat(F,' tabled',F1),
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
   ;
@@ -1324,7 +1310,7 @@ tab_dir(M,H,[(:- table HT)],[H1]):-
   append(Args0,ExtraArgs,Args),
   HT=..[F|Args],
   H=..[_|ArgsH],
-  H1=..[F1|ArgsH],
+  H1=..[F|ArgsH],
   assert(M:tabled(PT)),
   zero_clause(M,F/A0,LZ),
   assert(M:zero_clauses(LZ)).
