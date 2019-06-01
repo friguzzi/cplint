@@ -42,7 +42,7 @@ test_pita:-
     card,
     dt_umbrella,
     dt_winning,
-    dt_weather,
+    %dt_weather,
     dt_viral
     ]).
 
