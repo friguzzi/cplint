@@ -43,7 +43,8 @@ test_pita:-
     dt_umbrella,
     dt_winning,
     dt_weather,
-    dt_viral
+    dt_viral,
+    tabling_probs
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
@@ -69,9 +70,15 @@ test(best_st_weather):-
 :- begin_tests(dt_viral, []).
 :- ensure_loaded(library(examples/dt_viral)).
 test(best_st_weather):-
-  ansi_format([bold,fg(cyan)], '~nThis test takes approximately 10 seconds.~n',[]),
+  ansi_format([bold,fg(cyan)], '~nThis test takes few seconds.~n',[]),
   run((dt_solve(Strategy,ExpValue),close_to(ExpValue,3.21),perm(Strategy,[[marketed(theo)],[marketed(martijn)],[marketed(ingo)],[marketed(guy)]]))).
 :- end_tests(dt_viral).
+
+:- begin_tests(tabling_probs, []).
+:- ensure_loaded(library(examples/dt_viral_probs)).
+test(correct_probs):-
+  run((compute_probs(PB,PI,PT,PA,PG,PM,PL,PK),close_to(PB,0.420),close_to(PI,0.480),close_to(PT,0.486),close_to(PA,0.384),close_to(PG,0.480),close_to(PM,0.486),close_to(PL,0.490),close_to(PK,0.291))).
+:- end_tests(tabling_probs).
 
 :- begin_tests(coin, []).
 
