@@ -40,12 +40,12 @@ trans(s4,_,s3).
 
 markov_chain(digraph(G)):-
     findall(edge(A -> B,[label=P]),
-      (clause('trans tabled'(A,_,B,_,_,_),
+      (clause(trans(A,_,B,_,_,_),
         (get_var_n(_,_,_,_,Probs,_),equalityc(_,_,N,_))),
         nth0(N,Probs,P)),
       G0),
     findall(edge(A -> B,[label=1.0]),
-      clause('trans tabled'(A,_,B,_,_,_),onec(_,_)),
+      clause(trans(A,_,B,_,_,_),onec(_,_)),
       G1),
     append(G0,G1,G).
 
