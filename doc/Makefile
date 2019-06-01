@@ -1,19 +1,20 @@
+# Minimal makefile for Sphinx documentation
+#
 
-manual.pdf: manual.tex bib.bib inference.tex learning.tex learning_par.tex parameters.tex syntax.tex semantics.tex inf_goals.tex graphics.tex tabling.tex bib.bib
-	pdflatex manual
-	bibtex manual
-	pdflatex manual
-	pdflatex manual
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = cplint
+SOURCEDIR     = .
+BUILDDIR      = _build
 
-manual.html: manual.tex inference.tex learning.tex learning_par.tex parameters.tex syntax.tex semantics.tex inf_goals.tex graphics.tex tabling.tex bib.bib
-	pandoc manual.tex -o manual.html -s --bibliography bib.bib  --csl acm-sigchi-proceedings.csl --table-of-contents --toc-depth=3 --mathjax --metadata link-citations
-  
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-help-cplint.pdf: help-cplint.tex inference.tex learning.tex learning_par.tex parameters.tex syntax.tex semantics.tex inf_goals.tex graphics.tex tabling.tex bib.bib
-	pdflatex help-cplint
-	bibtex help-cplint
-	pdflatex help-cplint
-	pdflatex help-cplint
+.PHONY: help Makefile
 
-help-cplint.html: help-cplint.tex inference.tex learning.tex learning_par.tex parameters.tex syntax.tex semantics.tex inf_goals.tex graphics.tex tabling.tex bib.bib
-	pandoc help-cplint.tex -o help-cplint.html -s --bibliography bib.bib  --csl acm-sigchi-proceedings.csl --table-of-contents --toc-depth=3 --mathjax --metadata link-citations
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

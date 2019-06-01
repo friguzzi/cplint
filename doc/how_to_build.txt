@@ -1,0 +1,16 @@
+To build the documentation using sphinx just type:
+
+    > make html
+
+Make sure you have installed it with:
+    
+    > sudo apt-get install python3-sphinx
+
+You need also for the bibliography:
+
+    > sudo apt install python3-sphinxcontrib.bibtex    
+
+all the biblio entries must be written without dash (-)
+
+Style ref:
+    https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
