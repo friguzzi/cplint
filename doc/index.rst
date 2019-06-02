@@ -11,13 +11,11 @@ cplint on SWISH Manual
 	:caption: Contents:
 
 	self
-	predicate_list
-
-Syntax
+	
+Syntax 
 ==================
 cplint permits the definition of discrete probability distributions and continuous probability densities.
 
-For a full predicate list see: :doc:`predicates list <predicate_list>` 
 
 Discrete Probability Distributions
 ----------------------------------
@@ -171,13 +169,7 @@ states that argument :code:`X` of :code:`g(X)` follows a Gaussian distribution w
 
 	g(X): gaussian(X,[0,0], [[1,0],[0,1]]).
 
-states that argument :code:`X` of :code:`g(X)` follows a Gaussian multivariate distribution with mean vector :code:`[0,0]` and covariance matrix 
-.. math:: 
-
-	\begin{array}{rr}
-	1&amp;0\\
-	0&amp;1
-	\end{array}
+states that argument :code:`X` of :code:`g(X)` follows a Gaussian multivariate distribution with mean vector :code:`[0,0]` and covariance matrix :math:`\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}`
 
 For example, `gaussian_mixture.pl <http://cplint.eu/e/gaussian_mixture.pl>`_ defines a mixture of two Gaussians: ::
 
@@ -973,8 +965,8 @@ is like :code:`densities/3` with the number of bins is determined by R.
 
 See `gauss_mean_est_R.pl <http://cplint.eu/e/gauss_mean_est_R.pl>`_ for an example of use of these predicates.
 
-Parameters
-----------
+Parameters for Inference
+------------------------
 The inference modules have a number of parameters in order to control their behavior. 
 They can be set with the directive ::
 
@@ -1079,7 +1071,7 @@ Learning
 ==================
 The following learning algorithms are available:
 
-- EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs :cite:`BelRig11-IDA-IJ,BelRig11-CILC11-NC,BelRig11-TR`
+- EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs :cite:`BelRig11-IDA-IJ,bellodi2013expectation,BelRig11-TR`
 - SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately :cite:`BelRig13-TPLP-IJ`
 - LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte-Carlo tree search :cite:`DiMBelRig15-ML-IJ`
 
@@ -1413,7 +1405,7 @@ The interpretations may contain a fact of the form ::
 	prob(0.3).
 
 assigning a probability (0.3 in this case) to the interpretations. 
-If this is omitted, the probability of each interpretation is considered equal to :math:`1/n` where :math:`\(n\)` is the total number of interpretations. :code:`prob/1` can be used to set a different multiplicity for the interpretations.
+If this is omitted, the probability of each interpretation is considered equal to :math:`1/n` where :math:`n` is the total number of interpretations. :code:`prob/1` can be used to set a different multiplicity for the interpretations.
 
 The facts in the interpretation are loaded in SWI-Prolog database by adding an extra initial argument equal to the name of the model. 
 After each interpretation is loaded, a fact of the form :code:`int(<id>)` is asserted, where :code:`id` is the name of the interpretation. 
@@ -1579,8 +1571,8 @@ or predicate ::
 
 that takes as input a list :code:`ExampleList` of pairs probability-literal of the form that is returned by :code:`test_prob/6`.
 
-Parameters
-----------
+Parameters for Learning
+-----------------------
 Parameters are set with commands of the form ::
 
 	:- set_sc(<parameter>,<value>).
@@ -1599,7 +1591,7 @@ The available parameters are:
 - :code:`random_restarts_REFnumber` (values: integer, default value: 1, valid for SLIPCOVER and LEMUR): number of random restarts of parameter EM learning for refinements
 - :code:`seed` (values: seed(integer) or seed(random), default value :code:`seed(3032)`): seed for the Prolog random functions, see `SWI-Prolog manual <http://www.swi-prolog.org/pldoc/man?predicate=set_random/1>`__ 
 - :code:`c_seed` (values: unsigned integer, default value 21344)): seed for the C random functions
-- :code:`logzero` (values: negative real, default value :math:`\log(0.000001)`: value assigned to :math:`\log 0`
+- :code:`logzero` (values: negative real, default value :math:`\log(0.000001)`: value assigned to :math:`\log(0)`
 - :code:`max_iter` (values: integer, default value: 10, valid for SLIPCOVER): number of interations of beam search
 - :code:`max_var` (values: integer, default value: 4, valid for SLIPCOVER and LEMUR): maximum number of distinct variables in a clause
 - :code:`beamsize` (values: integer, default value: 100, valid for SLIPCOVER): size of the beam
@@ -1616,7 +1608,7 @@ The available parameters are:
 - :code:`mcts_iter` (values: integer, default value: 20, valid for LEMUR): number of Monte-Carlo tree search iterations
 - :code:`mcts_maxrestarts` (values: integer, default value: 20, valid for LEMUR): maximum number of Monte-Carlo tree search restarts
 - :code:`neg_ex` (values: :code:`given`, :code:`cw`, default value: :code:`cw`): if set to :code:`given`, the negative examples in testing are taken from the test folds interpretations, i.e., those examples :code:`ex` stored as :code:`neg(ex)`; if set to :code:`cw`, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
-- :code:`alpha` (values: floating point :math:`\geq 0`, default value: 0): parameter of the symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is used to sample parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled uniformly and independently in [0,1]. If it takes a value :math:`\(\geq 0\)`, the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters :math:`\alpha,\ldots,\alpha`.
+- :code:`alpha` (values: floating point :math:`\geq 0`, default value: 0): parameter of the symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is used to sample parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled uniformly and independently in [0,1]. If it takes a value :math:`\geq 0`, the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters :math:`\alpha,\ldots,\alpha`.
 - :code:`verbosity` (values: integer in [1,3], default value: 1): level of verbosity of the algorithms.
 
 
@@ -1668,7 +1660,4 @@ Manual in PDF
 ==================
 A PDF version of the manual is available at `https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf <https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf>`_.
 
-
-Bibliography
-============
 .. bibliography:: newbib.bib
