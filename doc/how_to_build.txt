@@ -1,47 +1,63 @@
-To build the documentation using sphinx just type in the folder where the file(s) .rst is(are):
-
-    > make html
-
-Make sure you have sphinx installed it with:
+The documentation is written in rst format.
+To build the documentation make sure you have sphinx installed it with:
     
     > sudo apt-get install python3-sphinx
 
-You need also for the bibliography:
+and also
 
     > sudo apt install python3-sphinxcontrib.bibtex    
 
-Style ref:
-    https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
-    https://www.sphinx-doc.org/en/stable/theming.html
 
-To build the pdf:
-    the pdf is built converting the rst file in tex and then compiling it
+To build the documentation using sphinx, move to doc, make sure the file index.rst is there and type:
 
-    > sudo apt install latexmk
-    > apt-get install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended 
-    
-    or make sure you have installed 
-    
+    > make html
+
+The result html file will be in _build/html/index.html
+
+To build the pdf, make sure you have installed
+
     texlive-latex-recommended
     texlive-fonts-recommended
     texlive-latex-extra
     latexmk (this is a Sphinx requirement on GNU/Linux and MacOS X for functioning of make latexpdf)
     
-    then:
-    > make latexpdf
+to install type
+
+    > sudo apt install latexmk
+    > sudo apt install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended 
     
-    or
+in the same folder as before type:
+
     > make latexpdf LATEXMKOPTS="-silent"
 
-    to have less output
+To generate the pdf
 
-    note that you maybe need to run the command two times in order to link also the bibliography
+    > make latexpdf
+    
+or
 
-    info:
+    > make latexpdf LATEXMKOPTS="-silent"
+
+to have less output.
+
+Note that you maybe need to run the command two times in order to link also the bibliography which is 
+located in newbib.bib
+
+The result pdf file will be in _build/latex/cplint.pdf. This because the program compiles the .rst file
+in a .tex file and then calls latexmk to compile the .tex file.
+
+The file conf.py in this folder defines some parameters for the compilation. In particular
+the number of the release and the authors.
+
+Style ref:
+    https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
+    https://www.sphinx-doc.org/en/stable/theming.html
+
+info:
     http://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder
 
-    several customisations:
+several customisations:
     https://www.sphinx-doc.org/en/master/latex.html
 
-    official sphinx documentation
+official sphinx documentation
     https://buildmedia.readthedocs.org/media/pdf/sphinx/stable/sphinx.pdf
