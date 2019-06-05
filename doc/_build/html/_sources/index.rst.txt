@@ -21,7 +21,7 @@ They differ slightly in the features offered.
 This manual is about the SWI-Prolog version. 
 You can find the manual for the Yap version at `<http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html>`_.
 
-Author: Fabrizio Riguzzi - fabrizio.riguzzi@unife.it
+cplint on SWISH is a web application for using cplint available at `<http://cplint.eu>`_.
 
 Installation
 ============
@@ -1637,7 +1637,7 @@ The available parameters are:
 
 Download Query Results through an API
 =====================================
-The results of queries can also be downloaded programmatically by directly approaching the Pengine API. 
+In cplint on SWISH the results of queries can also be downloaded programmatically by directly approaching the Pengine API. 
 Example client code is `available <https://github.com/friguzzi/swish/tree/master/client>`_. 
 For example, the :code:`swish-ask.sh` client can be used with bash to download the results for a query in CSV. 
 
