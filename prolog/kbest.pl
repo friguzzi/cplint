@@ -536,12 +536,6 @@ builtin(G):-
 builtin(G):-
   predicate_property(G,imported_from(lists)).
 
-average(L,Av):-
-        sum_list(L,Sum),
-        length(L,N),
-        Av is Sum/N.
-
-
 listN(N, N, []) :- !.
 
 listN(NIn, N, [NIn|T]) :-

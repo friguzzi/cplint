@@ -1085,7 +1085,8 @@ system:term_expansion((:- lemur), []) :-!,
     ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,
     query_rule/4,
-    zero_clauses/1,tabled/1)),
+    zero_clauses/1,tabled/1,
+    fold/2)),
   retractall(M:tabled(_)),
   style_check(-discontiguous).
 
