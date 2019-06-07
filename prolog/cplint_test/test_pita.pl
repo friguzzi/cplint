@@ -71,6 +71,7 @@ test(best_st_weather):-
 :- ensure_loaded(library(examples/dt_viral)).
 test(best_st_viral):-
   ansi_format([bold,fg(cyan)], '~nThis test takes few seconds.~n',[]),
+  % run((dt_solve(Strategy,ExpValue),close_to(ExpValue,2.217),perm(Strategy,[[marketed(theo)],[marketed(guy)]]))).
   run((dt_solve(Strategy,ExpValue),close_to(ExpValue,3.21),perm(Strategy,[[marketed(theo)],[marketed(martijn)],[marketed(ingo)],[marketed(guy)]]))).
 :- end_tests(dt_viral).
 
