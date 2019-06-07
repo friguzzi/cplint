@@ -106,7 +106,11 @@ default_setting_lm(tabling,auto).
   auto
   explicit
 */
-
+default_setting_lm(alpha,0.0).
+% Sets the type of parameter initialization for EM on Environment:
+% if alpha is 0.0, it uses a truncated Dirichlet process
+% if alpha is a float > 0.0, it uses a symmetric Dirichlet distribution
+% with that value as parameter
 :- thread_local database/1, lm_input_mod/1.
 
 /**
