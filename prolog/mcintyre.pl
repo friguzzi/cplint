@@ -478,11 +478,11 @@ mh_montecarlo(L,K0,NC0,N0, S0,Succ0, SuccNew,M:Goal, M:Evidence, N, S):-
   %flush_output,
     K1 is K0-1
   ;
-    N1 = N0,
-    S1 = S0,
-    K1 = K0,
     NC1 = NC0,
     Succ = Succ0,
+    N1 is N0 + 1,
+    K1 is K0-1,
+    S1 is S0 + Succ,
     erase_samples(M),
     restore_samples(M,Goal)
   ),
@@ -1435,9 +1435,14 @@ mh_sample_arg(L,K0,NC0,M:Goal, M:Evidence, Arg,AP0,AP,V0,V):-
       restore_samples(M,Goal)
     )
   ;
-    K1 = K0,
+    (get_assoc(AP0, V0, N)->
+      N1 is N+1,
+      put_assoc(AP0,V0,N1,V1)
+    ;
+      put_assoc(AP0,V0,1,V1)
+    ),
+    K1 is K0-1,
     NC1 = NC0,
-    V1 = V0,
     AP1=AP0,
     erase_samples(M),
     restore_samples(M,Goal)

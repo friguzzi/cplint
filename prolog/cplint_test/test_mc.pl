@@ -352,7 +352,7 @@ test(mh_rec_n_drug):-
 test(mh_rec_drug_f):-
   run((mc_mh_sample(recovery,(drug,female),500,P,[lag(2)]),close_to(P,0.2))).
 test(mh_rec_n_drug_f):-
-  run((mc_mh_sample(recovery,(\+drug,female),500,P,[lag(2)]),close_to(P,0.3))).
+  run((mc_mh_sample(recovery,(\+drug,female),1000,P,[lag(2)]),close_to(P,0.3))).
 test(mh_rec_drug_m):-
   run((mc_mh_sample(recovery,(drug,\+female),500,P,[lag(2)]),close_to(P,0.6))).
 test(mh_rec_n_drug_m):-
