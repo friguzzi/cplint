@@ -16,7 +16,7 @@
   get_var_n/6,get_abd_var_n/6,
   get_dec_var_n/5,
   load/1,load_file/1,
-  dt_solve_complete/2, % complete solution without pruning
+  % dt_solve_complete/2, % complete solution without pruning
   dt_solve/2,
   % op(600,fx,'?'),
   op(600,xfy,'::'),
@@ -45,6 +45,7 @@ details.
 :- reexport(library(cplint_util)).
 :- reexport(library(bddem)).
 
+% :- prolog_debug(chk_secure).
 
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
@@ -69,7 +70,7 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
-:-meta_predicate dt_solve_complete(:,-).
+% :-meta_predicate dt_solve_complete(:,-).
 :-meta_predicate dt_solve(:,-).
 
 % :- dynamic utility/2.
@@ -142,21 +143,19 @@ load_file(File):-
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. Complete solution without pruning.
  */
-dt_solve_complete(M:Strategy,Cost):-
-  % writeln("----- FIX -----"),
+
+% this is a complete version, rename it dt_solve_complete
+% when the other version works
+dt_solve(M:Strategy,Cost):-
   abolish_all_tables,
   findall([H,U],M:'$util'(H,U),LUtils),  
   init(Env),
-  statistics(walltime,[Start|_]), 
-  % add_const(Env,0,ZeroAdd),
-  % writeln("passed"),
-  % writeln(ZeroBdd),
-  % generate_solution(Env,M,LUtils,ZeroAdd,St,Cost),
+  % statistics(walltime,[Start|_]), 
   generate_solution(Env,M,LUtils,[],St,Cost),
-  statistics(walltime,[Stop|_]), 
+  % statistics(walltime,[Stop|_]), 
   end(Env),
-  Runtime is Stop - Start,
-  format('Runtime: ~w~n',[Runtime]),
+  % Runtime is Stop - Start,
+  % format('Runtime: ~w~n',[Runtime]),
   maplist(pair(M),St,Strategy).
 
 pair(M,A,B):- M:rule_by_num(A,B,_,_).
@@ -169,12 +168,14 @@ split([A,B],A,B).
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. Solution with pruning.
  */
-dt_solve(M:Strategy,Cost):-
+dt_solve_bug(M:Strategy,Cost):-
   abolish_all_tables, 
   findall([S,U],M:'$util'(S,U),L),
+  % writeln(L),
   maplist(split,L,LStrategy,LUtils),
   init(Env),
   get_bdd(M,Env,LStrategy,[],LBDD),
+  writeln(LBDD),
   compute_best_strategy(Env,LBDD,LUtils,St,Cost),
   end(Env),
   maplist(pair(M),St,Strategy).
@@ -182,6 +183,7 @@ dt_solve(M:Strategy,Cost):-
 get_bdd(_,_,[],L,L):- !.
 get_bdd(M,Env,[G|T],L,LO):-
   get_node(M:G,Env,Out),
+  writeln(Out),
   Out=(_,BDD),
   append(L,[BDD],LT),
   get_bdd(M,Env,T,LT,LO).
@@ -1460,7 +1462,7 @@ system:term_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   append([Head],BodyList,List),
   extract_vars_list(List,[],VC),
   get_next_rule_number(M,R),
-  to_table(M,[Head],TabDir,HeadList1),  % <---------------------- iF HEAD = H => U does NOT WORKS
+  to_table(M,[Head],TabDir,HeadList1),  % <---------------------- if HEAD = H => U does NOT WORKS
   HeadList1 = [H1],
   add_bdd_arg(H1,Env,BO,M,Head2),
   Clause = (Head2:-(Body1,get_var_n(M,Env,R,VC,V),equalityc(Env,V,0,B),andc(Env,BDDAnd,B,BO))).
@@ -1977,7 +1979,7 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
-sandbox:safe_meta(pita:dt_solve_complete(_,_),[]).
+% sandbox:safe_meta(pita:dt_solve_complete(_,_),[]).
 sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 

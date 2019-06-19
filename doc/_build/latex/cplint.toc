@@ -1,0 +1,37 @@
+\babel@toc {english}{}
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {chapter}{\numberline {2}Installation}{3}{chapter.2}
+\contentsline {chapter}{\numberline {3}Syntax}{5}{chapter.3}
+\contentsline {section}{\numberline {3.1}Discrete Probability Distributions}{5}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}ProbLog Syntax}{6}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}PRISM Syntax}{6}{subsection.3.1.2}
+\contentsline {section}{\numberline {3.2}Continuous Probability Densities}{7}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Distributional Clauses Syntax}{9}{subsection.3.2.1}
+\contentsline {chapter}{\numberline {4}Semantics}{11}{chapter.4}
+\contentsline {chapter}{\numberline {5}Inference}{13}{chapter.5}
+\contentsline {section}{\numberline {5.1}Unconditional Queries}{14}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}Drawing BDDs}{17}{subsection.5.1.1}
+\contentsline {section}{\numberline {5.2}Conditional Queries on Discrete Variables}{18}{section.5.2}
+\contentsline {section}{\numberline {5.3}Conditional Queries on Continuous Variables}{20}{section.5.3}
+\contentsline {section}{\numberline {5.4}Causal Inference}{22}{section.5.4}
+\contentsline {section}{\numberline {5.5}Graphing the Results}{22}{section.5.5}
+\contentsline {subsection}{\numberline {5.5.1}Using C3.js}{23}{subsection.5.5.1}
+\contentsline {subsection}{\numberline {5.5.2}Using R}{24}{subsection.5.5.2}
+\contentsline {section}{\numberline {5.6}Parameters for Inference}{25}{section.5.6}
+\contentsline {section}{\numberline {5.7}Tabling}{26}{section.5.7}
+\contentsline {section}{\numberline {5.8}Decision Theory}{27}{section.5.8}
+\contentsline {chapter}{\numberline {6}Learning}{29}{chapter.6}
+\contentsline {section}{\numberline {6.1}Input}{29}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}Preamble}{29}{subsection.6.1.1}
+\contentsline {subsection}{\numberline {6.1.2}Background and Initial LPAD/CPL-program}{30}{subsection.6.1.2}
+\contentsline {subsection}{\numberline {6.1.3}Language Bias}{32}{subsection.6.1.3}
+\contentsline {subsection}{\numberline {6.1.4}Example Interpretations}{35}{subsection.6.1.4}
+\contentsline {section}{\numberline {6.2}Commands}{37}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}Parameter Learning}{37}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}Structure Learning}{37}{subsection.6.2.2}
+\contentsline {subsection}{\numberline {6.2.3}Testing}{37}{subsection.6.2.3}
+\contentsline {section}{\numberline {6.3}Parameters for Learning}{38}{section.6.3}
+\contentsline {chapter}{\numberline {7}Download Query Results through an API}{41}{chapter.7}
+\contentsline {chapter}{\numberline {8}Manual in PDF}{43}{chapter.8}
+\contentsline {chapter}{\numberline {9}License}{45}{chapter.9}
+\contentsline {chapter}{Bibliography}{47}{chapter*.3}

@@ -1,0 +1,63 @@
+The documentation is written in rst format.
+To build the documentation make sure you have sphinx installed it with:
+    
+    > sudo apt-get install python3-sphinx
+
+and also
+
+    > sudo apt install python3-sphinxcontrib.bibtex    
+
+
+To build the documentation using sphinx, move to doc, make sure the file index.rst is there and type:
+
+    > make html
+
+The result html file will be in _build/html/index.html
+
+To build the pdf, make sure you have installed
+
+    texlive-latex-recommended
+    texlive-fonts-recommended
+    texlive-latex-extra
+    latexmk (this is a Sphinx requirement on GNU/Linux and MacOS X for functioning of make latexpdf)
+    
+to install type
+
+    > sudo apt install latexmk
+    > sudo apt install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended 
+    
+in the same folder as before type:
+
+    > make latexpdf LATEXMKOPTS="-silent"
+
+To generate the pdf
+
+    > make latexpdf
+    
+or
+
+    > make latexpdf LATEXMKOPTS="-silent"
+
+to have less output.
+
+Note that you maybe need to run the command two times in order to link also the bibliography which is 
+located in newbib.bib
+
+The result pdf file will be in _build/latex/cplint.pdf. This because the program compiles the .rst file
+in a .tex file and then calls latexmk to compile the .tex file.
+
+The file conf.py in this folder defines some parameters for the compilation. In particular
+the number of the release and the authors.
+
+Style ref:
+    https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
+    https://www.sphinx-doc.org/en/stable/theming.html
+
+info:
+    http://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder
+
+several customisations:
+    https://www.sphinx-doc.org/en/master/latex.html
+
+official sphinx documentation
+    https://buildmedia.readthedocs.org/media/pdf/sphinx/stable/sphinx.pdf

@@ -9,6 +9,9 @@
 
 :- format(user_error,
 	  'cplint test suite.  To run all tests run ?- test.~n~n', []).
+
+% :- set_prolog_flag(trace_gc, true).
+
 test:-
   test_pita,
   test_mc,
