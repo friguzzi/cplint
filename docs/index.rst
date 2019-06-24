@@ -37,7 +37,7 @@ Moreover, in order to make sure you have a foreign library that matches your arc
 
 Syntax 
 ==================
-cplint permits the definition of discrete probability distributions and continuous probability densities.
+cplint allows the definition of discrete probability distributions and continuous probability densities.
 
 
 Discrete Probability Distributions
