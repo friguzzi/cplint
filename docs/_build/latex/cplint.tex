@@ -35,14 +35,8 @@
 % Set up styles of URL: it should be placed after hyperref.
 \urlstyle{same}
 
-\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
-\makeatletter
-\def\fnum@figure{\figurename\thefigure{}}
-\makeatother
-\addto\captionsenglish{\renewcommand{\tablename}{Table }}
-\makeatletter
-\def\fnum@table{\tablename\thetable{}}
-\makeatother
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
+\addto\captionsenglish{\renewcommand{\tablename}{Table}}
 \addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
 
 \addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
@@ -58,7 +52,7 @@
 
 
 \title{cplint Documentation}
-\date{Jun 24, 2019}
+\date{Jun 26, 2019}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -97,11 +91,76 @@ To install it, use
 ?\PYGZhy{} pack\PYGZus{}install(cplint).
 \end{sphinxVerbatim}
 
-Moreover, in order to make sure you have a foreign library that matches your architecture, run
+
+\section{Requirements}
+\label{\detokenize{index:requirements}}
+It requires the packs
+\begin{itemize}
+\item {} 
+\sphinxhref{https://github.com/friguzzi/bddem}{bddem}
+
+\item {} 
+\sphinxhref{https://github.com/friguzzi/auc}{auc}
+
+\item {} 
+\sphinxhref{https://github.com/friguzzi/matrix}{matrix}
+
+\end{itemize}
+
+They are installed automatically when installing pack \sphinxtitleref{cplint} or can installed manually as
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-?\PYGZhy{} pack\PYGZus{}rebuild(cplint).
+\PYGZdl{} swipl
+?\PYGZhy{} pack\PYGZus{}install(bddem).
+?\PYGZhy{} pack\PYGZus{}install(auc).
+?\PYGZhy{} pack\PYGZus{}install(matrix).
 \end{sphinxVerbatim}
+
+\sphinxtitleref{bddem} uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} pack\PYGZus{}rebuild(bdeem).
+\end{sphinxVerbatim}
+
+On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page \sphinxurl{https://github.com/friguzzi/bddem}.
+
+You can upgrade the pack with
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYGZdl{} swipl
+?\PYGZhy{} pack\PYGZus{}upgrade(cplint).
+\end{sphinxVerbatim}
+
+Note that the packs on which \sphinxtitleref{cplint} depends are not upgraded automatically in this case so they need to be upgraded manually.
+
+
+\section{Example of use}
+\label{\detokenize{index:example-of-use}}
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYGZdl{} cd \PYGZlt{}pack\PYGZgt{}/cplint/prolog/examples
+\PYGZdl{} swipl
+?\PYGZhy{} [coin].
+?\PYGZhy{} prob(heads(coin),P).
+\end{sphinxVerbatim}
+
+
+\section{Testing the installation}
+\label{\detokenize{index:testing-the-installation}}
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYGZdl{} swipl
+?\PYGZhy{} [library(cplint\PYGZus{}test/test)].
+?\PYGZhy{} test.
+\end{sphinxVerbatim}
+
+
+\section{Datasets}
+\label{\detokenize{index:datasets}}
+Other machine learning datasets are available in pack \sphinxhref{https://github.com/friguzzi/cplint\_datasets}{cplint\_datasets}.
+
+
+\section{Support}
+\label{\detokenize{index:support}}
+Use the Google group \sphinxurl{https://groups.google.com/forum/\#!forum/cplint}.
 
 
 \chapter{Syntax}
@@ -590,6 +649,18 @@ The Yap version of \sphinxcode{\sphinxupquote{cplint}} includes reasoning algori
 
 In \sphinxcode{\sphinxupquote{mcintyre}} you can query database clauses in the body of probabilistic clauses without any special syntax.
 You can also use \sphinxcode{\sphinxupquote{findall/3}}.
+
+To run a query, you can simply load the Prolog file, for example \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl}, as:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} [coin].
+\end{sphinxVerbatim}
+
+or:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYGZdl{} swipl coin.pl
+\end{sphinxVerbatim}
 
 
 \section{Unconditional Queries}
@@ -2310,9 +2381,16 @@ Prob = 0.51.
 \end{sphinxVerbatim}
 
 
+\chapter{Example files}
+\label{\detokenize{index:example-files}}
+The \sphinxcode{\sphinxupquote{pack/cplint/prolog/examples}} folder in SWI-Prolog home contains some example programs.
+The subfolder \sphinxcode{\sphinxupquote{learning}} contains some learning examples.
+The \sphinxcode{\sphinxupquote{pack/cplint/docs}} folder contains this manual in latex, html and pdf.
+
+
 \chapter{Manual in PDF}
 \label{\detokenize{index:manual-in-pdf}}
-A PDF version of the manual is available at \sphinxurl{https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf}.
+A PDF version of the manual is available at \sphinxurl{http://friguzzi.github.io/cplint/\_build/latex/cplint.pdf}.
 
 
 \chapter{License}
@@ -2355,6 +2433,9 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
+
+\chapter{References}
+\label{\detokenize{index:references}}
 
 
 \begin{sphinxthebibliography}{VdBTVODR}

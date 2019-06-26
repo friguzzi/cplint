@@ -30,10 +30,60 @@ To install it, use ::
 
 	?- pack_install(cplint).
 
-Moreover, in order to make sure you have a foreign library that matches your architecture, run ::
+Requirements
+-------------
+It requires the packs
 
-	?- pack_rebuild(cplint). 
+ * `bddem <https://github.com/friguzzi/bddem>`_
+ * `auc <https://github.com/friguzzi/auc>`_
+ * `matrix <https://github.com/friguzzi/matrix>`_
+ 
+They are installed automatically when installing pack `cplint` or can installed manually as ::
 
+	$ swipl
+	?- pack_install(bddem).
+	?- pack_install(auc).
+	?- pack_install(matrix).
+
+`bddem` uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use ::
+
+	?- pack_rebuild(bdeem).
+
+On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page `<https://github.com/friguzzi/bddem>`_.
+
+You can upgrade the pack with ::
+
+    $ swipl
+    ?- pack_upgrade(cplint).
+
+Note that the packs on which `cplint` depends are not upgraded automatically in this case so they need to be upgraded manually.
+
+Example of use
+---------------
+::
+
+    $ cd <pack>/cplint/prolog/examples
+    $ swipl
+    ?- [coin].
+    ?- prob(heads(coin),P).
+
+Testing the installation
+------------------------
+::
+
+    $ swipl
+    ?- [library(cplint_test/test)].
+    ?- test.
+
+Datasets
+--------
+
+Other machine learning datasets are available in pack `cplint_datasets <https://github.com/friguzzi/cplint_datasets>`_.
+
+Support
+-------
+
+Use the Google group `<https://groups.google.com/forum/#!forum/cplint>`_.
 
 Syntax 
 ==================
@@ -435,6 +485,14 @@ The Yap version of :code:`cplint` includes reasoning algorithms that allows aggr
 
 In :code:`mcintyre` you can query database clauses in the body of probabilistic clauses without any special syntax. 
 You can also use :code:`findall/3`.
+
+To run a query, you can simply load the Prolog file, for example `coin.pl <http://cplint.eu/e/coin.pl>`_, as::
+
+	?- [coin].
+
+or::
+
+	$ swipl coin.pl
 
 Unconditional Queries
 ----------------------
@@ -1679,9 +1737,16 @@ Prolog can exploit the Pengine API directly. For example, the above can be calle
 
 	Prob = 0.51.
 	
+
+Example Files
+=============
+The :code:`pack/cplint/prolog/examples` folder in SWI-Prolog home contains some example programs. 
+The subfolder :code:`learning` contains some learning examples.
+The :code:`pack/cplint/docs` folder contains this manual in latex, html and pdf.
+
 Manual in PDF
 ==================
-A PDF version of the manual is available at `https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf <https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf>`_.
+A PDF version of the manual is available at `http://friguzzi.github.io/cplint/_build/latex/cplint.pdf <http://friguzzi.github.io/cplint/_build/latex/cplint.pdf>`_.
 
 License
 =======
@@ -1717,4 +1782,6 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 
+References
+==========
 .. bibliography:: newbib.bib

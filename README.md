@@ -4,7 +4,7 @@ cplint
 cplint is a suite of programs for reasoning with probabilistic logic programs.
 It contains programs for both inference and learning.
 
-You can find the manual at [http://friguzzi.github.io/cplint/doc/manual.pdf](http://friguzzi.github.io/cplint/doc/manual.pdf) or [http://friguzzi.github.io/cplint/doc/manual.html](http://friguzzi.github.io/cplint/doc/manual.html).
+You can find the manual at [http://friguzzi.github.io/cplint/](http://friguzzi.github.io/cplint/).
 
 You can try it online at [http://cplint.eu](http://cplint.eu).
 
@@ -32,11 +32,11 @@ It requires the packs
     ?- pack_install(auc).
     ?- pack_install(matrix).
 
-`bddem` uses a foreign library and contains the library binaries for 32 and 64 bits Linux and 64 bits Windows. If you want to recompile the foreign library you can use
+`bddem` uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use
 
     ?- pack_rebuild(bdeem).
 
-On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page [https://github.com/friguzzi/matrix](https://github.com/friguzzi/matrix).
+On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page [https://github.com/friguzzi/bddem](https://github.com/friguzzi/bddem).
 
 You can upgrade the pack with
 

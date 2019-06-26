@@ -46,7 +46,7 @@
     {\Large
       \begin{tabular}[t]{c}
         \@author
-      \end{tabular}\kern-\tabcolsep}\par
+      \end{tabular}}\par
     \vspace{25pt}
     \@date \par
     \py@authoraddress \par

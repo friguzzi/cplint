@@ -57,9 +57,59 @@ To install it, use</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- pack_install(cplint).
 </pre></div>
 </div>
-<p>Moreover, in order to make sure you have a foreign library that matches your architecture, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- pack_rebuild(cplint).
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<p>It requires the packs</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/friguzzi/bddem">bddem</a></li>
+<li><a class="reference external" href="https://github.com/friguzzi/auc">auc</a></li>
+<li><a class="reference external" href="https://github.com/friguzzi/matrix">matrix</a></li>
+</ul>
+</div></blockquote>
+<p>They are installed automatically when installing pack <cite>cplint</cite> or can installed manually as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ swipl
+?- pack_install(bddem).
+?- pack_install(auc).
+?- pack_install(matrix).
 </pre></div>
+</div>
+<p><cite>bddem</cite> uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- pack_rebuild(bdeem).
+</pre></div>
+</div>
+<p>On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page <a class="reference external" href="https://github.com/friguzzi/bddem">https://github.com/friguzzi/bddem</a>.</p>
+<p>You can upgrade the pack with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ swipl
+?- pack_upgrade(cplint).
+</pre></div>
+</div>
+<p>Note that the packs on which <cite>cplint</cite> depends are not upgraded automatically in this case so they need to be upgraded manually.</p>
+</div>
+<div class="section" id="example-of-use">
+<h3>Example of use<a class="headerlink" href="#example-of-use" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd &lt;pack&gt;/cplint/prolog/examples
+$ swipl
+?- [coin].
+?- prob(heads(coin),P).
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing-the-installation">
+<h3>Testing the installation<a class="headerlink" href="#testing-the-installation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ swipl
+?- [library(cplint_test/test)].
+?- test.
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasets">
+<h3>Datasets<a class="headerlink" href="#datasets" title="Permalink to this headline">¶</a></h3>
+<p>Other machine learning datasets are available in pack <a class="reference external" href="https://github.com/friguzzi/cplint_datasets">cplint_datasets</a>.</p>
+</div>
+<div class="section" id="support">
+<h3>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h3>
+<p>Use the Google group <a class="reference external" href="https://groups.google.com/forum/#!forum/cplint">https://groups.google.com/forum/#!forum/cplint</a>.</p>
 </div>
 </div>
 <div class="section" id="syntax">
@@ -445,6 +495,14 @@ For example (<a class="reference external" href="http://cplint.eu/example/infere
 The Yap version of <code class="code docutils literal notranslate"><span class="pre">cplint</span></code> includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see <a class="reference external" href="http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html</a>.</p>
 <p>In <code class="code docutils literal notranslate"><span class="pre">mcintyre</span></code> you can query database clauses in the body of probabilistic clauses without any special syntax.
 You can also use <code class="code docutils literal notranslate"><span class="pre">findall/3</span></code>.</p>
+<p>To run a query, you can simply load the Prolog file, for example <a class="reference external" href="http://cplint.eu/e/coin.pl">coin.pl</a>, as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- [coin].
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ swipl coin.pl
+</pre></div>
+</div>
 <div class="section" id="unconditional-queries">
 <h3>Unconditional Queries<a class="headerlink" href="#unconditional-queries" title="Permalink to this headline">¶</a></h3>
 <p>The unconditional probability of an atom can be asked using <code class="code docutils literal notranslate"><span class="pre">pita</span></code> with the predicate</p>
@@ -1596,9 +1654,15 @@ Prob = 0.51.
 </pre></div>
 </div>
 </div>
+<div class="section" id="example-files">
+<h2>Example Files<a class="headerlink" href="#example-files" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">pack/cplint/prolog/examples</span></code> folder in SWI-Prolog home contains some example programs.
+The subfolder <code class="code docutils literal notranslate"><span class="pre">learning</span></code> contains some learning examples.
+The <code class="code docutils literal notranslate"><span class="pre">pack/cplint/docs</span></code> folder contains this manual in latex, html and pdf.</p>
+</div>
 <div class="section" id="manual-in-pdf">
 <h2>Manual in PDF<a class="headerlink" href="#manual-in-pdf" title="Permalink to this headline">¶</a></h2>
-<p>A PDF version of the manual is available at <a class="reference external" href="https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf">https://github.com/friguzzi/cplint/blob/master/doc/help-cplint.pdf</a>.</p>
+<p>A PDF version of the manual is available at <a class="reference external" href="http://friguzzi.github.io/cplint/_build/latex/cplint.pdf">http://friguzzi.github.io/cplint/_build/latex/cplint.pdf</a>.</p>
 </div>
 <div class="section" id="license">
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
@@ -1628,6 +1692,9 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <p id="bibtex-bibliography-index-0"><table class="docutils citation" frame="void" id="belrig11-tr" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -1786,7 +1853,14 @@ POSSIBILITY OF SUCH DAMAGE.</p>
   <ul>
 <li><a class="reference internal" href="#">cplint on SWISH Manual - SWI-Prolog Version</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#example-of-use">Example of use</a></li>
+<li><a class="reference internal" href="#testing-the-installation">Testing the installation</a></li>
+<li><a class="reference internal" href="#datasets">Datasets</a></li>
+<li><a class="reference internal" href="#support">Support</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#syntax">Syntax</a><ul>
 <li><a class="reference internal" href="#discrete-probability-distributions">Discrete Probability Distributions</a><ul>
 <li><a class="reference internal" href="#problog-syntax">ProbLog Syntax</a></li>
@@ -1836,8 +1910,10 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#download-query-results-through-an-api">Download Query Results through an API</a></li>
+<li><a class="reference internal" href="#example-files">Example Files</a></li>
 <li><a class="reference internal" href="#manual-in-pdf">Manual in PDF</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>
@@ -1857,7 +1933,7 @@ POSSIBILITY OF SUCH DAMAGE.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Riguzzi Fabrizio, Azzolini Damiano.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
     </div>
   </body>
 </html>
