@@ -5,6 +5,7 @@
   prob_meta/3,
   abd_prob/3,
   vit_prob/3,
+  vit_all_prob/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
@@ -49,6 +50,7 @@ details.
 
 :-meta_predicate abd_prob(:,-,-).
 :-meta_predicate vit_prob(:,-,-).
+:-meta_predicate vit_all_prob(:,-,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob(:,:,-,+).
@@ -296,6 +298,44 @@ vit_prob(M:Goal,P,Delta):-
   member((Goal,P,Exp0),L),
   reverse(Exp0,Exp),
   from_assign_to_vit_exp(Exp,M,Delta).
+
+vit_all_prob(M:Goal,Prob,Exp):-
+  vit_prob(M:Goal,Prob0,Exp0),
+  complete_exp(Exp0,Prob0,M,Exp,Prob).
+
+
+complete_exp(Exp0,Prob0,M,Exp,Prob):-
+  findall((R,S),(M:rule_by_num(R,Head,Body,S),\+ member(rule(R,_,Head,Body),Exp0)),L)->
+  maplist(find_max(M),L,Exp1),
+  foldl(mult,Exp1,Prob0,Prob),
+  convert_exp(Exp1,M,Exp2),
+  append(Exp0,Exp2,Exp).
+
+mult((_,_,_,P1),P0,P):-
+  P is P0*P1.
+
+find_max(M,(R,S),(R,S,N,P)):-
+  M:rule_by_num(R,[_:P0|Head],_Body,S),
+  length(Head,L),
+  numlist(1,L,Numbers),
+  foldl(get_max,Head,Numbers,(P0,0),(P,N)).
+
+get_max(_:P,N,(P0,N0),(P1,N1)):-
+  (P>P0->
+    N1=N,
+    P1=P
+  ;
+    N1=N0,
+    P1=P0
+  ).
+  
+
+convert_exp([],_M,[]).
+
+convert_exp([(R,S,N,_)|T],M,[rule(R,Head,HeadList,Body)|TDelta]):-
+  M:rule_by_num(R,HeadList, Body,S),!,
+  nth0(N,HeadList,Head:_),
+  convert_exp(T,M,TDelta).
 
 /**
  * vit_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-Probability:float,-Delta:list) is nondet
