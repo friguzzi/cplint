@@ -1361,8 +1361,7 @@ system:term_expansion(end_of_file, C) :-
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   retractall(pita_input_mod(M)),
-  findall(LZ,M:zero_clauses(LZ),L0),
-  append(L0,L),
+  findall(LZ,M:zero_clauses(LZ),L),
   retractall(M:zero_clauses(_)),
   retractall(M:tabled(_)),
   append(L,[(:- style_check(+discontiguous)),end_of_file],C).

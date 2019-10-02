@@ -44,10 +44,25 @@ test_pita:-
     dt_winning,
     dt_weather,
     dt_viral,
-    tabling_probs
+    tabling_probs,
+    event_calculus
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
+
+
+:- begin_tests(event_calculus, []).
+:- ensure_loaded(library(examples/event_calculus)).
+test(garden2):-
+  run((prob(holdsAt(locatedIn(bob,garden),2),P),close_to(P,1))).
+test(garden4):-
+  run((prob(holdsAt(locatedIn(bob,garden),4),P),close_to(P,0.34))).
+test(kitchen4):-
+  run((prob(holdsAt(locatedIn(bob,kitchen),4),P),close_to(P,0.66))).
+test(garage6):-
+  run((prob(holdsAt(locatedIn(bob,garage),6),P),close_to(P,0.66))).
+:- end_tests(event_calculus).
+
 
 :- begin_tests(dt_winning, []).
 :- ensure_loaded(library(examples/dt_winning)).
