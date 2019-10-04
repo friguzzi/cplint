@@ -53,7 +53,7 @@ viterbi(M:Goals,Prob,Exp):-
   assert(M:best_exp([])),
   list2and(GL,Goals),
   assert(M:best_goal(GL)),
-	findall(_,find_exp(GL,M),_),
+	(find_exp(GL,M),fail; true),
   M:best_prob(Prob),
   M:best_exp(Exp0),
   M:best_goal(GL),
