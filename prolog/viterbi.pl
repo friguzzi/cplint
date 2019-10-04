@@ -113,7 +113,7 @@ solve([],_M,C,C,P,P):-!.
 
 solve([\+ H|T],M,CIn,COut,P0,P):-
 	builtin(H),!,
-	call(\+ H),
+	\+ H,
 	solve(T,M,CIn,COut,P0,P).
 
 solve([\+ H |T],M,CIn,COut,P0,P):-
