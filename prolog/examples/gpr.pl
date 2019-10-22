@@ -142,7 +142,7 @@ sq_exp_p(X,XP,K):-
 
 l(L):uniform(L,[1,2,3]).
 
-sigma(Sigma):uniform(Sigma,-2,2).
+sigma(Sigma):uniform_dens(Sigma,-2,2).
 
 % squared exponential kernel with fixed parameters: sigma=1, l=1.
 sq_exp(X,XP,K):-

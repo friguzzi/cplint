@@ -223,7 +223,7 @@ To specify a probability density on an argument :code:`Var` of an atom :code:`A`
 where :code:`Density` is a special atom identifying a probability density on variable :code:`Var` and :code:`Body` 
 (optional) is a regular clause body. Allowed :code:`Density` atoms are
 
-- :code:`uniform(Var,L,U)`: :code:`Var` is uniformly distributed in :code:`[L,U]`.
+- :code:`uniform_dens(Var,L,U)`: :code:`Var` is uniformly distributed in :code:`[L,U]`.
 - :code:`gaussian(Var,Mean,Variance)`: :code:`Var` follows a Gaussian distribution with mean :code:`Mean` and variance :code:`Variance`. The distribution can be multivariate if :code:`Mean` is a list and :code:`Variance` a list of lists representing the mean vector and the covariance matrix. In this case the values of :code:`Var` are lists of real values with the same length as that of :code:`Mean`.
 - :code:`dirichlet(Var,Par)`: :code:`Var` is a list of real numbers following a Dirichlet distribution with :math:`\alpha` parameters specified by the list :code:`Par`.
 - :code:`gamma(Var,Shape,Scale)` :code:`Var` follows a gamma distribution with shape parameter :code:`Shape` and scale parameter :code:`Scale`.

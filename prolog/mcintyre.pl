@@ -2386,16 +2386,16 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
 /**
- * uniform(+Lower:float,+Upper:float,-S:float) is det
+ * uniform_dens(+Lower:float,+Upper:float,-S:float) is det
  *
  * Returns in S a sample from a distribution uniform in (Lower,Upper)
  */
-uniform(L,U,_M,S):-
+uniform_dens(L,U,_M,S):-
   number(L),
   random(V),
   S is L+V*(U-L).
 
-uniform(L,U,_M,_S,D):-
+uniform_dens(L,U,_M,_S,D):-
   D is 1/(U-L).
 
 /**
@@ -2413,12 +2413,11 @@ uniform(Values,_M,_S,D):-
   length(Values,L),
   D is 1.0/L.
 
-%uniform(_Values,_S,1.0).
 /**
- * take_a_sample(+R:int,+VC:list,+M:module,+Mean:float,+Variance:float,-S:float) is det
+ * take_a_sample(+R:int,+VC:list,+M:module,+Distr:term,-S:term) is det
  *
- * Returns in S a sample for a Gaussian variable with mean Mean and variance
- * Variance associated to rule R with substitution VC. If the variable
+ * Returns in S a sample for a random variable with distribution Distr
+ * associated to rule R with substitution VC. If the variable
  * has already been sampled, it retrieves the sampled value, otherwise
  * it takes a new sample and records it for rule R with substitution VC.
  */
@@ -3322,6 +3321,7 @@ is_dist(_M,D):-
     finite,
     discrete,
     uniform,
+    uniform_dens,
     gaussian,
     dirichlet,
     gamma,

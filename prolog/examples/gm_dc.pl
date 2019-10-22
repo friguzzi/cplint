@@ -20,9 +20,9 @@ heads:0.6;tails:0.4.
 % a coin is thrown. The coin is biased: with probability 0.6 it lands heads,
 % with probabiity 0.4 it lands tails
 
-g ~ uniform(0, 1).
+g ~ uniform_dens(0, 1).
 % X in g(X)  follows a Gaussian distribution with mean 0 and variance 1
-h ~ uniform(5, 2).
+h ~ uniform_dens(5, 2).
 % X in h(X)  follows a Gaussian distribution with mean 5 and variance 2
 
 mix(X) := heads, g ~= X.
@@ -34,34 +34,34 @@ mix(X) := tails, h ~= X.
 
 hist_uncond(Samples,NBins,Chart):-
   mc_sample_arg(mix(X),Samples,X,L0),
-  histogram(L0,NBins,Chart).
+  histogram(L0,Chart,[nbins(NBins)]).
 % take SAmples samples of X in mix(X) and draw a histogram with NBins bins representing 
 % the probability density of X 
 
 hist_rej_heads(Samples,NBins,Chart):-
   mc_rejection_sample_arg(mix(X),heads,Samples,X,L0),
-  histogram(L0,NBins,Chart).
+  histogram(L0,Chart,[nbins(NBins)]).
 % take Samples samples of X in mix(X) given that heads was true using 
 % rejection sampling and draw an
 % histogram with NBins bins representing the probability density of X
 
 hist_mh_heads(Samples,Lag,NBins,Chart):-
   mc_mh_sample_arg(mix(X),heads,Samples,Lag,X,L0),
-  histogram(L0,NBins,Chart).
+  histogram(L0,Chart,[nbins(NBins)]).
 % take Samples samples of X in mix(X) given that heads was true using 
 % Metropolis-Hastings and draw an
 % histogram with NBins bins representing the probability density of X
 
 hist_rej_dis(Samples,NBins,Chart):-
   mc_rejection_sample_arg(mix(X),(mix(Y),Y>2),Samples,X,L0),
-  histogram(L0,NBins,Chart).
+  histogram(L0,Chart,[nbins(NBins)]).
 % take Samples samples of X in mix(X) given that X>2 was true using 
 % rejection sampling and draw an
 % histogram with NBins bins representing the probability density of X
 
 hist_mh_dis(Samples,Lag,NBins,Chart):-
   mc_mh_sample_arg(mix(X),(mix(Y),Y>2),Samples,Lag,X,L0),
-  histogram(L0,NBins,Chart).
+  histogram(L0,Chart,[nbins(NBins)]).
 % take Samples samples of X in mix(X) given that X>2 was true using 
 % Metropolis-Hastings and draw an
 % histogram with NBins bins representing the probability density of X
