@@ -3022,7 +3022,7 @@ msw_weight(M:A,B,W):-
   msw_weight(V,D,B,W).
 
 msw_weight(real,norm(Mean,Variance),V,W):-!,
-  gauss_density(Mean,Variance,V,W).
+  gaussian(Mean,Variance,V,W).
 
 msw_weight(Values,Dist,V,W):-
   maplist(combine,Values,Dist,VD),
