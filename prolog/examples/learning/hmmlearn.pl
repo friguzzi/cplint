@@ -46,6 +46,8 @@ output(success/1).
 input(hmmf/3).
 input(tr/2).
 
+modeh(*,success(out_sq)).
+
 in([
 (success(L) :- hmmf(L,[r0],3)),
 

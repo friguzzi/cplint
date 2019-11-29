@@ -1597,18 +1597,19 @@ find_val([_T|TT],[_A|TA],T,A):-
 get_output_atoms(O,M):-
   findall((A/Ar),M:output((A/Ar)),O).
 
+generate_goal(LP,M,H,[],LG):-
+  M:local_setting(neg_ex,given),!,
+  find_ex_pred(LP,M,[H],[],LG,0,_Pos,0,_Neg).
 
-generate_goal([],_M,_H,G,G):-!.
+generate_goal(LP,M,H,[],LG):-
+  M:local_setting(neg_ex,cw),
+  (M:modeh(_,_)->
+    true
+  ;
+    throw(missing_mode_declarations)
+  ),
+  find_ex_pred_cw(LP,M,[H],[],LG,0,_Pos,0,_Neg).
 
-generate_goal([P/A|T],M,H,G0,G1):-
-  functor(Pred,P,A),
-  Pred=..[P|Rest],
-  Pred1=..[P,H|Rest],
-  findall(Pred1,call(M:Pred1),L),
-  findall(\+ Pred1,call(M:neg(Pred1)),LN),
-  append(G0,L,G2),
-  append(G2,LN,G3),
-  generate_goal(T,M,H,G3,G1).
 
 /**
  * remove_duplicates(+List1:list,-List2:list) is det
@@ -2240,6 +2241,7 @@ get_node(\+ Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
   retractall(M:v(_,_,_)),
+  abolish_all_tables,
   add_bdd_arg_db(Goal,Env,B,DB,Goal1),
   (M:Goal1->
     bdd_notc(Env,B,(_,BDD))
@@ -2249,6 +2251,7 @@ get_node(\+ Goal,M,Env,BDD):-
 
 get_node(\+ Goal,M,Env,BDD):-!,
   retractall(M:v(_,_,_)),
+  abolish_all_tables,
   add_bdd_arg(Goal,Env,B,Goal1),
   (M:Goal1->
     bdd_notc(Env,B,(_,BDD))
@@ -2260,6 +2263,7 @@ get_node(Goal,M,Env,BDD):-
   M:local_setting(depth_bound,true),!,
   M:local_setting(depth,DB),
   retractall(M:v(_,_,_)),
+  abolish_all_tables,
   add_bdd_arg_db(Goal,Env,B,DB,Goal1),%DB=depth bound
   (M:Goal1->
     (_,BDD)=B
@@ -2270,6 +2274,8 @@ get_node(Goal,M,Env,BDD):-
 get_node(Goal,M,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   add_bdd_arg(Goal,Env,B,Goal1),
+  abolish_all_tables,
+%  trace,
   (M:Goal1->
     (_,BDD)=B
   ;
@@ -3927,7 +3933,7 @@ system:term_expansion((:- sc), []) :-!,
   assert(M:rule_sc_n(0)),
   retractall(M:rule_ng_sc_n(_)),
   assert(M:rule_ng_sc_n(0)),
-  M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
+  M:dynamic((modeh/2,modeh/4,modeb/2,fixed_rule/3,banned/2,lookahead/2,
     lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
     ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
     bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,v/3,
