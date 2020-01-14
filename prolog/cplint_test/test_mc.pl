@@ -31,7 +31,8 @@ test_list([
     uwcsemc,
     bitcoin_attack,
     lda,
-    ship
+    ship,
+    fruit
   ]).
 
 test_mc:-
@@ -484,3 +485,19 @@ test(fire):-
   close_to(P,0.67))).
 
 :- end_tests(ship).
+
+:- begin_tests(fruit, []).
+
+:-ensure_loaded(library(examples/fruit)).
+
+test(apple):-
+  run((
+	mc_sample(buy(apple),1000,P),
+  close_to(P,0.464))).
+
+test(banana):-
+  run((
+	mc_sample(buy(banana),1000,P),
+  close_to(P,0.162))).
+
+:- end_tests(fruit).
