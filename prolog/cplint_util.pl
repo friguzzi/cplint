@@ -472,7 +472,12 @@ single_value_vect(H-N,S0,S):-
   matrix_mult_scal([H],N,[H1]),
   matrix_sum([H1],[S0],[S]).
 
-
+/**
+ * agg_val(+Couple:atom,+PartialSum:number,-Sum:number) is det
+ *
+ * Aggregate values by summation. The first argument is a couple _-N with
+ * N the new value to sum to PartialSum
+ */
 agg_val(_ -N,S,S+N).
 
 vector_sum(A,B,C):-

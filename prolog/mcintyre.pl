@@ -2386,7 +2386,7 @@ sample([_HeadTerm:HeadProb|Tail], Index, Prev, Prob, HeadId) :-
 		sample(Tail, Succ, Next, Prob, HeadId)).
 
 /**
- * uniform_dens(+Lower:float,+Upper:float,-S:float) is det
+ * uniform_dens(+Lower:float,+Upper:float,+M:module,-S:float) is det
  *
  * Returns in S a sample from a distribution uniform in (Lower,Upper)
  */
@@ -2399,7 +2399,7 @@ uniform_dens(L,U,_M,_S,D):-
   D is 1/(U-L).
 
 /**
- * uniform(+Values:list,-S:float) is det
+ * uniform(+Values:list,+M:module,-S:float) is det
  *
  * Returns in S a value from Values chosen uniformly
  */
@@ -2431,7 +2431,7 @@ take_a_sample(R,VC,M,Distr,S):-
   S=S0.
 
 /**
- * gaussian(+Mean:float,+Variance:float,-S:float) is det
+ * gaussian(+Mean:float,+Variance:float,+M:module,-S:float) is det
  *
  * samples a value from a Gaussian with mean Mean and variance
  * Variance and returns it in S
@@ -2489,7 +2489,7 @@ n_gaussian_var(N1,N,[Z1,Z2|T]):-
 
 
 /**
- * gaussian(+Mean:float,+Variance:float,+S:float,-Density:float) is det
+ * gaussian(+Mean:float,+Variance:float,+M:module,+S:float,-Density:float) is det
  *
  * Computes the probability density of value S according to a Gaussian with
  * mean Mean and variance Variance and returns it in Density.
@@ -2511,7 +2511,7 @@ gaussian(Mean,Covariance,_M,S,D):-
 
 
 /**
- * gamma(+Shape:float,+Scale:float,-S:float) is det
+ * gamma(+Shape:float,+Scale:float,+M:module,-S:float) is det
  *
  * samples a value from a Gamma density function with shape Shape and
  * scale Scale returns it in S
@@ -2562,7 +2562,7 @@ gamma(K,Scale,_M,S,D):-
   D is exp(-lgamma(K))/(Scale^K)*S^(K-1)*exp(-S/Scale).
 
 /**
- * beta(+Alpha:float,+Beta:float,-S:float) is det
+ * beta(+Alpha:float,+Beta:float,+M:module,-S:float) is det
  *
  * samples a value from a beta probability distribution with parameters
  * Alpha and Beta and returns it in S.
@@ -2582,7 +2582,7 @@ beta(Alpha,Beta,_M,X,D):-
 
 
 /**
- * poisson(+Lambda:float,-S:int) is det
+ * poisson(+Lambda:float,+M:module,-S:int) is det
  *
  * samples a value from a Poisson probability distribution with parameter
  * Lambda and returns it in S.
@@ -2616,7 +2616,7 @@ fact(N,F0,F):-
   fact(N1,F1,F).
 
 /**
- * binomial(+N:int,+P:float,-S:int) is det
+ * binomial(+N:int,+P:float,+M:module,-S:int) is det
  *
  * samples a value from a binomial probability distribution with parameters
  * N and P and returns it in S.
@@ -2645,7 +2645,7 @@ binomial(N,P,_M,X,Pr):-
   Pr is P^X*(1-P)^N_X*FN/(FX*FN_X).
 
 /**
- * dirichlet(+Par:list,-S:float) is det
+ * dirichlet(+Par:list,+M:module,-S:float) is det
  *
  * samples a value from a Dirichlet probability density with parameters
  * Par and returns it in S
@@ -2670,7 +2670,7 @@ prod(X,A,P0,P0*X^(A-1)).
 
 
 /**
- * geometric(+P:float,-I:int) is det
+ * geometric(+P:float,+M:module,-I:int) is det
  *
  * samples a value from a geometric probability distribution with parameters
  * P and returns it in I (I belongs to [1,infinity]
@@ -2690,7 +2690,7 @@ geometric_val(N0,P,N):-
 geometric(P,_M,I,D):-
   D is (1-P)^(I-1)*P.
 /**
- * finite(+Distribution:list,-S:float) is det
+ * finite(+Distribution:list,+M:module,-S:float) is det
  *
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
@@ -2702,7 +2702,7 @@ finite(D,M,S,Dens):-
   discrete(D,M,S,Dens).
 
 /**
- * discrete(+Distribution:list,-S:float) is det
+ * discrete(+Distribution:list,+M:module,-S:float) is det
  *
  * samples a value from a discrete distribution Distribution (a list
  * of couples Val:Prob) and returns it in S
@@ -2726,28 +2726,20 @@ discrete(D,_M,S,Dens):-
   member(S:Dens,D).
 % discrete(_D,_S,1.0).
 /** 
- * exponential(+Lambda:float, -V:int) is det
+ * exponential(+Lambda:float,+M:module,-V:int) is det
  *
  * Samples a value from exponential distribution with parameter Lambda 
  * 
 **/
 exponential(Lambda,_M,V):-
-  V0 is 1 - exp(-Lambda),
-  random(RandomVal),    
-  exponential_(1,RandomVal,Lambda,V0,V).
-
-exponential_(I,RandomVal,_,CurrentProb,I):-
-  RandomVal =< CurrentProb, !.
-exponential_(I,RandomVal,Lambda,_,V):-
-  I1 is I+1,
-  CurrentProb is 1 - exp(-Lambda*I1),
-  exponential_(I1,RandomVal,Lambda,CurrentProb,V).
+  random(U),
+  V is - log(U)/Lambda.
 
 exponential(Lambda,_M,X,V):-
   V is Lambda*exp(-Lambda*X).
 
 /**
- * pascal(+R:int,+P:float,-Value:int) is det
+ * pascal(+R:int,+P:float,+M:module,-Value:int) is det
  *
  * samples a value from a pascal probability distribution with parameters
  * R and P and returns it in Value. 
