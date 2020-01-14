@@ -30,7 +30,8 @@ test_list([
     viralmc,
     uwcsemc,
     bitcoin_attack,
-    lda
+    lda,
+    ship
   ]).
 
 test_mc:-
@@ -472,3 +473,14 @@ test(mh):-
   run((mc_mh_sample(res(coin,heads),fairness(coin,fair),200,P,[mix(100),lag(3)]),close_to(P,0.5))).
 
 :- end_tests(coinmsw_mc_memo).
+
+:- begin_tests(ship, []).
+
+:-ensure_loaded(library(examples/ship)).
+
+test(fire):-
+  run((
+	mc_sample(saved,1000,P),
+  close_to(P,0.67))).
+
+:- end_tests(ship).
