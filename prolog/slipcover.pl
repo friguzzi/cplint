@@ -284,16 +284,12 @@ make_dynamic(M):-
   maplist(to_dyn(M),L).
 
 to_dyn(M,P/A):-
-  atomic_concat(P, ' tabled',PT),
   A1 is A+1,
   M:(dynamic P/A1),
   A2 is A1+2,
   M:(dynamic P/A2),
-  M:(dynamic PT/A2),
   A3 is A2+1,
-  M:(dynamic P/A3),
-  M:(dynamic PT/A3).
-
+  M:(dynamic P/A3).
 
 
 
