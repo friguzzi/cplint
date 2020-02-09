@@ -267,7 +267,7 @@ abd_prob(M:Goal,P,Delta):-
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   init(Env),
-  findall((Goal,P,Exp),get_abd_p(M:Goal1,M:constraints,Env,P,Exp),L),
+  findall((Goal,P,Exp),get_abd_p(M:Goal1,M:'$constraints',Env,P,Exp),L),
   end(Env),
   erase(Ref),
   member((Goal,P,Exp),L),
@@ -1378,7 +1378,7 @@ system:term_expansion((:- action Conj), []) :-!,
   list2and(L,Conj),
   maplist(act(M),L).
 
-system:term_expansion((:- pita), []) :-!,
+system:term_expansion((:- pita), Clauses) :-!,
   prolog_load_context(module, M),
   retractall(M:local_pita_setting(_,_)),
   findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
@@ -1389,9 +1389,16 @@ system:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
   M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
-    zero_clauses/1, pita_on/0, tabled/1, constraints/2),
+    zero_clauses/1, pita_on/0, tabled/1, '$cons'/2),
   retractall(M:query_rule(_,_,_,_)),
-  style_check(-discontiguous).
+  style_check(-discontiguous),
+  process_body([\+ '$cons'],BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  to_table(M,['$constraints':_],TabDir,[Head1:_]),
+  to_table(M,['$cons':_],TabDirCons,_),
+  add_bdd_arg(Head1,Env,BDDAnd,M,Head2),
+  append([TabDir,TabDirCons,[(Head2 :- Body2)]],Clauses).
 
 system:term_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
@@ -1413,9 +1420,60 @@ system:term_expansion((:- end_lpad), []) :-
   pita_input_mod(M),!,
   retractall(M:pita_on).
 
+system:term_expansion((:- end_lpad), []) :-
+  prolog_load_context(module, M),
+  pita_input_mod(M),!,
+  retractall(M:pita_on).
+
 system:term_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),M:pita_on,!.
+
+system:term_expansion((:- Constraint), Clauses) :-
+  % constraint for abuction
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  Constraint\= (table _),
+  Constraint\=(multifile _),
+  Constraint\=set_sw(_,_),!,
+  list2and(BodyList, Constraint),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  to_table(M,['$cons':_],TabDir,[Head1:_]),
+  add_bdd_arg(Head1,Env,BDDAnd,M,Head2),
+  append(TabDir,[(Head2 :- Body2)],Clauses).
+
+system:term_expansion((Prob:- Constraint), Clauses) :-
+  % probabilistic constraint for abuction
+  prolog_load_context(module, M),
+  pita_input_mod(M),
+  M:pita_on,
+  float(Prob),
+  Constraint\= (table _),
+  Constraint\=(multifile _),
+  Constraint\=set_sw(_,_),!,
+  list2or(HeadListOr, '$cons':Prob),
+  process_head(HeadListOr, HeadList),
+  list2and(BodyList, Constraint),
+  process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  append(HeadList,BodyList,List),
+  extract_vars_list(List,[],VC),
+  get_next_rule_number(M,R),
+  get_probs(HeadList,Probs),%***test single_vars
+  (M:local_pita_setting(single_var,true)->
+    VC1 = []
+  ;
+    VC1 = VC
+  ),
+  to_table(M,HeadList,TabDir,[H1:_]),
+  generate_clause(H1,Env,Body2,VC1,R,Probs,BDDAnd,0,Clauses0,M),
+  append(TabDir,[Clauses0],Clauses).
+
+
 
 system:term_expansion(map_query(Clause),[query_rule(R,HeadList,Body,VC)|Clauses]):-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,!,
@@ -1749,6 +1807,8 @@ system:term_expansion((Head :- Body),Clauses) :-
   append(TabDir,[(Head2 :- Body1)],Clauses).
 
 system:term_expansion((Head :- Body),Clauses) :-
+%  writeln((Head:-Body)),
+ % trace,
 % definite clause senza DB
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
   ((Head:-Body) \= ((system:term_expansion(_,_)) :- _ )),!,

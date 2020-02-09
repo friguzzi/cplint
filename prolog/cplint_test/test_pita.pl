@@ -26,6 +26,8 @@ test_pita:-
     abd1,
     abd2,
     abd3,
+    abd1cons1,
+    abd1cons2,
     map1,
     map_es3,
     map_es21,
@@ -395,6 +397,24 @@ test(bdd_a):-
   run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),perm(Exp,[e, c]))).
 
 :- end_tests(abd1).
+
+:- begin_tests(abd1cons1, []).
+
+:-ensure_loaded(library(examples/abd1cons1)).
+
+test(a):-
+  run((abd_prob(a,P,Exp),close_to(P,0.6),perm(Exp,[\+c, e]))).
+
+:- end_tests(abd1cons1).
+
+:- begin_tests(abd1cons2, []).
+
+:-ensure_loaded(library(examples/abd1cons2)).
+
+test(a):-
+  run((abd_prob(a,P,Exp),close_to(P,0.648),perm(Exp,[c, e]))).
+
+:- end_tests(abd1cons2).
 
 :- begin_tests(abd2, []).
 

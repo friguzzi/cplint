@@ -19,6 +19,8 @@ abducible c.
 d:0.6.
 abducible e.
 
+0.1 :- c,e.
+
 :- end_lpad.
 
 /** <examples>
