@@ -267,11 +267,12 @@ abd_prob(M:Goal,P,Delta):-
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   init(Env),
-  findall((Goal,P,Exp),get_abd_p(M:Goal1,Env,P,Exp),L),
+  findall((Goal,P,Exp),get_abd_p(M:Goal1,M:constraints,Env,P,Exp),L),
   end(Env),
   erase(Ref),
   member((Goal,P,Exp),L),
   from_assign_to_exp(Exp,M,Delta).
+
 
 /**
  * vit_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
@@ -707,6 +708,11 @@ get_p(M:Goal,Env,P):-
 
 get_abd_p(M:Goal,Env,P,Exp):-
   get_node(M:Goal,Env,Out),
+  Out=(_,BDD),
+  ret_abd_prob(Env,BDD,P,Exp).
+
+get_abd_p(M:Goal,M:Evidence,Env,P,Exp):-
+  get_cond_node(M:Goal,M:Evidence,Env,Out,_),
   Out=(_,BDD),
   ret_abd_prob(Env,BDD,P,Exp).
 
@@ -1383,7 +1389,7 @@ system:term_expansion((:- pita), []) :-!,
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
   M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
-    zero_clauses/1, pita_on/0, tabled/1),
+    zero_clauses/1, pita_on/0, tabled/1, constraints/2),
   retractall(M:query_rule(_,_,_,_)),
   style_check(-discontiguous).
 

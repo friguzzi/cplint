@@ -19,6 +19,9 @@ abducible c.
 d:0.6.
 abducible e.
 
+constraints:- \+ cons.
+
+cons:- c,e.
 
 :- end_lpad.
 
