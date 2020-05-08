@@ -409,7 +409,6 @@ Inference
 ==================
 :code:`cplint` answers queries using the module :code:`pita` or :code:`mcintyre`. 
 The first performs the program transformation technique of :cite:`RigSwi10-ICLP10-IC`. 
-Differently from that work, techniques alternative to tabling and answer subsumption are used. 
 The latter performs approximate inference by sampling using a different program transformation technique and is described in :cite:`Rig13-FI-IJ`. 
 Only :code:`mcintyre` is able to handle continuous random variables.
 

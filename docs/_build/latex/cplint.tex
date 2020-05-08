@@ -52,7 +52,7 @@
 
 
 \title{cplint Documentation}
-\date{Jun 26, 2019}
+\date{May 08, 2020}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -74,10 +74,11 @@
 cplint is a suite of programs for reasoning with LPADs/CP-logic programs \sphinxcite{index:venver03-tr}\sphinxcite{index:venver04-iclp04-ic}\sphinxcite{index:vendenbru-jelia06}\sphinxcite{index:dblp-journals-tplp-vennekensdb09}.
 It contains modules for both inference and learning.
 
-cplint is available in two versions, one for Yap Prolog and one for SWI-Prolog.
+cplint is available in three versions, one for Yap Prolog, one for XSB and one for SWI-Prolog.
 They differ slightly in the features offered.
 This manual is about the SWI-Prolog version.
-You can find the manual for the Yap version at \sphinxurl{http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html}.
+You can find the manual for the Yap version at \sphinxurl{http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html} and
+for the XSB version at \sphinxurl{http://xsb.sourceforge.net/manual2/manual2.pdf}.
 
 cplint on SWISH is a web application for using cplint available at \sphinxurl{http://cplint.eu}.
 
@@ -335,7 +336,7 @@ where \sphinxcode{\sphinxupquote{Density}} is a special atom identifying a proba
 (optional) is a regular clause body. Allowed \sphinxcode{\sphinxupquote{Density}} atoms are
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{uniform(Var,L,U)}}: \sphinxcode{\sphinxupquote{Var}} is uniformly distributed in \sphinxcode{\sphinxupquote{{[}L,U{]}}}.
+\sphinxcode{\sphinxupquote{uniform\_dens(Var,L,U)}}: \sphinxcode{\sphinxupquote{Var}} is uniformly distributed in \sphinxcode{\sphinxupquote{{[}L,U{]}}}.
 
 \item {} 
 \sphinxcode{\sphinxupquote{gaussian(Var,Mean,Variance)}}: \sphinxcode{\sphinxupquote{Var}} follows a Gaussian distribution with mean \sphinxcode{\sphinxupquote{Mean}} and variance \sphinxcode{\sphinxupquote{Variance}}. The distribution can be multivariate if \sphinxcode{\sphinxupquote{Mean}} is a list and \sphinxcode{\sphinxupquote{Variance}} a list of lists representing the mean vector and the covariance matrix. In this case the values of \sphinxcode{\sphinxupquote{Var}} are lists of real values with the same length as that of \sphinxcode{\sphinxupquote{Mean}}.
@@ -564,7 +565,6 @@ for example \sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl}
 \label{\detokenize{index:inference}}
 \sphinxcode{\sphinxupquote{cplint}} answers queries using the module \sphinxcode{\sphinxupquote{pita}} or \sphinxcode{\sphinxupquote{mcintyre}}.
 The first performs the program transformation technique of \sphinxcite{index:rigswi10-iclp10-ic}.
-Differently from that work, techniques alternative to tabling and answer subsumption are used.
 The latter performs approximate inference by sampling using a different program transformation technique and is described in \sphinxcite{index:rig13-fi-ij}.
 Only \sphinxcode{\sphinxupquote{mcintyre}} is able to handle continuous random variables.
 
@@ -2315,7 +2315,7 @@ The available parameters are:
 \sphinxcode{\sphinxupquote{mcts\_maxrestarts}} (values: integer, default value: 20, valid for LEMUR): maximum number of Monte-Carlo tree search restarts
 
 \item {} 
-\sphinxcode{\sphinxupquote{neg\_ex}} (values: \sphinxcode{\sphinxupquote{given}}, \sphinxcode{\sphinxupquote{cw}}, default value: \sphinxcode{\sphinxupquote{cw}}): if set to \sphinxcode{\sphinxupquote{given}}, the negative examples in testing are taken from the test folds interpretations, i.e., those examples \sphinxcode{\sphinxupquote{ex}} stored as \sphinxcode{\sphinxupquote{neg(ex)}}; if set to \sphinxcode{\sphinxupquote{cw}}, the negative examples are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate.
+\sphinxcode{\sphinxupquote{neg\_ex}} (values: \sphinxcode{\sphinxupquote{given}}, \sphinxcode{\sphinxupquote{cw}}, default value: \sphinxcode{\sphinxupquote{cw}}): if set to \sphinxcode{\sphinxupquote{given}}, the negative examples in training and testing are taken from the test folds interpretations, i.e., those examples \sphinxcode{\sphinxupquote{ex}} stored as \sphinxcode{\sphinxupquote{neg(ex)}}; if set to \sphinxcode{\sphinxupquote{cw}}, the negative examples in training and testing are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate, so the target predicates must have at least one fact for \sphinxcode{\sphinxupquote{modeh/2}} or \sphinxcode{\sphinxupquote{modebb/2}} also for parameter learning.
 
 \item {} 
 \sphinxcode{\sphinxupquote{alpha}} (values: floating point \(\geq 0\), default value: 0): parameter of the symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is used to sample parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled uniformly and independently in {[}0,1{]}. If it takes a value \(\geq 0\), the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters \(\alpha,\ldots,\alpha\).
@@ -2381,7 +2381,7 @@ Prob = 0.51.
 \end{sphinxVerbatim}
 
 
-\chapter{Example files}
+\chapter{Example Files}
 \label{\detokenize{index:example-files}}
 The \sphinxcode{\sphinxupquote{pack/cplint/prolog/examples}} folder in SWI-Prolog home contains some example programs.
 The subfolder \sphinxcode{\sphinxupquote{learning}} contains some learning examples.
