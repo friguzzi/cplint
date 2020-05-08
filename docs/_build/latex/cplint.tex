@@ -1501,48 +1501,6 @@ However, also \sphinxcode{\sphinxupquote{mcintyre}} may not terminate if loops n
 If you want to set the seed of the random number generator, you can use SWI-Prolog predicates \sphinxcode{\sphinxupquote{setrand/1}} and \sphinxcode{\sphinxupquote{getrand/1}}, see \sphinxhref{http://www.swi-prolog.org/pldoc/doc\_for?object=setrand/1}{SWI-Prolog manual}.
 
 
-\section{Tabling}
-\label{\detokenize{index:tabling}}
-You can also use tabling in inference to speed up the computation and/or avoid loops, see the \sphinxhref{http://www.swi-prolog.org/pldoc/man?section=tabling}{SWI-Prolog manual}.
-
-To do so you have to use the \sphinxcode{\sphinxupquote{tabling}} library module and declare some of the predicates as tabled.
-The tabling declarations go after the \sphinxcode{\sphinxupquote{:-pita.}} or \sphinxcode{\sphinxupquote{:- mc.}} directives.
-
-For example, to compute the probability of paths in undirected graphs you can use the program (\sphinxhref{http://cplint.eu/e/tabling.swinb}{tabling.swinb})
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{tabling}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{pita}\PYG{o}{.}
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{table} \PYG{n}{path}\PYG{o}{/}\PYG{l+m+mf}{2.}
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{begin\PYGZus{}lpad}\PYG{o}{.}
-
-\PYG{n}{path}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{X}\PYG{p}{)}\PYG{o}{.}
-\PYG{n}{path}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{Y}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}
-        \PYG{n}{path}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{Z}\PYG{p}{)}\PYG{p}{,}\PYG{n}{edge}\PYG{p}{(}\PYG{n}{Z}\PYG{p}{,}\PYG{n}{Y}\PYG{p}{)}\PYG{o}{.}
-\PYG{n}{edge}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{Y}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{arc}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{Y}\PYG{p}{)}\PYG{o}{.}
-\PYG{n}{edge}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{Y}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{arc}\PYG{p}{(}\PYG{n}{Y}\PYG{p}{,}\PYG{n}{X}\PYG{p}{)}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{n}{b}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.2}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{b}\PYG{p}{,}\PYG{n}{e}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.5}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{n}{c}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.3}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{c}\PYG{p}{,}\PYG{n}{d}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{d}\PYG{p}{,}\PYG{n}{e}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{o}{.}
-\PYG{n}{arc}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{n}{e}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.1}\PYG{o}{.}
-
-\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}lpad}\PYG{o}{.}
-\end{sphinxVerbatim}
-
-Then you can compute the probability that \sphinxcode{\sphinxupquote{a}} and \sphinxcode{\sphinxupquote{e}} are connected with
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{prob}\PYG{p}{(}\PYG{n}{path}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{n}{e}\PYG{p}{)}\PYG{p}{,}\PYG{n}{Prob}\PYG{p}{)}\PYG{o}{.}
-\end{sphinxVerbatim}
-
-This programs has loops so if you run the above query without tabling \sphinxcode{\sphinxupquote{pita}} would loop forever.
-
-You can use tabling with both \sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}}.
-
-
 \section{Decision Theory}
 \label{\detokenize{index:decision-theory}}
 cplint allows also to represent decision theory problem following the syntax of Dtproblog \sphinxcite{index:van2010dtproblog}.

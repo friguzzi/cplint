@@ -1093,42 +1093,6 @@ However, also :code:`mcintyre` may not terminate if loops not involving probabil
 
 If you want to set the seed of the random number generator, you can use SWI-Prolog predicates :code:`setrand/1` and :code:`getrand/1`, see `SWI-Prolog manual <http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1>`__.
 
-Tabling
--------
-You can also use tabling in inference to speed up the computation and/or avoid loops, see the `SWI-Prolog manual <http://www.swi-prolog.org/pldoc/man?section=tabling>`__.
-
-To do so you have to use the :code:`tabling` library module and declare some of the predicates as tabled. 
-The tabling declarations go after the :code:`:-pita.` or :code:`:- mc.` directives.
-
-For example, to compute the probability of paths in undirected graphs you can use the program (`tabling.swinb <http://cplint.eu/e/tabling.swinb>`_) ::
-
-	:- use_module(library(pita)).
-	:- use_module(library(tabling)).
-	:- pita.
-	:- table path/2.
-	:- begin_lpad.
-
-	path(X,X).
-	path(X,Y):-
-		path(X,Z),edge(Z,Y).
-	edge(X,Y):-arc(X,Y).
-	edge(X,Y):-arc(Y,X).
-	arc(a,b):0.2.
-	arc(b,e):0.5.
-	arc(a,c):0.3.
-	arc(c,d):0.4.
-	arc(d,e):0.4.
-	arc(a,e):0.1.
-	
-	:- end_lpad.
-
-Then you can compute the probability that :code:`a` and :code:`e` are connected with ::
-
-	prob(path(a,e),Prob).
-
-This programs has loops so if you run the above query without tabling :code:`pita` would loop forever.
-
-You can use tabling with both :code:`pita` and :code:`mcintyre`.
 
 Decision Theory
 ---------------

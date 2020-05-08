@@ -1044,40 +1044,6 @@ Differently from <code class="code docutils literal notranslate"><span class="pr
 However, also <code class="code docutils literal notranslate"><span class="pre">mcintyre</span></code> may not terminate if loops not involving probabilistic predicates are present.</p>
 <p>If you want to set the seed of the random number generator, you can use SWI-Prolog predicates <code class="code docutils literal notranslate"><span class="pre">setrand/1</span></code> and <code class="code docutils literal notranslate"><span class="pre">getrand/1</span></code>, see <a class="reference external" href="http://www.swi-prolog.org/pldoc/doc_for?object=setrand/1">SWI-Prolog manual</a>.</p>
 </div>
-<div class="section" id="tabling">
-<h3>Tabling<a class="headerlink" href="#tabling" title="Permalink to this headline">¶</a></h3>
-<p>You can also use tabling in inference to speed up the computation and/or avoid loops, see the <a class="reference external" href="http://www.swi-prolog.org/pldoc/man?section=tabling">SWI-Prolog manual</a>.</p>
-<p>To do so you have to use the <code class="code docutils literal notranslate"><span class="pre">tabling</span></code> library module and declare some of the predicates as tabled.
-The tabling declarations go after the <code class="code docutils literal notranslate"><span class="pre">:-pita.</span></code> or <code class="code docutils literal notranslate"><span class="pre">:-</span> <span class="pre">mc.</span></code> directives.</p>
-<p>For example, to compute the probability of paths in undirected graphs you can use the program (<a class="reference external" href="http://cplint.eu/e/tabling.swinb">tabling.swinb</a>)</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="o">-</span> <span class="n">use_module</span><span class="p">(</span><span class="n">library</span><span class="p">(</span><span class="n">pita</span><span class="p">))</span><span class="o">.</span>
-<span class="p">:</span><span class="o">-</span> <span class="n">use_module</span><span class="p">(</span><span class="n">library</span><span class="p">(</span><span class="n">tabling</span><span class="p">))</span><span class="o">.</span>
-<span class="p">:</span><span class="o">-</span> <span class="n">pita</span><span class="o">.</span>
-<span class="p">:</span><span class="o">-</span> <span class="n">table</span> <span class="n">path</span><span class="o">/</span><span class="mf">2.</span>
-<span class="p">:</span><span class="o">-</span> <span class="n">begin_lpad</span><span class="o">.</span>
-
-<span class="n">path</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">X</span><span class="p">)</span><span class="o">.</span>
-<span class="n">path</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">):</span><span class="o">-</span>
-        <span class="n">path</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="n">edge</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span><span class="o">.</span>
-<span class="n">edge</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">):</span><span class="o">-</span><span class="n">arc</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span><span class="o">.</span>
-<span class="n">edge</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">):</span><span class="o">-</span><span class="n">arc</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">)</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span><span class="mf">0.2</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">e</span><span class="p">):</span><span class="mf">0.5</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">):</span><span class="mf">0.3</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">):</span><span class="mf">0.4</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">e</span><span class="p">):</span><span class="mf">0.4</span><span class="o">.</span>
-<span class="n">arc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">):</span><span class="mf">0.1</span><span class="o">.</span>
-
-<span class="p">:</span><span class="o">-</span> <span class="n">end_lpad</span><span class="o">.</span>
-</pre></div>
-</div>
-<p>Then you can compute the probability that <code class="code docutils literal notranslate"><span class="pre">a</span></code> and <code class="code docutils literal notranslate"><span class="pre">e</span></code> are connected with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prob</span><span class="p">(</span><span class="n">path</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">),</span><span class="n">Prob</span><span class="p">)</span><span class="o">.</span>
-</pre></div>
-</div>
-<p>This programs has loops so if you run the above query without tabling <code class="code docutils literal notranslate"><span class="pre">pita</span></code> would loop forever.</p>
-<p>You can use tabling with both <code class="code docutils literal notranslate"><span class="pre">pita</span></code> and <code class="code docutils literal notranslate"><span class="pre">mcintyre</span></code>.</p>
-</div>
 <div class="section" id="decision-theory">
 <h3>Decision Theory<a class="headerlink" href="#decision-theory" title="Permalink to this headline">¶</a></h3>
 <p>cplint allows also to represent decision theory problem following the syntax of Dtproblog <a class="reference internal" href="#van2010dtproblog" id="id35">[VdBTVODR10]</a>.</p>
@@ -1888,7 +1854,6 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#parameters-for-inference">Parameters for Inference</a></li>
-<li><a class="reference internal" href="#tabling">Tabling</a></li>
 <li><a class="reference internal" href="#decision-theory">Decision Theory</a></li>
 </ul>
 </li>
