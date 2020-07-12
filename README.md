@@ -34,7 +34,7 @@ It requires the packs
 
 `bddem` uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use
 
-    ?- pack_rebuild(bdeem).
+    ?- pack_rebuild(bddem).
 
 On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page [https://github.com/friguzzi/bddem](https://github.com/friguzzi/bddem).
 
