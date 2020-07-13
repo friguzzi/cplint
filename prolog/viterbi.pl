@@ -1,5 +1,5 @@
 
-:- module(viterbi,[ viterbi/3, 
+:- module(viterbi,[ viterbi/3,
   viterbi_all/3,
   op(600,xfy,'::')
     ]).
@@ -33,7 +33,7 @@ default_setting_viterbi(epsilon_parsing, 1e-5).
  * It returns the explanation in Exp. It completes the explanation with the most probable
  * values of the random variables not included in the explanation, thus performing MPE, i.e.,
  * a value is chosen for all probabilistic clauses. For clauses not included in the explanation
- * that are nonground, it considers their nonground version, thus not performing MPE exactly. 
+ * that are nonground, it considers their nonground version, thus not performing MPE exactly.
  */
 viterbi_all(M:Goals,Prob,Exp):-
   viterbi(M:Goals,Prob0,Exp0),
@@ -83,7 +83,7 @@ get_max(_:P,N,(P0,N0),(P1,N1)):-
     N1=N0,
     P1=P0
   ).
-  
+
 
 convert_exp([],_M,[]).
 
@@ -354,8 +354,8 @@ gen_head_disc(H,V,V1:P,H1:P):-copy_term((H,V),(H1,V1)).
  */
 process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   (H=Head:ProbHead;H=ProbHead::Head),!,
-  ProbHead1 is ProbHead,
-  ProbLast is 1 - Prob - ProbHead1,
+  ProbHead1 is float(ProbHead),
+  ProbLast is 1.0 - Prob - ProbHead1,
   prolog_load_context(module, M),vit_input_mod(M),
   M:local_viterbi_setting(epsilon_parsing, Eps),
   EpsNeg is - Eps,
@@ -368,7 +368,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
 
 process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
   (H=Head:ProbHead;H=ProbHead::Head),
-  ProbHead1 is ProbHead,
+  ProbHead1 is float(ProbHead),
   ProbNext is Prob + ProbHead1,
   process_head_ground(Tail, ProbNext, Next).
 

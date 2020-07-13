@@ -247,7 +247,7 @@ induce_rules(M:Folds,R):-
   learn_params(DB,M,R2,R,Score),
   format2(M,"~nRefinement score  ~f - score after EMBLEM ~f~n",[Score2,Score]),
   statistics(walltime,[_,WT]),
-  WTS is WT/1000,
+  WTS is WT/1000.0,
   write2(M,'\n\n'),
   format2(M,'/* SLIPCOVER Final score ~f~n',[Score]),
   format2(M,'Wall time ~f */~n',[WTS]),
@@ -440,7 +440,7 @@ induce_parameters(M:Folds,R):-
   statistics(walltime,[_,_]),
   learn_params(DB,M,R0,R,Score),
   statistics(walltime,[_,CT]),
-  CTS is CT/1000,
+  CTS is CT/1000.0,
   format2(M,'/* EMBLEM Final score ~f~n',[Score]),
   format2(M,'Wall time ~f */~n',[CTS]),
   write_rules2(M,R,user_output),
@@ -864,7 +864,7 @@ get_bdd_group([],_M,_Env,[],G,G,BDD,BDD,_CE,LE,LE):-!.
 get_bdd_group(T,_M,_Env,T,0,0,BDD,BDD,_CE,LE,LE):- !.
 
 get_bdd_group([H|T],M,Env,T1,Gmax,G1,BDD0,BDD,CE,[H|LE0],LE):-
-  get_node(H,M,Env,BDD1),  		%creates the BDD for atom H
+  get_node(H,M,Env,BDD1),		%creates the BDD for atom H
   and(Env,BDD0,BDD1,BDD2),
   G is Gmax-1,
   get_bdd_group(T,M,Env,T1,G,G1,BDD2,BDD,CE,LE0,LE).
@@ -934,7 +934,7 @@ score(_M,LE,ExP,_CLL,Score):-
 compute_prob([],[],[],Pos,Pos,Neg,Neg).
 
 compute_prob([\+ HE|TE],[HP|TP],[P- (\+ HE)|T],Pos0,Pos,Neg0,Neg):-!,
-  P is 1-HP,
+  P is 1.0-HP,
   Neg1 is Neg0+1,
   compute_prob(TE,TP,T,Pos0,Pos,Neg1,Neg).
 
@@ -1014,7 +1014,7 @@ area([R0-P0|T],Flag,Pos,TPA,FPA,A0,A):-
     ;
       P_1 is TPA/(TPA+FPA)
     ),
-    FPB is TPB*(1-P0)/P0,
+    FPB is TPB*(1.0-P0)/P0,
     N is TPB-TPA+0.5,
     interpolate(1,N,Pos,R_1,P_1,TPA,FPA,TPB,FPB,A0,A1)
   ),
@@ -1158,8 +1158,8 @@ deduct(NM,Mod,DB,InTheory0,InTheory):-
     NM1 is NM-1,
     ( HL \== [] ->
        (generate_body(HL,Mod,InTheory1),
-    	append(InTheory0,InTheory1,InTheory2),
-    	deduct(NM1,Mod,DB1,InTheory2,InTheory)
+	append(InTheory0,InTheory1,InTheory2),
+	deduct(NM1,Mod,DB1,InTheory2,InTheory)
        )
       ;
        deduct(NM1,Mod,DB1,InTheory0,InTheory)
@@ -1314,7 +1314,7 @@ all_plus_args([H|T]):-
  * generate_body(+ModeDecs:list,+Module:atom,-BottomClauses:list) is det
  *
  * Generates the body of bottom clauses and returns the bottom clauses in BottomClauses.
- * 
+ *
  */
 generate_body([],_Mod,[]):-!.
 
@@ -1330,7 +1330,7 @@ generate_body([(A,H,Det)|T],Mod,[(rule(R,HP,[],BodyList,tunable),-1e20)|CL0]):-!
   remove_duplicates(BodyList2,BodyList),
   get_next_rule_number(Mod,R),
   length(Head,LH),
-  Prob is 1/(LH+1),
+  Prob is 1.0/(LH+1),
   gen_head(Head,Prob,HP),
   copy_term((HP,BodyList),(HeadV,BodyListV)),
   numbervars((HeadV,BodyListV),0,_V),
@@ -1654,7 +1654,7 @@ specialize_rule(Rule,M,SpecRule,Lit):-
   remove_prob(LH,LH1),
   delete(LH1,'',LH2),
   append(LH2,BL1,ALL2),
-  dv(LH2,BL1,M,DList), 	%-DList: list of couples (variable,depth)
+  dv(LH2,BL1,M,DList),	%-DList: list of couples (variable,depth)
   extract_fancy_vars(ALL2,Vars1),
   length(Vars1,NV),
   M:local_setting(max_var,MV),
@@ -1843,7 +1843,7 @@ remove_eq(X,[_|R],R1):-
  *
  * The predicate checks whether Literals form a linked list of literals
  * given that PrevLits are the previous literals.
- * In a linked list of literals input variables of a literal are output variables in  
+ * In a linked list of literals input variables of a literal are output variables in
  * a previous literal.
  */
 linked_clause([],_M,_).
@@ -1951,8 +1951,8 @@ type_vars([_V|RV],[_T|RT],RTV):-
 /**
  * take_var_args(+ArgSpec:list,+TypeVars:list,-Vars:list) is det
  *
- * The predicate returns in Vars the list of vars corresponding to 
- * variables arguments in ArgSpec (those with argument specification 
+ * The predicate returns in Vars the list of vars corresponding to
+ * variables arguments in ArgSpec (those with argument specification
  * +type or -type). TypeVars is a list of terns of the form
  * Variable=Types as returnd by extract_type_vars/3.
  */
@@ -2008,7 +2008,7 @@ fancy_vars([X|R],N,[NN2=X|R1]):-
  * delete_one(+List:list,-Rest:list,+Element:term) is nondet
  *
  * As the library predicate delete(+List1, @Elem, -List2) but
- * Element is unified with the deleted element (so it can be 
+ * Element is unified with the deleted element (so it can be
  * instantiated by the call).
  */
 delete_one([X|R],R,X).
@@ -2054,13 +2054,13 @@ head_depth([V|R],[[V,0]|R1]):-
 %associates a depth to each variable in the clause body
 var_depth([],_M,PrevDs1,PrevDs1,MD,MD):-!.
 
-var_depth([L|R],M,PrevDs,PrevDs1,_MD,MD):-    		%L = a body literal, MD = maximum depth set by the user
+var_depth([L|R],M,PrevDs,PrevDs1,_MD,MD):-		%L = a body literal, MD = maximum depth set by the user
   input_variables_b(L,M,InputVars),
   term_variables(L, BodyAtomVars),
   output_vars(BodyAtomVars,InputVars,OutputVars),
-  depth_InputVars(InputVars,PrevDs,0,MaxD),   		%MaxD: maximum depth of the input variables in the body literal
+  depth_InputVars(InputVars,PrevDs,0,MaxD),		%MaxD: maximum depth of the input variables in the body literal
   D is MaxD+1,
-  compute_depth(OutputVars,D,PrevDs,PrevDs0), 		%Computes the depth for the output variables in the body literal
+  compute_depth(OutputVars,D,PrevDs,PrevDs0),		%Computes the depth for the output variables in the body literal
   var_depth(R,M,PrevDs0,PrevDs1,D,MD).
 
 get_max([],_,Ds,Ds).
@@ -2130,7 +2130,7 @@ Copyright (c) 2011, Fabrizio Riguzzi and Elena Bellodi
 /**
  * assert_all(+Terms:list,+Module:atom,-Refs:list) is det
  *
- * The predicate asserts all terms in Terms in module Module using assertz(M:Term,Ref) and 
+ * The predicate asserts all terms in Terms in module Module using assertz(M:Term,Ref) and
  * returns the list of references in Refs
  */
 assert_all([],_M,[]).
@@ -2758,9 +2758,9 @@ gen_clause_cw(def_rule(H,BodyList,Lit),_M,N,N,def_rule(H,BodyList,Lit),Clauses) 
  * generate_clauses(+Rules0:list,+Module:atom,+StartingIndex:integer,-Rules:list,+Clauses:list,-ClausesOut:list) is det
  *
  * The predicate generate the internal representation of rules to produce clauses to be
- * asserted in the database. 
+ * asserted in the database.
  * Rules0 is a list of term of the form rule(R,HeadList,BodyList,Lit,Tun).
- * Rules is a list of terms of the form 
+ * Rules is a list of terms of the form
  * rule(N,HeadList,BodyList,Lit,Tun) where N is
  * an increasing index starting from StartingIndex.
  * ClausesOut/Clauses is a difference list of clauses to be asserted.
@@ -2841,7 +2841,7 @@ gen_clause(def_rule(H,BodyList,Lit),M,N,N,def_rule(H,BodyList,Lit),Clauses) :- !
  * generate_clauses_bg(+Rules:list,-Clauses:list) is det
  *
  * The predicate generate clauses to be
- * asserted in the database for the rules from the background. 
+ * asserted in the database for the rules from the background.
  * Rules is a list of term of the form def_rule(H,BodyList,_Lit).
  * Clauses is a list of clauses to be asserted.
  */
@@ -3025,7 +3025,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[Rule])):-
   append(HeadList0,['':_],HeadList),
   list2and(BodyList, Body),
   gen_cl_t(M,HeadList,BodyList,Clauses,Rule).
-  
+
 term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fixed)])):-
   M:local_setting(compiling,on),
   M:local_setting(depth_bound,true),
@@ -3905,7 +3905,7 @@ tab(M,A/B,P):-
 /**
  * zero_clause(+Module:atom,+PredSpec:pred_spec,-ZeroClause:term) is det
  *
- * Generates the zero clause for predicate PredSpec. 
+ * Generates the zero clause for predicate PredSpec.
  * Module is the module of the input file.
  */
 zero_clause(M,A/B,(H:-maplist(nonvar,Args0),slipcover:zeroc(Env,BDD))):-

@@ -1107,21 +1107,25 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
 
 process_head(HeadList, GroundHeadList) :-
   ground_prob(HeadList), !,
-  process_head_ground(HeadList, 0, GroundHeadList).
+  process_head_ground(HeadList, 0.0, GroundHeadList).
 
 process_head(HeadList0, HeadList):-
   get_probs(HeadList0,PL),
-  foldl(minus,PL,1,PNull),
+  foldl(minus,PL,1.0,PNull),
   append(HeadList0,['':PNull],HeadList).
 
 minus(A,B,B-A).
 
-prob_ann(_:P,P):-!.
-prob_ann(P::_,P).
+prob_ann(_:P0,P):-!, to_float(P0,P).
+prob_ann(P0::_,P):- to_float(P0, P).
 
+to_float(P0, P) :-
+  ground(P0), !,
+  P is float(P0).
+to_float(P, P).
 
 gen_head(H,P,VH,V,V1,H1:P):-copy_term((H,VH,V),(H1,VH,V1)).
-gen_head_disc(H,VH,V,V1:P,H1:P1):-copy_term((H,VH,V),(H1,VH,V1)),P1 is P.
+gen_head_disc(H,VH,V,V1:P,H1:P1):-copy_term((H,VH,V),(H1,VH,V1)),P1 is float(P).
 
 
 /* process_head_ground([Head:ProbHead], Prob, [Head:ProbHead|Null])
@@ -1129,8 +1133,8 @@ gen_head_disc(H,VH,V,V1:P,H1:P1):-copy_term((H,VH,V),(H1,VH,V1)),P1 is P.
  */
 process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   (H=Head:ProbHead;H=ProbHead::Head),!,
-  ProbHead1 is ProbHead,
-  ProbLast is 1 - Prob - ProbHead1,
+  ProbHead1 is float(ProbHead),
+  ProbLast is 1.0 - Prob - ProbHead1,
   prolog_load_context(module, M),pita_input_mod(M),
   M:local_pita_setting(epsilon_parsing, Eps),
   EpsNeg is - Eps,
@@ -1143,7 +1147,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
 
 process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
   (H=Head:ProbHead;H=ProbHead::Head),
-  ProbHead1 is ProbHead,
+  ProbHead1 is float(ProbHead),
   ProbNext is Prob + ProbHead1,
   process_head_ground(Tail, ProbNext, Next).
 
