@@ -163,6 +163,7 @@ details.
 :-use_module(library(matrix)).
 :-use_module(library(option)).
 :-use_module(library(predicate_options)).
+:-use_module(cplint_util).
 
 :-predicate_options(mc_prob/3,3,[bar(-)]).
 :-predicate_options(mc_sample/4,4,[successes(-),failures(-),bar(-)]).
@@ -551,7 +552,7 @@ mc_sample(M:Goal,S,P,Options):-
 
 /**
  * mc_sample(:Query:atom,+Samples:int,-Probability:float) is det
- * 
+ *
  * Equivalent to mc_sample/4 with an empty option list.
  */
 mc_sample(M:Goal,S,P):-
@@ -690,7 +691,7 @@ nac(do(\+ _)).
 /**
  * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
  *
- * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) 
+ * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0)
  * times.
  * The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
  * It performs Gibbs sampling: each sample is obtained from the previous one by resampling
@@ -970,7 +971,7 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence,Block, Arg,V0,V):-
  * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
- * It performs blocked Gibbs sampling: each sample is obtained from the 
+ * It performs blocked Gibbs sampling: each sample is obtained from the
  * previous one by resampling
  * Block variables given the values of the variables in its Markov blanket.
  */
@@ -1006,7 +1007,7 @@ mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Block,Arg,ValList):-
  * L is the list of values of Arg for which Query succeeds in
  * a world sampled at random and N is the number of samples
  * returning that list of values.
- * It performs blocked Gibbs sampling: each sample is obtained from the previous one 
+ * It performs blocked Gibbs sampling: each sample is obtained from the previous one
  * by resampling
  * Block variables given the values of the variables in its Markov blanket.
  */
@@ -1084,7 +1085,7 @@ mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
  */
 mc_mh_sample(M:Goal,M:Evidence,S,P):-
   mc_mh_sample(M:Goal,M:Evidence,S,P,[]).
-  
+
 /**
  * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
@@ -1365,7 +1366,7 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[]).
-  
+
 /**
  * mc_mh_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
  *
@@ -2116,7 +2117,7 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  *
  * Options is a list of options, the following are recognised by mc_sample_arg_one/5:
  * * bar(-BarChar:dict)
- *   BarChart is a dict for rendering with c3 as a bar chart 
+ *   BarChart is a dict for rendering with c3 as a bar chart
  *   with a bar for each value of Arg returned by sampling with uniform
  *   probability one answer from those returned by Query in a world sampled
  *   at random.
@@ -2725,11 +2726,11 @@ discrete_int([S0:W|T],W0,U,S):-
 discrete(D,_M,S,Dens):-
   member(S:Dens,D).
 % discrete(_D,_S,1.0).
-/** 
+/**
  * exponential(+Lambda:float,+M:module,-V:int) is det
  *
- * Samples a value from exponential distribution with parameter Lambda 
- * 
+ * Samples a value from exponential distribution with parameter Lambda
+ *
 **/
 exponential(Lambda,_M,V):-
   random(U),
@@ -2742,7 +2743,7 @@ exponential(Lambda,_M,X,V):-
  * pascal(+R:int,+P:float,+M:module,-Value:int) is det
  *
  * samples a value from a pascal probability distribution with parameters
- * R and P and returns it in Value. 
+ * R and P and returns it in Value.
  * R is the number of failures
  * P is the success probability
  */
@@ -3280,32 +3281,14 @@ list2and([X],X):-
 list2and([H|T],(H,Ta)):-!,
     list2and(T,Ta).
 
-/**
- * builtin(+Goal:atom) is det
- *
- * Succeeds if Goal is an atom whose predicate is defined in Prolog
- * (either builtin or defined in a standard library).
- */
-builtin(G):-
-  builtin_int(G),!.
 
-builtin_int(average(_L,_Av)).
-builtin_int(mc_prob(_,_,_)).
-builtin_int(mc_prob(_,_)).
-builtin_int(mc_sample(_,_,_,_)).
-builtin_int(db(_)).
-builtin_int(G):-
-  predicate_property(G,built_in).
-builtin_int(G):-
-  predicate_property(G,imported_from(lists)).
-builtin_int(G):-
-  predicate_property(G,imported_from(apply)).
-builtin_int(G):-
-  predicate_property(G,imported_from(nf_r)).
-builtin_int(G):-
-  predicate_property(G,imported_from(matrix)).
-builtin_int(G):-
-  predicate_property(G,imported_from(clpfd)).
+builtin(average(_L,_Av)) :- !.
+builtin(mc_prob(_,_,_)) :- !.
+builtin(mc_prob(_,_)) :- !.
+builtin(mc_sample(_,_,_,_)) :- !.
+builtin(db(_)) :- !.
+builtin(G) :-
+  swi_builtin(G).
 
 
 is_dist(_M,D):-

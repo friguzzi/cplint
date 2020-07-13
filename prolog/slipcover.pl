@@ -56,6 +56,7 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(terms)).
 :-use_module(library(rbtrees)).
 :-use_module(library(apply)).
+:-use_module(cplint_util).
 :-set_prolog_flag(unknown,warning).
 
 
@@ -2897,33 +2898,11 @@ get_sc_var_n(M,Env,R,S,Probs0,V):-
     throw(error('Non ground probailities not instantiated by the body'))
   ).
 
-/**
- * builtin(+Goal:atom) is det
- *
- * Succeeds if Goal is an atom whose predicate is defined in Prolog
- * (either builtin or defined in a standard library).
- */
-builtin(G):-
-  builtin_int(G),!.
 
-builtin_int(average(_L,_Av)).
-builtin_int(G):-
-  predicate_property(G,built_in).
-builtin_int(G):-
-  predicate_property(G,imported_from(lists)).
-builtin_int(G):-
-  predicate_property(G,imported_from(apply)).
-builtin_int(G):-
-  predicate_property(G,imported_from(nf_r)).
-builtin_int(G):-
-  predicate_property(G,imported_from(matrix)).
-builtin_int(G):-
-  predicate_property(G,imported_from(clpfd)).
+builtin(average(_L,_Av)) :- !.
+builtin(G) :-
+  swi_builtin(G).
 
-average(L,Av):-
-        sum_list(L,Sum),
-        length(L,N),
-        Av is Sum/N.
 
 gen_cl_db_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun)):-
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),

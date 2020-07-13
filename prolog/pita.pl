@@ -2065,11 +2065,9 @@ transform(H,H1):-
   H=..[prob|Args],
   H1=..[prob_meta|Args].
 
-builtin(average(_L,_Av)).
-builtin(G):-
-  predicate_property(G,built_in).
-builtin(G):-
-  predicate_property(G,imported_from(lists)).
+builtin(average(_L,_Av)) :- !.
+builtin(G) :-
+  swi_builtin(G).
 
 
 :- multifile sandbox:safe_meta/2.

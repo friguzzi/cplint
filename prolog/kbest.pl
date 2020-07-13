@@ -529,12 +529,10 @@ choose_a_head(N, R, S, [H|T], [H|T1]) :-
 	choose_a_head(N, R, S, T, T1).
 
 
-builtin(average(_L,_Av)).
-builtin(prob(_,_)).
-builtin(G):-
-  predicate_property(G,built_in).
-builtin(G):-
-  predicate_property(G,imported_from(lists)).
+builtin(average(_L,_Av)) :- !.
+builtin(prob(_,_)) :- !.
+builtin(G) :-
+  swi_builtin(G).
 
 listN(N, N, []) :- !.
 
