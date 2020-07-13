@@ -1,4 +1,4 @@
-
+:- set_test_options([load(always)]).
 :- use_module(test_pita).
 :- use_module(test_mc).
 :- use_module(test_kbest).
