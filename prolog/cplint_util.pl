@@ -27,6 +27,7 @@
   agg_val/3]).
 
 :- use_module(library(matrix)).
+:- use_module(highlight).
 /** <module> cplint_util
 
 Utility module for cplint
@@ -321,7 +322,7 @@ density2d(Post0,D,Options):-
  * to_pair(+Pair:pair,-FlattenedPair:pair) is det
  *
  * Given a pair E-W, returns a pair Ep-W where
- * Ep=EE if E=[EE], otherwise Ep=E 
+ * Ep=EE if E=[EE], otherwise Ep=E
  */
 to_pair([E]-W,E-W):- !.
 to_pair(E-W,E-W).
@@ -428,13 +429,13 @@ comp_lgamma(X,LnG):-
  *
  * Computes the average of Values.
  * Values can be
- * 
+ *
  * * a list of numbers
  * * a list of couples number-weight, in which case each number is multiplied by the weight
  *   before being summed
  * * a list of lists,  in which case lists are considered as matrices of numbers and averaged
  *   element-wise
- * * a list of couples list-weight, in which case the list is considered as a matrix of numbers. 
+ * * a list of couples list-weight, in which case the list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -491,11 +492,11 @@ vector_sum(A,B,C):-
  *
  * Computes the variance or standard deviation (and the average) of Values.
  * Values can be
- * 
+ *
  * * a list of numbers
  * * a list of couples number-weight, in which case each number is multiplied by the weight
  *   before being considered
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers. 
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -504,12 +505,12 @@ variance(L,Var):-
 
 variance(L,Av,Var):-
   average(L,Av),
-  maplist(sq_diff(Av),L,LS), 
+  maplist(sq_diff(Av),L,LS),
   average(LS,Var).
 
 std_dev(L,Dev):-
   std_dev(L,_Av,Dev).
-  
+
 std_dev(L,Av,Dev):-
   variance(L,Av,Var),
   root(Var,Dev).
