@@ -27,6 +27,7 @@
   agg_val/3]).
 
 :- use_module(library(matrix)).
+:- use_module(highlight).
 /** <module> cplint_util
 
 Utility module for cplint
