@@ -1,7 +1,7 @@
 :- module(pita,[
-  prob/2, 
+  prob/2,
   prob/3,
-  prob_meta/2, 
+  prob_meta/2,
   prob_meta/3,
   abd_prob/3,
   vit_prob/3,
@@ -140,7 +140,7 @@ load_file(File):-
 
 /**
  * dt_solve_complete(-Strategy:list,-Cost:float) is det
- * 
+ *
  * The predicate computes the best solution for the decision theory
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. Complete solution without pruning.
@@ -150,11 +150,11 @@ load_file(File):-
 % when the other version works
 dt_solve(M:Strategy,Cost):-
   abolish_all_tables,
-  findall([H,U],M:'$util'(H,U),LUtils),  
+  findall([H,U],M:'$util'(H,U),LUtils),
   init(Env),
-  % statistics(walltime,[Start|_]), 
+  % statistics(walltime,[Start|_]),
   generate_solution(Env,M,LUtils,[],St,Cost),
-  % statistics(walltime,[Stop|_]), 
+  % statistics(walltime,[Stop|_]),
   end(Env),
   % Runtime is Stop - Start,
   % format('Runtime: ~w~n',[Runtime]),
@@ -165,13 +165,13 @@ split([A,B],A,B).
 
 /**
  * dt_solve(-Strategy:list,-Cost:float) is det
- * 
+ *
  * The predicate computes the best solution for the decision theory
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. Solution with pruning.
  */
 dt_solve_bug(M:Strategy,Cost):-
-  abolish_all_tables, 
+  abolish_all_tables,
   findall([S,U],M:'$util'(S,U),L),
   % writeln(L),
   maplist(split,L,LStrategy,LUtils),
@@ -203,7 +203,7 @@ generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
   Out=(_,BDD),
   probability_dd(Env,BDD,AddConv),
   add_prod(Env,AddConv,Cost,AddScaled),
-  (CurrentAdd = [] -> 
+  (CurrentAdd = [] ->
     AddOut = AddScaled ;
     % writeln(CurrentAdd),
     add_sum(Env,CurrentAdd,AddScaled,AddOut)
@@ -329,7 +329,7 @@ get_max(_:P,N,(P0,N0),(P1,N1)):-
     N1=N0,
     P1=P0
   ).
-  
+
 
 convert_exp([],_M,[]).
 
@@ -557,7 +557,7 @@ prob(M:Goal,M:Evidence,P):-
  *
  * To be used in place of prob/3 for meta calls (doesn't abolish tables)
  */
-prob_meta(M:Goal,M:Evidence,P):-  
+prob_meta(M:Goal,M:Evidence,P):-
   get_next_goal_number(M,GN),
   atomic_concat('$ev',GN,NewEv),
   deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
@@ -852,9 +852,9 @@ get_var_n(M,Env,R,S,Probs0,V):-
 
 /**
  * get_dec_var_n(++M:atomic,++Environment:int,++Rule:int,++Substitution:term,-Variable:int) is det
- * 
+ *
  * Returns the index Variable of the random variable associated to rule with
- * index Rule in environment Environment. 
+ * index Rule in environment Environment.
  */
  get_dec_var_n(M,Env,R,S,V):-
   % format('get_dec_var: R: ~w - S: ~w - V: ~w - M: ~w ~n', [R,S,V,M]),
@@ -1289,7 +1289,7 @@ tab_dir(M,H:P,[],[H:P]):-
 % the predicates are equal except
 % (?)::H and H:P
 tab_dir(M,HT,[],[H]):-
-  (HT = ?::H ; HT = (?)::H),  
+  (HT = ?::H ; HT = (?)::H),
   M:tabled(H),!.
 % tab dir for decision variables
 % merge with the previous one?
@@ -1303,7 +1303,7 @@ tab_dir(M,H,[],[H]):-
 
 tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
   functor(H,F,A0),
-  functor(PT,F,A0),  
+  functor(PT,F,A0),
   PT=..[F|Args0],
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
@@ -1325,7 +1325,7 @@ tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
 tab_dir(M,HT1,[(:- table HT)],[H1]):-
   (HT1 = ?::H ; HT1 = (?)::H),
   functor(H,F,A0),
-  functor(PT,F,A0),  
+  functor(PT,F,A0),
   PT=..[F|Args0],
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
@@ -1348,7 +1348,7 @@ tab_dir(M,H,[(:- table HT)],[H1]):-
   H=..[F|_],
   F = utility,
   functor(H,F,A0),
-  functor(PT,F,A0),  
+  functor(PT,F,A0),
   PT=..[F|Args0],
   (M:local_pita_setting(depth_bound,true)->
     ExtraArgs=[_,_,lattice(orc/3)]
@@ -1516,7 +1516,7 @@ system:term_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
 
 % decision facts with body and ground variables
 % ?::a:- b.
-system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :- 
+system:term_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
@@ -1542,12 +1542,12 @@ system:term_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((system:term_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,  
+  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
   extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),
   HeadList1 = [H1],
-  add_bdd_arg(H1,Env,BDD,M,Head1), 
+  add_bdd_arg(H1,Env,BDD,M,Head1),
   Clause = (Head1:-(get_dec_var_n(M,Env,R,VC,V),equalityc(Env,V,0,BDD))).
 
 % utility attributes with body
@@ -1625,7 +1625,7 @@ system:term_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses])
      throw(error('Non ground list of values in discrete(Var,Values) or finite(Var,Values)'))
   ;
     true
-  ),  
+  ),
   extract_vars_list([H],[],VH),
   delete_equal(VH,Var,VH1),
   maplist(gen_head_disc(H,VH1,Var),D,HeadList),
@@ -1874,7 +1874,7 @@ system:term_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   Prob is 1.0/Len,
   extract_vars_list([H],[],VH),
   delete_equal(VH,Var,VH1),
-  maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),  
+  maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   extract_vars_list(HeadList,[],VC),
