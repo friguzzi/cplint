@@ -223,7 +223,7 @@ explore(ProbBound, M, Prob0-(Gnd0, Var0, [\+ Head|Tail]), Prob1-(Gnd1, Var1, Goa
   ;
 		%% Recursive call: consider next goal (building next values)
 		choose_clausesc(Gnd0, M, Var0, LowerBound, Var),
-		get_prob(Var, M, 1, Prob),
+		get_prob(Var, M, 1.0, Prob),
 		append(Gnd0, Var, Gnd2),
 		Prob2 is Prob0 + log(Prob),
 		explore(ProbBound, M, Prob2-(Gnd2, [], Tail), Prob1-(Gnd1, Var1, Goals1))
@@ -259,7 +259,7 @@ explore_pres(ProbBound, M, R, S, N, Goals, Prob0-(Gnd0, Var0, Goals0), Prob1-(Gn
 explore_pres(ProbBound, M, R, S, N, Goals, Prob0-(Gnd0, Var0, Goals0), Prob1-(Gnd1, Var1, Goals1)) :-
 	append(Var0, [(N, R, S)], Var),
 	append(Goals, Goals0, Goals2),
-	get_prob(Var, M, 1, Prob),
+	get_prob(Var, M, 1.0, Prob),
 	append(Gnd0, Var, Gnd2),
 	Prob2 is Prob0 + log(Prob),
 	explore(ProbBound, M, Prob2-(Gnd2, [], Goals2), Prob1-(Gnd1, Var1, Goals1)).
@@ -586,7 +586,7 @@ process_head(HeadList, GroundHeadList) :-
 
 process_head(HeadList0, HeadList):-
   get_probs(HeadList0,PL),
-  foldl(minus,PL,1,PNull),
+  foldl(minus,PL,1.0,PNull),
   append(HeadList0,['':PNull],HeadList).
 
 minus(A,B,B-A).
@@ -604,8 +604,8 @@ gen_head_disc(H,V,V1:P,H1:P):-copy_term((H,V),(H1,V1)).
  */
 process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   (H=Head:ProbHead;H=ProbHead::Head),!,
-  ProbHead1 is ProbHead,
-  ProbLast is 1 - Prob - ProbHead1,
+  ProbHead1 is float(ProbHead),
+  ProbLast is 1.0 - Prob - ProbHead1,
   prolog_load_context(module, M),kbest_input_mod(M),
   M:local_kbest_setting(epsilon_parsing, Eps),
   EpsNeg is - Eps,
@@ -618,7 +618,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
 
 process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
   (H=Head:ProbHead;H=ProbHead::Head),
-  ProbHead1 is ProbHead,
+  ProbHead1 is float(ProbHead),
   ProbNext is Prob + ProbHead1,
   process_head_ground(Tail, ProbNext, Next).
 
