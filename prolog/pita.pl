@@ -1275,7 +1275,7 @@ to_table(M,Heads,[],Heads):-
 to_table(M,Heads,ProcTabDir,Heads1):-
   maplist(tab_dir(M),Heads,TabDirList,Heads1L),
   append(TabDirList,TabDir),
-  maplist(pita_expansion,TabDir,ProcTabDirL),
+  maplist(system:term_expansion,TabDir,ProcTabDirL),
   append(ProcTabDirL,ProcTabDir),
   append(Heads1L,Heads1).
 
