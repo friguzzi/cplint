@@ -24,7 +24,8 @@
   variance/3,
   std_dev/2,
   std_dev/3,
-  agg_val/3]).
+  agg_val/3,
+  swi_builtin/1]).
 
 :- use_module(library(matrix)).
 :- use_module(highlight).
@@ -536,6 +537,41 @@ sq_diff(Av,A-W,S):-
 sq_diff(Av,A-W,S):-
   maplist(sq_diff,Av,A,S0),
   matrix_mult_scal([S0],W,[S]).
+
+/**
+ * builtin(+Goal:atom) is det
+ *
+ * Succeeds if Goal is an atom whose predicate is defined in Prolog
+ * (either builtin or defined in a standard library).
+ */
+:- dynamic
+  builtin_cache/2.
+
+swi_builtin(G):-
+  builtin_cache(G, IsBuiltin),
+  !,
+  IsBuiltin == true.
+swi_builtin(G):-
+  functor(G, Name, Arity),
+  functor(Gen, Name, Arity),
+  (   builtin_int(Gen)
+  ->  asserta(builtin_cache(Gen, true))
+  ;   asserta(builtin_cache(Gen, false)),
+      fail
+  ).
+
+builtin_int(G):-
+  predicate_property(G,built_in).
+builtin_int(G):-
+  predicate_property(G,imported_from(lists)).
+builtin_int(G):-
+  predicate_property(G,imported_from(apply)).
+builtin_int(G):-
+  predicate_property(G,imported_from(nf_r)).
+builtin_int(G):-
+  predicate_property(G,imported_from(matrix)).
+builtin_int(G):-
+  predicate_property(G,imported_from(clpfd)).
 
 
 :- multifile sandbox:safe_primitive/1.
