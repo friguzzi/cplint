@@ -13,10 +13,24 @@
 % :- set_prolog_flag(trace_gc, true).
 
 test:-
-  test_pita,
-  test_mc,
-  test_kbest,
-  test_viterbi,
-  test_sc,
-  test_lemur,
-  test_util.
+  collect_failed([ test_pita,
+                   test_mc,
+                   test_kbest,
+                   test_viterbi,
+                   test_sc,
+                   test_lemur,
+                   test_util
+                 ], Failed),
+  (   Failed == []
+  ->  format(user_error, 'All test suites succeeded~n', [])
+  ;   format(user_error, 'These test suites failed: ~p~n', [Failed]),
+      fail
+  ).
+
+collect_failed([], []).
+collect_failed([H|T], Failed) :-
+  (   call(H)
+  ->  collect_failed(T, Failed)
+  ;   Failed = [H|Failed1],
+      collect_failed(T, Failed1)
+  ).
