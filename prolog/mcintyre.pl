@@ -305,10 +305,8 @@ save_samples(M,_I,_S):-
   retractall(M:sampled_g(_)).
 
 save_samples(M,G):-
-  M:sampled(R,Sub,V),
-  assert(M:mem(G,R,Sub,V)),
-  erase(M:sampled(R,Sub,V)),
-  fail.
+  forall(retract(M:sampled(R,Sub,V)),
+         assertz(M:mem(G,R,Sub,V))).
 
 save_samples(_M,_G).
 
