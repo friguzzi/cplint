@@ -5,7 +5,7 @@ probability of being equal to already sampled values. The process depends
 on a parameter alpha (concentration parameter): with alpha->0, a single 
 value is sampled, with alpha->infinite the distribution is equal to the base
 distribution.
-In this example the base distribution is a Guassian with mean 0 and variance
+In this example the base distribution is a Gaussian with mean 0 and variance
 1, as in https://en.wikipedia.org/wiki/Dirichlet_process#/media/File:Dirichlet_process_draws.svg
 To model the process, this example uses a stick breaking process: to sample
 a value, a sample beta_1 is taken from Beta(1,alpha) and a coin with heads
@@ -83,7 +83,7 @@ choose_prop(N,NV,Alpha,P,V):-
 % sample of the beta_i parameters
 stick_proportion(_,Alpha,P):beta(P,1,Alpha).
 
-% flip of the coing for the portion of the stick of size P
+% flip of the coin for the portion of the stick of size P
 pick_portion(N,NV,P):P;neg_pick_portion(N,NV,P):1-P.
 
 :- end_lpad.

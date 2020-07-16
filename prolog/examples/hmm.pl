@@ -25,7 +25,7 @@ vol. 5649. Springer, 55-69.
 % sequence of states S
 
 hmm(O):-hmm1(_,O).
-% O is an output sequence if there is a state seuqnece S such that hmm1(S,O)
+% O is an output sequence if there is a state sequence S such that hmm1(S,O)
 % holds
 
 hmm1(S,O):-hmm(q1,[],S,O).

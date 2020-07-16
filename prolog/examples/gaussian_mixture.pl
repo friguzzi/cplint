@@ -18,7 +18,7 @@ probability density function of continuous random variables.
 
 heads:0.6;tails:0.4. 
 % a coin is thrown. The coin is biased: with probability 0.6 it lands heads,
-% with probabiity 0.4 it lands tails
+% with probability 0.4 it lands tails
 
 g(X): gaussian(X,0, 1).
 % X in g(X)  follows a Gaussian distribution with mean 0 and variance 1
