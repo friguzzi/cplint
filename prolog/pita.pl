@@ -177,7 +177,7 @@ dt_solve_bug(M:Strategy,Cost):-
   maplist(split,L,LStrategy,LUtils),
   init(Env),
   get_bdd(M,Env,LStrategy,[],LBDD),
-  writeln(LBDD),
+  % writeln(LBDD),
   compute_best_strategy(Env,LBDD,LUtils,St,Cost),
   end(Env),
   maplist(pair(M),St,Strategy).
@@ -185,7 +185,7 @@ dt_solve_bug(M:Strategy,Cost):-
 get_bdd(_,_,[],L,L):- !.
 get_bdd(M,Env,[G|T],L,LO):-
   get_node(M:G,Env,Out),
-  writeln(Out),
+  % writeln(Out),
   Out=(_,BDD),
   append(L,[BDD],LT),
   get_bdd(M,Env,T,LT,LO).
