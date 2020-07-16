@@ -308,8 +308,6 @@ save_samples(M,G):-
   forall(retract(M:sampled(R,Sub,V)),
          assertz(M:mem(G,R,Sub,V))).
 
-save_samples(_M,_G).
-
 restore_samples(M,I,S):-
   M:mem(I,S,R,Sub,V),
   assert_samp(R,M,Sub,V),
