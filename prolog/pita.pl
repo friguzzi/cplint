@@ -757,6 +757,8 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -775,6 +777,8 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):- %with DB=false
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
