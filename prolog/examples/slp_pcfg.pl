@@ -1,5 +1,5 @@
 /*
-Probabilistic contect-free grammar implemented as a Stochastic Logic Program.
+Probabilistic context-free grammar implemented as a Stochastic Logic Program.
 The grammar
 0.2:S->aS
 0.2:S->bS

@@ -177,7 +177,7 @@ dt_solve_bug(M:Strategy,Cost):-
   maplist(split,L,LStrategy,LUtils),
   init(Env),
   get_bdd(M,Env,LStrategy,[],LBDD),
-  writeln(LBDD),
+  % writeln(LBDD),
   compute_best_strategy(Env,LBDD,LUtils,St,Cost),
   end(Env),
   maplist(pair(M),St,Strategy).
@@ -185,7 +185,7 @@ dt_solve_bug(M:Strategy,Cost):-
 get_bdd(_,_,[],L,L):- !.
 get_bdd(M,Env,[G|T],L,LO):-
   get_node(M:G,Env,Out),
-  writeln(Out),
+  % writeln(Out),
   Out=(_,BDD),
   append(L,[BDD],LT),
   get_bdd(M,Env,T,LT,LO).
@@ -757,6 +757,8 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
   M:local_pita_setting(depth_bound,true),!,
   M:local_pita_setting(depth,DB),
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg_db(Goal,Env,BDD,DB,M,Goal1),%DB=depth bound
   (M:Goal1*->
     true
@@ -775,6 +777,8 @@ get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):-
 
 get_cond_node(M:Goal,M:Ev,Env,BGE,BDDE):- %with DB=false
   retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
