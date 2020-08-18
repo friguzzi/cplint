@@ -434,14 +434,7 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
-  abolish_all_tables,
-  init(Env),
-  get_node(M:Goal,Env,Out),
-  Out=(_,BDD),!,
-  findall([V,R,S],M:v(R,S,V),LV),
-  findall([V,R,S],M:av(R,S,V),LAV),
-  create_dot_string(Env,BDD,Dot),
-  end(Env).
+  abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,_P,_Delta).
 
 /**
  * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is det
@@ -458,14 +451,14 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
 abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   abolish_all_tables,
   init(Env),
-  get_node(M:Goal,Env,Out),
-  Out=(_,BDD),!,
-  findall([V,R,S],M:v(R,S,V),LV),
-  findall([V,R,S],M:av(R,S,V),LAV),
+  get_cond_node(M:Goal,M:'$constraints',Env,Out,_),
+  Out=(_,BDD), !,
   ret_abd_prob(Env,BDD,P,Exp),
-  from_assign_to_exp(Exp,M,Delta),
   create_dot_string(Env,BDD,Dot),
-  end(Env).
+  end(Env),
+  from_assign_to_exp(Exp,M,Delta),
+  findall([V,R,S],M:v(R,S,V),LV),
+  findall([V,R,S],M:av(R,S,V),LAV).
 
 /**
  * map(:Query:atom,-Probability:float,-Delta:list) is nondet
@@ -706,10 +699,6 @@ get_p(M:Goal,Env,P):-
   get_node(M:Goal,Env,BDD),
   ret_probc(Env,BDD,P).
 
-get_abd_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,Out),
-  Out=(_,BDD),
-  ret_abd_prob(Env,BDD,P,Exp).
 
 get_abd_p(M:Goal,M:Evidence,Env,P,Exp):-
   get_cond_node(M:Goal,M:Evidence,Env,Out,_),
@@ -1204,12 +1193,12 @@ setting_pita(M:P,V):-
   M:local_pita_setting(P,V).
 
 extract_vars_list(L,[],V):-
-  rb_new(T),                  % <-- deprecated
+  rb_empty(T),
   extract_vars_tree(L,T,T1),
   rb_keys(T1,V).
 
 extract_vars(Term,V):-
-  rb_new(T),
+  rb_empty(T),
   extract_vars_term(Term,T,T1),
   rb_keys(T1,V).
 
@@ -1428,17 +1417,12 @@ pita_expansion((:- end_lpad), []) :-
   pita_input_mod(M),!,
   retractall(M:pita_on).
 
-pita_expansion((:- end_lpad), []) :-
-  prolog_load_context(module, M),
-  pita_input_mod(M),!,
-  retractall(M:pita_on).
-
 pita_expansion(values(A,B), values(A,B)) :-
   prolog_load_context(module, M),
   pita_input_mod(M),M:pita_on,!.
 
 pita_expansion((:- Constraint), Clauses) :-
-  % constraint for abuction
+  % constraint for abduction
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
@@ -1454,7 +1438,7 @@ pita_expansion((:- Constraint), Clauses) :-
   append(TabDir,[(Head2 :- Body2)],Clauses).
 
 pita_expansion((Prob:- Constraint), Clauses) :-
-  % probabilistic constraint for abuction
+  % probabilistic constraint for abduction
   prolog_load_context(module, M),
   pita_input_mod(M),
   M:pita_on,
@@ -1898,7 +1882,7 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
 
 pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
-% disjunctive fact with guassia distr
+  % disjunctive fact with discrete distr
   (Head \= ((pita_expansion(_,_)) :- _ )),
   Head = (_:P),
   nonvar(P),
