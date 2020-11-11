@@ -15,7 +15,7 @@ a:- b,c,d.
 a:- e,f,\+ g.
 
 b:0.3.
-abducible c:0.3.
+abducible c.
 e:0.6.
 abducible d.
 abducible f.
