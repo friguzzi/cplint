@@ -1371,42 +1371,15 @@ tab_dir(M,H,[(:- table HT)],[H1]):-
   zero_clause(M,F/A0,LZ),
   assert(M:zero_clauses(LZ)).
 
-pita_expansion(end_of_file, C) :-
-  prolog_load_context(module, M),
-  pita_input_mod(M),!,
-  retractall(pita_input_mod(M)),
-  findall(LZ,M:zero_clauses(LZ),L),
-  retractall(M:zero_clauses(_)),
-  retractall(M:tabled(_)),
-  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
+pita_expansion(begin_of_file,_):-
+  !,
+  fail.
 
 pita_expansion((:- action Conj), []) :-!,
   prolog_load_context(module, M),
   pita_input_mod(M),!,
   list2and(L,Conj),
   maplist(act(M),L).
-
-pita_expansion((:- pita), Clauses) :-!,
-  prolog_load_context(module, M),
-  retractall(M:local_pita_setting(_,_)),
-  findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
-  assert_all(L,M,_),
-  assert(pita_input_mod(M)),
-  retractall(M:rule_n(_)),
-  retractall(M:goal_n(_)),
-  assert(M:rule_n(0)),
-  assert(M:goal_n(0)),
-  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
-    zero_clauses/1, pita_on/0, tabled/1, '$cons'/2),
-  retractall(M:query_rule(_,_,_,_)),
-  style_check(-discontiguous),
-  process_body([\+ '$cons'],BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
-  append([onec(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body2),
-  to_table(M,['$constraints':_],TabDir,[Head1:_]),
-  to_table(M,['$cons':_],TabDirCons,_),
-  add_bdd_arg(Head1,Env,BDDAnd,M,Head2),
-  append([TabDir,TabDirCons,[(Head2 :- Body2)]],Clauses).
 
 pita_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
@@ -2025,10 +1998,6 @@ pita_expansion(Head, Clauses) :-
   add_bdd_arg(Head1,Env,One,M,Head2),
   append(TabDir,[(Head2:-onec(Env,One))],Clauses).
 
-system:term_expansion(In, Out) :-
-  \+ current_prolog_flag(xref, true),
-  pita_expansion(In, Out).
-
 
 /**
  * begin_lpad_pred is det
@@ -2102,3 +2071,49 @@ sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 
 :- license(artisticv2).
+
+:- thread_local pita_file/1.
+
+user:term_expansion(:-pita, Clauses) :-!,
+  prolog_load_context(source, Source),
+  asserta(pita_file(Source)),
+  prolog_load_context(module, M),
+  retractall(M:local_pita_setting(_,_)),
+  findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
+  assert_all(L,M,_),
+  assert(pita_input_mod(M)),
+  retractall(M:rule_n(_)),
+  retractall(M:goal_n(_)),
+  assert(M:rule_n(0)),
+  assert(M:goal_n(0)),
+  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
+    zero_clauses/1, pita_on/0, tabled/1, '$cons'/2),
+  retractall(M:query_rule(_,_,_,_)),
+  style_check(-discontiguous),
+  process_body([\+ '$cons'],BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
+  append([onec(Env,BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  to_table(M,['$constraints':_],TabDir,[Head1:_]),
+  to_table(M,['$cons':_],TabDirCons,_),
+  add_bdd_arg(Head1,Env,BDDAnd,M,Head2),
+  append([TabDir,TabDirCons,[(Head2 :- Body2)]],Clauses).
+
+user:term_expansion(end_of_file, C) :-
+  pita_file(Source),
+  prolog_load_context(source, Source),
+  retractall(pita_file(Source)),
+  prolog_load_context(module, M),
+  pita_input_mod(M),!,
+  retractall(pita_input_mod(M)),
+  findall(LZ,M:zero_clauses(LZ),L),
+  retractall(M:zero_clauses(_)),
+  retractall(M:tabled(_)),
+  append(L,[(:- style_check(+discontiguous)),end_of_file],C).
+
+user:term_expansion(In, Out) :-
+   \+ current_prolog_flag(xref, true),
+   pita_file(Source),
+   prolog_load_context(source, Source),
+   pita_expansion(In, Out).
+
+
