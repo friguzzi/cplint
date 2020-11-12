@@ -21,8 +21,6 @@ abducible d.
 abducible f.
 abducible g.
 
-constraints.
-
 :- end_lpad.
 
 /** <examples>

@@ -344,7 +344,7 @@ test(h_2_d_3):-
 
 :- begin_tests(uwcse, []).
 
-:-ensure_loaded(library(examples/uwcse)).
+:-ensure_loaded(library(examples/uwcse_inf)).
 
 test(t_c1_p1):-
   run((prob(taught_by(c1,p1),P),close_to(P,0.0926040439925477))).
@@ -433,10 +433,10 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd3)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.42),perm(Exp,[f, (\+g), (\+ c)]))).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[c, d, f, \+g]))).
 test(bdd_a):-
-  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.42),
-  perm(Exp,[f, (\+g), (\+ c)]))).
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
+  perm(Exp,[c, d, f, \+g]))).
 
 :- end_tests(abd3).
 
