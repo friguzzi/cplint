@@ -1487,7 +1487,7 @@ pita_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
   M:pita_on,
   ((Head:- Body) \= ((pita_expansion(_,_)) :- _ )),
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
+  (Head = ((?) :: H) ; Head = decision(H)), ground(H), !,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
   append([onec(Env,BDD)],BodyList1,BodyList2),
@@ -1507,7 +1507,7 @@ pita_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
+  (Head = ((?) :: H) ; Head = decision(H)), ground(H), !,
   extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),
