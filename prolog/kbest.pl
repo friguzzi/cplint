@@ -718,46 +718,28 @@ get_next_rule_number(PName,R):-
   R1 is R+1,
   assert(PName:rule_n(R1)).
 
-system:term_expansion(end_of_file, end_of_file) :-
-  prolog_load_context(module, M),
-  kbest_input_mod(M),!,
-  retractall(kbest_input_mod(M)),
-  style_check(+discontiguous).
 
-system:term_expansion((:- kbest), []) :-!,
-  prolog_load_context(module, M),
-  retractall(M:local_kbest_setting(_,_)),
-  findall(local_kbest_setting(P,V),default_setting_kbest(P,V),L),
-  assert_all(L,M,_),
-  assert(kbest_input_mod(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)),
-  M:(dynamic rule_by_num/5, rule/8, rule/4, query_rule/4),
-  retractall(M:rule_by_num(_,_,_,_,_)),
-  retractall(M:rule(_,_,_,_,_,_,_,_)),
-  style_check(-discontiguous).
-
-system:term_expansion((:- begin_plp), []) :-
+kbest_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
   kbest_input_mod(M),!,
   assert(M:kbest_on).
 
-system:term_expansion((:- end_plp), []) :-
+kbest_expansion((:- end_plp), []) :-
   prolog_load_context(module, M),
   kbest_input_mod(M),!,
   retractall(M:kbest_on).
 
-system:term_expansion((:- begin_lpad), []) :-
+kbest_expansion((:- begin_lpad), []) :-
   prolog_load_context(module, M),
   kbest_input_mod(M),!,
   assert(M:kbest_on).
 
-system:term_expansion((:- end_lpad), []) :-
+kbest_expansion((:- end_lpad), []) :-
   prolog_load_context(module, M),
   kbest_input_mod(M),!,
   retractall(M:kbest_on).
 
-system:term_expansion((Head :- Body), []):-
+kbest_expansion((Head :- Body), []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,
 % disjunctive clause with more than one head atom
   Head = (_;_), !,
@@ -773,7 +755,7 @@ system:term_expansion((Head :- Body), []):-
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
 
-system:term_expansion((Head :- Body), []):-
+kbest_expansion((Head :- Body), []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,
 	(Head=(_:_); Head=(_::_)),  !,
 	list2or(HeadListOr, Head),
@@ -787,12 +769,12 @@ system:term_expansion((Head :- Body), []):-
 	assert_rules(HeadList, M,0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
-system:term_expansion((Head :- Body), []):-
+kbest_expansion((Head :- Body), []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,!,
 	list2and(BodyList, Body),
 	assert(M:def_rule(Head, BodyList)).
 
-system:term_expansion(Head , []):-
+kbest_expansion(Head , []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,
 	Head=(_;_), !,
 	list2or(HeadListOr, Head),
@@ -804,7 +786,7 @@ system:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-system:term_expansion(Head , []):-
+kbest_expansion(Head , []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,
 	(Head=(_:_); Head=(_::_)), !,
 	list2or(HeadListOr, Head),
@@ -816,7 +798,7 @@ system:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-system:term_expansion(Head, []):-
+kbest_expansion(Head, []):-
   prolog_load_context(module, M),kbest_input_mod(M),M:kbest_on,!,
 	assert(M:def_rule(Head, [])).
 
@@ -824,3 +806,37 @@ system:term_expansion(Head, []):-
 
 sandbox:safe_meta(kbest:kbest(_,_,_), []).
 sandbox:safe_meta(kbest:kbest(_,_,_,_), []).
+
+:- thread_local kbest_file/1.
+
+user:term_expansion((:- kbest), []) :-!,
+	prolog_load_context(source, Source),
+	asserta(kbest_file(Source)),
+  prolog_load_context(module, M),
+  retractall(M:local_kbest_setting(_,_)),
+  findall(local_kbest_setting(P,V),default_setting_kbest(P,V),L),
+  assert_all(L,M,_),
+  assert(kbest_input_mod(M)),
+  retractall(M:rule_n(_)),
+  assert(M:rule_n(0)),
+  M:(dynamic rule_by_num/5, rule/8, rule/4, query_rule/4),
+  retractall(M:rule_by_num(_,_,_,_,_)),
+  retractall(M:rule(_,_,_,_,_,_,_,_)),
+  style_check(-discontiguous).
+
+
+user:term_expansion(end_of_file, end_of_file) :-
+  kbest_file(Source),
+  prolog_load_context(source, Source),
+	retractall(kbest_file(Source)),
+	prolog_load_context(module, M),
+  kbest_input_mod(M),!,
+  retractall(kbest_input_mod(M)),
+  style_check(+discontiguous).
+
+
+user:term_expansion(In, Out) :-
+	\+ current_prolog_flag(xref, true),
+	kbest_file(Source),
+	prolog_load_context(source, Source),
+	kbest_expansion(In, Out).
