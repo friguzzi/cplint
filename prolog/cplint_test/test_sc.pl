@@ -51,7 +51,14 @@ test(induce_par):-
 test(test_in):-
   in(P),test(P,[all],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL, -21.286207461851408),close_to(AUCROC,0.7733333333333333),close_to(AUCPR, 0.5527564018467214).
 test(induce):-
-  induce([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL,-18.554628716462105),close_to(AUCROC,0.77),close_to(AUCPR,0.600952380952381).
+  induce([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
+  atomic_list_concat(['Result\nLL=',LL,'\nAUCROC=',AUCROC,'\nAUCPR=',AUCPR,'\n'],St),
+  writeln(St),
+  writeln(P),
+  atomic_list_concat(['Expected\nLL=','-18.554628716462105','\nAUCROC=','0.77','\nAUCPR=','0.600952380952381','\n'],StE),
+  writeln(StE),
+  writeln([(class(sendback):0.5;'':0.5:-worn(_138896)),(class(fix):0.5714285714285714;'':0.4285714285714286:-worn(_138670),replaceable(_138670))]),
+  close_to(LL,-18.554628716462105),close_to(AUCROC,0.77),close_to(AUCPR,0.600952380952381).
 :- end_tests(mach).
 
 :- begin_tests(bongard, []).
@@ -144,7 +151,11 @@ writeln(St1).
 
 test(in):-
   in(P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
+atomic_list_concat(['Result\nLL=',LL,'\nAUCROC=',AUCROC,'\nAUCPR=',AUCPR,'\n'],St),
+writeln(St),
 P = [shops(john):0.2, shops(mary):0.9,  (bought(spaghetti):0.5;bought(steak):0.5:-shops(john)),  (bought(spaghetti):0.3;bought(fish):0.7:-shops(mary))],
+atomic_list_concat(['Expected\nLL=','-3127.225749380786','\nAUCROC=','0.8035006664184584','\nAUCPR=','0.752406766447365','\n'],StE),
+writeln(StE),
 LL = -3127.225749380786,
 AUCROC = 0.8035006664184584,
 AUCPR = 0.752406766447365.
