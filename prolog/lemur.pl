@@ -1074,45 +1074,22 @@ setting_lm(M:P,V):-
 
 
 
-system:term_expansion((:- lemur), []) :-!,
-  prolog_load_context(module, M),
-  retractall(M:local_setting(_,_)),
-  findall(local_setting(P,V),default_setting_lm(P,V),L),
-  assert_all(L,M,_),
-  assert(lm_input_mod(M)),
-  retractall(M:rule_sc_n(_)),
-  assert(M:rule_sc_n(0)),
-  retractall(M:rule_ng_sc_n(_)),
-  assert(M:rule_ng_sc_n(0)),
-    M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
-    lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
-    ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
-    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,
-    query_rule/4,
-    zero_clauses/1,tabled/1,
-    fold/2)),
-  retractall(M:tabled(_)),
-  style_check(-discontiguous).
 
-system:term_expansion(end_of_file, end_of_file) :-
-  prolog_load_context(module, M),
-  lm_input_mod(M),!,
-  make_dynamic(M),
-  retractall(lm_input_mod(M)),
-  style_check(+discontiguous).
 
-system:term_expansion((:- begin_bg), []) :-
+
+
+lemur_expansion((:- begin_bg), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   assert(M:bg_on).
 
-system:term_expansion(C, M:bgc(C)) :-
+lemur_expansion(C, M:bgc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_bg),
   lm_input_mod(M),
   M:bg_on,!.
 
-system:term_expansion((:- end_bg), []) :-
+lemur_expansion((:- end_bg), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:bg_on),
@@ -1126,18 +1103,18 @@ system:term_expansion((:- end_bg), []) :-
     assert(M:bg(L))
   ).
 
-system:term_expansion((:- begin_in), []) :-
+lemur_expansion((:- begin_in), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   assert(M:in_on).
 
-system:term_expansion(C, M:inc(C)) :-
+lemur_expansion(C, M:inc(C)) :-
   prolog_load_context(module, M),
   C\= (:- end_in),
   lm_input_mod(M),
   M:in_on,!.
 
-system:term_expansion((:- end_in), []) :-
+lemur_expansion((:- end_in), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:in_on),
@@ -1151,7 +1128,7 @@ system:term_expansion((:- end_in), []) :-
     assert(M:in(L))
   ).
 
-system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
+lemur_expansion(output(P/A), [output(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:local_setting(tabling,auto),!,
@@ -1160,7 +1137,7 @@ system:term_expansion(output(P/A), [output(P/A)|TabDir]) :-
   term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
+lemur_expansion(input(P/A), [input(P/A)|TabDir]) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:local_setting(tabling,auto),!,
@@ -1169,19 +1146,19 @@ system:term_expansion(input(P/A), [input(P/A)|TabDir]) :-
   term_expansion((:- table P1),TabDir),
   assert(M:zero_clauses([Z])).
 
-system:term_expansion(begin(model(I)), []) :-
+lemur_expansion(begin(model(I)), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:model(_)),
   assert(M:model(I)),
   assert(M:int(I)).
 
-system:term_expansion(end(model(_I)), []) :-
+lemur_expansion(end(model(_I)), []) :-
   prolog_load_context(module, M),
   lm_input_mod(M),!,
   retractall(M:model(_)).
 
-system:term_expansion(At, A) :-
+lemur_expansion(At, A) :-
   prolog_load_context(module, M),
   lm_input_mod(M),
   M:model(Name),
@@ -1207,3 +1184,44 @@ system:term_expansion(At, A) :-
 sandbox:safe_meta(lemur:induce_lm(_,_),[]).
 sandbox:safe_meta(lemur:set_lm(_,_), []).
 sandbox:safe_meta(lemur:setting_lm(_,_), []).
+
+:- thread_local lemur_file/1.
+
+
+user:term_expansion((:- lemur), []) :-!,
+  prolog_load_context(source, Source),
+  asserta(lemur_file(Source)),  
+  prolog_load_context(module, M),
+  retractall(M:local_setting(_,_)),
+  findall(local_setting(P,V),default_setting_lm(P,V),L),
+  assert_all(L,M,_),
+  assert(lm_input_mod(M)),
+  retractall(M:rule_sc_n(_)),
+  assert(M:rule_sc_n(0)),
+  retractall(M:rule_ng_sc_n(_)),
+  assert(M:rule_ng_sc_n(0)),
+    M:dynamic((modeh/2,modeh/4,fixed_rule/3,banned/2,lookahead/2,
+    lookahead_cons/2,lookahead_cons_var/2,'$prob'/2,output/1,input/1,input_cw/1,
+    ref_clause/1,ref/1,model/1,neg/1,rule/5,determination/2,
+    bg_on/0,bg/1,bgc/1,in_on/0,in/1,inc/1,int/1,
+    query_rule/4,
+    zero_clauses/1,tabled/1,
+    fold/2)),
+  retractall(M:tabled(_)),
+  style_check(-discontiguous).
+
+user:term_expansion(end_of_file, end_of_file) :-
+  lemur_file(Source),
+  prolog_load_context(source, Source),
+  retractall(lemur_file(Source)),
+  prolog_load_context(module, M),
+  lm_input_mod(M),!,
+  make_dynamic(M),
+  retractall(lm_input_mod(M)),
+  style_check(+discontiguous).
+
+user:term_expansion(In, Out) :-
+  \+ current_prolog_flag(xref, true),
+  lemur_file(Source),
+  prolog_load_context(source, Source),
+  lemur_expansion(In, Out).
