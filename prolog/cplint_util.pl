@@ -27,6 +27,13 @@
   agg_val/3,
   swi_builtin/1]).
 
+
+:- use_module(library(lists)).
+:- use_module(library(apply)).
+:- use_module(library(clp/clpr)).
+:- use_module(library(matrix)).
+:- use_module(library(clpfd)).
+
 :- use_module(library(matrix)).
 :- use_module(highlight).
 /** <module> cplint_util
