@@ -28,7 +28,7 @@ test_pita:-
     abd3,
     abd1cons1,
     abd1cons2,
-    bag_game_mpa_all,
+    bag_game_mpe,
     bag_pb_mpa_all,
     bag_simple,
     bag_all,
@@ -456,9 +456,9 @@ test(bdd_a):-
 
 :- end_tests(abd3).
 
-:- begin_tests(bag_game_mpa_all, []).
+:- begin_tests(bag_game_mpe, []).
 
-:-ensure_loaded(library(examples/bag_game_mpa_all)).
+:-ensure_loaded(library(examples/bag_game_mpe)).
 
 test(winb):-
   run((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
@@ -477,7 +477,7 @@ test(win):-
 		rule(3, yellow, [yellow:0.6, '':0.4], true),
 	  rule(1, green, [green:0.9, '':0.09999999999999998], true)
 	 ]))).
-:- end_tests(bag_game_mpa_all).
+:- end_tests(bag_game_mpe).
 
 :- begin_tests(bag_pb_mpa_all, []).
 
