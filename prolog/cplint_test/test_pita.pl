@@ -28,16 +28,14 @@ test_pita:-
     abd3,
     abd1cons1,
     abd1cons2,
-    map1,
-    map_es3,
-    map_es21,
-    map_es2,
-    map_es2map,
-    map_es2map1,
-    pitavit_win,
-    pitavit_hmm,
-    pitavit_coin,
-    pitavit_mendel,
+    bag_game_mpa_all,
+    bag_pb_mpa_all,
+    bag_simple,
+    bag_all,
+    bag_1,
+    bag_2,
+    bag_game,
+    pitampe_hmm,
     meta,
     pcfg,
     var_objdb,
@@ -118,7 +116,12 @@ test(h_c_n_b_c):-
   run((prob((heads(coin),\+ biased(coin)),P),close_to(P,0.45))).
 test(n_h_c):-
   run((prob(\+ heads(coin),P),close_to(P,0.49))).
-
+test(h_c):-
+  run((mpe(heads(coin),Prob,Exp),close_to(Prob,0.45),
+    perm(Exp, [rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []),
+    rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5],
+    [toss(coin), \+biased(coin)])]
+  ))).
 :- end_tests(coin).
 
 
@@ -281,6 +284,19 @@ test(s_2_p):-
 test(s_2_w):-
   run((prob(cg(s,2,w),P),close_to(P,0.5))).
 
+test(s_p):-
+  run((mpe(color(s,purple),Prob,Exp),close_to(Prob,0.5),
+	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
+	 [mother(m, s), cg(m, 1, p), cg(m, 2, w)])]))).
+
+
+test(s_w):-
+  run((mpe(color(s,white),Prob,Exp),close_to(Prob,0.25),
+  perm(Exp, [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
+     [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),
+	 rule(1, cg(s, 2, w), [cg(s, 2, w):0.5, cg(s, 2, p):0.5],
+	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])]))).
+
 :- end_tests(mendel).
 
 :- begin_tests(coin2, []).
@@ -440,9 +456,9 @@ test(bdd_a):-
 
 :- end_tests(abd3).
 
-:- begin_tests(map1, []).
+:- begin_tests(bag_game_mpa_all, []).
 
-:-ensure_loaded(library(examples/map1)).
+:-ensure_loaded(library(examples/bag_game_mpa_all)).
 
 test(winb):-
   run((map_bdd_dot_string(win,_BDD,_Var,_VarA,P,Exp),close_to(P,0.162),
@@ -461,11 +477,11 @@ test(win):-
 		rule(3, yellow, [yellow:0.6, '':0.4], true),
 	  rule(1, green, [green:0.9, '':0.09999999999999998], true)
 	 ]))).
-:- end_tests(map1).
+:- end_tests(bag_game_mpa_all).
 
-:- begin_tests(map_es3, []).
+:- begin_tests(bag_pb_mpa_all, []).
 
-:-ensure_loaded(library(examples/map_es3)).
+:-ensure_loaded(library(examples/bag_pb_mpa_all)).
 
 test(ev):-
   run((map(ev,P,Exp),close_to(P,0.27),
@@ -483,11 +499,11 @@ test(evb):-
 			rule(0,pf(1,1),[pf(1,1):0.6,'':0.4],true)
 		  ]))).
 
-:- end_tests(map_es3).
+:- end_tests(bag_pb_mpa_all).
 
-:- begin_tests(map_es21, []).
+:- begin_tests(bag_simple, []).
 
-:-ensure_loaded(library(examples/map_es21)).
+:-ensure_loaded(library(examples/bag_simple)).
 
 test(evb):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
@@ -499,11 +515,11 @@ test(ev):-
 	  perm(Exp,[
 		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
 		  ]))).
-:- end_tests(map_es21).
+:- end_tests(bag_simple).
 
-:- begin_tests(map_es2, []).
+:- begin_tests(bag_all, []).
 
-:-ensure_loaded(library(examples/map_es2)).
+:-ensure_loaded(library(examples/bag_all)).
 
 test(evb):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.36),
@@ -517,11 +533,11 @@ test(ev):-
 		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
 			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
 		  ]))).
-:- end_tests(map_es2).
+:- end_tests(bag_all).
 
-:- begin_tests(map_es2map, []).
+:- begin_tests(bag_1, []).
 
-:-ensure_loaded(library(examples/map_es2map)).
+:-ensure_loaded(library(examples/bag_1)).
 
 test(evb):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.54),
@@ -533,11 +549,11 @@ test(ev):-
 	  perm(Exp,[
 		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)
 		  ]))).
-:- end_tests(map_es2map).
+:- end_tests(bag_1).
 
-:- begin_tests(map_es2map1, []).
+:- begin_tests(bag_2, []).
 
-:-ensure_loaded(library(examples/map_es2map1)).
+:-ensure_loaded(library(examples/bag_2)).
 test(evb):-
   run((map_bdd_dot_string(ev,_BDD,_Var,_VarA,P,Exp),close_to(P,0.6),
 	  perm(Exp,[
@@ -548,25 +564,25 @@ test(ev):-
 	  perm(Exp,[
 		  rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
 		  ]))).
-:- end_tests(map_es2map1).
+:- end_tests(bag_2).
 
-:- begin_tests(pitavit_win, []).
+:- begin_tests(bag_game, []).
 
-:-ensure_loaded(library(examples/pitavit_win)).
+:-ensure_loaded(library(examples/bag_game)).
 test(win):-
-  run((vit_prob(win,P,Exp),close_to(P,0.36),
+  run((mpe(win,P,Exp),close_to(P,0.36),
   perm(Exp,[
   rule(0, red, [red:0.4, '':0.6], []),
   rule(1, green, [green:0.9, '':0.09999999999999998], [])]))).
 
-:- end_tests(pitavit_win).
+:- end_tests(bag_game).
 
-:- begin_tests(pitavit_hmm, []).
+:- begin_tests(pitampe_hmm, []).
 
-:-ensure_loaded(library(examples/pitavit_hmm)).
+:-ensure_loaded(library(examples/pitampe_hmm)).
 
 test(hmm_a_g_g):-
-  run((vit_prob(hmm([a,g,g]),P,Exp),close_to(P,0.000405),
+  run((mpe(hmm([a,g,g]),P,Exp),close_to(P,0.000405),
     perm(Exp, [rule(0,next_state(q1,q2,[]),[next_state(q1,q1,[]):0.5,
 	    next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
 		rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
@@ -585,7 +601,7 @@ test(hmm_a_g_g):-
 
 
 test(hmm_a_a_a):-
-  run((vit_prob(hmm([a,a,a]),P,Exp),close_to(P,0.0008000000000000003),
+  run((mpe(hmm([a,a,a]),P,Exp),close_to(P,0.0008000000000000003),
     perm(Exp, [rule(0,next_state(q1,q1,[]),[next_state(q1,q1,[]):0.5,
 	  next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
 	rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
@@ -601,41 +617,7 @@ test(hmm_a_a_a):-
 	  letter(q1,t,[q1,q1]):0.1],[])]
   ))).
 
-:- end_tests(pitavit_hmm).
-
-
-:- begin_tests(pitavit_coin, []).
-
-:-ensure_loaded(library(examples/pitavit_coin)).
-
-test(h_c):-
-  run((vit_prob(heads(coin),Prob,Exp),close_to(Prob,0.45),
-    perm(Exp, [rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []),
-    rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5],
-    [toss(coin), \+biased(coin)])]
-  ))).
-
-:- end_tests(pitavit_coin).
-
-:- begin_tests(pitavit_mendel, []).
-
-:-ensure_loaded(library(examples/pitavit_mendel)).
-
-
-test(s_p):-
-  run((vit_prob(color(s,purple),Prob,Exp),close_to(Prob,0.5),
-	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-	 [mother(m, s), cg(m, 1, p), cg(m, 2, w)])]))).
-
-
-test(s_w):-
-  run((vit_prob(color(s,white),Prob,Exp),close_to(Prob,0.25),
-  perm(Exp, [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-     [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),
-	 rule(1, cg(s, 2, w), [cg(s, 2, w):0.5, cg(s, 2, p):0.5],
-	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])]))).
-
-:- end_tests(pitavit_mendel).
+:- end_tests(pitampe_hmm).
 
 :- begin_tests(meta, []).
 

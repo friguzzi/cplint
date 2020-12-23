@@ -56,6 +56,10 @@ toss(coin).
 % The table Var contains the associations between the rule groundings and the
 % multivalued variables.
 
-
+?- mpe(heads(coin),Prob,Exp).
+Prob = 0.45,
+Exp = [rule(2, fair(coin), [fair(coin):0.9, biased(coin):0.1], []),
+rule(0, heads(coin), [heads(coin):0.5, tails(coin):0.5],
+  [toss(coin), \+biased(coin)])].
 */
 

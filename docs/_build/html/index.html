@@ -869,9 +869,128 @@ The predicate returns in <code class="code docutils literal notranslate"><span c
 <p>that computes the expected value of <code class="code docutils literal notranslate"><span class="pre">Arg</span></code> in <code class="code docutils literal notranslate"><span class="pre">Query</span></code> given that <code class="code docutils literal notranslate"><span class="pre">Evidence</span></code> is true.
 It uses <code class="code docutils literal notranslate"><span class="pre">N</span></code> particles.</p>
 </div>
+<div class="section" id="mpe-map-and-viterbi-inference">
+<h3>MPE, MAP and Viterbi Inference<a class="headerlink" href="#mpe-map-and-viterbi-inference" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">pita</span></code> supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) <a class="reference internal" href="#dblp-conf-ilp-shterionovrvkmj14" id="id30">[SRV+15]</a><a class="reference internal" href="#belalbrig20-tplp-ij" id="id31">[BARZ20]</a>.</p>
+<p>With MPE you can find the choices of head atoms of all clauses that lead to the probability of a query being
+maximal. The predicate to use is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mpe</span><span class="p">(:</span><span class="n">Query</span><span class="p">:</span><span class="n">atom</span><span class="p">,</span><span class="o">-</span><span class="n">Probability</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="o">-</span><span class="n">Delta</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="ow">is</span> <span class="n">nondet</span>
+</pre></div>
+</div>
+<p>The set of choices is returned in <code class="code docutils literal notranslate"><span class="pre">Delta</span></code>.
+For example, the query</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- mpe(win,P,Exp).
+</pre></div>
+</div>
+<p>returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span><span class="o">=</span><span class="mf">0.36</span>
+<span class="n">Exp</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="p">[</span><span class="n">red</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">],</span> <span class="p">[]),</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="p">[</span><span class="n">green</span><span class="p">:</span><span class="mf">0.9</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.09999999999999998</span><span class="p">],</span> <span class="p">[])]</span>
+</pre></div>
+</div>
+<p>on example <a class="reference external" href="http://cplint.eu/e/bag_game.pl">bag_game.pl</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">win</span> <span class="p">:</span><span class="o">-</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="o">.</span>
+<span class="n">win</span> <span class="p">:</span><span class="o">-</span> <span class="n">blue</span><span class="p">,</span> <span class="n">yellow</span><span class="o">.</span>
+
+<span class="mf">0.4</span><span class="p">::</span><span class="n">red</span><span class="o">.</span>
+<span class="mf">0.9</span><span class="p">::</span><span class="n">green</span><span class="o">.</span>
+<span class="mf">0.5</span><span class="p">::</span><span class="n">blue</span><span class="o">.</span>
+<span class="mf">0.6</span><span class="p">::</span><span class="n">yellow</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>The interpretation of the explanation is the the following:
+<code class="code docutils literal notranslate"><span class="pre">rule(RuleNumber,ChosenHead,Head,Body)</span></code>.</p>
+<p>As you can see, <code class="code docutils literal notranslate"><span class="pre">mpe_prob/3</span></code> does not return a complete explanation but a set of choices
+that can be expanded to a complete explanation by adding the most probable choice of the other
+rules according to the distribution over the head.
+To get a complete explanation use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mpe_all</span><span class="p">(:</span><span class="n">Query</span><span class="p">:</span><span class="n">atom</span><span class="p">,</span><span class="o">-</span><span class="n">Probability</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="o">-</span><span class="n">Delta</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="ow">is</span> <span class="n">nondet</span>
+</pre></div>
+</div>
+<p>On example <a class="reference external" href="http://cplint.eu/e/bag_game.pl">bag_game.pl</a>, the query <code class="code docutils literal notranslate"><span class="pre">?-</span> <span class="pre">mpe_all(win,P,Exp).</span></code> returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="mf">0.10800000000000001</span><span class="p">,</span>
+<span class="n">Exp</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="p">[</span><span class="n">red</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">],</span> <span class="p">[]),</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="p">[</span><span class="n">green</span><span class="p">:</span><span class="mf">0.9</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.09999999999999998</span><span class="p">],</span> <span class="p">[]),</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="p">[</span><span class="n">blue</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[]),</span>
+        <span class="n">rule</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">yellow</span><span class="p">,</span> <span class="p">[</span><span class="n">yellow</span><span class="p">:</span><span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">],</span> <span class="p">[])]</span>
+</pre></div>
+</div>
+<p>thus a choice for each rule.   For clauses not included in the explanation
+that are nonground, it considers their nonground version, thus not performing MPE exactly.</p>
+<p>In MAP inference we are not interested in the choices for all rules but only in the choices for
+some specific rules. These rules, called <em>query</em>, are indicated in the input file by prepending
+the text <code class="code docutils literal notranslate"><span class="pre">map_query</span></code> to each query rule. For example, in the program <a class="reference external" href="http://cplint.eu/e/bag_1.pl">bag_1.pl</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.6</span><span class="p">::</span><span class="n">red</span><span class="p">(</span><span class="n">b1</span><span class="p">);</span> <span class="mf">0.3</span><span class="p">::</span><span class="n">green</span><span class="p">(</span><span class="n">b1</span><span class="p">);</span> <span class="mf">0.1</span><span class="p">::</span><span class="n">blue</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span> <span class="p">:</span><span class="o">-</span> <span class="n">pick</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span><span class="o">.</span>
+<span class="n">map_query</span> <span class="mf">0.6</span><span class="p">::</span><span class="n">pick</span><span class="p">(</span><span class="n">b1</span><span class="p">);</span> <span class="mf">0.4</span><span class="p">::</span><span class="n">no_pick</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span><span class="o">.</span>
+
+<span class="n">ev</span><span class="p">:</span><span class="o">-</span> \<span class="o">+</span> <span class="n">blue</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>we are asking for the choice for the second rule.
+The query</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- map(ev,P,Exp).
+</pre></div>
+</div>
+<p>asks for the chocie for the second rule that yelds the highest probability for <code class="code docutils literal notranslate"><span class="pre">ev</span></code>. The query returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="mf">0.5399999999999999</span><span class="p">,</span>
+<span class="n">Exp</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pick</span><span class="p">(</span><span class="n">b1</span><span class="p">),</span> <span class="p">[</span><span class="n">pick</span><span class="p">(</span><span class="n">b1</span><span class="p">):</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">no_pick</span><span class="p">(</span><span class="n">b1</span><span class="p">):</span><span class="mf">0.4</span><span class="p">],</span> <span class="n">true</span><span class="p">)]</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>In Viterbi inference we are interested in the most probable proof of a query. See <a class="reference internal" href="#dblp-conf-ilp-shterionovrvkmj14" id="id33">[SRV+15]</a>
+for the difference between the most probable proof and the most probable explanation.
+Module <code class="code docutils literal notranslate"><span class="pre">viterbi</span></code> looks for the most probable proof by using a meta interpreter
+that performs branch and bound.</p>
+<p>The predicate</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">viterbi</span><span class="p">(:</span><span class="n">Query</span><span class="p">:</span><span class="n">conjunction</span><span class="p">,</span><span class="o">+</span><span class="n">K</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="o">-</span><span class="n">Exp</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="ow">is</span> <span class="n">nondet</span>
+</pre></div>
+</div>
+<p>computes the most probable proof of the conjunction of literals <code class="code docutils literal notranslate"><span class="pre">Query</span></code>.
+It returns the proof as explanation in <code class="code docutils literal notranslate"><span class="pre">Exp</span></code>.</p>
+<p>In example <a class="reference external" href="http://cplint.eu/e/bag_game_vit.pl">bag_game_vit.pl</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="o">-</span> <span class="n">use_module</span><span class="p">(</span><span class="n">library</span><span class="p">(</span><span class="n">viterbi</span><span class="p">))</span><span class="o">.</span>
+
+<span class="p">:</span><span class="o">-</span> <span class="n">viterbi</span><span class="o">.</span>
+
+<span class="p">:</span><span class="o">-</span> <span class="n">begin_lpad</span><span class="o">.</span>
+
+<span class="n">win</span> <span class="p">:</span><span class="o">-</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="o">.</span>
+<span class="n">win</span> <span class="p">:</span><span class="o">-</span> <span class="n">blue</span><span class="p">,</span> <span class="n">yellow</span><span class="o">.</span>
+
+<span class="mf">0.4</span><span class="p">::</span><span class="n">red</span><span class="o">.</span>
+<span class="mf">0.9</span><span class="p">::</span><span class="n">green</span><span class="o">.</span>
+<span class="mf">0.5</span><span class="p">::</span><span class="n">blue</span><span class="o">.</span>
+<span class="mf">0.6</span><span class="p">::</span><span class="n">yellow</span><span class="o">.</span>
+
+<span class="p">:</span><span class="o">-</span> <span class="n">end_lpad</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>the query</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?- viterbi(win,P,Exp)
+</pre></div>
+</div>
+<p>returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span><span class="o">=</span><span class="mf">0.36</span><span class="p">,</span>
+<span class="n">Exp</span><span class="o">=</span><span class="p">[</span>
+<span class="n">rule</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="p">[</span><span class="n">red</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">],</span> <span class="p">[]),</span>
+<span class="n">rule</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="p">[</span><span class="n">green</span><span class="p">:</span><span class="mf">0.9</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">:</span><span class="mf">0.09999999999999998</span><span class="p">],</span> <span class="p">[])]))</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Note that <code class="code docutils literal notranslate"><span class="pre">viterbi/3</span></code>, in case the query contains variables, returns their instantiation
+leading to the highest probability of the relative grounding of the query. For example,
+in <a class="reference external" href="http://cplint.eu/e/hmm_vit.pl">hmm_vit.pl</a>, the query</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>?-viterbi(hmm1(S,[a,g,g]),_P,_E).
+</pre></div>
+</div>
+<p>returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="p">[</span><span class="n">q2</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">q1</span><span class="p">],</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="causal-inference">
 <h3>Causal Inference<a class="headerlink" href="#causal-inference" title="Permalink to this headline">¶</a></h3>
-<p><code class="code docutils literal notranslate"><span class="pre">pita</span></code> and <code class="code docutils literal notranslate"><span class="pre">mcintyre</span></code> support causal reasoning, i.e., computing the effect of actions using the do-calculus <a class="reference internal" href="#pea00-book" id="id30">[Pea00]</a>.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pita</span></code> and <code class="code docutils literal notranslate"><span class="pre">mcintyre</span></code> support causal reasoning, i.e., computing the effect of actions using the do-calculus <a class="reference internal" href="#pea00-book" id="id34">[Pea00]</a>.</p>
 <p>Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="o">-</span> <span class="n">action</span> <span class="n">predicate1</span><span class="o">/</span><span class="n">arity1</span><span class="p">,</span><span class="o">...</span><span class="p">,</span><span class="n">predicaten</span><span class="o">/</span><span class="n">arityn</span><span class="o">.</span>
 </pre></div>
@@ -1046,7 +1165,7 @@ However, also <code class="code docutils literal notranslate"><span class="pre">
 </div>
 <div class="section" id="decision-theory">
 <h3>Decision Theory<a class="headerlink" href="#decision-theory" title="Permalink to this headline">¶</a></h3>
-<p>cplint allows also to represent decision theory problem following the syntax of Dtproblog <a class="reference internal" href="#van2010dtproblog" id="id35">[VdBTVODR10]</a>.</p>
+<p>cplint allows also to represent decision theory problem following the syntax of Dtproblog <a class="reference internal" href="#van2010dtproblog" id="id39">[VdBTVODR10]</a>.</p>
 <p>Decision facts can be expressed with the operator <code class="code docutils literal notranslate"><span class="pre">?::</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>? :: umbrella.
 </pre></div>
@@ -1066,9 +1185,9 @@ However, also <code class="code docutils literal notranslate"><span class="pre">
 <h2>Learning<a class="headerlink" href="#learning" title="Permalink to this headline">¶</a></h2>
 <p>The following learning algorithms are available:</p>
 <ul class="simple">
-<li>EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs <a class="reference internal" href="#belrig11-ida-ij" id="id36">[BR13b]</a><a class="reference internal" href="#bellodi2013expectation" id="id37">[BR13a]</a><a class="reference internal" href="#belrig11-tr" id="id38">[BR11]</a></li>
-<li>SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately <a class="reference internal" href="#belrig13-tplp-ij" id="id39">[BR15]</a></li>
-<li>LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte-Carlo tree search <a class="reference internal" href="#dimbelrig15-ml-ij" id="id40">[DMBR15]</a></li>
+<li>EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs <a class="reference internal" href="#belrig11-ida-ij" id="id40">[BR13b]</a><a class="reference internal" href="#bellodi2013expectation" id="id41">[BR13a]</a><a class="reference internal" href="#belrig11-tr" id="id42">[BR11]</a></li>
+<li>SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately <a class="reference internal" href="#belrig13-tplp-ij" id="id43">[BR15]</a></li>
+<li>LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte-Carlo tree search <a class="reference internal" href="#dimbelrig15-ml-ij" id="id44">[DMBR15]</a></li>
 </ul>
 <div class="section" id="input">
 <h3>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h3>
@@ -1081,7 +1200,7 @@ However, also <code class="code docutils literal notranslate"><span class="pre">
 <li>example interpretations</li>
 </ul>
 <p>The preamble must come first, the order of the other parts can be changed.</p>
-<p>For example, consider the Bongard problems of <a class="reference internal" href="#raelae95-alt95" id="id41">[DRVL95]</a>. <a class="reference external" href="http://cplint.eu/e/bongard.pl">bongard.pl</a> and <a class="reference external" href="http://cplint.eu/e/bongardkeys.pl">bongardkeys.pl</a> represent a Bongard problem for SLIPCOVER.
+<p>For example, consider the Bongard problems of <a class="reference internal" href="#raelae95-alt95" id="id45">[DRVL95]</a>. <a class="reference external" href="http://cplint.eu/e/bongard.pl">bongard.pl</a> and <a class="reference external" href="http://cplint.eu/e/bongardkeys.pl">bongardkeys.pl</a> represent a Bongard problem for SLIPCOVER.
 <a class="reference external" href="http://cplint.eu/example/lemur/bongard.pl">bongard.pl</a> and <a class="reference external" href="http://cplint.eu/example/lemur/bongardkeys.pl">bongardkeys.pl</a> represent a Bongard problem for LEMUR.</p>
 <div class="section" id="preamble">
 <h4>Preamble<a class="headerlink" href="#preamble" title="Permalink to this headline">¶</a></h4>
@@ -1567,7 +1686,7 @@ test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 <li><code class="code docutils literal notranslate"><span class="pre">mcts_visits</span></code> (values: integer, default value: +1e20, valid for LEMUR): maximum number of visits</li>
 <li><code class="code docutils literal notranslate"><span class="pre">max_iter_structure</span></code> (values: integer, default value: 10000, valid for SLIPCOVER): maximum number of theory search iterations</li>
 <li><code class="code docutils literal notranslate"><span class="pre">background_clauses</span></code> (values: integer, default value: 50, valid for SLIPCOVER): maximum numbers of background clauses</li>
-<li><code class="code docutils literal notranslate"><span class="pre">maxdepth_var</span></code> (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in <a class="reference internal" href="#dblp-journals-ai-cohen95" id="id44">[Coh95]</a>).</li>
+<li><code class="code docutils literal notranslate"><span class="pre">maxdepth_var</span></code> (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in <a class="reference internal" href="#dblp-journals-ai-cohen95" id="id48">[Coh95]</a>).</li>
 <li><code class="code docutils literal notranslate"><span class="pre">mcts_max_depth</span></code> (values: integer, default value: 8, valid for LEMUR): maximum depth of default policy search</li>
 <li><code class="code docutils literal notranslate"><span class="pre">mcts_c</span></code> (values: real, default value: 0.7, valid for LEMUR): value of parameter <span class="math notranslate nohighlight">\(C\)</span> in the computation of UCT</li>
 <li><code class="code docutils literal notranslate"><span class="pre">mcts_iter</span></code> (values: integer, default value: 20, valid for LEMUR): number of Monte-Carlo tree search iterations</li>
@@ -1661,34 +1780,40 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<p id="bibtex-bibliography-index-0"><table class="docutils citation" frame="void" id="belrig11-tr" rules="none">
+<p id="bibtex-bibliography-index-0"><table class="docutils citation" frame="void" id="belalbrig20-tplp-ij" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id38">[BR11]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS-2011-01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: <a class="reference external" href="http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf">http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id31">[BARZ20]</a></td><td>Elena Bellodi, Marco Alberti, Fabrizio Riguzzi, and Riccardo Zese. MAP inference for probabilistic logic programming. <em>Theory and Practice of Logic Programming</em>, 20(5):641â€“655, 2020. URL: <a class="reference external" href="https://arxiv.org/abs/2008.01394">https://arxiv.org/abs/2008.01394</a>, <a class="reference external" href="https://doi.org/10.1017/S1471068420000174">doi:10.1017/S1471068420000174</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="belrig11-tr" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id42">[BR11]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS-2011-01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: <a class="reference external" href="http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf">http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="bellodi2013expectation" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id37">[BR13a]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Expectation maximization over binary decision diagrams for probabilistic logic programs. <em>Intelligent Data Analysis</em>, 17(2):343–363, 2013.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id41">[BR13a]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Expectation maximization over binary decision diagrams for probabilistic logic programs. <em>Intelligent Data Analysis</em>, 17(2):343–363, 2013.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="belrig11-ida-ij" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id36">[BR13b]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. <em>Intelligent Data Analysis</em>, 17(2):343–363, 2013. URL: <a class="reference external" href="http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf">http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id40">[BR13b]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. <em>Intelligent Data Analysis</em>, 17(2):343–363, 2013. URL: <a class="reference external" href="http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf">http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="belrig13-tplp-ij" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id39">[BR15]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic programs by searching the clause space. <em>Theory and Practice of Logic Programming</em>, 15(2):169–212, 2015. URL: <a class="reference external" href="http://arxiv.org/abs/1309.2080">http://arxiv.org/abs/1309.2080</a>, <a class="reference external" href="https://doi.org/10.1017/S1471068413000689">doi:10.1017/S1471068413000689</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id43">[BR15]</a></td><td>Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic programs by searching the clause space. <em>Theory and Practice of Logic Programming</em>, 15(2):169–212, 2015. URL: <a class="reference external" href="http://arxiv.org/abs/1309.2080">http://arxiv.org/abs/1309.2080</a>, <a class="reference external" href="https://doi.org/10.1017/S1471068413000689">doi:10.1017/S1471068413000689</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="dblp-journals-ai-cohen95" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id44">[Coh95]</a></td><td>William&nbsp;W. Cohen. Pac-learning non-recursive prolog clauses. <em>Artif. Intell.</em>, 79(1):1–38, 1995.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id48">[Coh95]</a></td><td>William&nbsp;W. Cohen. Pac-learning non-recursive prolog clauses. <em>Artif. Intell.</em>, 79(1):1–38, 1995.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="dblp-conf-ijcai-raedtkt07" rules="none">
@@ -1700,13 +1825,13 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 <table class="docutils citation" frame="void" id="raelae95-alt95" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id41">[DRVL95]</a></td><td>L.&nbsp;De&nbsp;Raedt and W.&nbsp;Van&nbsp;Laer. Inductive constraint logic. In <em>Proceedings of the 6th Conference on Algorithmic Learning Theory (ALT 1995)</em>, volume 997 of LNAI, 80–94. Fukuoka, Japan, 1995. Springer.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id45">[DRVL95]</a></td><td>L.&nbsp;De&nbsp;Raedt and W.&nbsp;Van&nbsp;Laer. Inductive constraint logic. In <em>Proceedings of the 6th Conference on Algorithmic Learning Theory (ALT 1995)</em>, volume 997 of LNAI, 80–94. Fukuoka, Japan, 1995. Springer.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="dimbelrig15-ml-ij" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id40">[DMBR15]</a></td><td>Nicola Di&nbsp;Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo structure learning of probabilistic logic programs. <em>Mach. Learn.</em>, 100(1):127–156, July 2015. URL: <a class="reference external" href="http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf">http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf</a>, <a class="reference external" href="https://doi.org/10.1007/s10994-015-5510-3">doi:10.1007/s10994-015-5510-3</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id44">[DMBR15]</a></td><td>Nicola Di&nbsp;Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo structure learning of probabilistic logic programs. <em>Mach. Learn.</em>, 100(1):127–156, July 2015. URL: <a class="reference external" href="http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf">http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf</a>, <a class="reference external" href="https://doi.org/10.1007/s10994-015-5510-3">doi:10.1007/s10994-015-5510-3</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="fung1990weighing" rules="none">
@@ -1736,7 +1861,7 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 <table class="docutils citation" frame="void" id="pea00-book" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id30">[Pea00]</a></td><td>J.&nbsp;Pearl. <em>Causality</em>. Cambridge University Press, 2000.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id34">[Pea00]</a></td><td>J.&nbsp;Pearl. <em>Causality</em>. Cambridge University Press, 2000.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="dblp-journals-ai-poole97" rules="none">
@@ -1769,10 +1894,16 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 <tr><td class="label">[SK01]</td><td><em>(<a class="fn-backref" href="#id10">1</a>, <a class="fn-backref" href="#id17">2</a>)</em> Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic-statistical modeling. <em>J. Artif. Intell. Res.</em>, 15:391–454, 2001.</td></tr>
 </tbody>
 </table>
+<table class="docutils citation" frame="void" id="dblp-conf-ilp-shterionovrvkmj14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[SRV+15]</td><td><em>(<a class="fn-backref" href="#id30">1</a>, <a class="fn-backref" href="#id33">2</a>)</em> Dimitar&nbsp;Sht. Shterionov, Joris Renkens, Jonas Vlasselaer, Angelika Kimmig, Wannes Meert, and Gerda Janssens. The most probable explanation for probabilistic logic programs with annotated disjunctions. In Jesse Davis and Jan Ramon, editors, <em>International Conference on Inductive Logic Programming</em>, volume 9046 of LNCS, 139–153. Berlin, Heidelberg, 2015. Springer. <a class="reference external" href="https://doi.org/10.1007/978-3-319-23708-4_10">doi:10.1007/978-3-319-23708-4_10</a>.</td></tr>
+</tbody>
+</table>
 <table class="docutils citation" frame="void" id="van2010dtproblog" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id35">[VdBTVODR10]</a></td><td>Guy Van&nbsp;den Broeck, Ingo Thon, Martijn Van&nbsp;Otterlo, and Luc De&nbsp;Raedt. Dtproblog: a decision-theoretic probabilistic prolog. In <em>Twenty-Fourth AAAI Conference on Artificial Intelligence</em>. 2010.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id39">[VdBTVODR10]</a></td><td>Guy Van&nbsp;den Broeck, Ingo Thon, Martijn Van&nbsp;Otterlo, and Luc De&nbsp;Raedt. Dtproblog: a decision-theoretic probabilistic prolog. In <em>Twenty-Fourth AAAI Conference on Artificial Intelligence</em>. 2010.</td></tr>
 </tbody>
 </table>
 <table class="docutils citation" frame="void" id="vendenbru-jelia06" rules="none">
@@ -1847,6 +1978,7 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 </li>
 <li><a class="reference internal" href="#conditional-queries-on-discrete-variables">Conditional Queries on Discrete Variables</a></li>
 <li><a class="reference internal" href="#conditional-queries-on-continuous-variables">Conditional Queries on Continuous Variables</a></li>
+<li><a class="reference internal" href="#mpe-map-and-viterbi-inference">MPE, MAP and Viterbi Inference</a></li>
 <li><a class="reference internal" href="#causal-inference">Causal Inference</a></li>
 <li><a class="reference internal" href="#graphing-the-results">Graphing the Results</a><ul>
 <li><a class="reference internal" href="#using-c3-js">Using C3.js</a></li>

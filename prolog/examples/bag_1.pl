@@ -11,7 +11,7 @@
 
 :- begin_lpad.
 
- 0.6::red(b1); 0.3::green(b1); 0.1::blue(b1) :- pick(b1).
+0.6::red(b1); 0.3::green(b1); 0.1::blue(b1) :- pick(b1).
 map_query 0.6::pick(b1); 0.4::no_pick(b1).
 
 ev:- \+ blue(b1).
@@ -19,6 +19,10 @@ ev:- \+ blue(b1).
 :- end_lpad.
 
 /** <examples>
+?- map(ev,P,Exp).
+P = 0.5399999999999999,
+Exp = [rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)].
+
 ?- map_bdd_dot_string(ev,BDD,Var,VarA,P,Exp).
 
 ?- abd_prob(win,Prob,Exp).

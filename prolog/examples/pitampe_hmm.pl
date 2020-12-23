@@ -69,40 +69,39 @@ state_diagram(digraph(G)):-
 /** <examples>
 
 
-?-vit_prob(hmm([a,g,g]),P,E).
+?-mpe(hmm([a,g,g]),P,E).
 P = 0.000405,
 E = [rule(0,next_state(q1,q2,[]),[next_state(q1,q1,[]):0.5,
-    next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
-	rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
-	  letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
-	rule(1,next_state(q2,q2,[q1]),[next_state(q2,q1,[q1]):0.45,
-	  next_state(q2,q2,[q1]):0.5,next_state(q2,end,[q1]):0.05],[]),
-	rule(3,letter(q2,g,[q1]),[letter(q2,a,[q1]):0.1,letter(q2,c,[q1]):0.2,
-	  letter(q2,g,[q1]):0.3,letter(q2,t,[q1]):0.4],[]),
-	rule(1,next_state(q2,end,[q2,q1]),[next_state(q2,q1,[q2,q1]):0.45,
-	  next_state(q2,q2,[q2,q1]):0.5,next_state(q2,end,[q2,q1]):0.05],[]),
-	rule(3,letter(q2,g,[q2,q1]),[letter(q2,a,[q2,q1]):0.1,
-	  letter(q2,c,[q2,q1]):0.2,letter(q2,g,[q2,q1]):0.3,
-		letter(q2,t,[q2,q1]):0.4],[])]
+	    next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
+		rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
+		  letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
+		rule(1,next_state(q2,q2,[q1]),[next_state(q2,q1,[q1]):0.45,
+		  next_state(q2,q2,[q1]):0.5,next_state(q2,end,[q1]):0.05],[]),
+		rule(3,letter(q2,g,[q1]),[letter(q2,a,[q1]):0.1,letter(q2,c,[q1]):0.2,
+		  letter(q2,g,[q1]):0.3,letter(q2,t,[q1]):0.4],[]),
+		rule(1,next_state(q2,end,[q2,q1]),[next_state(q2,q1,[q2,q1]):0.45,
+		  next_state(q2,q2,[q2,q1]):0.5,next_state(q2,end,[q2,q1]):0.05],[]),
+		rule(3,letter(q2,g,[q2,q1]),[letter(q2,a,[q2,q1]):0.1,
+		  letter(q2,c,[q2,q1]):0.2,letter(q2,g,[q2,q1]):0.3,
+			letter(q2,t,[q2,q1]):0.4]
 
-?-vit_prob(hmm([a,a,a]),P,E).
-S = [q1, q1, q1],
+?-mpe(hmm([a,a,a]),P,E).
 P = 0.0008000000000000003,
 E= [rule(0,next_state(q1,q1,[]),[next_state(q1,q1,[]):0.5,
-	next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
-rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
-	letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
-rule(0,next_state(q1,q1,[q1]),[next_state(q1,q1,[q1]):0.5,
-	next_state(q1,q2,[q1]):0.45,next_state(q1,end,[q1]):0.05],[]),
-rule(2,letter(q1,a,[q1]),[letter(q1,a,[q1]):0.4,letter(q1,c,[q1]):0.3,
-	letter(q1,g,[q1]):0.2,letter(q1,t,[q1]):0.1],[]),
-rule(0,next_state(q1,end,[q1,q1]),[next_state(q1,q1,[q1,q1]):0.5,
-	next_state(q1,q2,[q1,q1]):0.45,next_state(q1,end,[q1,q1]):0.05],[]),
-rule(2,letter(q1,a,[q1,q1]),[letter(q1,a,[q1,q1]):0.4,
-	letter(q1,c,[q1,q1]):0.3,letter(q1,g,[q1,q1]):0.2,
-	letter(q1,t,[q1,q1]):0.1],[])]
+	  next_state(q1,q2,[]):0.45,next_state(q1,end,[]):0.05],[]),
+	rule(2,letter(q1,a,[]),[letter(q1,a,[]):0.4,letter(q1,c,[]):0.3,
+	  letter(q1,g,[]):0.2,letter(q1,t,[]):0.1],[]),
+	rule(0,next_state(q1,q1,[q1]),[next_state(q1,q1,[q1]):0.5,
+	  next_state(q1,q2,[q1]):0.45,next_state(q1,end,[q1]):0.05],[]),
+	rule(2,letter(q1,a,[q1]),[letter(q1,a,[q1]):0.4,letter(q1,c,[q1]):0.3,
+	  letter(q1,g,[q1]):0.2,letter(q1,t,[q1]):0.1],[]),
+	rule(0,next_state(q1,end,[q1,q1]),[next_state(q1,q1,[q1,q1]):0.5,
+	  next_state(q1,q2,[q1,q1]):0.45,next_state(q1,end,[q1,q1]):0.05],[]),
+	rule(2,letter(q1,a,[q1,q1]),[letter(q1,a,[q1,q1]):0.4,
+	  letter(q1,c,[q1,q1]):0.3,letter(q1,g,[q1,q1]):0.2,
+	  letter(q1,t,[q1,q1]):0.1]
 
-?-vit_bdd_dot_string(hmm([a,g,g]),G,LV,P,MAP).
+?-mpe_bdd_dot_string(hmm([a,g,g]),G,LV,P,MAP).
 
 ?- state_diagram(G).
 % show the state diagram

@@ -4,15 +4,15 @@
   prob_meta/2,
   prob_meta/3,
   abd_prob/3,
-  vit_prob/3,
-  vit_all_prob/3,
+  mpe/3,
+  mpe_all/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
   abd_bdd_dot_string/6,
   map_bdd_dot_string/6,
   map/3,
-  vit_bdd_dot_string/5,
+  mpe_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
   get_dec_var_n/5,
@@ -49,8 +49,8 @@ details.
 % :- prolog_debug(chk_secure).
 
 :-meta_predicate abd_prob(:,-,-).
-:-meta_predicate vit_prob(:,-,-).
-:-meta_predicate vit_all_prob(:,-,-).
+:-meta_predicate mpe(:,-,-).
+:-meta_predicate mpe_all(:,-,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob(:,:,-,+).
@@ -62,7 +62,7 @@ details.
 :-meta_predicate abd_bdd_dot_string(:,-,-,-,-,-).
 :-meta_predicate map(:,-,-).
 :-meta_predicate map_bdd_dot_string(:,-,-,-,-,-).
-:-meta_predicate vit_bdd_dot_string(:,-,-,-,-).
+:-meta_predicate mpe_bdd_dot_string(:,-,-,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-meta_predicate get_p(:,+,-).
@@ -275,12 +275,12 @@ abd_prob(M:Goal,P,Delta):-
 
 
 /**
- * vit_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
+ * mpe(:Query:atom,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the most probable explanation (MPE) of the ground query Query.
  * It returns the explanation in Delta together with its Probability
  */
-vit_prob(M:Goal,P,Delta):-
+mpe(M:Goal,P,Delta):-
   abolish_all_tables,
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
@@ -293,15 +293,24 @@ vit_prob(M:Goal,P,Delta):-
   add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
   M:(asserta((Head1 :- Body2),Ref)),
   init(Env),
-  findall((Goal,P,Exp),get_vit_p(M:Goal1,Env,P,Exp),L),
+  findall((Goal,P,Exp),get_mpe_p(M:Goal1,Env,P,Exp),L),
   end(Env),
   erase(Ref),
   member((Goal,P,Exp0),L),
   reverse(Exp0,Exp),
-  from_assign_to_vit_exp(Exp,M,Delta).
-
-vit_all_prob(M:Goal,Prob,Exp):-
-  vit_prob(M:Goal,Prob0,Exp0),
+  from_assign_to_mpe_exp(Exp,M,Delta).
+/**
+ * mpe_all(:Query:atom,-Probability:float,-Delta:list) is nondet
+ *
+ * The predicate computes the most probable explanation (MPE) of the ground query Query.
+ * It returns the explanation in Delta together with its Probability.
+ * It completes the explanation with the most probable
+ * values of the random variables not included in the explanation. 
+ * For clauses not included in the explanation
+ * that are nonground, it considers their nonground version, thus not performing MPE exactly.
+ */
+mpe_all(M:Goal,Prob,Exp):-
+  mpe(M:Goal,Prob0,Exp0),
   complete_exp(Exp0,Prob0,M,Exp,Prob).
 
 
@@ -339,7 +348,7 @@ convert_exp([(R,S,N,_)|T],M,[rule(R,Head,HeadList,Body)|TDelta]):-
   convert_exp(T,M,TDelta).
 
 /**
- * vit_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-Probability:float,-Delta:list) is nondet
+ * mpe_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the most probable explanation (MPE) of the ground query Query.
  * It returns the explanation in Delta together with its Probability
@@ -350,25 +359,25 @@ convert_exp([(R,S,N,_)|T],M,[rule(R,Head,HeadList,Body)|TDelta]):-
  * the rule number and the grounding substitution.
 
  */
-vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
+mpe_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
   abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),!,
   findall([V,R,S],M:v(R,S,V),LV),
-  ret_vit_prob(Env,BDD,P,Exp0),
+  ret_mpe_prob(Env,BDD,P,Exp0),
   reverse(Exp0,Exp),
-  from_assign_to_vit_exp(Exp,M,MAP),
+  from_assign_to_mpe_exp(Exp,M,MAP),
   create_dot_string(Env,BDD,Dot),
   end(Env).
 
-from_assign_to_vit_exp([],_M,[]).
+from_assign_to_mpe_exp([],_M,[]).
 
-from_assign_to_vit_exp([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
+from_assign_to_mpe_exp([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
   M:v(R,S,Var),
   M:rule_by_num(R,HeadList,Body,S),
   nth0(Val,HeadList,Head:_),
-  from_assign_to_vit_exp(TA,M,TDelta).
+  from_assign_to_mpe_exp(TA,M,TDelta).
 
 %  Delta=Exp.
 %  from_assign_to_exp(Exp,M,Delta).
@@ -705,10 +714,10 @@ get_abd_p(M:Goal,M:Evidence,Env,P,Exp):-
   Out=(_,BDD),
   ret_abd_prob(Env,BDD,P,Exp).
 
-get_vit_p(M:Goal,Env,P,Exp):-
+get_mpe_p(M:Goal,Env,P,Exp):-
   get_node(M:Goal,Env,Out),
   Out=(_,BDD),
-  ret_vit_prob(Env,BDD,P,Exp).
+  ret_mpe_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
   get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
@@ -2036,14 +2045,14 @@ sandbox:safe_meta(pita:prob(_,_,_,_), []).
 sandbox:safe_meta(pita:prob_meta(_,_), []).
 sandbox:safe_meta(pita:prob_meta(_,_,_), []).
 sandbox:safe_meta(pita:abd_prob(_,_,_), []).
-sandbox:safe_meta(pita:vit_prob(_,_,_), []).
+sandbox:safe_meta(pita:mpe(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:map(_,_,_), []).
 sandbox:safe_meta(pita:map_bdd_dot_string(_,_,_,_,_,_), []).
-sandbox:safe_meta(pita:vit_bdd_dot_string(_,_,_,_,_), []).
+sandbox:safe_meta(pita:mpe_bdd_dot_string(_,_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
