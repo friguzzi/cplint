@@ -52,7 +52,7 @@
 
 
 \title{cplint Documentation}
-\date{Dec 23, 2020}
+\date{Dec 24, 2020}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1230,6 +1230,158 @@ that computes the expected value of \sphinxcode{\sphinxupquote{Arg}} in \sphinxc
 It uses \sphinxcode{\sphinxupquote{N}} particles.
 
 
+\section{MPE, MAP and Viterbi Inference}
+\label{\detokenize{index:mpe-map-and-viterbi-inference}}
+\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. \sphinxcite{index:dblp-conf-ilp-shterionovrvkmj14}\sphinxcite{index:belalbrig20-tplp-ij}.
+
+In MAP inference we look for the choices of head atoms of some clauses that lead to the probability of a query being
+maximal. The rules for which we want the choices, called \sphinxstyleemphasis{query}, are indicated in the input file by prepending
+the text \sphinxcode{\sphinxupquote{map\_query}} to each query rule. For example, in the program \sphinxhref{http://cplint.eu/e/bag\_1.pl}{bag\_1.pl}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.3}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.1}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{no\PYGZus{}pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+
+\PYG{n}{ev}\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYGZbs{}\PYG{o}{+} \PYG{n}{blue}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+we are asking for the choice for the second rule.
+The predicate to use is
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n+nb}{map}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Exp}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+For example, the query on the program above
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} map(ev,P,Exp).
+\end{sphinxVerbatim}
+
+asks for the chocie for the second rule that yelds the highest probability for \sphinxcode{\sphinxupquote{ev}}. The query returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{P} \PYG{o}{=} \PYG{l+m+mf}{0.5399999999999999}\PYG{p}{,}
+\PYG{n}{Exp} \PYG{o}{=} \PYG{p}{[}\PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{,} \PYG{p}{[}\PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{,} \PYG{n}{no\PYGZus{}pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{]}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+In MPE inference we are interested in the choices for \sphinxstyleemphasis{all} rules. To perform MPE inference,
+we need to prepend  \sphinxcode{\sphinxupquote{map\_query}} to each rule and use predicate \sphinxcode{\sphinxupquote{map/3}}.
+
+For example, on program \sphinxhref{http://cplint.eu/e/bag\_game\_mpe.pl}{bag\_game\_mpe.pl}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{red}\PYG{p}{,} \PYG{n}{green}\PYG{o}{.}
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{blue}\PYG{p}{,} \PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.9}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.5}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{yellow}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} map(win,P,Exp).
+\end{sphinxVerbatim}
+
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{Exp} \PYG{o}{=} \PYG{p}{[}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{p}{[}\PYG{n}{red}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.6}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{green}\PYG{p}{,} \PYG{p}{[}\PYG{n}{green}\PYG{p}{:}\PYG{l+m+mf}{0.9}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.09999999999999998}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{blue}\PYG{p}{,} \PYG{p}{[}\PYG{n}{blue}\PYG{p}{:}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.5}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{yellow}\PYG{p}{,} \PYG{p}{[}\PYG{n}{yellow}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{]}\PYG{p}{,}
+\PYG{n}{P} \PYG{o}{=} \PYG{l+m+mf}{0.162}\PYG{p}{,}
+\end{sphinxVerbatim}
+
+In Viterbi inference we are interested in the most probable proof of a query. See \sphinxcite{index:dblp-conf-ilp-shterionovrvkmj14}
+for the difference between the most probable proof and the most probable explanation.
+Module \sphinxcode{\sphinxupquote{viterbi}} looks for the most probable proof by using a meta interpreter
+that performs branch and bound.
+
+The predicate
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{viterbi}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{conjunction}\PYG{p}{,}\PYG{o}{+}\PYG{n}{K}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Exp}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+computes the most probable proof of the conjunction of literals \sphinxcode{\sphinxupquote{Query}}.
+It returns the proof as explanation in \sphinxcode{\sphinxupquote{Exp}}.
+
+In example \sphinxhref{http://cplint.eu/e/bag\_game\_vit.pl}{bag\_game\_vit.pl}:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{viterbi}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{viterbi}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{begin\PYGZus{}lpad}\PYG{o}{.}
+
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{red}\PYG{p}{,} \PYG{n}{green}\PYG{o}{.}
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{blue}\PYG{p}{,} \PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{o}{.}
+\PYG{l+m+mf}{0.9}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{o}{.}
+\PYG{l+m+mf}{0.5}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{o}{.}
+\PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}lpad}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} viterbi(win,P,Exp).
+\end{sphinxVerbatim}
+
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{P}\PYG{o}{=}\PYG{l+m+mf}{0.36}\PYG{p}{,}
+\PYG{n}{Exp}\PYG{o}{=}\PYG{p}{[}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{red}\PYG{p}{,} \PYG{p}{[}\PYG{n}{red}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{green}\PYG{p}{,} \PYG{p}{[}\PYG{n}{green}\PYG{p}{:}\PYG{l+m+mf}{0.9}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.09999999999999998}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+As you can see the Viterbi explanation is different from the MPE one presented above.
+
+Note that \sphinxcode{\sphinxupquote{viterbi/3}}, in case the query contains variables, returns their instantiation
+leading to the highest probability of the grounding of the query. For example,
+in \sphinxhref{http://cplint.eu/e/hmm\_vit.pl}{hmm\_vit.pl}, the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{}viterbi(hmm1(S,[a,g,g]),\PYGZus{}P,\PYGZus{}E).
+\end{sphinxVerbatim}
+
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{S} \PYG{o}{=} \PYG{p}{[}\PYG{n}{q2}\PYG{p}{,} \PYG{n}{q2}\PYG{p}{,} \PYG{n}{q1}\PYG{p}{]}\PYG{p}{,}
+\end{sphinxVerbatim}
+
+
+\subsection{Drawing BDDs for MAP/MPE}
+\label{\detokenize{index:drawing-bdds-for-map-mpe}}
+With \sphinxcode{\sphinxupquote{pita}}, you can obtain the BDD for a MAP/MPE query with the predicate
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{map\PYGZus{}bdd\PYGZus{}dot\PYGZus{}string}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{DotString}\PYG{p}{:}\PYG{n}{string}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LV}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LAV}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}
+        \PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Delta}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+The BDD is represented in the dot format of graphviz and returned in \sphinxcode{\sphinxupquote{DotString}}. See {\hyperref[\detokenize{index:drawing-bdds}]{\sphinxcrossref{\DUrole{std,std-ref}{Drawing BDDs}}}}
+for the graph format and for instruction on how to draw it.
+It returns the explanation in \sphinxcode{\sphinxupquote{Delta}} together with its \sphinxcode{\sphinxupquote{Probability}}
+The predicate returns \sphinxcode{\sphinxupquote{LV}} and \sphinxcode{\sphinxupquote{LAV}}, the association of variables to rules
+and of query variables to rules respectively.
+\sphinxcode{\sphinxupquote{LV}} and \sphinxcode{\sphinxupquote{LAV}} are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.
+
+
 \section{Causal Inference}
 \label{\detokenize{index:causal-inference}}
 \sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do-calculus \sphinxcite{index:pea00-book}.
@@ -2397,6 +2549,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 \begin{sphinxthebibliography}{VdBTVODR}
+\bibitem[BARZ20]{index:belalbrig20-tplp-ij}
+Elena Bellodi, Marco Alberti, Fabrizio Riguzzi, and Riccardo Zese. MAP inference for probabilistic logic programming. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 20(5):641â\texteuro{}“655, 2020. URL: \sphinxurl{https://arxiv.org/abs/2008.01394}, \sphinxhref{https://doi.org/10.1017/S1471068420000174}{doi:10.1017/S1471068420000174}.
 \bibitem[BR11]{index:belrig11-tr}
 Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS-2011-01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: \sphinxurl{http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf}.
 \bibitem[BR13a]{index:bellodi2013expectation}
@@ -2433,6 +2587,8 @@ Fabrizio Riguzzi and Terrance Swift. Tabling and Answer Subsumption for Reasonin
 Taisuke Sato and Yoshitaka Kameya. Prism: a language for symbolic-statistical modeling. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 1330\textendash{}1339. 1997.
 \bibitem[SK01]{index:dblp-journals-jair-satok01}
 Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic-statistical modeling. \sphinxstyleemphasis{J. Artif. Intell. Res.}, 15:391\textendash{}454, 2001.
+\bibitem[SRV+15]{index:dblp-conf-ilp-shterionovrvkmj14}
+Dimitar Sht. Shterionov, Joris Renkens, Jonas Vlasselaer, Angelika Kimmig, Wannes Meert, and Gerda Janssens. The most probable explanation for probabilistic logic programs with annotated disjunctions. In Jesse Davis and Jan Ramon, editors, \sphinxstyleemphasis{International Conference on Inductive Logic Programming}, volume 9046 of LNCS, 139\textendash{}153. Berlin, Heidelberg, 2015. Springer. \sphinxhref{https://doi.org/10.1007/978-3-319-23708-4\_10}{doi:10.1007/978-3-319-23708-4\_10}.
 \bibitem[VdBTVODR10]{index:van2010dtproblog}
 Guy Van den Broeck, Ingo Thon, Martijn Van Otterlo, and Luc De Raedt. Dtproblog: a decision-theoretic probabilistic prolog. In \sphinxstyleemphasis{Twenty-Fourth AAAI Conference on Artificial Intelligence}. 2010.
 \bibitem[VDB06]{index:vendenbru-jelia06}

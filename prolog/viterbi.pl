@@ -1,6 +1,5 @@
 
 :- module(viterbi,[ viterbi/3,
-  viterbi_all/3,
   op(600,xfy,'::')
     ]).
 /** <module> kbest
@@ -20,24 +19,9 @@ of the query
 :- thread_local vit_input_mod/1.
 
 :-meta_predicate viterbi(:,-,-).
-:-meta_predicate viterbi_all(:,-,-).
-
 
 
 default_setting_viterbi(epsilon_parsing, 1e-5).
-
-/**
- * viterbi_all(:Query:conjunction,+K:int,-Exp:list) is nondet
- *
- * The predicate computes the most probable explanation of the conjunction of literals Query.
- * It returns the explanation in Exp. It completes the explanation with the most probable
- * values of the random variables not included in the explanation, thus performing MPE, i.e.,
- * a value is chosen for all probabilistic clauses. For clauses not included in the explanation
- * that are nonground, it considers their nonground version, thus not performing MPE exactly.
- */
-viterbi_all(M:Goals,Prob,Exp):-
-  viterbi(M:Goals,Prob0,Exp0),
-  complete_exp(Exp0,Prob0,M,Exp,Prob).
 
 /**
  * viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
@@ -576,7 +560,6 @@ vit_expansion(Head, []):-
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(viterbi:viterbi(_,_,_), []).
-sandbox:safe_meta(viterbi:viterbi_all(_,_,_), []).
 
 :- thread_local vit_file/1.
 
@@ -591,7 +574,7 @@ user:term_expansion((:- viterbi), []) :-!,
   retractall(M:rule_n(_)),
   assert(M:rule_n(0)),
   M:(dynamic rule_by_num/5),
-  M:(dynamic rule/8),
+  M:(dynamic rule/8,def_rule/2),
   retractall(M:rule_by_num(_,_,_,_,_)),
   retractall(M:rule(_,_,_,_,_,_,_,_)),
   style_check(-discontiguous).

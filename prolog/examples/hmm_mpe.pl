@@ -44,17 +44,17 @@ hmm(Q,S0,S,[L|O]):-
 % an HMM in state Q different from end goes in state Q1, emits the letter L
 % and continues the chain
 
-next_state(q1,q1,S):1/2;next_state(q1,q2,S):0.45;next_state(q1,end,S):0.05.
+map_query next_state(q1,q1,S):1/2;next_state(q1,q2,S):0.45;next_state(q1,end,S):0.05.
 % from state q1 the HMM can go to q1, q2 or end with equal probability
 
-next_state(q2,q1,S):0.45;next_state(q2,q2,S):1/2;next_state(q2,end,S):0.05.
+map_query next_state(q2,q1,S):0.45;next_state(q2,q2,S):1/2;next_state(q2,end,S):0.05.
 % from state q2 the HMM can go to q1, q2 or end with equal probability
 
 
-letter(q1,a,S):0.4;letter(q1,c,S):0.3;letter(q1,g,S):0.2;letter(q1,t,S):0.1.
+map_query letter(q1,a,S):0.4;letter(q1,c,S):0.3;letter(q1,g,S):0.2;letter(q1,t,S):0.1.
 % from state q1 the HMM emits one of the letters with equal probability
 
-letter(q2,a,S):0.1;letter(q2,c,S):0.2;letter(q2,g,S):0.3;letter(q2,t,S):0.4.
+map_query letter(q2,a,S):0.1;letter(q2,c,S):0.2;letter(q2,g,S):0.3;letter(q2,t,S):0.4.
 % from state q1 the HMM emits one of the letters with equal probability
 
 :- end_lpad.
