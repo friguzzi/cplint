@@ -19,10 +19,7 @@ ev:- \+ blue(b1).
 :- end_lpad.
 
 /** <examples>
-?- map_bdd_dot_string(ev,BDD,Var,VarA,P,Exp).
-
-?- abd_prob(win,Prob,Exp).
-
+?- map(ev,P,Exp).
 
 
 */

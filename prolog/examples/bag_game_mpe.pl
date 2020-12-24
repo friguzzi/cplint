@@ -23,15 +23,13 @@ map_query 0.6::yellow.
 :- end_lpad.
 
 /** <examples>
-?- map(win,BDD,Var,VarA,P,Exp).
+?- map(win,P,Exp).
 Exp = [
   rule(0, '', [red:0.4, '' : 0.6], true), 
   rule(1, green, [green:0.9, '' : 0.09999999999999998], true), 
   rule(2, blue, [blue:0.5, '' : 0.5], true), 
   rule(3, yellow, [yellow:0.6, '' : 0.4], true)],
 P = 0.162,
-?- abd_prob(win,Prob,Exp).
-
 
 
 */

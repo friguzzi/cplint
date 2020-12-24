@@ -38,7 +38,7 @@ fault_rupture(east_west) : 0.55.
 
 /** <examples>
 
-?- vit(eruption,P,E).
+?- viterbi(eruption,P,E).
 P = 0.252,
 E = [rule(0, eruption, [eruption:0.6, earthquake:0.3, '':0.10000000000000003], [sudden_energy_release, fault_rupture(southwest_northeast)]), 
 rule(1, sudden_energy_release, [sudden_energy_release:0.7, '':0.30000000000000004], []), 

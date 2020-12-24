@@ -33,6 +33,7 @@ test_pita:-
     bag_pb_mpe,
     bag_simple,
     bag_mpe,
+    eruption_mpe,
     bag_1,
     bag_2,
     hmm_mpe,
@@ -546,6 +547,20 @@ test(ev):-
 			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
 		  ]))).
 :- end_tests(bag_mpe).
+
+:- begin_tests(eruption_mpe, []).
+
+:-ensure_loaded(library(examples/eruption_mpe)).
+
+test(ev):-
+  run((map(ev,P,Exp),close_to(P,0.08316),
+	  perm(Exp,[rule(1,sudden_energy_release,[sudden_energy_release:0.7,'':0.30000000000000004],true),
+      rule(2,fault_rupture(southwest_northeast),[fault_rupture(southwest_northeast):0.6,'':0.4],true),
+      rule(3,fault_rupture(east_west),[fault_rupture(east_west):0.55,'':0.44999999999999996],true),
+      rule(0,eruption,[eruption:0.6,earthquake:0.3,'':0.10000000000000003],(sudden_energy_release,fault_rupture(southwest_northeast))),
+      rule(0,eruption,[eruption:0.6,earthquake:0.3,'':0.10000000000000003],(sudden_energy_release,fault_rupture(east_west)))
+		  ]))).
+:- end_tests(eruption_mpe).
 
 :- begin_tests(bag_1, []).
 

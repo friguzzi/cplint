@@ -23,10 +23,4 @@ ev:- \+ blue(b1).
 P = 0.5399999999999999,
 Exp = [rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)].
 
-?- map_bdd_dot_string(ev,BDD,Var,VarA,P,Exp).
-
-?- abd_prob(win,Prob,Exp).
-
-
-
 */

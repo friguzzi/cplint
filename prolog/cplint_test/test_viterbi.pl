@@ -7,10 +7,24 @@ test_viterbi:-
     bag_game_vit,
     hmm_vit,
     coin_vit,
-    mendel_vit
+    mendel_vit,
+    eruption_vit
   ]).
 
   :-use_module(library(cplint_test/cplint_test)).
+
+:- begin_tests(eruption_vit, []).
+
+:-ensure_loaded(library(examples/eruption_vit)).
+
+test(ev):-
+  run((viterbi(eruption,P,Exp),close_to(P,0.252),
+	  perm(Exp,[rule(0, eruption, [eruption:0.6, earthquake:0.3, '':0.10000000000000003], [sudden_energy_release, fault_rupture(southwest_northeast)]), 
+    rule(1, sudden_energy_release, [sudden_energy_release:0.7, '':0.30000000000000004], []), 
+    rule(2, fault_rupture(southwest_northeast), [fault_rupture(southwest_northeast):0.6, '':0.4], [])]))).
+  
+:- end_tests(eruption_vit).
+
 
 :- begin_tests(bag_game_vit, []).
 
