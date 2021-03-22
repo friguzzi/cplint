@@ -2243,7 +2243,7 @@ get_node(\+ Goal,M,Env,BDD):-
   (M:Goal1->
     bdd_notc(Env,B,(_,BDD))
   ;
-    zeroc(Env,(_,BDD))
+    onec(Env,(_,BDD))
   ).
 
 get_node(\+ Goal,M,Env,BDD):-!,
@@ -2253,7 +2253,7 @@ get_node(\+ Goal,M,Env,BDD):-!,
   (M:Goal1->
     bdd_notc(Env,B,(_,BDD))
   ;
-    zeroc(Env,(_,BDD))
+    onec(Env,(_,BDD))
   ).
 
 get_node(Goal,M,Env,BDD):-
