@@ -29,14 +29,17 @@ par([
 		multiple_paths_learning,
     bongard_ind,
     bongard_fixed,
-    bongard_initial]).
+    bongard_initial,
+    mach_par]).
 
-stru([mach,
+stru([mach_sendback,
+    mach_fix,
+    mach_all,
 		registration]).
 
 
-:- begin_tests(mach, []).
-:-ensure_loaded(library(examples/learning/mach)).
+:- begin_tests(mach_par, []).
+:-ensure_loaded(library(examples/learning/mach_par)).
 :-use_module(library(cplint_test/cplint_test)).
 
 test(induce_par):-
@@ -48,18 +51,50 @@ test(induce_par):-
    (class(fix):0.5714285714285714;'':0.4285714285714286:-worn(B), replaceable(B)),
    (class(ok):0.2;'':0.8:-not_worn(_120))]).
 
-test(test_in):-
-  in(P),test(P,[all],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL, -21.286207461851408),close_to(AUCROC,0.7733333333333333),close_to(AUCPR, 0.5527564018467214).
+:- end_tests(mach_par).
+
+
+:- begin_tests(mach_sendback, []).
+:-ensure_loaded(library(examples/learning/mach_sendback)).
+:-use_module(library(cplint_test/cplint_test)).
+
 test(induce):-
   induce([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
   atomic_list_concat(['Result\nLL=',LL,'\nAUCROC=',AUCROC,'\nAUCPR=',AUCPR,'\n'],St),
   writeln(St),
   writeln(P),
-  atomic_list_concat(['Expected\nLL=','-18.554628716462105','\nAUCROC=','0.77','\nAUCPR=','0.600952380952381','\n'],StE),
+  atomic_list_concat(['Expected\nLL=','0.0','\nAUCROC=','1.0','\nAUCPR=','1.0','\n'],StE),
   writeln(StE),
-  writeln([(class(sendback):0.5;'':0.5:-worn(_138896)),(class(fix):0.5714285714285714;'':0.4285714285714286:-worn(_138670),replaceable(_138670))]),
-  close_to(LL,-18.554628716462105),close_to(AUCROC,0.77),close_to(AUCPR,0.600952380952381).
-:- end_tests(mach).
+  writeln([(sendback:1.0;'':0.0:-worn(_52500), not_replaceable(_52510), not_replaceable(_52520), worn(_52520))]),
+  close_to(LL,0.0),close_to(AUCROC,1.0),close_to(AUCPR,1.0).
+:- end_tests(mach_sendback).
+
+
+:- begin_tests(mach_fix, []).
+:-ensure_loaded(library(examples/learning/mach_fix)).
+:-use_module(library(cplint_test/cplint_test)).
+
+test(induce):-
+  induce([train],P),test(P,[test],LL,AUCROC,_ROC,AUCPR,_PR),
+  atomic_list_concat(['Result\nLL=',LL,'\nAUCROC=',AUCROC,'\nAUCPR=',AUCPR,'\n'],St),
+  writeln(St),
+  writeln(P),
+  atomic_list_concat(['Expected\nLL=','0.0','\nAUCROC=','1.0','\nAUCPR=','1.0','\n'],StE),
+  writeln(StE),
+  writeln([(fix:1.0;'':0.0:-worn(_142386))]),
+  close_to(LL,0.0),close_to(AUCROC,1.0),close_to(AUCPR,1.0).
+:- end_tests(mach_fix).
+
+:- begin_tests(mach_all, []).
+:-ensure_loaded(library(examples/learning/mach_all)).
+:-use_module(library(cplint_test/cplint_test)).
+
+
+test(test_in):-
+  in(P),test(P,[all],LL,AUCROC,_ROC,AUCPR,_PR),close_to(LL, -124.33959502167846),close_to(AUCROC,0.7),close_to(AUCPR, 0.6844298018482021).
+:- end_tests(mach_all).
+
+
 
 :- begin_tests(bongard, []).
 :-ensure_loaded(library(examples/learning/bongard)).

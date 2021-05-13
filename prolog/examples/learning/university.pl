@@ -6,7 +6,9 @@ http://www.cs.sfu.ca/~oschulte/jbn/dataset.html
 */
 
 /** <examples>
-?- induce([f1,f2,f3,f4],P),test(P,[f5],LL,AUCROC,ROC,AUCPR,PR). % learn the structure and the parameters and test the result
+?- induce([f1,f3,f4,f5],P),test(P,[f2],LL,AUCROC,ROC,AUCPR,PR). 
+% learn the structure and the parameters and test the result
+% fold f2 is used for testing as it is the only fold with both positive and negative examples
 */
 
 :- use_module(library(slipcover)).
@@ -18,7 +20,7 @@ http://www.cs.sfu.ca/~oschulte/jbn/dataset.html
 
 :-sc.
 
-:- set_sc(verbosity,1).
+:- set_sc(verbosity,3).
 :- set_sc(depth_bound,false).
 :- set_sc(neg_ex,given).
 
@@ -33,7 +35,7 @@ fold(f4,[f4]).
 fold(f5,[f5]).
 
 
-output(rating/2).
+output(rating_1/1).
 
 input(capability/3).
 
@@ -43,7 +45,7 @@ input(diff/2).
 
 input(popularity/2).
 
-input(rating/2).
+input(rating_1/1).
 
 input(teachingability/2).
 
@@ -59,31 +61,31 @@ input(b_registration/2).
 
 input(b_ra/2).
 
-determination(rating/2,rating/2).
+determination(rating_1/1,rating_1/1).
 
-determination(rating/2,capability/3).
+determination(rating_1/1,capability/3).
 
-determination(rating/2,salary/3).
+determination(rating_1/1,salary/3).
 
-determination(rating/2,diff/2).
+determination(rating_1/1,diff/2).
 
-determination(rating/2,popularity/2).
+determination(rating_1/1,popularity/2).
 
-determination(rating/2,rating/2).
+determination(rating_1/1,rating_1/1).
 
-determination(rating/2,teachingability/2).
+determination(rating_1/1,teachingability/2).
 
-determination(rating/2,grade/3).
+determination(rating_1/1,grade/3).
 
-determination(rating/2,sat/3).
+determination(rating_1/1,sat/3).
 
-determination(rating/2,intelligence/2).
+determination(rating_1/1,intelligence/2).
 
-determination(rating/2,ranking/2).
+determination(rating_1/1,ranking/2).
 
-determination(rating/2,b_registration/2).
+determination(rating_1/1,b_registration/2).
 
-determination(rating/2,b_ra/2).
+determination(rating_1/1,b_ra/2).
 
 
 modeb(*,b_registration(+course,-st)).
@@ -93,8 +95,7 @@ modeb(*,b_ra(-pr,+st)).
 modeb(*,b_ra(+pr,-st)).
 
 
-modeh(*,rating(+course,rating_1)).
-modeh(*,rating(+course,rating_2)).
+modeh(*,rating_1(+course)).
 
 modeb(*,diff(+course,-diff)).
 modeb(*,diff(+course,-#diff)).
@@ -116,7 +117,15 @@ modeb(*,teachingability(+pr,-#tab)).
 modeb(*,popularity(+pr,-pop)).
 modeb(*,popularity(+pr,-#pop)).
 
-banned([rating(A,B)],[rating(A,B)]).
+banned([rating_1(A)],[rating_1(A)]).
+
+
+rating_1(M,C):-
+  rating(M,C,rating_1).
+
+neg(rating_1(M,C)):-
+  rating(M,C,rating_2).
+
 begin(model(f1)).
 capability(prof_id_5,student_id_5,capability_1).
 capability(prof_id_6,student_id_5,capability_2).
@@ -569,8 +578,6 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_6,rating_2).
 rating(course_id_9,rating_2).
-neg(rating(course_id_6,rating_1)).
-neg(rating(course_id_9,rating_1)).
 end(model(f1)).
 begin(model(f2)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -1024,8 +1031,6 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_8,rating_2).
 rating(course_id_12,rating_1).
-neg(rating(course_id_8,rating_1)).
-neg(rating(course_id_12,rating_2)).
 end(model(f2)).
 begin(model(f3)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -1479,8 +1484,6 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_11,rating_1).
 rating(course_id_4,rating_2).
-neg(rating(course_id_11,rating_2)).
-neg(rating(course_id_4,rating_1)).
 end(model(f3)).
 begin(model(f4)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -1934,8 +1937,6 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_13,rating_1).
 rating(course_id_7,rating_2).
-neg(rating(course_id_13,rating_2)).
-neg(rating(course_id_7,rating_1)).
 end(model(f4)).
 begin(model(f5)).
 capability(prof_id_5,student_id_5,capability_1).
@@ -2389,6 +2390,4 @@ b_ra(prof_id_5,student_id_27).
 b_ra(prof_id_5,student_id_28).
 rating(course_id_10,rating_2).
 rating(course_id_5,rating_2).
-neg(rating(course_id_10,rating_1)).
-neg(rating(course_id_5,rating_1)).
 end(model(f5)).
