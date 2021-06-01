@@ -5,7 +5,7 @@
 
 This module defines highlight  support  for   both  the  offline  tools,
 notably  PceEmacs  and  the   graphical    debugger,   and   the  online
-[cplint-on-SWISH](http://cplint.ml.unife.it).
+[cplint-on-SWISH](http://cplint.eu).
 */
 
 :- multifile prolog_colour:term_colours/2.
