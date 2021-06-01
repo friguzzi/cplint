@@ -1,6 +1,6 @@
 
 
-:- module(pitaind,[s/2, prob_ind/2, prob_bar/2, prob_ind/3, prob_bar/3,
+:- module(pitaind,[prob_ind/2, prob_bar/2, prob_ind/3, prob_bar/3,
   set_pitaind/2,setting_pitaind/2,
   onec/1,zeroc/1,andc/3,notc/2,andcnf/3,
   orc_ind/3,orc_exc/3,
@@ -17,9 +17,6 @@ This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It reads probabilistic program andcomputes the probability of queries.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
-details.
 
 @author Fabrizio Riguzzi
 @license Artistic License 2.0
@@ -31,8 +28,6 @@ details.
 :-meta_predicate prob_bar(:,-).
 :-meta_predicate prob_ind(:,:,-).
 :-meta_predicate prob_bar(:,:,-).
-:-meta_predicate msw_ind(:,-,-).
-:-meta_predicate msw_ind(:,-,-,-).
 :-meta_predicate get_p(:,-).
 :-meta_predicate get_cond_p(:,:,-).
 :-meta_predicate get_node(:,-).
