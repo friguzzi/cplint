@@ -62,8 +62,7 @@ Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries
 using sampling.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+See http://friguzzi.github.io/cplint/_build/html/index.html for
 details.
 
 @author Fabrizio Riguzzi
