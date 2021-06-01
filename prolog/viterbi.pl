@@ -2,7 +2,7 @@
 :- module(viterbi,[ viterbi/3,
   op(600,xfy,'::')
     ]).
-/** <module> kbest
+/** <module> viterbi
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
@@ -371,30 +371,6 @@ ground_prob([ProbHead::_Head|Tail]) :-
 get_probs(Head, PL):-
   maplist(prob_ann,Head,PL).
 
-/*get_probs([], []).
-
-get_probs([_H:P|T], [P1|T1]) :-
-  P1 is P,
-  get_probs(T, T1).
-*/
-
-/**
- * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
- *
- * Returns in BDD a pointer to a BDD belonging to environment Environment
- * representing the disjunction of all the BDDs in ListOfBDDs
- */
-or_list([H],_Env,H):-!.
-
-or_list([H|T],Env,B):-
-  or_list1(T,Env,H,B).
-
-
-or_list1([],_Env,B,B).
-
-or_list1([H|T],Env,B0,B1):-
-  or(Env,B0,H,B2),
-  or_list1(T,Env,B2,B1).
 
 list2or([],true):-!.
 
