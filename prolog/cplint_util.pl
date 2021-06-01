@@ -546,7 +546,7 @@ sq_diff(Av,A-W,S):-
   matrix_mult_scal([S0],W,[S]).
 
 /**
- * builtin(+Goal:atom) is det
+ * swi_builtin(+Goal:atom) is det
  *
  * Succeeds if Goal is an atom whose predicate is defined in Prolog
  * (either builtin or defined in a standard library).
