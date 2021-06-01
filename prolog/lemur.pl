@@ -12,8 +12,7 @@ Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi.
 Bandit-based Monte-Carlo structure learning of probabilistic logic programs. 
 Machine Learning, 100(1):127-156, July 2015
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+See http://friguzzi.github.io/cplint/_build/html/index.html for
 details.
 
 @author Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi
