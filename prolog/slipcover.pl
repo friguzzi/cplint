@@ -32,8 +32,7 @@ This module performs learning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It performs both parameter and structure learning.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+See http://friguzzi.github.io/cplint/_build/html/index.html for
 details.
 
 @author Fabrizio Riguzzi, Elena Bellodi
