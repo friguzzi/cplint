@@ -12,7 +12,7 @@ https://dtai.cs.kuleuven.be/static/ACE/doc/
 /** <examples>
 ?- induce_par([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % learn the parameteters and test the result
 ?- induce([train],P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % learn the structure and the parameters and test the result
-?- inside(P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % test the input theory
+?- in(P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR). % test the input theory
 ?- induce_par([all],P).
 ?- induce([all],P).
 */
