@@ -2,12 +2,14 @@
 
 :-module(cplint_test,
   [close_to/2,close_to/3,relatively_close_to/2,relatively_close_to/3,run/1,
-  perm/2]).
+  perm/2,perm_map/2]).
 
 :- meta_predicate run(:).
 
 perm(A,B):-
 	permutation(A,B),!.
+perm_map(L,LR):-
+    maplist(permutation,L,LR).
 
 run(M:H):-
 	copy_term(H,NH),
