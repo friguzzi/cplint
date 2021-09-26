@@ -2640,6 +2640,43 @@ binomial(N,P,_M,X,Pr):-
   Pr is P^X*(1-P)^N_X*FN/(FX*FN_X).
 
 /**
+ * multinomial(+N:int,+P:list,+M:module,-S:list) is det
+ *
+ * samples a value from a multinomiaò probability distribution with parameters
+ * N and P and returns it in S.
+ */
+
+multinomial(N,P,_M,S):-
+  length(P,K),
+  numlist(1,K,Outcomes),
+  length(Distribution,K),
+  maplist(pair,Outcomes,P,Distribution),
+  findall(0,between(1,K,_),SampleState),
+  Sample =..[sample|SampleState],
+  multinomial_cycle(0,N,Distribution,Sample),
+  Sample=..[_|S].
+
+pair(A,B,A:B).
+
+multinomial_cycle(N,N,_Distribution,_Sample):-!.
+
+multinomial_cycle(N0,N,Distribution,Sample):-
+  discrete(Distribution,_,Index),
+  arg(Index,Sample,Count),
+  Count1 is Count+1,
+  setarg(Index,Sample,Count1),
+  N1 is N0+1,
+  multinomial_cycle(N1,N,Distribution,Sample).
+
+multinomial(N,P,_M,S,Pr):-
+  fact(N,1,FN),
+  foldl(factor_multi,P,S,FN,Pr).
+
+factor_multi(Pi,Xi,Pr0,Pr):-
+  fact(Xi,1,FXi),
+  Pr is Pr0*Pi^Xi/FXi.
+
+/**
  * dirichlet(+Par:list,+M:module,-S:float) is det
  *
  * samples a value from a Dirichlet probability density with parameters
@@ -3280,6 +3317,7 @@ is_dist(_M,D):-
     beta,
     poisson,
     binomial,
+    multinomial,
     geometric,
     exponential,
     pascal,
