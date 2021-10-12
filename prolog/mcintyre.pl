@@ -2642,7 +2642,7 @@ binomial(N,P,_M,X,Pr):-
 /**
  * multinomial(+N:int,+P:list,+M:module,-S:list) is det
  *
- * samples a value from a multinomiaò probability distribution with parameters
+ * samples a value from a multinomial probability distribution with parameters
  * N and P and returns it in S.
  */
 
