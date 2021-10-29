@@ -156,25 +156,6 @@ dt_solve(M:Strategy,Cost):-
 pair(M,A,B):- M:rule_by_num(A,B,_,_).
 split([A,B],A,B).
 
-/**
- * dt_solve(-Strategy:list,-Cost:float) is det
- *
- * The predicate computes the best solution for the decision theory
- * problem. It returns the best strategy in Strategy and it cost
- * in Cost. Solution with pruning.
- */
-dt_solve_bug(M:Strategy,Cost):-
-  abolish_all_tables,
-  findall([S,U],M:'$util'(S,U),L),
-  % writeln(L),
-  maplist(split,L,LStrategy,LUtils),
-  init(Env),
-  get_bdd(M,Env,LStrategy,[],LBDD),
-  % writeln(LBDD),
-  compute_best_strategy(Env,LBDD,LUtils,St,Cost),
-  end(Env),
-  maplist(pair(M),St,Strategy).
-
 get_bdd(_,_,[],L,L):- !.
 get_bdd(M,Env,[G|T],L,LO):-
   get_node(M:G,Env,Out),
