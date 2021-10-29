@@ -86,7 +86,7 @@ test(best_st_weather):-
 :- begin_tests(dt_viral, []).
 :- ensure_loaded(library(examples/dt_viral)).
 test(best_st_viral):-
-  ansi_format([bold,fg(cyan)], '~nThis test takes few seconds.~n',[]),
+  ansi_format([bold,fg(cyan)], '~nThis test takes some time.~n',[]),
   % run((dt_solve(Strategy,ExpValue),close_to(ExpValue,2.217),perm(Strategy,[[marketed(theo)],[marketed(guy)]]))).
   run((dt_solve(Strategy,ExpValue),close_to(ExpValue,3.21),perm(Strategy,[[marketed(theo)],[marketed(martijn)],[marketed(ingo)],[marketed(guy)]]))).
 :- end_tests(dt_viral).
@@ -421,9 +421,9 @@ test(p):-
 :-ensure_loaded(library(examples/abd1)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[e, c]))).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm_map(Exp,[[e,c]]))).
 test(bdd_a):-
-  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),perm(Exp,[e, c]))).
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),perm_map(Exp,[[e,c]]))).
 
 :- end_tests(abd1).
 
@@ -432,7 +432,7 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd1cons1)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.6),perm(Exp,[\+c, e]))).
+  run((abd_prob(a,P,[[e]]),close_to(P,0.6))).
 
 :- end_tests(abd1cons1).
 
@@ -441,7 +441,7 @@ test(a):-
 :-ensure_loaded(library(examples/abd1cons2)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.648),perm(Exp,[c, e]))).
+  run((abd_prob(a,P,Exp),close_to(P,0.648),perm_map(Exp,[[c,e]]))).
 
 :- end_tests(abd1cons2).
 
@@ -450,10 +450,9 @@ test(a):-
 :-ensure_loaded(library(examples/abd2)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[f, (\+g), c, d]))).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm_map(Exp,[[f,c,d]]))).
 test(bdd_a):-
-  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
-  perm(Exp,[f, (\+g), c, d]))).
+  run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72), perm_map(Exp,[[f,c,d]]))).
 
 :- end_tests(abd2).
 
@@ -462,10 +461,10 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd3)).
 
 test(a):-
-  run((abd_prob(a,P,Exp),close_to(P,0.72),perm(Exp,[c, d, f, \+g]))).
+  run((abd_prob(a,P,Exp),close_to(P,0.72),perm_map(Exp,[[c,d,f]]))).
 test(bdd_a):-
   run((abd_bdd_dot_string(a,_BDD,_Var,_VarA,P,Exp),close_to(P,0.72),
-  perm(Exp,[c, d, f, \+g]))).
+  perm_map(Exp,[[c,d,f]]))).
 
 :- end_tests(abd3).
 

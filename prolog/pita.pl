@@ -263,22 +263,50 @@ abd_prob(M:Goal,P,Delta):-
   findall((Goal,P,Exp),get_abd_p(M:Goal1,M:'$constraints',Env,P,Exp),L),
   end(Env),
   erase(Ref),
+  % gtrace,
+  writeln(L),
   member((Goal,P,Exp),L),
-  from_assign_to_exp(Exp,M,Delta).
+  % writeln(Exp),
+  maplist(from_assign_to_exp(M),Exp,DeltaAll),
+  simplify_delta(DeltaAll,Delta).
+
+subset_([], []).
+subset_([E|Tail], [E|NTail]):-
+  subset_(Tail, NTail).
+subset_([_|Tail], NTail):-
+  subset_(Tail, NTail).
+
+mycompare(<,L1,L2) :- length(L1,A1), length(L2,A2), A1 < A2.
+mycompare(>, _, _).
+
+sub([A],[A]).
+sub([H|T],[V|R]):-
+  findall(X,(subset_(H,X), member(X,T)),LX),
+  (   LX = [] ->
+    V = H,
+    sub(T,R) ;
+    sub(T,[V|R]) 
+  ).
+
+simplify_delta([],[]):- !.
+simplify_delta(Din,Delta):-
+  predsort(mycompare,Din,LS),
+  reverse(LS,LNR),
+  sub(LNR,Delta), !.
 
 
 
-from_assign_to_exp([],_M,[]).
-
-from_assign_to_exp([Var-Val|TA],M,[Abd|TDelta]):-
+from_assign_to_exp(_M,[],[]):- !.
+from_assign_to_exp(M,[Var-Val|TA],[Abd|TDelta]):-
   M:av(R,S,Var),
   M:abd(R,S,H),
   (Val=1->
     Abd=H
   ;
     Abd= \+(H)
+    % Abd= []
   ),
-  from_assign_to_exp(TA,M,TDelta).
+  from_assign_to_exp(M,TA,TDelta).
 
 
 /**
@@ -351,7 +379,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
   ret_abd_prob(Env,BDD,P,Exp),
   create_dot_string(Env,BDD,Dot),
   end(Env),
-  from_assign_to_exp(Exp,M,Delta),
+  maplist(from_assign_to_exp(M),Exp,Delta),
   findall([V,R,S],M:v(R,S,V),LV),
   findall([V,R,S],M:av(R,S,V),LAV).
 
@@ -596,15 +624,21 @@ get_p(M:Goal,Env,P):-
 
 
 get_abd_p(M:Goal,M:Evidence,Env,P,Exp):-
+  % get_node_no_rec(M:Evidence,Env,OutIC),
   get_cond_node(M:Goal,M:Evidence,Env,Out,_),
+  % get_node(M:Evidence,Env,OutIC),
   Out=(_,BDD),
+  % OutIC = (_,BDDIC),
   ret_abd_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
   get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
   ret_probc(Env,BDDE,PE),
   ret_probc(Env,BDDGE,PGE),
-  P is PGE/PE.
+  ( PE =:= 0 -> 
+      writeln("Undefined: probability of evidence 0.") ;
+      P is PGE/PE
+  ).
 
 
 get_node(M:Goal,Env,BDD):-
@@ -618,6 +652,18 @@ get_node(M:Goal,Env,BDD):-
     true
   ;
     zeroc(Env,BDD)
+  ).
+
+get_node_no_rec(M:Goal,Env,BDD):- %with DB=false
+  retractall(M:v(_,_,_)),
+  retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  add_bdd_arg(Goal,Env,BDD,M,Goal1),
+  (M:Goal1*->
+    true
+  ;
+    zeroc(Env,BDD)
+    % format("-------------------------Failed goal: ~w ~n",[M:Goal])
   ).
 
 get_node(M:Goal,Env,BDD):- %with DB=false
