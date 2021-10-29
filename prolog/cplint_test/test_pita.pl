@@ -551,8 +551,8 @@ test(ev):-
 
 :-ensure_loaded(library(examples/eruption_mpe)).
 
-test(ev):-
-  run((map(ev,P,Exp),close_to(P,0.08316),
+test(eruption):-
+  run((map(eruption,P,Exp),close_to(P,0.08316),
 	  perm(Exp,[rule(1,sudden_energy_release,[sudden_energy_release:0.7,'':0.30000000000000004],true),
       rule(2,fault_rupture(southwest_northeast),[fault_rupture(southwest_northeast):0.6,'':0.4],true),
       rule(3,fault_rupture(east_west),[fault_rupture(east_west):0.55,'':0.44999999999999996],true),

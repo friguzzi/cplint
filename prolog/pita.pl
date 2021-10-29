@@ -263,10 +263,7 @@ abd_prob(M:Goal,P,Delta):-
   findall((Goal,P,Exp),get_abd_p(M:Goal1,M:'$constraints',Env,P,Exp),L),
   end(Env),
   erase(Ref),
-  % gtrace,
-  writeln(L),
   member((Goal,P,Exp),L),
-  % writeln(Exp),
   maplist(from_assign_to_exp(M),Exp,DeltaAll),
   simplify_delta(DeltaAll,Delta).
 
