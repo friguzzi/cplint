@@ -19,10 +19,20 @@ ev:- \+ blue(b1).
 :- end_lpad.
 
 /** <examples>
-?- map_bdd_dot_string(ev,BDD,Var,VarA,P,Exp).
 
-?- abd_prob(win,Prob,Exp).
+?-map(ev,P,Exp).
+P=0.36,
+Exp=[
+		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
+			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ].
 
+?-map_bdd_dot_string(ev,BDD,Var,VarA,P,Exp).
+P=0.36,
+Exp=[
+		  rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true),
+			rule(0, red(b1), [red(b1):0.6, green(b1):0.3, blue(b1):0.1], pick(b1))
+		  ].
 
 
 */

@@ -27,6 +27,13 @@
   agg_val/3,
   swi_builtin/1]).
 
+
+:- use_module(library(lists)).
+:- use_module(library(apply)).
+:- use_module(library(clp/clpr)).
+:- use_module(library(matrix)).
+:- use_module(library(clpfd)).
+
 :- use_module(library(matrix)).
 :- use_module(highlight).
 /** <module> cplint_util
@@ -539,7 +546,7 @@ sq_diff(Av,A-W,S):-
   matrix_mult_scal([S0],W,[S]).
 
 /**
- * builtin(+Goal:atom) is det
+ * swi_builtin(+Goal:atom) is det
  *
  * Succeeds if Goal is an atom whose predicate is defined in Prolog
  * (either builtin or defined in a standard library).

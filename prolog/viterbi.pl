@@ -1,9 +1,8 @@
 
 :- module(viterbi,[ viterbi/3,
-  viterbi_all/3,
   op(600,xfy,'::')
     ]).
-/** <module> kbest
+/** <module> viterbi
 
 This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
@@ -20,24 +19,9 @@ of the query
 :- thread_local vit_input_mod/1.
 
 :-meta_predicate viterbi(:,-,-).
-:-meta_predicate viterbi_all(:,-,-).
-
 
 
 default_setting_viterbi(epsilon_parsing, 1e-5).
-
-/**
- * viterbi_all(:Query:conjunction,+K:int,-Exp:list) is nondet
- *
- * The predicate computes the most probable explanation of the conjunction of literals Query.
- * It returns the explanation in Exp. It completes the explanation with the most probable
- * values of the random variables not included in the explanation, thus performing MPE, i.e.,
- * a value is chosen for all probabilistic clauses. For clauses not included in the explanation
- * that are nonground, it considers their nonground version, thus not performing MPE exactly.
- */
-viterbi_all(M:Goals,Prob,Exp):-
-  viterbi(M:Goals,Prob0,Exp0),
-  complete_exp(Exp0,Prob0,M,Exp,Prob).
 
 /**
  * viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
@@ -387,30 +371,6 @@ ground_prob([ProbHead::_Head|Tail]) :-
 get_probs(Head, PL):-
   maplist(prob_ann,Head,PL).
 
-/*get_probs([], []).
-
-get_probs([_H:P|T], [P1|T1]) :-
-  P1 is P,
-  get_probs(T, T1).
-*/
-
-/**
- * or_list(++ListOfBDDs:list,++Environment,--BDD:int) is det
- *
- * Returns in BDD a pointer to a BDD belonging to environment Environment
- * representing the disjunction of all the BDDs in ListOfBDDs
- */
-or_list([H],_Env,H):-!.
-
-or_list([H|T],Env,B):-
-  or_list1(T,Env,H,B).
-
-
-or_list1([],_Env,B,B).
-
-or_list1([H|T],Env,B0,B1):-
-  or(Env,B0,H,B2),
-  or_list1(T,Env,B2,B1).
 
 list2or([],true):-!.
 
@@ -487,47 +447,30 @@ get_next_rule_number(PName,R):-
   R1 is R+1,
   assert(PName:rule_n(R1)).
 
-system:term_expansion(end_of_file, end_of_file) :-
-  prolog_load_context(module, M),
-  vit_input_mod(M),!,
-  retractall(vit_input_mod(M)),
-  style_check(+discontiguous).
 
-system:term_expansion((:- viterbi), []) :-!,
-  prolog_load_context(module, M),
-  retractall(M:local_viterbi_setting(_,_)),
-  findall(local_viterbi_setting(P,V),default_setting_viterbi(P,V),L),
-  assert_all(L,M,_),
-  assert(vit_input_mod(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)),
-  M:(dynamic rule_by_num/5),
-  M:(dynamic rule/8),
-  retractall(M:rule_by_num(_,_,_,_,_)),
-  retractall(M:rule(_,_,_,_,_,_,_,_)),
-  style_check(-discontiguous).
 
-system:term_expansion((:- begin_plp), []) :-
+
+vit_expansion((:- begin_plp), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   assert(M:vit_on).
 
-system:term_expansion((:- end_plp), []) :-
+vit_expansion((:- end_plp), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   retractall(M:vit_on).
 
-system:term_expansion((:- begin_lpad), []) :-
+vit_expansion((:- begin_lpad), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   assert(M:vit_on).
 
-system:term_expansion((:- end_lpad), []) :-
+vit_expansion((:- end_lpad), []) :-
   prolog_load_context(module, M),
   vit_input_mod(M),!,
   retractall(M:vit_on).
 
-system:term_expansion((Head :- Body), []):-
+vit_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 % disjunctive clause with more than one head atom
   Head = (_;_), !,
@@ -543,7 +486,7 @@ system:term_expansion((Head :- Body), []):-
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
 
-system:term_expansion((Head :- Body), []):-
+vit_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	(Head=(_:_); Head=(_::_)),  !,
 	list2or(HeadListOr, Head),
@@ -557,12 +500,12 @@ system:term_expansion((Head :- Body), []):-
 	assert_rules(HeadList, M,0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
-system:term_expansion((Head :- Body), []):-
+vit_expansion((Head :- Body), []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	list2and(BodyList, Body),
 	assert(M:def_rule(Head, BodyList)).
 
-system:term_expansion(Head , []):-
+vit_expansion(Head , []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	Head=(_;_), !,
 	list2or(HeadListOr, Head),
@@ -574,7 +517,7 @@ system:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-system:term_expansion(Head , []):-
+vit_expansion(Head , []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,
 	(Head=(_:_); Head=(_::_)), !,
 	list2or(HeadListOr, Head),
@@ -586,11 +529,44 @@ system:term_expansion(Head , []):-
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
-system:term_expansion(Head, []):-
+vit_expansion(Head, []):-
   prolog_load_context(module, M),vit_input_mod(M),M:vit_on,!,
 	assert(M:def_rule(Head, [])).
 
 :- multifile sandbox:safe_meta/2.
 
 sandbox:safe_meta(viterbi:viterbi(_,_,_), []).
-sandbox:safe_meta(viterbi:viterbi_all(_,_,_), []).
+
+:- thread_local vit_file/1.
+
+user:term_expansion((:- viterbi), []) :-!,
+  prolog_load_context(source, Source),
+  asserta(vit_file(Source)),
+  prolog_load_context(module, M),
+  retractall(M:local_viterbi_setting(_,_)),
+  findall(local_viterbi_setting(P,V),default_setting_viterbi(P,V),L),
+  assert_all(L,M,_),
+  assert(vit_input_mod(M)),
+  retractall(M:rule_n(_)),
+  assert(M:rule_n(0)),
+  M:(dynamic rule_by_num/5),
+  M:(dynamic rule/8,def_rule/2),
+  retractall(M:rule_by_num(_,_,_,_,_)),
+  retractall(M:rule(_,_,_,_,_,_,_,_)),
+  style_check(-discontiguous).
+
+user:term_expansion(end_of_file, end_of_file) :-
+  vit_file(Source),
+  prolog_load_context(source, Source),
+  retractall(vit_file(Source)),
+  prolog_load_context(module, M),
+  vit_input_mod(M),!,
+  retractall(vit_input_mod(M)),
+  style_check(+discontiguous).
+
+
+user:term_expansion(In, Out) :-
+  \+ current_prolog_flag(xref, true),
+  vit_file(Source),
+  prolog_load_context(source, Source),
+  vit_expansion(In, Out).

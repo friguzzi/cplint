@@ -62,8 +62,7 @@ Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries
 using sampling.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+See http://friguzzi.github.io/cplint/_build/html/index.html for
 details.
 
 @author Fabrizio Riguzzi
@@ -2641,6 +2640,43 @@ binomial(N,P,_M,X,Pr):-
   Pr is P^X*(1-P)^N_X*FN/(FX*FN_X).
 
 /**
+ * multinomial(+N:int,+P:list,+M:module,-S:list) is det
+ *
+ * samples a value from a multinomial probability distribution with parameters
+ * N and P and returns it in S.
+ */
+
+multinomial(N,P,_M,S):-
+  length(P,K),
+  numlist(1,K,Outcomes),
+  length(Distribution,K),
+  maplist(pair,Outcomes,P,Distribution),
+  findall(0,between(1,K,_),SampleState),
+  Sample =..[sample|SampleState],
+  multinomial_cycle(0,N,Distribution,Sample),
+  Sample=..[_|S].
+
+pair(A,B,A:B).
+
+multinomial_cycle(N,N,_Distribution,_Sample):-!.
+
+multinomial_cycle(N0,N,Distribution,Sample):-
+  discrete(Distribution,_,Index),
+  arg(Index,Sample,Count),
+  Count1 is Count+1,
+  setarg(Index,Sample,Count1),
+  N1 is N0+1,
+  multinomial_cycle(N1,N,Distribution,Sample).
+
+multinomial(N,P,_M,S,Pr):-
+  fact(N,1,FN),
+  foldl(factor_multi,P,S,FN,Pr).
+
+factor_multi(Pi,Xi,Pr0,Pr):-
+  fact(Xi,1,FXi),
+  Pr is Pr0*Pi^Xi/FXi.
+
+/**
  * dirichlet(+Par:list,+M:module,-S:float) is det
  *
  * samples a value from a Dirichlet probability density with parameters
@@ -3030,59 +3066,42 @@ act(M,A/B):-
 tab(A/B,A/B1):-
   B1 is B + 2.
 
-system:term_expansion(end_of_file, end_of_file) :-
-  prolog_load_context(module, M),
-  mc_input_mod(M),!,
-  retractall(mc_input_mod(M)),
-  style_check(+discontiguous).
 
-system:term_expansion((:- mcaction Conj), []) :-!,
+mcintyre_expansion((:- mcaction Conj), []) :-!,
   prolog_load_context(module, M),
   mc_input_mod(M),!,
   list2and(L,Conj),
   maplist(act(M),L).
 
-system:term_expansion((:- mc), []) :-!,
-  prolog_load_context(module, M),
-  retractall(local_mc_setting(_,_)),
-  findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
-  assert_all(L,M,_),
-  assert(mc_input_mod(M)),
-  retractall(M:rule_n(_)),
-  assert(M:rule_n(0)),
-  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1, M:disc/1,M:values/2)),
-  retractall(M:samp(_,_,_)),
-  style_check(-discontiguous).
-
-system:term_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
+mcintyre_expansion((:- table(Conj)), [:- table(Conj1)]) :-!,
   prolog_load_context(module, M),
   mc_input_mod(M),!,
   list2and(L,Conj),
   maplist(tab,L,L1),
   list2and(L1,Conj1).
 
-system:term_expansion((:- begin_lpad), []) :-
+mcintyre_expansion((:- begin_lpad), []) :-
   prolog_load_context(module, M),
   mc_input_mod(M),!,
   assert(M:mc_on).
 
-system:term_expansion((:- end_lpad), []) :-
+mcintyre_expansion((:- end_lpad), []) :-
   prolog_load_context(module, M),
   mc_input_mod(M),!,
   retractall(M:mc_on).
 
-system:term_expansion((Head:=Body),(H1:-Body)) :-
+mcintyre_expansion((Head:=Body),(H1:-Body)) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with guassia distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   Head=(H~val(Var)), !,
   add_arg(H,Var,H1).
 
 
-system:term_expansion((Head:=Body),Clause) :-
+mcintyre_expansion((Head:=Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   Head=(H~Distr0), !,
   add_arg(H,Var,H1),
   switch_finite(Distr0,Distr),
@@ -3094,10 +3113,10 @@ system:term_expansion((Head:=Body),Clause) :-
     generate_clause_distr(H1,Body,VC,M,R,Var,Distr,Clause)
   ).
 
-system:term_expansion((Head:=Body),(Head:- Body)) :-
+mcintyre_expansion((Head:=Body),(Head:- Body)) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,!.
 
-system:term_expansion((Head :- Body), Clauses):-
+mcintyre_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive clause with more than one head atom senza depth_bound
   Head = (_;_), !,
@@ -3111,10 +3130,10 @@ system:term_expansion((Head :- Body), Clauses):-
     generate_rules(HeadList,Body,HeadList,VC,M,R,0,Clauses)
   ).
 
-system:term_expansion((Head:-Body),Clause) :-
+mcintyre_expansion((Head:-Body),Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % rule with distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   Head=(H:Distr0),
   nonvar(Distr0),
   \+ number(Distr0),
@@ -3130,19 +3149,19 @@ system:term_expansion((Head:-Body),Clause) :-
     generate_clause_distr(H,Body,VC,M,R,Var,Distr,Clause)
   ).
 
-system:term_expansion((Head :- Body), []) :-
+mcintyre_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola e' non  caricata nella teoria e non e' conteggiata in NR
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((mcintyre_expansion(_,_) ):- _ )),
   (Head = (_:P);Head=(P::_)),
   ground(P),
   P=:=0.0, !.
 
 
-system:term_expansion((Head :- Body), Clauses) :-
+mcintyre_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
-  ((Head:-Body) \= ((system:term_expansion(_,_) ):- _ )),
+  ((Head:-Body) \= ((mcintyre_expansion(_,_) ):- _ )),
   (Head = (H:_);Head = (_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -3155,7 +3174,7 @@ system:term_expansion((Head :- Body), Clauses) :-
   ).
 
 
-system:term_expansion(Head,Clauses) :-
+mcintyre_expansion(Head,Clauses) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with more than one head atom senza db
   Head=(_;_), !,
@@ -3169,10 +3188,10 @@ system:term_expansion(Head,Clauses) :-
     generate_rules_fact(HeadList,HeadList,VC,M,R,0,Clauses)
   ).
 
-system:term_expansion(Head,Clause) :-
+mcintyre_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % fact with distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   Head=(H~Distr0),
   nonvar(Distr0),
   !,
@@ -3186,10 +3205,10 @@ system:term_expansion(Head,Clause) :-
     generate_clause_distr(H1,true,VC,M,R,Var,Distr,Clause)
   ).
 
-system:term_expansion(Head,Clause) :-
+mcintyre_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with dirichlet distr
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   Head=(H:Distr0),
   nonvar(Distr0),
   \+ number(Distr0),
@@ -3206,28 +3225,28 @@ system:term_expansion(Head,Clause) :-
   ).
 
 
-system:term_expansion(Head,[]) :-
+mcintyre_expansion(Head,[]) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom con prob. 0
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   (Head = (_:P); Head = (P::_)),
   ground(P),
   P=:=0.0, !.
 
 
-system:term_expansion(Head,H) :-
+mcintyre_expansion(Head,H) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom con prob. 1, senza db
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   (Head = (H:P);Head =(P::H)),
   ground(P),
   P=:=1.0, !.
 
 
-system:term_expansion(Head,Clause) :-
+mcintyre_expansion(Head,Clause) :-
   prolog_load_context(module, M),mc_input_mod(M),M:mc_on,
 % disjunctive fact with a single head atom e prob. generiche, senza db
-  (Head \= ((system:term_expansion(_,_)) :- _ )),
+  (Head \= ((mcintyre_expansion(_,_)) :- _ )),
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
@@ -3298,6 +3317,7 @@ is_dist(_M,D):-
     beta,
     poisson,
     binomial,
+    multinomial,
     geometric,
     exponential,
     pascal,
@@ -3391,3 +3411,34 @@ sandbox:safe_meta(mcintyre:setting_mc(_,_), []).
 sandbox:safe_meta(mcintyre:set_sw(_,_) ,[]).
 
 :- license(artisticv2).
+
+:- thread_local mcintyre_file/1.
+
+user:term_expansion((:- mc), []) :-!,
+  prolog_load_context(source, Source),
+  asserta(mcintyre_file(Source)),
+  prolog_load_context(module, M),
+  retractall(local_mc_setting(_,_)),
+  findall(local_mc_setting(P,V),default_setting_mc(P,V),L),
+  assert_all(L,M,_),
+  assert(mc_input_mod(M)),
+  retractall(M:rule_n(_)),
+  assert(M:rule_n(0)),
+  dynamic((M:samp/3,M:mem/4,M:mc_on/0,M:sw/2,M:sw/3,M:sampled/3, M:sampled_g/2, M:sampled_g/1, M:disc/1,M:values/2)),
+  retractall(M:samp(_,_,_)),
+  style_check(-discontiguous).
+
+user:term_expansion(end_of_file, end_of_file) :-
+  mcintyre_file(Source),
+  prolog_load_context(source, Source),
+  retractall(mcintyre_file(Source)),
+  prolog_load_context(module, M),
+  mc_input_mod(M),!,
+  retractall(mc_input_mod(M)),
+  style_check(+discontiguous).
+
+user:term_expansion(In, Out) :-
+  \+ current_prolog_flag(xref, true),
+  mcintyre_file(Source),
+  prolog_load_context(source, Source),
+  mcintyre_expansion(In, Out).

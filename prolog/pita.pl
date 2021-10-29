@@ -4,15 +4,12 @@
   prob_meta/2,
   prob_meta/3,
   abd_prob/3,
-  vit_prob/3,
-  vit_all_prob/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
   abd_bdd_dot_string/4,
   abd_bdd_dot_string/6,
   map_bdd_dot_string/6,
   map/3,
-  vit_bdd_dot_string/5,
   set_pita/2,setting_pita/2,
   get_var_n/6,get_abd_var_n/6,
   get_dec_var_n/5,
@@ -35,8 +32,7 @@ This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries.
 
-See https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
-http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html for
+See http://friguzzi.github.io/cplint/_build/html/index.html for
 details.
 
 @author Fabrizio Riguzzi
@@ -49,8 +45,6 @@ details.
 % :- prolog_debug(chk_secure).
 
 :-meta_predicate abd_prob(:,-,-).
-:-meta_predicate vit_prob(:,-,-).
-:-meta_predicate vit_all_prob(:,-,-).
 :-meta_predicate prob(:,-).
 :-meta_predicate prob(:,:,-).
 :-meta_predicate prob(:,:,-,+).
@@ -62,7 +56,6 @@ details.
 :-meta_predicate abd_bdd_dot_string(:,-,-,-,-,-).
 :-meta_predicate map(:,-,-).
 :-meta_predicate map_bdd_dot_string(:,-,-,-,-,-).
-:-meta_predicate vit_bdd_dot_string(:,-,-,-,-).
 :-meta_predicate msw(:,-,-,-).
 :-meta_predicate msw(:,-,-,-,-).
 :-meta_predicate get_p(:,+,-).
@@ -302,104 +295,6 @@ simplify_delta(Din,Delta):-
   sub(LNR,Delta), !.
 
 
-/**
- * vit_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
- *
- * The predicate computes the most probable explanation (MPE) of the ground query Query.
- * It returns the explanation in Delta together with its Probability
- */
-vit_prob(M:Goal,P,Delta):-
-  abolish_all_tables,
-  term_variables(Goal,VG),
-  get_next_goal_number(M,GN),
-  atomic_concat('$goal',GN,NewGoal),
-  Goal1=..[NewGoal|VG],
-  list2and(GoalL,Goal),
-  process_body(GoalL,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
-  append([onec(Env,BDD)],BodyList2,BodyList3),
-  list2and(BodyList3,Body2),
-  add_bdd_arg(Goal1,Env,BDDAnd,M,Head1),
-  M:(asserta((Head1 :- Body2),Ref)),
-  init(Env),
-  findall((Goal,P,Exp),get_vit_p(M:Goal1,Env,P,Exp),L),
-  end(Env),
-  erase(Ref),
-  member((Goal,P,Exp0),L),
-  reverse(Exp0,Exp),
-  from_assign_to_vit_exp(Exp,M,Delta).
-
-vit_all_prob(M:Goal,Prob,Exp):-
-  vit_prob(M:Goal,Prob0,Exp0),
-  complete_exp(Exp0,Prob0,M,Exp,Prob).
-
-
-complete_exp(Exp0,Prob0,M,Exp,Prob):-
-  findall((R,S),(M:rule_by_num(R,Head,Body,S),\+ member(rule(R,_,Head,Body),Exp0)),L)->
-  maplist(find_max(M),L,Exp1),
-  foldl(mult,Exp1,Prob0,Prob),
-  convert_exp(Exp1,M,Exp2),
-  append(Exp0,Exp2,Exp).
-
-mult((_,_,_,P1),P0,P):-
-  P is P0*P1.
-
-find_max(M,(R,S),(R,S,N,P)):-
-  M:rule_by_num(R,[_:P0|Head],_Body,S),
-  length(Head,L),
-  numlist(1,L,Numbers),
-  foldl(get_max,Head,Numbers,(P0,0),(P,N)).
-
-get_max(_:P,N,(P0,N0),(P1,N1)):-
-  (P>P0->
-    N1=N,
-    P1=P
-  ;
-    N1=N0,
-    P1=P0
-  ).
-
-
-convert_exp([],_M,[]).
-
-convert_exp([(R,S,N,_)|T],M,[rule(R,Head,HeadList,Body)|TDelta]):-
-  M:rule_by_num(R,HeadList, Body,S),!,
-  nth0(N,HeadList,Head:_),
-  convert_exp(T,M,TDelta).
-
-/**
- * vit_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-Probability:float,-Delta:list) is nondet
- *
- * The predicate computes the most probable explanation (MPE) of the ground query Query.
- * It returns the explanation in Delta together with its Probability
- * The predicate builds the BDD for Query and returns its dot representation
- * in DotString and a list in LV with the association of variables to rules.
- * LV is a list of list, each sublist has three elements:
- * the multivalued variable number,
- * the rule number and the grounding substitution.
-
- */
-vit_bdd_dot_string(M:Goal,dot(Dot),LV,P,MAP):-
-  abolish_all_tables,
-  init(Env),
-  get_node(M:Goal,Env,Out),
-  Out=(_,BDD),!,
-  findall([V,R,S],M:v(R,S,V),LV),
-  ret_vit_prob(Env,BDD,P,Exp0),
-  reverse(Exp0,Exp),
-  from_assign_to_vit_exp(Exp,M,MAP),
-  create_dot_string(Env,BDD,Dot),
-  end(Env).
-
-from_assign_to_vit_exp([],_M,[]).
-
-from_assign_to_vit_exp([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
-  M:v(R,S,Var),
-  M:rule_by_num(R,HeadList,Body,S),
-  nth0(Val,HeadList,Head:_),
-  from_assign_to_vit_exp(TA,M,TDelta).
-
-%  Delta=Exp.
-%  from_assign_to_exp(Exp,M,Delta).
 
 from_assign_to_exp(_M,[],[]):- !.
 from_assign_to_exp(M,[Var-Val|TA],[Abd|TDelta]):-
@@ -492,7 +387,7 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
  * map(:Query:atom,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the explanation of the ground query Query
- *  with Maximum A Posteriori (MAP) probability.
+ * with Maximum A Posteriori (MAP) probability.
  * It returns the explanation in Delta together with its Probability
  */
 map(M:Goal,P,MAP):-
@@ -503,11 +398,11 @@ map(M:Goal,P,MAP):-
  * map_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the explanation of the ground query Query
- *  with Maximum A Posteriori (MAP) probability.
+ * with Maximum A Posteriori (MAP) probability.
  * It returns the explanation in Delta together with its Probability
  * The predicate builds the BDD for Query and returns its dot representation
  * in DotString and lists LV and LAV, the association of variables to rules
- * and to query variables to rules respectively.
+ * and of query variables to rules respectively.
  * LV and LAV are lists of list, each sublist has three elements:
  * the multivalued variable number,
  * the rule number and the grounding substitution.
@@ -735,11 +630,6 @@ get_abd_p(M:Goal,M:Evidence,Env,P,Exp):-
   Out=(_,BDD),
   % OutIC = (_,BDDIC),
   ret_abd_prob(Env,BDD,P,Exp).
-
-get_vit_p(M:Goal,Env,P,Exp):-
-  get_node(M:Goal,Env,Out),
-  Out=(_,BDD),
-  ret_vit_prob(Env,BDD,P,Exp).
 
 get_cond_p(M:Goal,M:Evidence,Env,P):-
   get_cond_node(M:Goal,M:Evidence,Env,BDDGE,BDDE),
@@ -1533,7 +1423,7 @@ pita_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
   M:pita_on,
   ((Head:- Body) \= ((pita_expansion(_,_)) :- _ )),
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
+  (Head = ((?) :: H) ; Head = decision(H)), ground(H), !,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
   append([onec(Env,BDD)],BodyList1,BodyList2),
@@ -1553,7 +1443,7 @@ pita_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (? :: H) ; Head = decision(H) ; Head = (?::H)), ground(H), !,
+  (Head = ((?) :: H) ; Head = decision(H)), ground(H), !,
   extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),
@@ -2082,14 +1972,12 @@ sandbox:safe_meta(pita:prob(_,_,_,_), []).
 sandbox:safe_meta(pita:prob_meta(_,_), []).
 sandbox:safe_meta(pita:prob_meta(_,_,_), []).
 sandbox:safe_meta(pita:abd_prob(_,_,_), []).
-sandbox:safe_meta(pita:vit_prob(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:map(_,_,_), []).
 sandbox:safe_meta(pita:map_bdd_dot_string(_,_,_,_,_,_), []).
-sandbox:safe_meta(pita:vit_bdd_dot_string(_,_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).

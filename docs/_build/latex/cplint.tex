@@ -4,29 +4,47 @@
 \ifdefined\pdfpxdimen
    \let\sphinxpxdimen\pdfpxdimen\else\newdimen\sphinxpxdimen
 \fi \sphinxpxdimen=.75bp\relax
+\ifdefined\pdfimageresolution
+    \pdfimageresolution= \numexpr \dimexpr1in\relax/\sphinxpxdimen\relax
+\fi
+%% let collapsable pdf bookmarks panel have high depth per default
+\PassOptionsToPackage{bookmarksdepth=5}{hyperref}
 
 \PassOptionsToPackage{warn}{textcomp}
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
 % support both utf8 and utf8x syntaxes
-\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
+  \ifdefined\DeclareUnicodeCharacterAsOptional
+    \def\sphinxDUC#1{\DeclareUnicodeCharacter{"#1}}
+  \else
+    \let\sphinxDUC\DeclareUnicodeCharacter
+  \fi
+  \sphinxDUC{00A0}{\nobreakspace}
+  \sphinxDUC{2500}{\sphinxunichar{2500}}
+  \sphinxDUC{2502}{\sphinxunichar{2502}}
+  \sphinxDUC{2514}{\sphinxunichar{2514}}
+  \sphinxDUC{251C}{\sphinxunichar{251C}}
+  \sphinxDUC{2572}{\textbackslash}
 \fi
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amstext}
 \usepackage{babel}
-\usepackage{times}
+
+
+
+\usepackage{tgtermes}
+\usepackage{tgheros}
+\renewcommand{\ttdefault}{txtt}
+
+
+
 \usepackage[Bjarne]{fncychap}
 \usepackage{sphinx}
 
-\fvset{fontsize=\small}
+\fvset{fontsize=auto}
 \usepackage{geometry}
+
 
 % Include hyperref last.
 \usepackage{hyperref}
@@ -35,24 +53,14 @@
 % Set up styles of URL: it should be placed after hyperref.
 \urlstyle{same}
 
-\addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
-\addto\captionsenglish{\renewcommand{\tablename}{Table}}
-\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
 
-\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
-\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
-\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
-\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
-\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
-
-\addto\extrasenglish{\def\pageautorefname{page}}
-
+\usepackage{sphinxmessages}
 \setcounter{tocdepth}{1}
 
 
 
 \title{cplint Documentation}
-\date{May 08, 2020}
+\date{Oct 12, 2021}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -71,21 +79,25 @@
 
 \chapter{Introduction}
 \label{\detokenize{index:introduction}}
-cplint is a suite of programs for reasoning with LPADs/CP-logic programs \sphinxcite{index:venver03-tr}\sphinxcite{index:venver04-iclp04-ic}\sphinxcite{index:vendenbru-jelia06}\sphinxcite{index:dblp-journals-tplp-vennekensdb09}.
+\sphinxAtStartPar
+cplint is a suite of programs for reasoning with LPADs/CP\sphinxhyphen{}logic programs \sphinxcite{index:venver03-tr}\sphinxcite{index:venver04-iclp04-ic}\sphinxcite{index:vendenbru-jelia06}\sphinxcite{index:dblp-journals-tplp-vennekensdb09}.
 It contains modules for both inference and learning.
 
-cplint is available in three versions, one for Yap Prolog, one for XSB and one for SWI-Prolog.
+\sphinxAtStartPar
+cplint is available in three versions, one for Yap Prolog, one for XSB and one for SWI\sphinxhyphen{}Prolog.
 They differ slightly in the features offered.
-This manual is about the SWI-Prolog version.
+This manual is about the SWI\sphinxhyphen{}Prolog version.
 You can find the manual for the Yap version at \sphinxurl{http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html} and
 for the XSB version at \sphinxurl{http://xsb.sourceforge.net/manual2/manual2.pdf}.
 
+\sphinxAtStartPar
 cplint on SWISH is a web application for using cplint available at \sphinxurl{http://cplint.eu}.
 
 
 \chapter{Installation}
 \label{\detokenize{index:installation}}
-cplint is distributed as a \sphinxhref{http://www.swi-prolog.org/pack/list?p=cplint}{pack} of \sphinxhref{http://www.swi-prolog.org/}{SWI-Prolog}.
+\sphinxAtStartPar
+cplint is distributed as a \sphinxhref{http://www.swi-prolog.org/pack/list?p=cplint}{pack} of \sphinxhref{http://www.swi-prolog.org/}{SWI\sphinxhyphen{}Prolog}.
 To install it, use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -95,19 +107,24 @@ To install it, use
 
 \section{Requirements}
 \label{\detokenize{index:requirements}}
+\sphinxAtStartPar
 It requires the packs
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxhref{https://github.com/friguzzi/bddem}{bddem}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxhref{https://github.com/friguzzi/auc}{auc}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxhref{https://github.com/friguzzi/matrix}{matrix}
 
 \end{itemize}
 
+\sphinxAtStartPar
 They are installed automatically when installing pack \sphinxtitleref{cplint} or can installed manually as
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -117,14 +134,17 @@ They are installed automatically when installing pack \sphinxtitleref{cplint} or
 ?\PYGZhy{} pack\PYGZus{}install(matrix).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 \sphinxtitleref{bddem} uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} pack\PYGZus{}rebuild(bdeem).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page \sphinxurl{https://github.com/friguzzi/bddem}.
 
+\sphinxAtStartPar
 You can upgrade the pack with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -132,6 +152,7 @@ You can upgrade the pack with
 ?\PYGZhy{} pack\PYGZus{}upgrade(cplint).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Note that the packs on which \sphinxtitleref{cplint} depends are not upgraded automatically in this case so they need to be upgraded manually.
 
 
@@ -156,30 +177,35 @@ Note that the packs on which \sphinxtitleref{cplint} depends are not upgraded au
 
 \section{Datasets}
 \label{\detokenize{index:datasets}}
+\sphinxAtStartPar
 Other machine learning datasets are available in pack \sphinxhref{https://github.com/friguzzi/cplint\_datasets}{cplint\_datasets}.
 
 
 \section{Support}
 \label{\detokenize{index:support}}
+\sphinxAtStartPar
 Use the Google group \sphinxurl{https://groups.google.com/forum/\#!forum/cplint}.
 
 
 \chapter{Syntax}
 \label{\detokenize{index:syntax}}
+\sphinxAtStartPar
 cplint allows the definition of discrete probability distributions and continuous probability densities.
 
 
 \section{Discrete Probability Distributions}
 \label{\detokenize{index:discrete-probability-distributions}}
-LPAD and CP-logic programs consist of a set of annotated disjunctive clauses.
+\sphinxAtStartPar
+LPAD and CP\sphinxhyphen{}logic programs consist of a set of annotated disjunctive clauses.
 Disjunction in the head is represented with a semicolon and atoms in the head are separated from probabilities by a colon.
 For the rest, the usual syntax of Prolog is used.
-A general CP-logic clause has the form:
+A general CP\sphinxhyphen{}logic clause has the form:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{h1}\PYG{p}{:}\PYG{n}{p1} \PYG{p}{;} \PYG{o}{.}\PYG{o}{.}\PYG{o}{.} \PYG{p}{;} \PYG{n}{hn}\PYG{p}{:}\PYG{n}{pn} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Body}} is a conjunction of goals as in Prolog.
 No parentheses are necessary.
 The \sphinxcode{\sphinxupquote{pi}} are numeric expressions.
@@ -190,6 +216,7 @@ If the clause has an empty body, it can be represented like this:
 \PYG{n}{h1}\PYG{p}{:}\PYG{n}{p1} \PYG{p}{;} \PYG{o}{.}\PYG{o}{.}\PYG{o}{.} \PYG{p}{;} \PYG{n}{hn}\PYG{p}{:}\PYG{n}{pn}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 If the clause has a single head with probability 1, the annotation can be omitted and the clause takes
 the form of a normal prolog clause, i.e.:
 
@@ -197,12 +224,14 @@ the form of a normal prolog clause, i.e.:
 \PYG{n}{h1} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 stands for:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{h1}\PYG{p}{:}\PYG{l+m+mi}{1} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The coin example \sphinxcite{index:venver04-iclp04-ic} is represented as (file \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -217,16 +246,19 @@ The coin example \sphinxcite{index:venver04-iclp04-ic} is represented as (file \
 \PYG{n}{toss}\PYG{p}{(}\PYG{n}{coin}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The first clause states that if we toss a coin that is not biased it has equal probability of landing heads and
 tails.
 The second states that if the coin is biased it has a slightly higher probability of landing heads.
 The third states that the coin is fair with probability 0.9 and biased with probability 0.1 and the last clause
 states that we toss a coin with certainty.
 
-Moreover, the bodies of rules may contain built-in predicates, predicates from the libraries \sphinxcode{\sphinxupquote{lists}},
+\sphinxAtStartPar
+Moreover, the bodies of rules may contain built\sphinxhyphen{}in predicates, predicates from the libraries \sphinxcode{\sphinxupquote{lists}},
 \sphinxcode{\sphinxupquote{apply}} and \sphinxcode{\sphinxupquote{clpr/nf\_r}} plus the predicate \sphinxcode{\sphinxupquote{average/2}}
 that, given a list of numbers, computes its arithmetic mean.
 
+\sphinxAtStartPar
 The body of rules may also contain the predicate \sphinxcode{\sphinxupquote{prob/2}} that computes the probability of an atom,
 thus allowing nested probability computations.
 For example (\sphinxhref{http://cplint.eu/e/meta.pl}{meta.pl})
@@ -237,8 +269,10 @@ For example (\sphinxhref{http://cplint.eu/e/meta.pl}{meta.pl})
     \PYG{n}{P} \PYG{o}{\PYGZgt{}} \PYG{l+m+mf}{0.2}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 is a valid rule.
 
+\sphinxAtStartPar
 Moreover, the probabilistic annotations can be variables, as in (\sphinxhref{http://cplint.eu/e/flexprob.pl}{flexprob.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -249,47 +283,57 @@ Moreover, the probabilistic annotations can be variables, as in (\sphinxhref{htt
     \PYG{n}{red}\PYG{p}{(}\PYG{n}{Prob}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Variables in probabilistic annotations must be ground when resolution reaches the end of the body, otherwise an exception is raised.
 
+\sphinxAtStartPar
 Alternative ways of specifying probability distribution include
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{A}\PYG{p}{:}\PYG{n}{discrete}\PYG{p}{(}\PYG{n}{Var}\PYG{p}{,}\PYG{n}{D}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{A}\PYG{p}{:}\PYG{n}{finite}\PYG{p}{(}\PYG{n}{Var}\PYG{p}{,}\PYG{n}{D}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{\sphinxupquote{Var}} and \sphinxcode{\sphinxupquote{D}} is a list of couples \sphinxcode{\sphinxupquote{Value:Prob}} assigning probability \sphinxcode{\sphinxupquote{Prob}} to \sphinxcode{\sphinxupquote{Value}}.
 
+\sphinxAtStartPar
 Moreover, you can use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{A}\PYG{p}{:}\PYG{n}{uniform}\PYG{p}{(}\PYG{n}{Var}\PYG{p}{,}\PYG{n}{D}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{\sphinxupquote{Var}} and \sphinxcode{\sphinxupquote{D}} is a list of values each taking the same probability (1 over the length of \sphinxcode{\sphinxupquote{D}}).
 
 
 \subsection{ProbLog Syntax}
 \label{\detokenize{index:problog-syntax}}
+\sphinxAtStartPar
 You can also use ProbLog \sphinxcite{index:dblp-conf-ijcai-raedtkt07} syntax, so a general clause takes the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{p1}\PYG{p}{:}\PYG{p}{:}\PYG{n}{h1} \PYG{p}{;} \PYG{o}{.}\PYG{o}{.}\PYG{o}{.} \PYG{p}{;} \PYG{n}{pn}\PYG{p}{:}\PYG{p}{:}\PYG{n}{hn} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{body}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where the \(pi\) are numeric expressions.
 
 
 \subsection{PRISM Syntax}
 \label{\detokenize{index:prism-syntax}}
-You can also use PRISM \sphinxcite{index:dblp-conf-ijcai-satok97} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi-ary switch).
+\sphinxAtStartPar
+You can also use PRISM \sphinxcite{index:dblp-conf-ijcai-satok97} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi\sphinxhyphen{}ary switch).
 A call \sphinxcode{\sphinxupquote{msw(term,value)}} means that a random variable associated to \sphinxcode{\sphinxupquote{term}} assumes value \sphinxcode{\sphinxupquote{value}}.
 
+\sphinxAtStartPar
 The admissible values for a discrete random variable are specified using facts for the \sphinxcode{\sphinxupquote{values/2}} predicate
 of the form
 
@@ -297,6 +341,7 @@ of the form
 \PYG{n}{values}\PYG{p}{(}\PYG{n}{T}\PYG{p}{,}\PYG{n}{L}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{T}} is a term (possibly containing variables) and \sphinxcode{\sphinxupquote{L}} is a list of values.
 The distribution over values is specified using directives for \sphinxcode{\sphinxupquote{set\_sw/2}} of the form
 
@@ -304,11 +349,13 @@ The distribution over values is specified using directives for \sphinxcode{\sphi
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n}{T}\PYG{p}{,}\PYG{n}{LP}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{T}} is a term (possibly containing variables) and \sphinxcode{\sphinxupquote{LP}} is a list of probability values.
-Remember that usually in PRISM each call to \sphinxcode{\sphinxupquote{msw/2}} refers to a different random variable, i.e., no memoing is performed, differently from the case of LPAD/CP-Logic/ProbLog.
+Remember that usually in PRISM each call to \sphinxcode{\sphinxupquote{msw/2}} refers to a different random variable, i.e., no memoing is performed, differently from the case of LPAD/CP\sphinxhyphen{}Logic/ProbLog.
 This behavior can be changed with the setting \sphinxcode{\sphinxupquote{prism\_memoization}}: if set to \sphinxcode{\sphinxupquote{true}} then memoization is performed.
 Its default value is \sphinxcode{\sphinxupquote{false}}, i.e., no memoization.
 
+\sphinxAtStartPar
 For example, the coin example above in PRISM syntax becomes (\sphinxhref{http://cplint.eu/e/coinmsw.pl}{coinmsw.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -325,6 +372,7 @@ For example, the coin example above in PRISM syntax becomes (\sphinxhref{http://
 
 \section{Continuous Probability Densities}
 \label{\detokenize{index:continuous-probability-densities}}
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} handles continuous or integer random variables as well with its sampling inference module.
 To specify a probability density on an argument \sphinxcode{\sphinxupquote{Var}} of an atom \sphinxcode{\sphinxupquote{A}} you can used rules of the form
 
@@ -332,55 +380,74 @@ To specify a probability density on an argument \sphinxcode{\sphinxupquote{Var}}
 \PYG{n}{A}\PYG{p}{:}\PYG{n}{Density}\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{Body}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Density}} is a special atom identifying a probability density on variable \sphinxcode{\sphinxupquote{Var}} and \sphinxcode{\sphinxupquote{Body}}
 (optional) is a regular clause body. Allowed \sphinxcode{\sphinxupquote{Density}} atoms are
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{uniform\_dens(Var,L,U)}}: \sphinxcode{\sphinxupquote{Var}} is uniformly distributed in \sphinxcode{\sphinxupquote{{[}L,U{]}}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{gaussian(Var,Mean,Variance)}}: \sphinxcode{\sphinxupquote{Var}} follows a Gaussian distribution with mean \sphinxcode{\sphinxupquote{Mean}} and variance \sphinxcode{\sphinxupquote{Variance}}. The distribution can be multivariate if \sphinxcode{\sphinxupquote{Mean}} is a list and \sphinxcode{\sphinxupquote{Variance}} a list of lists representing the mean vector and the covariance matrix. In this case the values of \sphinxcode{\sphinxupquote{Var}} are lists of real values with the same length as that of \sphinxcode{\sphinxupquote{Mean}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{dirichlet(Var,Par)}}: \sphinxcode{\sphinxupquote{Var}} is a list of real numbers following a Dirichlet distribution with \(\alpha\) parameters specified by the list \sphinxcode{\sphinxupquote{Par}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{gamma(Var,Shape,Scale)}} \sphinxcode{\sphinxupquote{Var}} follows a gamma distribution with shape parameter \sphinxcode{\sphinxupquote{Shape}} and scale parameter \sphinxcode{\sphinxupquote{Scale}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{beta(Var,Alpha,Beta)}} \sphinxcode{\sphinxupquote{Var}} follows a beta distribution with parameters \sphinxcode{\sphinxupquote{Alpha}} and \sphinxcode{\sphinxupquote{Beta}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{poisson(Var,Lambda)}} \sphinxcode{\sphinxupquote{Var}} follows a Poisson distribution with parameter \sphinxcode{\sphinxupquote{Lambda}} (rate).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{binomial(Var,N,P)}} \sphinxcode{\sphinxupquote{Var}} follows a binomial distribution with parameters \sphinxcode{\sphinxupquote{N}} (number of trials) and \sphinxcode{\sphinxupquote{P}} (success probability).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{geometric(Var,P)}} \sphinxcode{\sphinxupquote{Var}} follows a geometric distribution with parameter \sphinxcode{\sphinxupquote{P}} (success probability).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{exponential(Var,Lambda)}} \sphinxcode{\sphinxupquote{Var}} follows an exponential distribution with parameter \sphinxcode{\sphinxupquote{Lambda}} (rate, or inverse scale).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{pascal(Var,R,P)}} \sphinxcode{\sphinxupquote{Var}} follows an exponential distribution with parameters \sphinxcode{\sphinxupquote{R}} (number of failures) and \sphinxcode{\sphinxupquote{P}} (success probability).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{multinomial(Var,N,P)}} \sphinxcode{\sphinxupquote{Var}} (vector/list of event numbers) follows a multinomial distribution with parameters \sphinxcode{\sphinxupquote{N}} (number of trials) and \sphinxcode{\sphinxupquote{P}} (vector/list of event probabilities).
 
 \end{itemize}
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{g}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}\PYG{p}{:} \PYG{n}{gaussian}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 states that argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{g(X)}} follows a Gaussian distribution with mean 0 and variance 1, while
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{g}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}\PYG{p}{:} \PYG{n}{gaussian}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 states that argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{g(X)}} follows a Gaussian multivariate distribution with mean vector \sphinxcode{\sphinxupquote{{[}0,0{]}}} and covariance matrix \(\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}\)
 
+\sphinxAtStartPar
 For example, \sphinxhref{http://cplint.eu/e/gaussian\_mixture.pl}{gaussian\_mixture.pl} defines a mixture of two Gaussians:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -391,6 +458,7 @@ For example, \sphinxhref{http://cplint.eu/e/gaussian\_mixture.pl}{gaussian\_mixt
 \PYG{n}{mix}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{tails}\PYG{p}{,} \PYG{n}{h}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{mix(X)}} follows a distribution that is a mixture of two Gaussian, one with mean 0 and variance 1 with probability 0.6 and one with mean 5 and variance 2 with probability 0.4.
 The parameters of the distribution atoms can be taken from the probabilistic atom, the example (\sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl})
 
@@ -402,6 +470,7 @@ The parameters of the distribution atoms can be taken from the probabilistic ato
 \PYG{n}{val}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{p}{,}\PYG{n}{M}\PYG{p}{,}\PYG{n}{X}\PYG{p}{)}\PYG{p}{:} \PYG{n}{gaussian}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,}\PYG{n}{M}\PYG{p}{,} \PYG{l+m+mf}{2.0}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 states that for an index \sphinxcode{\sphinxupquote{I}} the continuous variable \sphinxcode{\sphinxupquote{X}} is sampled from a Gaussian whose variance is 2 and whose mean is sampled from a Gaussian with mean 1 and variance 5.
 Any operation is allowed on continuous random variables.
 The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl}) encodes a Kalman filter:
@@ -411,7 +480,7 @@ The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_fil
     \PYG{n}{init}\PYG{p}{(}\PYG{n}{S}\PYG{p}{)}\PYG{p}{,}
     \PYG{n}{kf\PYGZus{}part}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{S}\PYG{p}{,}\PYG{n}{O}\PYG{p}{,}\PYG{n}{T}\PYG{p}{)}\PYG{o}{.}
 
-\PYG{n}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n}{I}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{S}\PYG{p}{,}\PYG{p}{[}\PYG{n}{V}\PYG{o}{\textbar{}}\PYG{n}{RO}\PYG{p}{]}\PYG{p}{,} \PYG{n}{T}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n}{I}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{S}\PYG{p}{,}\PYG{p}{[}\PYG{n}{V}\PYG{o}{|}\PYG{n}{RO}\PYG{p}{]}\PYG{p}{,} \PYG{n}{T}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}}
     \PYG{n}{I} \PYG{o}{\PYGZlt{}} \PYG{n}{N}\PYG{p}{,}
     \PYG{n}{NextI} \PYG{o+ow}{is} \PYG{n}{I}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,}
     \PYG{n}{trans}\PYG{p}{(}\PYG{n}{S}\PYG{p}{,}\PYG{n}{I}\PYG{p}{,}\PYG{n}{NextS}\PYG{p}{)}\PYG{p}{,}
@@ -420,11 +489,11 @@ The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_fil
 \PYG{n}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{N}\PYG{p}{,} \PYG{n}{S}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{,}\PYG{n}{S}\PYG{p}{)}\PYG{o}{.}
 
 \PYG{n}{trans}\PYG{p}{(}\PYG{n}{S}\PYG{p}{,}\PYG{n}{I}\PYG{p}{,}\PYG{n}{NextS}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}}
-    \PYG{p}{\PYGZob{}}\PYG{n}{NextS} \PYG{o}{=}\PYG{p}{:}\PYG{o}{=} \PYG{n}{E} \PYG{o}{+} \PYG{n}{S}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+    \PYG{p}{\PYGZob{}}\PYG{n}{NextS} \PYG{o}{=}\PYG{o}{:=} \PYG{n}{E} \PYG{o}{+} \PYG{n}{S}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
     \PYG{n}{trans\PYGZus{}err}\PYG{p}{(}\PYG{n}{I}\PYG{p}{,}\PYG{n}{E}\PYG{p}{)}\PYG{o}{.}
 
 \PYG{n}{emit}\PYG{p}{(}\PYG{n}{NextS}\PYG{p}{,}\PYG{n}{I}\PYG{p}{,}\PYG{n}{V}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}}
-    \PYG{p}{\PYGZob{}}\PYG{n}{NextS} \PYG{o}{=}\PYG{p}{:}\PYG{o}{=} \PYG{n}{V}\PYG{o}{+}\PYG{n}{X}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+    \PYG{p}{\PYGZob{}}\PYG{n}{NextS} \PYG{o}{=}\PYG{o}{:=} \PYG{n}{V}\PYG{o}{+}\PYG{n}{X}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
     \PYG{n}{obs\PYGZus{}err}\PYG{p}{(}\PYG{n}{I}\PYG{p}{,}\PYG{n}{X}\PYG{p}{)}\PYG{o}{.}
 
 \PYG{n}{init}\PYG{p}{(}\PYG{n}{S}\PYG{p}{)}\PYG{p}{:}\PYG{n}{gaussian}\PYG{p}{(}\PYG{n}{S}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}
@@ -432,16 +501,19 @@ The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_fil
 \PYG{n}{obs\PYGZus{}err}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{p}{,}\PYG{n}{E}\PYG{p}{)}\PYG{p}{:}\PYG{n}{gaussian}\PYG{p}{(}\PYG{n}{E}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Continuous random variables are involved in arithmetic expressions (in \sphinxcode{\sphinxupquote{trans/3}} and \sphinxcode{\sphinxupquote{emit/3}}).
-It is often convenient, as in this case, to use CLP(R) constraints (by including the directive \sphinxcode{\sphinxupquote{:- use\_module(library(clpr)).}}) as in this way the expressions can be used in multiple directions and the same clauses can be used both to sample and to evaluate the weight of the sample on the basis of evidence, otherwise different clauses have to be written.
+It is often convenient, as in this case, to use CLP(R) constraints (by including the directive \sphinxcode{\sphinxupquote{:\sphinxhyphen{} use\_module(library(clpr)).}}) as in this way the expressions can be used in multiple directions and the same clauses can be used both to sample and to evaluate the weight of the sample on the basis of evidence, otherwise different clauses have to be written.
 In case random variables are not sufficiently instantiated to exploit expressions for inferring the values of other variables, inference will return an error.
 
+\sphinxAtStartPar
 Moreover, user defined distributions are allowed with the syntax:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{A}\PYG{p}{:}\PYG{n}{user}\PYG{p}{(}\PYG{n}{Var}\PYG{p}{,}\PYG{n}{Density}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Var}} appears in \sphinxcode{\sphinxupquote{A}} and will contain the sampled value and \sphinxcode{\sphinxupquote{Density}} is an atom of the form \sphinxcode{\sphinxupquote{predicate(Parameters)}}.
 If \sphinxcode{\sphinxupquote{predicate}} in \sphinxcode{\sphinxupquote{predicate(Parameters)}} has arity \sphinxcode{\sphinxupquote{n}}, then the user has to define predicate \sphinxcode{\sphinxupquote{predicate/n+1}} such that
 
@@ -449,23 +521,28 @@ If \sphinxcode{\sphinxupquote{predicate}} in \sphinxcode{\sphinxupquote{predicat
 \PYG{n}{predicate}\PYG{p}{(}\PYG{n}{Parameters}\PYG{p}{,}\PYG{n}{Var}\PYG{p}{)}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 called with \sphinxcode{\sphinxupquote{Parameters}} instantiated, returns in \sphinxcode{\sphinxupquote{Var}} a value sampled from the user defined density.
-The definition of \sphinxcode{\sphinxupquote{predicate/n+1}} should appear after \sphinxcode{\sphinxupquote{:- end\_lpad.}}
+The definition of \sphinxcode{\sphinxupquote{predicate/n+1}} should appear after \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_lpad.}}
 
-If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate \sphinxcode{\sphinxupquote{predicate/n+2}} such that \sphinxcode{\sphinxupquote{predicate(Parameters,Var,Dens)}}, when called with \sphinxcode{\sphinxupquote{Parameters}} and \sphinxcode{\sphinxupquote{Var}} instantiated, returns in \sphinxcode{\sphinxupquote{Dens}} the value of the probability density of \sphinxcode{\sphinxupquote{Var}}. The definition of \sphinxcode{\sphinxupquote{predicate/n+2}} should appear after \sphinxcode{\sphinxupquote{:- end\_lpad.}}
+\sphinxAtStartPar
+If likelihood weighting or particle filtering will be used for inference, then the user has to define also predicate \sphinxcode{\sphinxupquote{predicate/n+2}} such that \sphinxcode{\sphinxupquote{predicate(Parameters,Var,Dens)}}, when called with \sphinxcode{\sphinxupquote{Parameters}} and \sphinxcode{\sphinxupquote{Var}} instantiated, returns in \sphinxcode{\sphinxupquote{Dens}} the value of the probability density of \sphinxcode{\sphinxupquote{Var}}. The definition of \sphinxcode{\sphinxupquote{predicate/n+2}} should appear after \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_lpad.}}
 
+\sphinxAtStartPar
 Moreover, if the density is discrete, the program must include the fact
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{disc}\PYG{p}{(}\PYG{n}{predicate}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-also after \sphinxcode{\sphinxupquote{:- end\_lpad.}}
+\sphinxAtStartPar
+also after \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_lpad.}}
 See for example \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est\_user.pl} and \sphinxhref{http://cplint.eu/e/binomial.pl}{binomial.pl}
 
 
 \subsection{Distributional Clauses Syntax}
 \label{\detokenize{index:distributional-clauses-syntax}}
+\sphinxAtStartPar
 You can also use the syntax of Distributional Clauses (DC) \sphinxcite{index:nitti2016}.
 Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in
 
@@ -473,20 +550,24 @@ Continuous random variables are represented in this case by term whose distribut
 \PYG{n}{T}\PYG{o}{\PYGZti{}}\PYG{n}{Density}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ := Body.}
 \end{sphinxVerbatim}
 
-Here \sphinxcode{\sphinxupquote{:=}} replaces the implication symbol, \sphinxcode{\sphinxupquote{T}} is a term and \sphinxcode{\sphinxupquote{Density'}} is one of the density atoms above without the \sphinxcode{\sphinxupquote{Var}} argument, because \sphinxcode{\sphinxupquote{T}} itself represents a random variables.
+\sphinxAtStartPar
+Here \sphinxcode{\sphinxupquote{:=}} replaces the implication symbol, \sphinxcode{\sphinxupquote{T}} is a term and \sphinxcode{\sphinxupquote{Density\textquotesingle{}}} is one of the density atoms above without the \sphinxcode{\sphinxupquote{Var}} argument, because \sphinxcode{\sphinxupquote{T}} itself represents a random variables.
 In the body of clauses you can use the infix operator \sphinxcode{\sphinxupquote{\textasciitilde{}=}} to equate a term representing a random variable with a logical variable or a constant as in \sphinxcode{\sphinxupquote{T \textasciitilde{}= X}}.
 Internally \sphinxcode{\sphinxupquote{cplint}} transforms the terms representing random variables into atoms with an extra argument for holding the variable.
 
+\sphinxAtStartPar
 DC can be used to represent also discrete distributions using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{T}\PYG{o}{\PYGZti{}}\PYG{n}{uniform}\PYG{p}{(}\PYG{n}{L}\PYG{p}{)} \PYG{p}{:}\PYG{o}{=} \PYG{n}{Body}\PYG{o}{.}
-\PYG{n}{T}\PYG{o}{\PYGZti{}}\PYG{n}{finite}\PYG{p}{(}\PYG{n}{D}\PYG{p}{)} \PYG{p}{:}\PYG{o}{=} \PYG{n}{Body}\PYG{o}{.}
+\PYG{n}{T}\PYG{o}{\PYGZti{}}\PYG{n}{uniform}\PYG{p}{(}\PYG{n}{L}\PYG{p}{)} \PYG{o}{:=} \PYG{n}{Body}\PYG{o}{.}
+\PYG{n}{T}\PYG{o}{\PYGZti{}}\PYG{n}{finite}\PYG{p}{(}\PYG{n}{D}\PYG{p}{)} \PYG{o}{:=} \PYG{n}{Body}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{L}} is a list of values and \sphinxcode{\sphinxupquote{D}} is a list of couples \sphinxcode{\sphinxupquote{P:V}} with \sphinxcode{\sphinxupquote{P}} a probability and \sphinxcode{\sphinxupquote{V}} a value.
 If \sphinxcode{\sphinxupquote{Body}} is empty, as in regular Prolog, the implication symbol \sphinxcode{\sphinxupquote{:=}} can be omitted.
 
+\sphinxAtStartPar
 The Indian GPA problem from \sphinxurl{http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa} in distributional clauses syntax
 (\sphinxurl{https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl}) takes the form (\sphinxhref{http://cplint.eu/e/indian\_gpadc.pl}{indian\_gpadc.pl}):
 
@@ -546,29 +627,34 @@ The Indian GPA problem from \sphinxurl{http://www.robots.ox.ac.uk/~fwood/anglica
 
 \chapter{Semantics}
 \label{\detokenize{index:semantics}}
+\sphinxAtStartPar
 The semantics of LPADs for the case of programs without functions symbols can be given as follows.
 An LPAD defines a probability distribution over normal logic programs called \sphinxstyleemphasis{worlds}.
 A world is obtained from an LPAD by first grounding it, by selecting a single head atom for each ground clause and by including in the world the clause with the selected head atom and the body.
 The probability of a world is the product of the probabilities associated to the heads selected.
 The probability of a ground atom (the query) is given by the sum of the probabilities of the worlds where the query is true.
 
+\sphinxAtStartPar
 If the LPAD contains function symbols, the definition is more complex, see \sphinxcite{index:dblp-journals-ai-poole97}\sphinxcite{index:dblp-journals-jair-satok01}.
-For the semantics of programs with continuous random variables, see \sphinxcite{index:tlp-8688161} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)-algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
+For the semantics of programs with continuous random variables, see \sphinxcite{index:tlp-8688161} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)\sphinxhyphen{}algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
 The probability space is lifted to cover the entire program using the least model semantics of constraint logic programs.
 Alternatively, \sphinxcite{index:nitti2016} defines the semantics of distributional clauses by resorting to a stochastic \(Tp\) operator.
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} allows more freedom than distributional clauses in the use of continuous random variables in expressions,
 for example \sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl} would not be allowed by distributional clauses.
 
 
 \chapter{Inference}
 \label{\detokenize{index:inference}}
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} answers queries using the module \sphinxcode{\sphinxupquote{pita}} or \sphinxcode{\sphinxupquote{mcintyre}}.
 The first performs the program transformation technique of \sphinxcite{index:rigswi10-iclp10-ic}.
 The latter performs approximate inference by sampling using a different program transformation technique and is described in \sphinxcite{index:rig13-fi-ij}.
 Only \sphinxcode{\sphinxupquote{mcintyre}} is able to handle continuous random variables.
 
-For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \sphinxcode{\sphinxupquote{pita}}), initialize it with a directive (for example \sphinxcode{\sphinxupquote{:- pita}}) and then enclose the LPAD clauses in \sphinxcode{\sphinxupquote{:-begin\_lpad.}} or \sphinxcode{\sphinxupquote{:-begin\_plp.}} and \sphinxcode{\sphinxupquote{:-end\_lpad.}} or \sphinxcode{\sphinxupquote{:-end\_plp.}}
+\sphinxAtStartPar
+For answering queries, you have to prepare a Prolog file where you first load the inference module (for example \sphinxcode{\sphinxupquote{pita}}), initialize it with a directive (for example \sphinxcode{\sphinxupquote{:\sphinxhyphen{} pita}}) and then enclose the LPAD clauses in \sphinxcode{\sphinxupquote{:\sphinxhyphen{}begin\_lpad.}} or \sphinxcode{\sphinxupquote{:\sphinxhyphen{}begin\_plp.}} and \sphinxcode{\sphinxupquote{:\sphinxhyphen{}end\_lpad.}} or \sphinxcode{\sphinxupquote{:\sphinxhyphen{}end\_plp.}}
 For example, the coin program above can be stored in \sphinxhref{http://cplint.eu/example/inference/coin.pl}{coin.pl} for performing inference with \sphinxcode{\sphinxupquote{pita}} as follows
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -587,6 +673,7 @@ For example, the coin program above can be stored in \sphinxhref{http://cplint.e
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}lpad}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The same program for \sphinxcode{\sphinxupquote{mcintyre}} is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -605,7 +692,8 @@ The same program for \sphinxcode{\sphinxupquote{mcintyre}} is
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}lpad}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-You can have also (non-probabilistic) clauses outside \sphinxcode{\sphinxupquote{:-begin/end\_lpad.}}
+\sphinxAtStartPar
+You can have also (non\sphinxhyphen{}probabilistic) clauses outside \sphinxcode{\sphinxupquote{:\sphinxhyphen{}begin/end\_lpad.}}
 These are considered as database clauses.
 In \sphinxcode{\sphinxupquote{pita}} subgoals in the body of probabilistic clauses can query them by enclosing the query in \sphinxcode{\sphinxupquote{db/1}}.
 For example (\sphinxhref{http://cplint.eu/example/inference/testdb.pl}{testdb.pl})
@@ -621,6 +709,7 @@ For example (\sphinxhref{http://cplint.eu/example/inference/testdb.pl}{testdb.pl
 \PYG{n}{male}\PYG{p}{(}\PYG{n}{david}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 You can also use \sphinxcode{\sphinxupquote{findall/3}} on subgoals defined by database clauses (\sphinxhref{http://cplint.eu/example/inference/persons.pl}{persons.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -644,18 +733,22 @@ You can also use \sphinxcode{\sphinxupquote{findall/3}} on subgoals defined by d
 \PYG{n}{female}\PYG{p}{(}\PYG{n}{cathy}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Aggregate predicates on probabilistic subgoals are not implemented due to their high computational cost (if the aggregation is over \(n\) atoms, the values of the aggregation are potentially \(2^n\)).
 The Yap version of \sphinxcode{\sphinxupquote{cplint}} includes reasoning algorithms that allows aggregate predicates on probabilistic subgoals, see \sphinxurl{http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html}.
 
+\sphinxAtStartPar
 In \sphinxcode{\sphinxupquote{mcintyre}} you can query database clauses in the body of probabilistic clauses without any special syntax.
 You can also use \sphinxcode{\sphinxupquote{findall/3}}.
 
+\sphinxAtStartPar
 To run a query, you can simply load the Prolog file, for example \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl}, as:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} [coin].
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -665,219 +758,270 @@ or:
 
 \section{Unconditional Queries}
 \label{\detokenize{index:unconditional-queries}}
+\sphinxAtStartPar
 The unconditional probability of an atom can be asked using \sphinxcode{\sphinxupquote{pita}} with the predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{prob}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} prob(heads(coin),P).
 \end{sphinxVerbatim}
 
-If the query is non-ground, \sphinxcode{\sphinxupquote{prob/2}} returns in backtracking the successful instantiations together with their probability.
+\sphinxAtStartPar
+If the query is non\sphinxhyphen{}ground, \sphinxcode{\sphinxupquote{prob/2}} returns in backtracking the successful instantiations together with their probability.
 When using \sphinxcode{\sphinxupquote{mcintyre}}, the predicate for querying is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_prob/3}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
 
 \end{itemize}
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}prob(heads(coin),P,[]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 You can also use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 which is equivalent to \sphinxcode{\sphinxupquote{mc\_prob/3}} with an empty option list.
 In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalent to calling the first with an empty option list.
 
+\sphinxAtStartPar
 With \sphinxcode{\sphinxupquote{mcintyre}}, you can also take a given number of samples with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,} \PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample/4}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
 
 \end{itemize}
 
+\sphinxAtStartPar
 For example (\sphinxhref{http://cplint.eu/e/coinmc.pl}{coinmc.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample(heads(coin),1000,P,[successes(S),failures(F)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that samples \sphinxcode{\sphinxupquote{heads(coin)}} 1000 times and returns in \sphinxcode{\sphinxupquote{S}} the number of successes, in \sphinxcode{\sphinxupquote{F}} the number of failures and in \sphinxcode{\sphinxupquote{P}} the estimated probability (\sphinxcode{\sphinxupquote{S/1000}}).
 
+\sphinxAtStartPar
 As another example, the call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample(heads(coin),1000,Prob).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 samples \sphinxcode{\sphinxupquote{heads(coin)}} 1000 times and returns the estimated probability that a sample is true.
 
+\sphinxAtStartPar
 You can also sample using Gibbs sampling with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/4}}:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{block(+Block:int)}} Perform blocked Gibbs: \sphinxcode{\sphinxupquote{Block}} variables are sampled together, default value 1
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mix(+Mix:int)}} The first \sphinxcode{\sphinxupquote{Mix}} samples are discarded (mixing time), default value 0
 
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \end{itemize}
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/3}} is equivalent to \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/4}} with an empty option list.
 
+\sphinxAtStartPar
 Moreover, you can sample arguments of queries with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}sample\PYGZus{}arg(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The predicate samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times. \sphinxcode{\sphinxupquote{Arg}} should be a variable in \sphinxcode{\sphinxupquote{Query}}.
-The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L-N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
+The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
 If \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that for that sample the query is determinate.
-If, in all couples \sphinxcode{\sphinxupquote{L-N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
+If, in all couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
 This is one of the assumptions taken for programs of the PRISM system \sphinxcite{index:dblp-journals-jair-satok01}.
 For example \sphinxhref{http://cplint.eu/e/pcfglr.pl}{pcfglr.pl} and \sphinxhref{http://cplint.eu/e/plcg.pl}{plcg.pl} satisfy this constraint while \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} and \sphinxhref{http://cplint.eu/e/var\_obj.pl}{var\_obj.pl} doesn’t.
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with with a bar for each possible value of \sphinxcode{\sphinxupquote{L}}, the list of values of \sphinxcode{\sphinxupquote{Arg}} for which the query succeeds in a world sampled at random. The size of the bar is the number of samples returning that list of values.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with with a bar for each possible value of \sphinxcode{\sphinxupquote{L}}, the list of values of \sphinxcode{\sphinxupquote{Arg}} for which the query succeeds in a world sampled at random. The size of the bar is the number of samples returning that list of values.
 
 \end{itemize}
 
+\sphinxAtStartPar
 An example of use of \sphinxcode{\sphinxupquote{mc\_sample\_arg/4}} is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample\PYGZus{}arg(reach(s0,0,S),50,S,Values).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 of \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} that takes 50 samples of \sphinxcode{\sphinxupquote{L}} in \sphinxcode{\sphinxupquote{findall(S,(reach(s0,0,S),L)}}.
 
+\sphinxAtStartPar
 You can sample arguments of queries also with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}raw(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times. The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of values of \sphinxcode{\sphinxupquote{Arg}} returned as the first answer by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random.
 The value is \sphinxcode{\sphinxupquote{failure}} if the query fails.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}first(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
-samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V-N}} where \sphinxcode{\sphinxupquote{V}} is the value of \sphinxcode{\sphinxupquote{Arg}} returned as the first answer by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value. \sphinxcode{\sphinxupquote{V}} is failure if the query fails. \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}} differs from \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}} because the first just computes the first answer of the query for each sampled world.
+\sphinxAtStartPar
+samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value of \sphinxcode{\sphinxupquote{Arg}} returned as the first answer by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value. \sphinxcode{\sphinxupquote{V}} is failure if the query fails. \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}} differs from \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}} because the first just computes the first answer of the query for each sampled world.
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} has a bar for each value of \sphinxcode{\sphinxupquote{Arg}} returned as a first answer for the query in a world sampled at random. The size of the bar is the number of samples that returned that value.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} has a bar for each value of \sphinxcode{\sphinxupquote{Arg}} returned as a first answer for the query in a world sampled at random. The size of the bar is the number of samples that returned that value.
 
 \end{itemize}
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}one(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
-samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V-N}} where \sphinxcode{\sphinxupquote{V}} is a value sampled with uniform probability from those returned by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
+\sphinxAtStartPar
+samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is a value sampled with uniform probability from those returned by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
 \sphinxcode{\sphinxupquote{V}} is failure if the query fails.
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample\_arg\_one/5}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} has a bar for each value of \sphinxcode{\sphinxupquote{Arg}} returned by sampling with uniform probability one answer from those returned by the query in a world sampled at random. The size of the bar is the number of samples.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} has a bar for each value of \sphinxcode{\sphinxupquote{Arg}} returned by sampling with uniform probability one answer from those returned by the query in a world sampled at random. The size of the bar is the number of samples.
 
 \end{itemize}
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 samples an argument of the query using Gibbs sampling.
 The same options as those of \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/4}} are recognized.
 
+\sphinxAtStartPar
 Finally, you can compute expectations with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}expectation(:Query:atom,+N:int,?Arg:var,\PYGZhy{}Exp:float) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that computes the expected value of \sphinxcode{\sphinxupquote{Arg}} in \sphinxcode{\sphinxupquote{Query}} by sampling.
 It takes \sphinxcode{\sphinxupquote{N}} samples of \sphinxcode{\sphinxupquote{Query}} and sums up the value of \sphinxcode{\sphinxupquote{Arg}} for each sample.
 The overall sum is divided by \sphinxcode{\sphinxupquote{N}} to give \sphinxcode{\sphinxupquote{Exp}}.
 
+\sphinxAtStartPar
 An example of use of the above predicate is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}expectation(eventually(elect,T),1000,T,E).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 of \sphinxhref{http://cplint.eu/e/pctl\_slep.pl}{pctl\_slep.pl} that returns in \sphinxcode{\sphinxupquote{E}} the expected value
 of \sphinxcode{\sphinxupquote{T}} by taking 1000 samples.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}gibbs\PYGZus{}expectation(:Query:atom,+N:int,?Arg:var,\PYGZhy{}Exp:float) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 computes an expectation with Gibbs sampling.
 
 
 \subsection{Drawing BDDs}
 \label{\detokenize{index:drawing-bdds}}
+\sphinxAtStartPar
 With \sphinxcode{\sphinxupquote{pita}}, you can obtain the BDD for a query with the predicates
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -885,34 +1029,40 @@ With \sphinxcode{\sphinxupquote{pita}}, you can obtain the BDD for a query with 
 \PYG{n}{bdd\PYGZus{}dot\PYGZus{}string}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{DotString}\PYG{p}{:}\PYG{n}{string}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Var}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The first write the BDD to a file, the latter returns it as a string.
 The BDD is represented in the dot format of graphviz.
-Solid edges indicate 1-children, dashed edges indicate 0-children and dotted edges indicate 0-children
+Solid edges indicate 1\sphinxhyphen{}children, dashed edges indicate 0\sphinxhyphen{}children and dotted edges indicate 0\sphinxhyphen{}children
 with negation applied to the sub BDD.
 Each level of the BDD is associated to a variable of the form XI\_J indicated on the left: I indicates the multivalued variable index and J the index of the Boolean variable of rule I.
 The hexadecimal number in each node is part of its address in memory and is not significant.
 The table \sphinxcode{\sphinxupquote{Var}} contains the associations between the rule groundings and the multivalued variables: the first column contains contains the multivalued variable index, the second column contains the rule index, corresponding to its position in the program, and the last column contains the list of constants grounding the rule, each replacing a variable in the order of appearance in the rule.
 
+\sphinxAtStartPar
 The BDD can be drawn in \sphinxcode{\sphinxupquote{cplint}} on SWISH by using the \sphinxcode{\sphinxupquote{graphviz}} renderer by including
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{n}{graphviz}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-before \sphinxcode{\sphinxupquote{:- pita.}}
+\sphinxAtStartPar
+before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} pita.}}
 
+\sphinxAtStartPar
 For example (\sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} bdd\PYGZus{}dot\PYGZus{}string(heads(coin),BDD,Var).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 returns the BDD for the query \sphinxcode{\sphinxupquote{heads(coin)}} and the list of associations between rule groundings
 and multivalued variables.
 
 
 \section{Conditional Queries on Discrete Variables}
 \label{\detokenize{index:conditional-queries-on-discrete-variables}}
+\sphinxAtStartPar
 The conditional probability of an atom query given another atom evidence can be asked using \sphinxcode{\sphinxupquote{pita}}
 with the predicate
 
@@ -920,109 +1070,135 @@ with the predicate
 \PYG{n}{prob}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} prob(heads(coin),biased(coin),P).
 \end{sphinxVerbatim}
 
-If the query/evidence are non-ground, \sphinxcode{\sphinxupquote{prob/3}} returns in backtracking ground
+\sphinxAtStartPar
+If the query/evidence are non\sphinxhyphen{}ground, \sphinxcode{\sphinxupquote{prob/3}} returns in backtracking ground
 instantiations together with their probability.
 The query and the evidence can be conjunctions of literals (positive or negative).
 
+\sphinxAtStartPar
 You also have
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{prob}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{prob/4}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
 
 \end{itemize}
 
+\sphinxAtStartPar
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} prob(heads(coin),biased(coin),P,[bar(Chart)\PYGZcb{}).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{prob/3}} is equivalent to \sphinxcode{\sphinxupquote{prob/4}} with an empty option list.
 When using \sphinxcode{\sphinxupquote{mcintyre}}, you can ask conditional queries with rejection sampling,
-Metropolis-Hastings Markov Chain Monte Carlo or Gibbs sampling.
+Metropolis\sphinxhyphen{}Hastings Markov Chain Monte Carlo or Gibbs sampling.
 In rejection sampling \sphinxcite{index:von195113}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded.
-In Metropolis-Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in \sphinxcite{index:nampally2014adaptive} (the non adaptive version).
+In Metropolis\sphinxhyphen{}Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in \sphinxcite{index:nampally2014adaptive} (the non adaptive version).
 A Markov chain is built by building an initial sample and by generating successor samples.
 
+\sphinxAtStartPar
 The initial sample is built by randomly sampling choices so that the evidence is true.
-This is done with a backtracking meta-interpreter that starts with the goal and randomizes the order in which clauses are selected during the search so that the initial sample is unbiased.
-Each time the meta-interpreter encounters a probabilistic choice, it first checks whether a value has already been sampled, if not, it takes a sample and records it.
-If a failure is obtained, the meta-interpreter backtracks to other clauses but without deleting samples. Then the goal is queries using regular MCINTYRE.
+This is done with a backtracking meta\sphinxhyphen{}interpreter that starts with the goal and randomizes the order in which clauses are selected during the search so that the initial sample is unbiased.
+Each time the meta\sphinxhyphen{}interpreter encounters a probabilistic choice, it first checks whether a value has already been sampled, if not, it takes a sample and records it.
+If a failure is obtained, the meta\sphinxhyphen{}interpreter backtracks to other clauses but without deleting samples. Then the goal is queries using regular MCINTYRE.
 
+\sphinxAtStartPar
 A successor sample is obtained by deleting a fixed number (parameter \sphinxcode{\sphinxupquote{Lag}}) of sampled probabilistic choices.
 Then the evidence is queried using regular MCINTYRE starting with the undeleted choices.
 If the query succeeds, the goal is queried using regular MCINTYRE.
 The sample is accepted with a probability of \(\min\{1,\frac{N_0}{N_1}\) where \(N_0\) is the number of choices sampled in the previous sample and \(N_1\) is the number of choices sampled in the current sample.
-In \sphinxcite{index:nampally2014adaptive} the lag is always 1 but the proof in \sphinxcite{index:nampally2014adaptive} that the above acceptance probability yields a valid Metropolis-Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
+In \sphinxcite{index:nampally2014adaptive} the lag is always 1 but the proof in \sphinxcite{index:nampally2014adaptive} that the above acceptance probability yields a valid Metropolis\sphinxhyphen{}Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
 
+\sphinxAtStartPar
 Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample.
 The final probability is given by the number of successes over the total number of samples.
 
+\sphinxAtStartPar
 You can take a given number of sample with rejection sampling using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}rejection\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}}:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \end{itemize}
 
+\sphinxAtStartPar
 as in (\sphinxhref{http://cplint.eu/e/coinmc.pl}{coinmc.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}rejection\PYGZus{}sample(heads(coin),biased(coin),1000,P,[successes(S),failures(F)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that takes 1000 samples where \sphinxcode{\sphinxupquote{biased(coin)}} is true and returns in \sphinxcode{\sphinxupquote{S}} the number of samples where \sphinxcode{\sphinxupquote{heads(coin)}} is true, in \sphinxcode{\sphinxupquote{F}} the number of samples where \sphinxcode{\sphinxupquote{heads(coin)}} is false and in \sphinxcode{\sphinxupquote{P}} the estimated probability (\sphinxcode{\sphinxupquote{S/1000}}).
 
+\sphinxAtStartPar
 The query and the evidence can be conjunctions of literals.
 
-You can take a given number of sample with Metropolis-Hastings MCMC using
+\sphinxAtStartPar
+You can take a given number of sample with Metropolis\sphinxhyphen{}Hastings MCMC using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}mh\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Lag}} (that is set with the options, default value 1) is the number of sampled choices to forget before taking a new sample.
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_mh\_sample/5}}:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mix(+Mix:int)}} The first Mix samples are discarded (mixing time), default value 0
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{lag(+Lag:int)}} lag between each sample, Lag sampled choices are forgotten, default value 1
 
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} BarChart is a dict for rendering with c3 as a bar chart with a bar for the number of successes and a bar for the number of failures.
 
 \end{itemize}
 
+\sphinxAtStartPar
 With \sphinxcode{\sphinxupquote{Mix}} specified it takes \sphinxcode{\sphinxupquote{Mix+Samples}} samples and discards the first \sphinxcode{\sphinxupquote{Mix}}.
 For example (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl})
 
@@ -1030,32 +1206,40 @@ For example (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl})
 ?\PYGZhy{} mc\PYGZus{}mh\PYGZus{}sample(eval(2,4),eval(1,3),10000,P,[successes(T), failures(F)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 takes 10000 accepted samples and returns in \sphinxcode{\sphinxupquote{T}} the number of samples where \sphinxcode{\sphinxupquote{eval(2,4)}} is true,
 in \sphinxcode{\sphinxupquote{F}} the number of samples where \sphinxcode{\sphinxupquote{eval(2,4)}} is false and in \sphinxcode{\sphinxupquote{P}} the estimated probability (\sphinxcode{\sphinxupquote{T/10000}}).
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 performs Gibbs sampling. \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/5}}:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{block(+Block:int)}} Perform blocked Gibbs: \sphinxcode{\sphinxupquote{Block}} variables are sampled together, default value 1
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mix(+Mix:int)}} The first \sphinxcode{\sphinxupquote{Mix}} samples are discarded (mixing time), default value 0
 
 \item {} 
-\sphinxcode{\sphinxupquote{successes(-Successes:int)}} Number of successes
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{successes(\sphinxhyphen{}Successes:int)}} Number of successes
 
 \item {} 
-\sphinxcode{\sphinxupquote{failures(-Failures:int)}} Number of failures
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{failures(\sphinxhyphen{}Failures:int)}} Number of failures
 
 \end{itemize}
 
-Moreover, you can sample arguments of queries with rejection sampling, Metropolis-Hastings MCMC or Gibbs sampling using
+\sphinxAtStartPar
+Moreover, you can sample arguments of queries with rejection sampling, Metropolis\sphinxhyphen{}Hastings MCMC or Gibbs sampling using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}rejection\PYGZus{}sample\PYGZus{}arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
@@ -1063,36 +1247,45 @@ mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg(:Query:atom,:Evidence:atom,+Samples:int
 mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that return the distribution of values for \sphinxcode{\sphinxupquote{Arg}} in \sphinxcode{\sphinxupquote{Query}} in \sphinxcode{\sphinxupquote{Samples}} of \sphinxcode{\sphinxupquote{Query}} given that \sphinxcode{\sphinxupquote{Evidence}} is true. \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mix(+Mix:int)}} The first \sphinxcode{\sphinxupquote{Mix}} samples are discarded (mixing time), default value 0 (only MH and GIbbs)
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{lag(+Lag:int)}} lag between each sample, \sphinxcode{\sphinxupquote{Lag}} sampled choices are forgotten, default value 1 (only MH)
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{block(+Block:int)}} Perform blocked Gibbs: \sphinxcode{\sphinxupquote{Block}} variables are sampled together, default value 1 (only Gibbs)
 
 \item {} 
-\sphinxcode{\sphinxupquote{bar(-BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a bar chart of the possible values
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}BarChar:dict)}} \sphinxcode{\sphinxupquote{BarChart}} is a bar chart of the possible values
 
 \end{itemize}
 
-The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L-N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
+\sphinxAtStartPar
+The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg(:Query:atom,+Samples:int,?Arg:var,\PYGZhy{}Values:list,+Options:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 An example of use of the above predicates is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg(eval(2,Y),eval(1,3),1000,Y,V,[]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 of (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl}).
 
+\sphinxAtStartPar
 To compute conditional expectations, use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1101,102 +1294,124 @@ mc\PYGZus{}mh\PYGZus{}expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,\PY
 mc\PYGZus{}gibbs\PYGZus{}expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,\PYGZhy{}Exp:float,+Options:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}mh\PYGZus{}expectation(eval(2,Y),eval(1,3),1000,Y,E,[]).
 \end{sphinxVerbatim}
 
-of (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl}) computes the expectation of argument \sphinxcode{\sphinxupquote{Y}} of \sphinxcode{\sphinxupquote{eval(2,Y)}} given that \sphinxcode{\sphinxupquote{eval(1,3)}} is true by taking 1000 samples using Metropolis-Hastings MCMC.
+\sphinxAtStartPar
+of (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl}) computes the expectation of argument \sphinxcode{\sphinxupquote{Y}} of \sphinxcode{\sphinxupquote{eval(2,Y)}} given that \sphinxcode{\sphinxupquote{eval(1,3)}} is true by taking 1000 samples using Metropolis\sphinxhyphen{}Hastings MCMC.
 
+\sphinxAtStartPar
 Note that conditional inference is not allowed for PRISM programs with the setting \sphinxcode{\sphinxupquote{prism\_memoization}} set to \sphinxcode{\sphinxupquote{false}}, as sampled values are not stored in that case and conditioning would have no effect.
 
 
 \section{Conditional Queries on Continuous Variables}
 \label{\detokenize{index:conditional-queries-on-continuous-variables}}
+\sphinxAtStartPar
 When you have continuous random variables, you may be interested in sampling arguments of goals representing continuous random variables.
 In this way you can build a probability density of the sampled argument.
 When you do not have evidence or you have evidence on atoms not depending on continuous random variables, you can use the above predicates for sampling arguments.
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample\PYGZus{}arg(val(0,X),1000,X,L).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from (\sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl}) samples 1000 values for \sphinxcode{\sphinxupquote{X}} in \sphinxcode{\sphinxupquote{value(0,X)}} and returns them in \sphinxcode{\sphinxupquote{L}}.
 
-When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis-Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0.
+\sphinxAtStartPar
+When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis\sphinxhyphen{}Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0.
 Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering \sphinxcite{index:fung1990weighing},:cite:\sphinxtitleref{koller2009probabilistic},:cite:\sphinxtitleref{Nitti2016} to obtain samples of continuous arguments of a goal.
 
-For each sample to be taken, likelihood weighting uses a meta-interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample.
-This meta-interpreter is similar to the one used to generate the first sample in Metropolis-Hastings.
-Then a different meta-interpreter is used to evaluate the weight of the sample.
-This meta-interpreter starts with the evidence as the query and a weight of 1.
-Each time the meta-interpreter encounters a probabilistic choice over a continuous variable, it first checks whether a value has already been sampled.
+\sphinxAtStartPar
+For each sample to be taken, likelihood weighting uses a meta\sphinxhyphen{}interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample.
+This meta\sphinxhyphen{}interpreter is similar to the one used to generate the first sample in Metropolis\sphinxhyphen{}Hastings.
+Then a different meta\sphinxhyphen{}interpreter is used to evaluate the weight of the sample.
+This meta\sphinxhyphen{}interpreter starts with the evidence as the query and a weight of 1.
+Each time the meta\sphinxhyphen{}interpreter encounters a probabilistic choice over a continuous variable, it first checks whether a value has already been sampled.
 If so, it computes the probability density of the sampled value and multiplies the weight by it.
 If the value has not been sampled, it takes a sample and records it, leaving the weight unchanged.
 In this way, each sample in the result has a weight that is 1 for the prior distribution and that may be different from the posterior distribution, reflecting the influence of evidence.
 
+\sphinxAtStartPar
 In particle filtering, the evidence is a list of atoms. Each sample is weighted by the likelihood of an element of the evidence and constitutes a particle.
 After weighting, particles are resampled and the next element of the evidence is considered.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}lw\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Prob}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times given that \sphinxcode{\sphinxupquote{Evidence}} (a conjunction of atoms is allowed here) is true.
 The predicate returns in \sphinxcode{\sphinxupquote{Prob}} the probability that the query is true.
 It performs likelihood weighting: each sample is weighted by the likelihood of evidence in the sample.
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}lw\PYGZus{}sample(nation(a),student\PYGZus{}gpa(4.0),1000,P).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/indian\_gpa.pl}{indian\_gpa.pl} samples 1000 times the query \sphinxcode{\sphinxupquote{nation(a)}} given that \sphinxcode{\sphinxupquote{student\_gpa(4.0)}} has been observed.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,\PYGZhy{}ValList) is det
 \end{sphinxVerbatim}
 
-returns in \sphinxcode{\sphinxupquote{ValList}} a list of couples \sphinxcode{\sphinxupquote{V-W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds and \sphinxcode{\sphinxupquote{W}} is the weight computed by likelihood weighting according to \sphinxcode{\sphinxupquote{Evidence}} (a conjunction of atoms is allowed here).
+\sphinxAtStartPar
+returns in \sphinxcode{\sphinxupquote{ValList}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds and \sphinxcode{\sphinxupquote{W}} is the weight computed by likelihood weighting according to \sphinxcode{\sphinxupquote{Evidence}} (a conjunction of atoms is allowed here).
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg(val(0,X),(val(1,9),val(2,8)),100,X,L).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl} samples 100 values for \sphinxcode{\sphinxupquote{X}} in \sphinxcode{\sphinxupquote{val(0,X)}} given that \sphinxcode{\sphinxupquote{val(1,9)}} and \sphinxcode{\sphinxupquote{val(2,8)}} have been observed.
 
+\sphinxAtStartPar
 You can compute conditional expectations using likelihood weighting with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}lw\PYGZus{}expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,\PYGZhy{}Exp:float) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that computes the expected value of \sphinxcode{\sphinxupquote{Arg}} in \sphinxcode{\sphinxupquote{Query}} given that \sphinxcode{\sphinxupquote{Evidence}} is true.
 It takes \sphinxcode{\sphinxupquote{N}} samples of \sphinxcode{\sphinxupquote{Arg}} in \sphinxcode{\sphinxupquote{Query}}, weighting each according to the evidence, and returns their weighted average.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg(:Query:atom,+Evidence:list,+Samples:int,?Arg:var,\PYGZhy{}Values:list) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 samples argument \sphinxcode{\sphinxupquote{Arg}} of \sphinxcode{\sphinxupquote{Query}} using particle filtering given that \sphinxcode{\sphinxupquote{Evidence}} is true. \sphinxcode{\sphinxupquote{Evidence}} is a list of goals and \sphinxcode{\sphinxupquote{Query}} can be either a single goal or a list of goals.
-When \sphinxcode{\sphinxupquote{Query}} is a single goal, the predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V-W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a particle in the last set of particles and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
+When \sphinxcode{\sphinxupquote{Query}} is a single goal, the predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a particle in the last set of particles and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
 For each element of \sphinxcode{\sphinxupquote{Evidence}}, the particles are obtained by sampling \sphinxcode{\sphinxupquote{Query}} in each current particle and weighting the particle by the likelihood of the evidence element.
 
+\sphinxAtStartPar
 When \sphinxcode{\sphinxupquote{Query}} is a list of goals, \sphinxcode{\sphinxupquote{Arg}} is a list of variables, one for each query of \sphinxcode{\sphinxupquote{Query}} and \sphinxcode{\sphinxupquote{Arg}} and \sphinxcode{\sphinxupquote{Query}} must have the same length of \sphinxcode{\sphinxupquote{Evidence}}.
-\sphinxcode{\sphinxupquote{Values}} is then list of the same length of \sphinxcode{\sphinxupquote{Evidence}} and each of its elements is a list of couples \sphinxcode{\sphinxupquote{V-W}} where \sphinxcode{\sphinxupquote{V}} is a value of the corresponding element of \sphinxcode{\sphinxupquote{Arg}} for which the corresponding element of \sphinxcode{\sphinxupquote{Query}} succeeds in a particle and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
+\sphinxcode{\sphinxupquote{Values}} is then list of the same length of \sphinxcode{\sphinxupquote{Evidence}} and each of its elements is a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of the corresponding element of \sphinxcode{\sphinxupquote{Arg}} for which the corresponding element of \sphinxcode{\sphinxupquote{Query}} succeeds in a particle and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
 For each element of \sphinxcode{\sphinxupquote{Evidence}}, the particles are obtained by sampling the corresponding element of \sphinxcode{\sphinxupquote{Query}} in each current particle and weighting the particle by the likelihood of the evidence element.
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1207,54 +1422,237 @@ kf\PYGZus{}fin(4,T4)],
 [T1,T2,T3,T4],[F1,F2,F3,F4]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl} performs particle filtering for a Kalman filter with four observations.
 For each observation, the value of the state at the same time point is sampled.
 The list of samples is returned in \sphinxcode{\sphinxupquote{{[}F1,F2,F3,F4{]}}}, with each element being the sample for a time point.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{mc\PYGZus{}particle\PYGZus{}sample}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{p}{:}\PYG{n}{Evidence}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Samples}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Prob}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times given that \sphinxcode{\sphinxupquote{Evidence}} is true using particle filtering. \sphinxcode{\sphinxupquote{Evidence}} is a list of goals.
 The predicate returns in \sphinxcode{\sphinxupquote{Prob}} the probability that the query is true.
 
+\sphinxAtStartPar
 You can compute conditional expectations using particle filtering with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 mc\PYGZus{}particle\PYGZus{}expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,\PYGZhy{}Exp:float) is det
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that computes the expected value of \sphinxcode{\sphinxupquote{Arg}} in \sphinxcode{\sphinxupquote{Query}} given that \sphinxcode{\sphinxupquote{Evidence}} is true.
 It uses \sphinxcode{\sphinxupquote{N}} particles.
 
 
+\section{MPE, MAP and Viterbi Inference}
+\label{\detokenize{index:mpe-map-and-viterbi-inference}}
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. \sphinxcite{index:dblp-conf-ilp-shterionovrvkmj14}\sphinxcite{index:belalbrig20-tplp-ij}.
+
+\sphinxAtStartPar
+In MAP inference we look for the choices of head atoms of some clauses that lead to the probability of a query being
+maximal. The rules for which we want the choices, called \sphinxstyleemphasis{query}, are indicated in the input file by prepending
+the text \sphinxcode{\sphinxupquote{map\_query}} to each query rule. For example, in the program \sphinxhref{http://cplint.eu/e/bag\_1.pl}{bag\_1.pl}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.3}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.1}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{no\PYGZus{}pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+
+\PYG{n}{ev}\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYGZbs{}\PYG{o}{+} \PYG{n}{blue}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+we are asking for the choice for the second rule.
+The predicate to use is
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n+nb}{map}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Exp}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+For example, the query on the program above
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} map(ev,P,Exp).
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+asks for the chocie for the second rule that yelds the highest probability for \sphinxcode{\sphinxupquote{ev}}. The query returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{P} \PYG{o}{=} \PYG{l+m+mf}{0.5399999999999999}\PYG{p}{,}
+\PYG{n}{Exp} \PYG{o}{=} \PYG{p}{[}\PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{,} \PYG{p}{[}\PYG{n}{pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{,} \PYG{n}{no\PYGZus{}pick}\PYG{p}{(}\PYG{n}{b1}\PYG{p}{)}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{]}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+In MPE inference we are interested in the choices for \sphinxstyleemphasis{all} rules. To perform MPE inference,
+we need to prepend  \sphinxcode{\sphinxupquote{map\_query}} to each rule and use predicate \sphinxcode{\sphinxupquote{map/3}}.
+
+\sphinxAtStartPar
+For example, on program \sphinxhref{http://cplint.eu/e/bag\_game\_mpe.pl}{bag\_game\_mpe.pl}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{red}\PYG{p}{,} \PYG{n}{green}\PYG{o}{.}
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{blue}\PYG{p}{,} \PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.9}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.5}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{o}{.}
+\PYG{n}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{yellow}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} map(win,P,Exp).
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{Exp} \PYG{o}{=} \PYG{p}{[}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{p}{[}\PYG{n}{red}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.6}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{green}\PYG{p}{,} \PYG{p}{[}\PYG{n}{green}\PYG{p}{:}\PYG{l+m+mf}{0.9}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.09999999999999998}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{blue}\PYG{p}{,} \PYG{p}{[}\PYG{n}{blue}\PYG{p}{:}\PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.5}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{yellow}\PYG{p}{,} \PYG{p}{[}\PYG{n}{yellow}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{:} \PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,} \PYG{n}{true}\PYG{p}{)}\PYG{p}{]}\PYG{p}{,}
+\PYG{n}{P} \PYG{o}{=} \PYG{l+m+mf}{0.162}\PYG{p}{,}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+In Viterbi inference we are interested in the most probable proof of a query. See \sphinxcite{index:dblp-conf-ilp-shterionovrvkmj14}
+for the difference between the most probable proof and the most probable explanation.
+Module \sphinxcode{\sphinxupquote{viterbi}} looks for the most probable proof by using a meta interpreter
+that performs branch and bound.
+
+\sphinxAtStartPar
+The predicate
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{viterbi}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{conjunction}\PYG{p}{,}\PYG{o}{+}\PYG{n}{K}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Exp}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+computes the most probable proof of the conjunction of literals \sphinxcode{\sphinxupquote{Query}}.
+It returns the proof as explanation in \sphinxcode{\sphinxupquote{Exp}}.
+
+\sphinxAtStartPar
+In example \sphinxhref{http://cplint.eu/e/bag\_game\_vit.pl}{bag\_game\_vit.pl}:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{viterbi}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{viterbi}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{begin\PYGZus{}lpad}\PYG{o}{.}
+
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{red}\PYG{p}{,} \PYG{n}{green}\PYG{o}{.}
+\PYG{n}{win} \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{blue}\PYG{p}{,} \PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{l+m+mf}{0.4}\PYG{p}{:}\PYG{p}{:}\PYG{n}{red}\PYG{o}{.}
+\PYG{l+m+mf}{0.9}\PYG{p}{:}\PYG{p}{:}\PYG{n}{green}\PYG{o}{.}
+\PYG{l+m+mf}{0.5}\PYG{p}{:}\PYG{p}{:}\PYG{n}{blue}\PYG{o}{.}
+\PYG{l+m+mf}{0.6}\PYG{p}{:}\PYG{p}{:}\PYG{n}{yellow}\PYG{o}{.}
+
+\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}lpad}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{} viterbi(win,P,Exp).
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{P}\PYG{o}{=}\PYG{l+m+mf}{0.36}\PYG{p}{,}
+\PYG{n}{Exp}\PYG{o}{=}\PYG{p}{[}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{red}\PYG{p}{,} \PYG{p}{[}\PYG{n}{red}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}
+        \PYG{n}{rule}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{green}\PYG{p}{,} \PYG{p}{[}\PYG{n}{green}\PYG{p}{:}\PYG{l+m+mf}{0.9}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{:}\PYG{l+m+mf}{0.09999999999999998}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+As you can see the Viterbi explanation is different from the MPE one presented above.
+
+\sphinxAtStartPar
+Note that \sphinxcode{\sphinxupquote{viterbi/3}}, in case the query contains variables, returns their instantiation
+leading to the highest probability of the grounding of the query. For example,
+in \sphinxhref{http://cplint.eu/e/hmm\_vit.pl}{hmm\_vit.pl}, the query
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?\PYGZhy{}viterbi(hmm1(S,[a,g,g]),\PYGZus{}P,\PYGZus{}E).
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+returns
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{S} \PYG{o}{=} \PYG{p}{[}\PYG{n}{q2}\PYG{p}{,} \PYG{n}{q2}\PYG{p}{,} \PYG{n}{q1}\PYG{p}{]}\PYG{p}{,}
+\end{sphinxVerbatim}
+
+
+\subsection{Drawing BDDs for MAP/MPE}
+\label{\detokenize{index:drawing-bdds-for-map-mpe}}
+\sphinxAtStartPar
+With \sphinxcode{\sphinxupquote{pita}}, you can obtain the BDD for a MAP/MPE query with the predicate
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{map\PYGZus{}bdd\PYGZus{}dot\PYGZus{}string}\PYG{p}{(}\PYG{p}{:}\PYG{n}{Query}\PYG{p}{:}\PYG{n}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{DotString}\PYG{p}{:}\PYG{n}{string}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LV}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LAV}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}
+        \PYG{o}{\PYGZhy{}}\PYG{n}{Probability}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Delta}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{nondet}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+The BDD is represented in the dot format of graphviz and returned in \sphinxcode{\sphinxupquote{DotString}}. See {\hyperref[\detokenize{index:drawing-bdds}]{\sphinxcrossref{\DUrole{std,std-ref}{Drawing BDDs}}}}
+for the graph format and for instruction on how to draw it.
+It returns the explanation in \sphinxcode{\sphinxupquote{Delta}} together with its \sphinxcode{\sphinxupquote{Probability}}
+The predicate returns \sphinxcode{\sphinxupquote{LV}} and \sphinxcode{\sphinxupquote{LAV}}, the association of variables to rules
+and of query variables to rules respectively.
+\sphinxcode{\sphinxupquote{LV}} and \sphinxcode{\sphinxupquote{LAV}} are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.
+
+
 \section{Causal Inference}
 \label{\detokenize{index:causal-inference}}
-\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do-calculus \sphinxcite{index:pea00-book}.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do\sphinxhyphen{}calculus \sphinxcite{index:pea00-book}.
 
+\sphinxAtStartPar
 Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{action} \PYG{n}{predicate1}\PYG{o}{/}\PYG{n}{arity1}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{,}\PYG{n}{predicaten}\PYG{o}{/}\PYG{n}{arityn}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 When performing causal reasoning, action literals must be enclosed in the \sphinxcode{\sphinxupquote{do/1}} functor and included in the evidence conjunction.
 More than one action can be included (each with in a separate \sphinxcode{\sphinxupquote{do/1}} term) and actions and observations can be freely mixed.
 All conditional inference goals can be used except those for particle filtering.
 
+\sphinxAtStartPar
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} prob(recovery,do(drug),P).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/simpson.swinb}{simpson.swinb} computes the probability of recovery of a patient given that the action of administering a drug has been performed.
 
 
 \section{Graphing the Results}
 \label{\detokenize{index:graphing-the-results}}
+\sphinxAtStartPar
 In \sphinxcode{\sphinxupquote{cplint}} on SWISH you can draw graphs for visualizing the results either with \sphinxhref{http://www.c3js.org/}{C3.js} or with \sphinxhref{http://www.r-project.org/}{R}.
 Similar predicates are available for the two methods.
 There are two types of graphs: those that represent individual probability values with a bar chart and those that visualize the results of sampling arguments.
@@ -1262,6 +1660,7 @@ There are two types of graphs: those that represent individual probability value
 
 \subsection{Using C3.js}
 \label{\detokenize{index:using-c3-js}}
+\sphinxAtStartPar
 You can draw the probability of a query being true and being false as a bar chart using the predicates
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1271,106 +1670,133 @@ You can draw the probability of a query being true and being false as a bar char
 \PYG{n}{argbar}\PYG{p}{(}\PYG{o}{+}\PYG{n}{Values}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Chart}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
-They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where \sphinxcode{\sphinxupquote{Values}} is a list of couples \sphinxcode{\sphinxupquote{V-N}} where \sphinxcode{\sphinxupquote{V}} is the value and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
+\sphinxAtStartPar
+They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where \sphinxcode{\sphinxupquote{Values}} is a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
 
+\sphinxAtStartPar
 To render C3.js charts you have to include
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{n}{c3}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-before \sphinxcode{\sphinxupquote{:- pita.}}
+\sphinxAtStartPar
+before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} pita.}}
 
-You can also use the \sphinxcode{\sphinxupquote{bar(-Chart:dict)}} option of many predicates as in
+\sphinxAtStartPar
+You can also use the \sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}Chart:dict)}} option of many predicates as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} prob(heads(coin),biased(coin),P,[bar(Chart)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{P}} will be instantiated with a chart with a bar for the probability of \sphinxcode{\sphinxupquote{heads(coin)}} true and a bar for the probability of \sphinxcode{\sphinxupquote{heads(coin)}} false, given that \sphinxcode{\sphinxupquote{biased(coin)}} is true.
 
+\sphinxAtStartPar
 Another example is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}prob(heads(coin),P,[bar(Chart)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that returns a chart representation of the probability.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample(heads(coin),1000,P,[bar(Chart)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 returns in \sphinxcode{\sphinxupquote{Chart}} a diagram with one bar for the number of successes and one bar for the number of failures.
 
+\sphinxAtStartPar
 The options of \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}}, \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}}, \sphinxcode{\sphinxupquote{mc\_mh\_sample\_arg/6}}, \sphinxcode{\sphinxupquote{mc\_rejection\_sample\_arg/6}}, can be used for visualizing the results of sampling arguments.
 
+\sphinxAtStartPar
 An example is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample\PYGZus{}arg(reach(s0,0,S),50,S,ValList,[bar(Chart)]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 of \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl}.
 
+\sphinxAtStartPar
 The same result can be achieved with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} mc\PYGZus{}sample\PYGZus{}arg(reach(s0,0,S),50,S,ValList),argbar(ValList,Chart)
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Drawing a graph is particularly interesting when sampling values for continuous arguments of goals.
 In this case, you can use the samples to draw the probability density function of the argument.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{histogram}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Chart}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
-draws a histogram of the samples in \sphinxcode{\sphinxupquote{List}} that must be a list of couples of the form \sphinxcode{\sphinxupquote{{[}V{]}-W}} or \sphinxcode{\sphinxupquote{V-W}} where \sphinxcode{\sphinxupquote{V}} is a sampled value and \sphinxcode{\sphinxupquote{W}} is its weight.
+\sphinxAtStartPar
+draws a histogram of the samples in \sphinxcode{\sphinxupquote{List}} that must be a list of couples of the form \sphinxcode{\sphinxupquote{{[}V{]}\sphinxhyphen{}W}} or \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a sampled value and \sphinxcode{\sphinxupquote{W}} is its weight.
 This is the format of the list of samples returned by argument sampling predicates.
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{density}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Chart}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 draws a line chart of the density of the samples in \sphinxcode{\sphinxupquote{List}} that must take the same form as for \sphinxcode{\sphinxupquote{histogram/3}}.
 
+\sphinxAtStartPar
 In \sphinxcode{\sphinxupquote{histogram/3}} and \sphinxcode{\sphinxupquote{density/3}} \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{min(+Min:float)}} the minimum value of domain, default value the minimum in \sphinxcode{\sphinxupquote{List}}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{max(+Max:float)}} the maximum value of domain, default value the maximum in \sphinxcode{\sphinxupquote{List}}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{nbins(+NBins:int)}} the number of bins for dividing the domain, default value 40
 
 \end{itemize}
 
+\sphinxAtStartPar
 In this way you can specify the limits and the number of intervals of the \(X\).
 
+\sphinxAtStartPar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{densities}\PYG{p}{(}\PYG{o}{+}\PYG{n}{PriorList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{PostList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{Chart}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
-draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in \sphinxcode{\sphinxupquote{PriorList}} and \sphinxcode{\sphinxupquote{PostList}} can be either couples \sphinxcode{\sphinxupquote{{[}V{]}-W}} or \sphinxcode{\sphinxupquote{V-W}} where \sphinxcode{\sphinxupquote{V}} is a value and \sphinxcode{\sphinxupquote{W}} its weight.
+\sphinxAtStartPar
+draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in \sphinxcode{\sphinxupquote{PriorList}} and \sphinxcode{\sphinxupquote{PostList}} can be either couples \sphinxcode{\sphinxupquote{{[}V{]}\sphinxhyphen{}W}} or \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value and \sphinxcode{\sphinxupquote{W}} its weight.
 The same options as for \sphinxcode{\sphinxupquote{histogram/3}} and \sphinxcode{\sphinxupquote{density/3}} are recognized.
 
+\sphinxAtStartPar
 For example, the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{}  mc\PYGZus{}sample\PYGZus{}arg(value(0,X),1000,X,L0,[]),histogram(L0,Chart,[]).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl}, takes 1000 samples of argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{value(0,X)}} and draws the density of the samples using an histogram.
 
+\sphinxAtStartPar
 Instead
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1380,19 +1806,23 @@ mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg(value(0,X),
 densities(L0,L,Chart).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl} takes 1000 amples of argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{value(0,X)}} before and after observing \sphinxcode{\sphinxupquote{(value(1,9),value(2,8)}} and draws the prior and posterior densities of the samples using a line chart.
 
+\sphinxAtStartPar
 Predicates \sphinxcode{\sphinxupquote{histogram/3}}, \sphinxcode{\sphinxupquote{density/3}} and \sphinxcode{\sphinxupquote{densities/4}} each have a version with one argument less that is equivalent to the predicate called with an empty option list.
 
 
 \subsection{Using R}
 \label{\detokenize{index:using-r}}
-You have to load library \sphinxcode{\sphinxupquote{cplint\_r}} (a SWI-Prolog pack) with
+\sphinxAtStartPar
+You have to load library \sphinxcode{\sphinxupquote{cplint\_r}} (a SWI\sphinxhyphen{}Prolog pack) with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Then you can use predicates
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1401,33 +1831,40 @@ Then you can use predicates
 \PYG{n}{argbar\PYGZus{}r}\PYG{o}{/}\PYG{l+m+mi}{1}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that work as their C3.js counterpart but do not return the graph as an argument as the graph is printed with a different mechanism.
 
+\sphinxAtStartPar
 You also have
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{histogram\PYGZus{}r}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{Options}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that works as \sphinxcode{\sphinxupquote{histogram/3}}.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{density\PYGZus{}r}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 is like \sphinxcode{\sphinxupquote{density/3}} with the number of bins is determined by R.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{densities\PYGZus{}r}\PYG{p}{(}\PYG{o}{+}\PYG{n}{PriorList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{PostList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 is like \sphinxcode{\sphinxupquote{densities/3}} with the number of bins is determined by R.
 
+\sphinxAtStartPar
 See \sphinxhref{http://cplint.eu/e/gauss\_mean\_est\_R.pl}{gauss\_mean\_est\_R.pl} for an example of use of these predicates.
 
 
 \section{Parameters for Inference}
 \label{\detokenize{index:parameters-for-inference}}
+\sphinxAtStartPar
 The inference modules have a number of parameters in order to control their behavior.
 They can be set with the directive
 
@@ -1435,154 +1872,191 @@ They can be set with the directive
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}pita}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{parameter}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{value}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}mc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{parameter}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{value}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-after initialization (\sphinxcode{\sphinxupquote{:-pita.}} or \sphinxcode{\sphinxupquote{:-mc.}}) but outside \sphinxcode{\sphinxupquote{:-begin/end\_lpad.}}
+\sphinxAtStartPar
+after initialization (\sphinxcode{\sphinxupquote{:\sphinxhyphen{}pita.}} or \sphinxcode{\sphinxupquote{:\sphinxhyphen{}mc.}}) but outside \sphinxcode{\sphinxupquote{:\sphinxhyphen{}begin/end\_lpad.}}
 The current value can be read with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} setting\PYGZus{}pita(\PYGZlt{}parameter\PYGZgt{},Value).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} setting\PYGZus{}mc(\PYGZlt{}parameter\PYGZgt{},Value).
 \end{sphinxVerbatim}
 
-from the top-level.
+\sphinxAtStartPar
+from the top\sphinxhyphen{}level.
 The available parameters common to both \sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} are:
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{epsilon\_parsing}}: if (1 - the sum of the probabilities of all the head atoms) is larger than \sphinxcode{\sphinxupquote{epsilon\_parsing}}, then \sphinxcode{\sphinxupquote{pita}} adds the null event to the head. Default value \sphinxcode{\sphinxupquote{0.00001}}.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{epsilon\_parsing}}: if (1 \sphinxhyphen{} the sum of the probabilities of all the head atoms) is larger than \sphinxcode{\sphinxupquote{epsilon\_parsing}}, then \sphinxcode{\sphinxupquote{pita}} adds the null event to the head. Default value \sphinxcode{\sphinxupquote{0.00001}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{single\_var}}: determines how non ground clauses are treated: if \sphinxcode{\sphinxupquote{true}}, a single random variable is assigned to the whole non ground clause, if \sphinxcode{\sphinxupquote{false}}, a different random variable is assigned to every grounding of the clause. Default value \sphinxcode{\sphinxupquote{false}}.
 
 \end{itemize}
 
+\sphinxAtStartPar
 Moreover, \sphinxcode{\sphinxupquote{pita}} has the parameters
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{depth\_bound}}: if \sphinxcode{\sphinxupquote{true}}, the depth of the derivation of the goal is limited to the value of the \sphinxcode{\sphinxupquote{depth}} parameter. Default value \sphinxcode{\sphinxupquote{false}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{depth}}: maximum depth of derivations when \sphinxcode{\sphinxupquote{depth\_bound}} is set to \sphinxcode{\sphinxupquote{true}}. Default value \sphinxcode{\sphinxupquote{5}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{prism\_memoization}}: \sphinxcode{\sphinxupquote{false}}: original prism semantics, \sphinxcode{\sphinxupquote{true}}: semantics with memoization
 
 \end{itemize}
 
-If \sphinxcode{\sphinxupquote{depth\_bound}} is set to \sphinxcode{\sphinxupquote{true}}, derivations are depth-bounded so you can query also programs containing infinite loops, for example programs where queries have an infinite number of explanations.
+\sphinxAtStartPar
+If \sphinxcode{\sphinxupquote{depth\_bound}} is set to \sphinxcode{\sphinxupquote{true}}, derivations are depth\sphinxhyphen{}bounded so you can query also programs containing infinite loops, for example programs where queries have an infinite number of explanations.
 However the probability that is returned is guaranteed only to be a lower bound, see for example \sphinxhref{http://cplint.eu/e/markov\_chaindb.pl}{markov\_chaindb.pl}
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mcintyre}} has the parameters
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{min\_error}}: minimal width of the binomial proportion confidence interval for the probability of the query. When the confidence interval for the probability of the query is below \sphinxcode{\sphinxupquote{min\_error}}, the computation stops. Default value \sphinxcode{\sphinxupquote{0.01}}.
 
 \item {} 
-\sphinxcode{\sphinxupquote{k}}: the number of samples to take before checking whether the the binomial proportion confidence interval is below \sphinxcode{\sphinxupquote{min\_error}}. Default value \sphinxcode{\sphinxupquote{1000}}. \sphinxcode{\sphinxupquote{max\_samples}}: the maximum number of samples to take. This is used when the probability of the query is very close to 0 or 1. In fact \sphinxcode{\sphinxupquote{mcintyre}} also checks for the validity of the the binomial proportion confidence interval: if less than 5 failures or successes are sampled, even if the width of the confidence interval is less than \sphinxcode{\sphinxupquote{min\_error}}, the computation continues. This would lead to non-termination in cases where the probability is 0 or 1. \sphinxcode{\sphinxupquote{max\_samples}} ensures termination. Default value \sphinxcode{\sphinxupquote{10e4}}.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{k}}: the number of samples to take before checking whether the the binomial proportion confidence interval is below \sphinxcode{\sphinxupquote{min\_error}}. Default value \sphinxcode{\sphinxupquote{1000}}. \sphinxcode{\sphinxupquote{max\_samples}}: the maximum number of samples to take. This is used when the probability of the query is very close to 0 or 1. In fact \sphinxcode{\sphinxupquote{mcintyre}} also checks for the validity of the the binomial proportion confidence interval: if less than 5 failures or successes are sampled, even if the width of the confidence interval is less than \sphinxcode{\sphinxupquote{min\_error}}, the computation continues. This would lead to non\sphinxhyphen{}termination in cases where the probability is 0 or 1. \sphinxcode{\sphinxupquote{max\_samples}} ensures termination. Default value \sphinxcode{\sphinxupquote{10e4}}.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{prism\_memoization}}: \sphinxcode{\sphinxupquote{false}}: original prism semantics, \sphinxcode{\sphinxupquote{true}}: semantics with memoization
 
 \end{itemize}
 
+\sphinxAtStartPar
 The example \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} shows that \sphinxcode{\sphinxupquote{mcintyre}} can perform inference in presence of an infinite number of explanations for the goal.
 Differently from \sphinxcode{\sphinxupquote{pita}}, no depth bound is necessary, as the probability of selecting the infinite computation branch is 0.
 However, also \sphinxcode{\sphinxupquote{mcintyre}} may not terminate if loops not involving probabilistic predicates are present.
 
-If you want to set the seed of the random number generator, you can use SWI-Prolog predicates \sphinxcode{\sphinxupquote{setrand/1}} and \sphinxcode{\sphinxupquote{getrand/1}}, see \sphinxhref{http://www.swi-prolog.org/pldoc/doc\_for?object=setrand/1}{SWI-Prolog manual}.
+\sphinxAtStartPar
+If you want to set the seed of the random number generator, you can use SWI\sphinxhyphen{}Prolog predicates \sphinxcode{\sphinxupquote{setrand/1}} and \sphinxcode{\sphinxupquote{getrand/1}}, see \sphinxhref{http://www.swi-prolog.org/pldoc/doc\_for?object=setrand/1}{SWI\sphinxhyphen{}Prolog manual}.
 
 
 \section{Decision Theory}
 \label{\detokenize{index:decision-theory}}
+\sphinxAtStartPar
 cplint allows also to represent decision theory problem following the syntax of Dtproblog \sphinxcite{index:van2010dtproblog}.
 
+\sphinxAtStartPar
 Decision facts can be expressed with the operator \sphinxcode{\sphinxupquote{?::}}
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ? :: umbrella.
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Utility facts can be expressed with \sphinxcode{\sphinxupquote{utility/2}} where the first parameter is the fact and the second its utility
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{utility}\PYG{p}{(}\PYG{n}{broken\PYGZus{}umbrella}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{40}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In order to compute the best strategy, you can use \sphinxcode{\sphinxupquote{dt\_solve/2}}
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{dt\PYGZus{}solve}\PYG{p}{(}\PYG{n}{Strategy}\PYG{p}{,}\PYG{n}{Value}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 which returns in \sphinxcode{\sphinxupquote{Strategy}} a set of decision facts and in \sphinxtitleref{Value} the value of the computed best strategy.
 
 
 \chapter{Learning}
 \label{\detokenize{index:learning}}
+\sphinxAtStartPar
 The following learning algorithms are available:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs \sphinxcite{index:belrig11-ida-ij}\sphinxcite{index:bellodi2013expectation}\sphinxcite{index:belrig11-tr}
 
 \item {} 
+\sphinxAtStartPar
 SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately \sphinxcite{index:belrig13-tplp-ij}
 
 \item {} 
-LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte-Carlo tree search \sphinxcite{index:dimbelrig15-ml-ij}
+\sphinxAtStartPar
+LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte\sphinxhyphen{}Carlo tree search \sphinxcite{index:dimbelrig15-ml-ij}
 
 \end{itemize}
 
 
 \section{Input}
 \label{\detokenize{index:input}}
+\sphinxAtStartPar
 To execute the learning algorithms, prepare a Prolog file divided in five parts
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 preamble
 
 \item {} 
+\sphinxAtStartPar
 background knowledge, i.e., knowledge valid for all interpretations
 
 \item {} 
-LPAD/CPL-program for you which you want to learn the parameters (optional)
+\sphinxAtStartPar
+LPAD/CPL\sphinxhyphen{}program for you which you want to learn the parameters (optional)
 
 \item {} 
+\sphinxAtStartPar
 language bias information
 
 \item {} 
+\sphinxAtStartPar
 example interpretations
 
 \end{itemize}
 
+\sphinxAtStartPar
 The preamble must come first, the order of the other parts can be changed.
 
+\sphinxAtStartPar
 For example, consider the Bongard problems of \sphinxcite{index:raelae95-alt95}. \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for SLIPCOVER.
 \sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/example/lemur/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for LEMUR.
 
 
 \subsection{Preamble}
 \label{\detokenize{index:preamble}}
+\sphinxAtStartPar
 In the preamble, the SLIPCOVER library is loaded with (\sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}):
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{slipcover}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Now you can initialize SLIPCOVER with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{sc}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 At this point you can start setting parameters for SLIPCOVER such as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1592,39 +2066,46 @@ At this point you can start setting parameters for SLIPCOVER such as for example
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}sc}\PYG{p}{(}\PYG{n}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 We will see later the list of available parameters.
 
+\sphinxAtStartPar
 In the preamble, the LEMUR library is loaded with (\sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl}):
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{lemur}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Now you can initialize LEMUR with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{lemur}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 At this point you can start setting parameters for LEMUR such as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}lm}\PYG{p}{(}\PYG{n}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 A parameter that is particularly important for both SLIPCOVER and LEMUR is \sphinxcode{\sphinxupquote{verbosity}}: if set to 1, nothing is printed and learning is fastest, if set to 3 much information is printed and learning is slowest, 2 is in between. This ends the preamble.
 
 
-\subsection{Background and Initial LPAD/CPL-program}
+\subsection{Background and Initial LPAD/CPL\sphinxhyphen{}program}
 \label{\detokenize{index:background-and-initial-lpad-cpl-program}}
+\sphinxAtStartPar
 Now you can specify the background knowledge with a fact of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{bg}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{list} \PYG{n}{of} \PYG{n}{terms} \PYG{n}{representing} \PYG{n}{clauses}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where the clauses must be deterministic.
-Alternatively, you can specify a set of clauses by including them in a section between \sphinxcode{\sphinxupquote{:- begin\_bg.}} and \sphinxcode{\sphinxupquote{:- end\_bg.}}
+Alternatively, you can specify a set of clauses by including them in a section between \sphinxcode{\sphinxupquote{:\sphinxhyphen{} begin\_bg.}} and \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_bg.}}
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1641,18 +2122,22 @@ For example
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}bg}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from the \sphinxhref{http://cplint.eu/e/mach.pl}{mach.pl} example.
 If you specify both a \sphinxcode{\sphinxupquote{bg/1}} fact and a section, the clauses of the two will be combined.
 
+\sphinxAtStartPar
 Moreover, you can specify an initial program with a fact of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{o+ow}{in}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{list} \PYG{n}{of} \PYG{n}{terms} \PYG{n}{representing} \PYG{n}{clauses}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The initial program is used in parameter learning for providing the structure.
-Remember to enclose each clause in parentheses because \sphinxcode{\sphinxupquote{:-}} has the highest precedence.
+Remember to enclose each clause in parentheses because \sphinxcode{\sphinxupquote{:\sphinxhyphen{}}} has the highest precedence.
 
+\sphinxAtStartPar
 For example, \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} has the initial program
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1667,7 +2152,8 @@ For example, \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} has the init
    \PYG{n}{circle}\PYG{p}{(}\PYG{n}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-Alternatively, you can specify an input program in a section between \sphinxcode{\sphinxupquote{:- begin\_in.}} and \sphinxcode{\sphinxupquote{:- end\_in.}}, as for example
+\sphinxAtStartPar
+Alternatively, you can specify an input program in a section between \sphinxcode{\sphinxupquote{:\sphinxhyphen{} begin\_in.}} and \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_in.}}, as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{begin\PYGZus{}in}\PYG{o}{.}
@@ -1685,13 +2171,17 @@ Alternatively, you can specify an input program in a section between \sphinxcode
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{end\PYGZus{}in}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 If you specify both a \sphinxcode{\sphinxupquote{in/1}} fact and a section, the clauses of the two will be combined.
 
+\sphinxAtStartPar
 The annotations of the head atoms of the initial program can be probabilities, as in the example above, in this case the parameters do not matter as they are first randomized. The type of randomization depends on the setting \sphinxcode{\sphinxupquote{alpha}}.
 If it takes value 0, a truncated Dirichlet process is used to initialize the parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled and independently uniformly in \([0,1]\).
 
+\sphinxAtStartPar
 If it takes a value \(\geq 0\), the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters \sphinxtitleref{((alpha,ldots,alpha))}.
 
+\sphinxAtStartPar
 The annotations of the head atoms of the initial program can also be \sphinxcode{\sphinxupquote{p(\textless{}prob\textgreater{})}} with \sphinxcode{\sphinxupquote{\textless{}prob\textgreater{}}} a probability, in this case the parameter is fixed so it is not tuned by learning, as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1703,9 +2193,11 @@ The annotations of the head atoms of the initial program can also be \sphinxcode
         \PYG{n}{triangle}\PYG{p}{(}\PYG{n}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The annotations of the head atoms of the initial program can also be \sphinxcode{\sphinxupquote{t(\textless{}prob\textgreater{},\textless{}args\textgreater{})}} with \sphinxcode{\sphinxupquote{\textless{}prob\textgreater{}}} either a probability, in this case it is the initial value of the parameter, or a variable, in this case the parameter is initially randomized, and \sphinxcode{\sphinxupquote{\textless{}args\textgreater{}}} a tuple of variables that also appear in the clause.
 In this case a different parameter is learned for every grounding of \sphinxcode{\sphinxupquote{\textless{}args\textgreater{}}} that make the body true.
 
+\sphinxAtStartPar
 For example, we can set the initial value of the parameter of the second clause to 0.9 with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1717,6 +2209,7 @@ For example, we can set the initial value of the parameter of the second clause 
         \PYG{n}{triangle}\PYG{p}{(}\PYG{n}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 With the program below we learn a different parameter for every instantiation of \sphinxcode{\sphinxupquote{C}} in the second clause:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1731,6 +2224,7 @@ With the program below we learn a different parameter for every instantiation of
 
 \subsection{Language Bias}
 \label{\detokenize{index:language-bias}}
+\sphinxAtStartPar
 The language bias part contains the declarations of the input and output predicates.
 Output predicates are declared as
 
@@ -1738,6 +2232,7 @@ Output predicates are declared as
 \PYG{n}{output}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{predicate}\PYG{o}{\PYGZgt{}}\PYG{o}{/}\PYG{o}{\PYGZlt{}}\PYG{n}{arity}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 and indicate the predicate whose atoms you want to predict.
 Derivations for the atoms for this predicates in the input data are built by the system.
 These are the predicates for which new clauses are generated.
@@ -1748,73 +2243,90 @@ You can declare closed world input predicates with
 \PYG{n}{input\PYGZus{}cw}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{predicate}\PYG{o}{\PYGZgt{}}\PYG{o}{/}\PYG{o}{\PYGZlt{}}\PYG{n}{arity}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 For these predicates, the only true atoms are those in the interpretations and those derivable from them using the background knowledge, the clauses in the input or in the hypothesized program are not used to derive atoms for these predicates. Moreover, clauses of the background knowledge that define closed world input predicates and that call an output predicate in the body will not be used for deriving examples.
 
+\sphinxAtStartPar
 Open world input predicates are declared with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n+nb}{input}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{predicate}\PYG{o}{\PYGZgt{}}\PYG{o}{/}\PYG{o}{\PYGZlt{}}\PYG{n}{arity}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In this case, if a subgoal for such a predicate is encountered when deriving a subgoal for the output predicates, both the facts in the interpretations, those derivable from them and the background knowledge, the background clauses and the clauses of the input program are used.
 
+\sphinxAtStartPar
 Then, you have to specify the language bias by means of mode declarations in the style of \sphinxhref{https://www.doc.ic.ac.uk/~shm/progol.html}{Progol}.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{modeh}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{recall}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{predicate}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{arg1}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 specifies the atoms that can appear in the head of clauses, while
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{modeb}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{recall}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{predicate}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{arg1}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 specifies the atoms that can appear in the body of clauses. \sphinxcode{\sphinxupquote{\textless{}recall\textgreater{}}} can be an integer or \sphinxcode{\sphinxupquote{*}}. \sphinxcode{\sphinxupquote{\textless{}recall\textgreater{}}} indicates how many atoms for the predicate specification are retained in the bottom clause during a saturation step. \sphinxcode{\sphinxupquote{*}} stands for all those that are found.
 Otherwise the indicated number is randomly chosen.
 
+\sphinxAtStartPar
 For SLIPCOVER, two specialization modes are available: \sphinxcode{\sphinxupquote{bottom}} and \sphinxcode{\sphinxupquote{mode}}. In the first, a bottom clause is built and the literals to be added during refinement are taken from it. In the latter, no bottom clause is built and the literals to be added during refinement are generated directly from the mode declarations. LEMUR has only specialization \sphinxcode{\sphinxupquote{mode}}.
 
+\sphinxAtStartPar
 Arguments of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{o}{+}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{type}\PYG{o}{\PYGZgt{}}
 \end{sphinxVerbatim}
 
-specifies that the argument should be an input variable of type \sphinxcode{\sphinxupquote{\textless{}type\textgreater{}}}, i.e., a variable replacing a \sphinxcode{\sphinxupquote{+\textless{}type\textgreater{}}} argument in the head or a \sphinxcode{\sphinxupquote{-\textless{}type\textgreater{}}} argument in a preceding literal in the current hypothesized clause.
+\sphinxAtStartPar
+specifies that the argument should be an input variable of type \sphinxcode{\sphinxupquote{\textless{}type\textgreater{}}}, i.e., a variable replacing a \sphinxcode{\sphinxupquote{+\textless{}type\textgreater{}}} argument in the head or a \sphinxcode{\sphinxupquote{\sphinxhyphen{}\textless{}type\textgreater{}}} argument in a preceding literal in the current hypothesized clause.
 
+\sphinxAtStartPar
 Another argument form is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{type}\PYG{o}{\PYGZgt{}}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 for specifying that the argument should be a output variable of type \sphinxcode{\sphinxupquote{\textless{}type\textgreater{}}}.
 Any variable can replace this argument, either input or output.
 The only constraint on output variables is that those in the head of the current hypothesized clause must appear as output variables in an atom of the body.
 
+\sphinxAtStartPar
 Other forms are
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{c+c1}{\PYGZsh{}\PYGZlt{}type\PYGZgt{}}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 for specifying an argument which should be replaced by a constant of type \sphinxcode{\sphinxupquote{\textless{}type\textgreater{}}} in the bottom clause but should not be used for replacing input variables of the following literals when building the bottom clause or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{o}{\PYGZhy{}}\PYG{c+c1}{\PYGZsh{}\PYGZlt{}type\PYGZgt{}}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 for specifying an argument which should be replaced by a constant of type \sphinxcode{\sphinxupquote{\textless{}type\textgreater{}}} in the bottom clause and that should be used for replacing input variables of the following literals when building the bottom clause.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{o}{\PYGZlt{}}\PYG{n}{constant}\PYG{o}{\PYGZgt{}}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 for specifying a constant.
 
-Note that arguments of the form \sphinxcode{\sphinxupquote{\#\textless{}type\textgreater{}}} \sphinxcode{\sphinxupquote{-\#\textless{}type\textgreater{}}} are not available in specialization mode \sphinxcode{\sphinxupquote{mode}}, if you want constants to appear in the literals you have to indicate them one by one in the mode declarations.
+\sphinxAtStartPar
+Note that arguments of the form \sphinxcode{\sphinxupquote{\#\textless{}type\textgreater{}}} \sphinxcode{\sphinxupquote{\sphinxhyphen{}\#\textless{}type\textgreater{}}} are not available in specialization mode \sphinxcode{\sphinxupquote{mode}}, if you want constants to appear in the literals you have to indicate them one by one in the mode declarations.
 
+\sphinxAtStartPar
 An example of language bias for the Bongard domain is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1835,7 +2347,8 @@ An example of language bias for the Bongard domain is
 \PYG{n}{modeb}\PYG{p}{(}\PYG{o}{*}\PYG{p}{,}\PYG{n}{config}\PYG{p}{(}\PYG{o}{+}\PYG{n}{obj}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{c+c1}{\PYGZsh{}dir)).}
 \end{sphinxVerbatim}
 
-SLIPCOVER and LEMUR also require facts for the \sphinxcode{\sphinxupquote{determination/2}} Aleph-style predicate that indicate which predicates can appear in the body of clauses.
+\sphinxAtStartPar
+SLIPCOVER and LEMUR also require facts for the \sphinxcode{\sphinxupquote{determination/2}} Aleph\sphinxhyphen{}style predicate that indicate which predicates can appear in the body of clauses.
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1844,15 +2357,17 @@ determination(pos/0,square/1).
 determination(pos/0,circle/1).
 determination(pos/0,in/2).
 determination(pos/0,config/2).
-state that :code:{}`triangle/1{}` can appear in the body of clauses for :code:{}`pos/0{}`.
+state that :code:`triangle/1` can appear in the body of clauses for :code:`pos/0`.
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 SLIPCOVER and LEMUR also allow mode declarations of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{modeh}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{r}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{p}{[}\PYG{o}{\PYGZlt{}}\PYG{n}{s1}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{sn}\PYG{o}{\PYGZgt{}}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{o}{\PYGZlt{}}\PYG{n}{a1}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{an}\PYG{o}{\PYGZgt{}}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{o}{\PYGZlt{}}\PYG{n}{P1}\PYG{o}{/}\PYG{n}{Ar1}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{Pk}\PYG{o}{/}\PYG{n}{Ark}\PYG{o}{\PYGZgt{}}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 These mode declarations are used to generate clauses with more than two head atoms.
 In them, \sphinxcode{\sphinxupquote{\textless{}s1\textgreater{},...,\textless{}sn\textgreater{}}} are schemas, \sphinxcode{\sphinxupquote{\textless{}a1\textgreater{},...,\textless{}an\textgreater{}}} are atoms such that \sphinxcode{\sphinxupquote{\textless{}ai\textgreater{}}} is obtained from \sphinxcode{\sphinxupquote{\textless{}si\textgreater{}}} by replacing placemarkers with variables, \sphinxcode{\sphinxupquote{\textless{}Pi/Ari\textgreater{}}} are the predicates admitted in the body. \sphinxcode{\sphinxupquote{\textless{}a1\textgreater{},...,\textless{}an\textgreater{}}} are used to indicate which variables should be shared by the atoms in the head.
 An example of such a mode declaration (from \sphinxcode{\sphinxupquote{uwcselearn.pl}}) is
@@ -1865,6 +2380,7 @@ An example of such a mode declaration (from \sphinxcode{\sphinxupquote{uwcselear
 \PYG{n}{publication}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{taughtby}\PYG{o}{/}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{n}{ta}\PYG{o}{/}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{n}{courselevel}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{yearsinprogram}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 If you want to specify negative literals for addition in the body of clauses, you should define a new predicate in the background as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1877,6 +2393,7 @@ If you want to specify negative literals for addition in the body of clauses, yo
 \PYGZbs{}\PYG{o}{+} \PYG{n}{one\PYGZus{}worn}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 from \sphinxhref{http://cplint.eu/e/mach.pl}{mach.pl} and add the new predicate in a \sphinxcode{\sphinxupquote{modeb/2}} fact
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1884,6 +2401,7 @@ from \sphinxhref{http://cplint.eu/e/mach.pl}{mach.pl} and add the new predicate 
 \PYG{n}{modeb}\PYG{p}{(}\PYG{o}{*}\PYG{p}{,}\PYG{n}{none\PYGZus{}worn}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Note that successful negative literals do not instantiate the variables, so if you want a variable appearing in a negative literal to be an output variable you must instantiate before calling the negative literals.
 The new predicates must also be declared as input
 
@@ -1892,26 +2410,31 @@ The new predicates must also be declared as input
 \PYG{n}{input\PYGZus{}cw}\PYG{p}{(}\PYG{n}{none\PYGZus{}worn}\PYG{o}{/}\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Lookahead can also be specified with facts of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{lookahead}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{literal}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{list} \PYG{n}{of} \PYG{n}{literals}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In this case when a literal matching \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} is added to the body of clause during refinement, then also the literals matching \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} will be added. An example of such declaration (from \sphinxhref{http://cplint.eu/e/muta.pl}{muta.pl}) is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{lookahead}\PYG{p}{(}\PYG{n}{logp}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{o}{=}\PYG{n}{\PYGZus{}}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Note that \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} is copied with \sphinxcode{\sphinxupquote{copy\_term/2}} before matching, so variables in common between \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} and \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} may not be in common in the refined clause.
 
+\sphinxAtStartPar
 It is also possible to specify that a literal can only be added together with other literals with facts of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{lookahead\PYGZus{}cons}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{literal}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{list} \PYG{n}{of} \PYG{n}{literals}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In this case \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} is added to the body of clause during refinement only together with literals matching \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}}.
 An example of such declaration is
 
@@ -1919,14 +2442,17 @@ An example of such declaration is
 \PYG{n}{lookahead\PYGZus{}cons}\PYG{p}{(}\PYG{n}{logp}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{p}{(}\PYG{n}{\PYGZus{}}\PYG{o}{=}\PYG{n}{\PYGZus{}}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Also here \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} is copied with \sphinxcode{\sphinxupquote{copy\_term/2}} before matching, so variables in common between \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} and \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} may not be in common in the refined clause.
 
+\sphinxAtStartPar
 Moreover, we can specify lookahead with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{lookahead\PYGZus{}cons\PYGZus{}var}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{literal}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{list} \PYG{n}{of} \PYG{n}{literals}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In this case \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} is added to the body of clause during refinement only together with literals matching \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} and \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} is not copied before matching, so variables in common between \sphinxcode{\sphinxupquote{\textless{}literal\textgreater{}}} and \sphinxcode{\sphinxupquote{\textless{}list of literals\textgreater{}}} are in common also in the refined clause. This is allowed only with \sphinxcode{\sphinxupquote{specialization}} set to \sphinxcode{\sphinxupquote{bottom}}.
 An example of such declaration is
 
@@ -1937,6 +2463,7 @@ An example of such declaration is
 
 \subsection{Example Interpretations}
 \label{\detokenize{index:example-interpretations}}
+\sphinxAtStartPar
 The last part of the file contains the data.
 You can specify data with two modalities: models and keys.
 In the models type, you specify an example model (or interpretation or megaexample) as a list of Prolog facts initiated by \sphinxcode{\sphinxupquote{begin(model(\textless{}name\textgreater{})).}} and terminated by \sphinxcode{\sphinxupquote{end(model(\textless{}name\textgreater{})).}} as in
@@ -1957,19 +2484,23 @@ In the models type, you specify an example model (or interpretation or megaexamp
 \PYG{n}{end}\PYG{p}{(}\PYG{n}{model}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The interpretations may contain a fact of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{prob}\PYG{p}{(}\PYG{l+m+mf}{0.3}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 assigning a probability (0.3 in this case) to the interpretations.
 If this is omitted, the probability of each interpretation is considered equal to \(1/n\) where \(n\) is the total number of interpretations. \sphinxcode{\sphinxupquote{prob/1}} can be used to set a different multiplicity for the interpretations.
 
-The facts in the interpretation are loaded in SWI-Prolog database by adding an extra initial argument equal to the name of the model.
+\sphinxAtStartPar
+The facts in the interpretation are loaded in SWI\sphinxhyphen{}Prolog database by adding an extra initial argument equal to the name of the model.
 After each interpretation is loaded, a fact of the form \sphinxcode{\sphinxupquote{int(\textless{}id\textgreater{})}} is asserted, where \sphinxcode{\sphinxupquote{id}} is the name of the interpretation.
 This can be used in order to retrieve the list of interpretations.
 
+\sphinxAtStartPar
 Alternatively, with the keys modality, you can directly write the facts and the first argument will be interpreted as a model identifier.
 The above interpretation in the keys modality is
 
@@ -1987,11 +2518,13 @@ The above interpretation in the keys modality is
 \PYG{n}{config}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{o1}\PYG{p}{,}\PYG{n}{up}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 which is contained in the \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl}.
-This is also how model \sphinxcode{\sphinxupquote{2}} above is stored in SWI-Prolog database.
+This is also how model \sphinxcode{\sphinxupquote{2}} above is stored in SWI\sphinxhyphen{}Prolog database.
 The two modalities, models and keys, can be mixed in the same file.
 Facts for \sphinxcode{\sphinxupquote{int/1}} are not asserted for interpretations in the key modality but can be added by the user explicitly.
 
+\sphinxAtStartPar
 Note that you can add background knowledge that is not probabilistic directly to the file writing the clauses taking into account the model argument.
 For example (\sphinxcode{\sphinxupquote{carc.pl}}) contains
 
@@ -2005,8 +2538,10 @@ symbond(Mod,A,B,T):\PYGZhy{} bond(Mod,A,B,T).
 symbond(Mod,A,B,T):\PYGZhy{} bond(Mod,B,A,T).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where the first argument of all the atoms is the model.
 
+\sphinxAtStartPar
 Example \sphinxhref{http://cplint.eu/e/registration.pl}{registration.pl} contains for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2014,6 +2549,7 @@ Example \sphinxhref{http://cplint.eu/e/registration.pl}{registration.pl} contain
 \PYG{n}{participant}\PYG{p}{(}\PYG{n}{M}\PYG{p}{,}\PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{P}\PYG{p}{,} \PYG{n}{\PYGZus{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 that defines intensionally the target predicate \sphinxcode{\sphinxupquote{party/1}}. Here \sphinxcode{\sphinxupquote{M}} is the model and \sphinxcode{\sphinxupquote{participant/4}} is defined in the interpretations.
 You can also define intensionally the negative examples with
 
@@ -2022,6 +2558,7 @@ You can also define intensionally the negative examples with
 \PYG{n}{neg}\PYG{p}{(}\PYG{n}{party}\PYG{p}{(}\PYG{n}{M}\PYG{p}{,}\PYG{n}{no}\PYG{p}{)}\PYG{p}{)}\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{party}\PYG{p}{(}\PYG{n}{M}\PYG{p}{,}\PYG{n}{yes}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Then you must indicate how the examples are divided in folds with facts of the form: \sphinxcode{\sphinxupquote{fold(\textless{}fold\_name\textgreater{},\textless{}list of model identifiers\textgreater{})}}, as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2029,6 +2566,7 @@ Then you must indicate how the examples are divided in folds with facts of the f
 \PYG{n}{fold}\PYG{p}{(}\PYG{n}{test}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{490}\PYG{p}{,}\PYG{l+m+mi}{491}\PYG{p}{,}\PYG{o}{.}\PYG{o}{.}\PYG{o}{.}\PYG{p}{]}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 As the input file is a Prolog program, you can define intensionally the folds as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2036,6 +2574,7 @@ As the input file is a Prolog program, you can define intensionally the folds as
 \PYG{n}{findall}\PYG{p}{(}\PYG{n}{I}\PYG{p}{,}\PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{I}\PYG{p}{)}\PYG{p}{,}\PYG{n}{F}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{fold/2}} is dynamic so you can also write (\sphinxhref{http://cplint.eu/e/registration.pl}{registration.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2045,6 +2584,7 @@ As the input file is a Prolog program, you can define intensionally the folds as
 \PYG{k}{assert}\PYG{p}{(}\PYG{n}{fold}\PYG{p}{(}\PYG{n}{rand\PYGZus{}test}\PYG{p}{,}\PYG{n}{FTe}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 which however must be inserted after the input interpretations otherwise the facts for \sphinxcode{\sphinxupquote{int/1}} will not be available and the fold \sphinxcode{\sphinxupquote{all}} would be empty.
 This command uses \sphinxcode{\sphinxupquote{sample(N,List,Sampled,Rest)}} exported from \sphinxcode{\sphinxupquote{slipcover}} that samples \sphinxcode{\sphinxupquote{N}} elements from \sphinxcode{\sphinxupquote{List}} and returns the sampled elements in \sphinxcode{\sphinxupquote{Sampled}} and the rest in \sphinxcode{\sphinxupquote{Rest}}.
 If \sphinxcode{\sphinxupquote{List}} has \sphinxcode{\sphinxupquote{N}} elements or less, \sphinxcode{\sphinxupquote{Sampled}} is equal to \sphinxcode{\sphinxupquote{List}} and \sphinxcode{\sphinxupquote{Rest}} is empty.
@@ -2055,14 +2595,17 @@ If \sphinxcode{\sphinxupquote{List}} has \sphinxcode{\sphinxupquote{N}} elements
 
 \subsection{Parameter Learning}
 \label{\detokenize{index:parameter-learning}}
+\sphinxAtStartPar
 To execute EMBLEM, prepare an input file in the editor panel as indicated above and call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} induce\PYGZus{}par(\PYGZlt{}list of folds\PYGZgt{},P).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{\textless{}list of folds\textgreater{}}} is a list of the folds for training and \sphinxcode{\sphinxupquote{P}} will contain the input program with updated parameters.
 
+\sphinxAtStartPar
 For example \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}, you can perform parameter learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2072,69 +2615,86 @@ For example \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}, you can perf
 
 \subsection{Structure Learning}
 \label{\detokenize{index:structure-learning}}
+\sphinxAtStartPar
 To execute SLIPCOVER, prepare an input file in the editor panel as indicated above and call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{induce}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List\PYGZus{}of\PYGZus{}folds}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{P}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{List\_of\_folds}} is a list of the folds for training and \sphinxcode{\sphinxupquote{P}} will contain the learned program.
 
+\sphinxAtStartPar
 For example \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}, you can perform structure learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} induce([train],P).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 A program can also be tested on a test set with \sphinxcode{\sphinxupquote{test/7}} or \sphinxcode{\sphinxupquote{test\_prob/6}} as described below.
 
-Between two executions of \sphinxcode{\sphinxupquote{induce/2}} you should exit SWI-Prolog to have a clean database.
+\sphinxAtStartPar
+Between two executions of \sphinxcode{\sphinxupquote{induce/2}} you should exit SWI\sphinxhyphen{}Prolog to have a clean database.
 
+\sphinxAtStartPar
 To execute LEMUR, prepare an input file in the editor panel as indicated above and call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{induce\PYGZus{}lm}\PYG{p}{(}\PYG{o}{+}\PYG{n}{List\PYGZus{}of\PYGZus{}folds}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{P}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{List\_of\_folds}} is a list of the folds for training and \sphinxcode{\sphinxupquote{P}} will contain the learned program.
 
+\sphinxAtStartPar
 For example \sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl}, you can perform structure learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} induce\PYGZus{}lm([train],P).
 \end{sphinxVerbatim}
 
-Between two executions of \sphinxcode{\sphinxupquote{induce\_lm/2}} you should exit SWI-Prolog to have a clean database.
+\sphinxAtStartPar
+Between two executions of \sphinxcode{\sphinxupquote{induce\_lm/2}} you should exit SWI\sphinxhyphen{}Prolog to have a clean database.
 
 
 \subsection{Testing}
 \label{\detokenize{index:testing}}
+\sphinxAtStartPar
 A program can also be tested on a test set in SLIPCOVER and LEMUR with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{test}\PYG{p}{(}\PYG{o}{+}\PYG{n}{Program}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{List\PYGZus{}of\PYGZus{}folds}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LL}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCROC}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{ROC}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCPR}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{PR}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{test}\PYG{p}{(}\PYG{o}{+}\PYG{n}{Program}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{List\PYGZus{}of\PYGZus{}folds}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{NPos}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{NNeg}\PYG{p}{:}\PYG{n+nb}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LL}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{ExampleList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Program}} is a list of terms representing clauses and \sphinxcode{\sphinxupquote{List\_of\_folds}} is a list of folds.
 
-\sphinxcode{\sphinxupquote{test/7}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the Area Under the ROC curve in \sphinxcode{\sphinxupquote{AUCROC}}, a dictionary containing the list of points (in the form of Prolog pairs \sphinxcode{\sphinxupquote{x-y}}) of the ROC curve in \sphinxcode{\sphinxupquote{ROC}}, the Area Under the PR curve in \sphinxcode{\sphinxupquote{AUCPR}}, a dictionary containing the list of points of the PR curve in \sphinxcode{\sphinxupquote{PR}}.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{test/7}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the Area Under the ROC curve in \sphinxcode{\sphinxupquote{AUCROC}}, a dictionary containing the list of points (in the form of Prolog pairs \sphinxcode{\sphinxupquote{x\sphinxhyphen{}y}}) of the ROC curve in \sphinxcode{\sphinxupquote{ROC}}, the Area Under the PR curve in \sphinxcode{\sphinxupquote{AUCPR}}, a dictionary containing the list of points of the PR curve in \sphinxcode{\sphinxupquote{PR}}.
 
-\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing couples \sphinxcode{\sphinxupquote{Prob-Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{\textbackslash{}+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing couples \sphinxcode{\sphinxupquote{Prob\sphinxhyphen{}Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{\textbackslash{}+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
 
+\sphinxAtStartPar
 Then you can draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH using C3.js using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{compute\PYGZus{}areas\PYGZus{}diagrams}\PYG{p}{(}\PYG{o}{+}\PYG{n}{ExampleList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCROC}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{ROC}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCPR}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{PR}\PYG{p}{:}\PYG{n+nb}{dict}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
-(from pack \sphinxhref{http://www.swi-prolog.org/pack/list?p=auc}{auc.pl}) that takes as input a list \sphinxcode{\sphinxupquote{ExampleList}} of pairs probability-literal of the form that is returned by \sphinxcode{\sphinxupquote{test\_prob/6}}.
+\sphinxAtStartPar
+(from pack \sphinxhref{http://www.swi-prolog.org/pack/list?p=auc}{auc.pl}) that takes as input a list \sphinxcode{\sphinxupquote{ExampleList}} of pairs probability\sphinxhyphen{}literal of the form that is returned by \sphinxcode{\sphinxupquote{test\_prob/6}}.
 
+\sphinxAtStartPar
 For example, to test on fold \sphinxcode{\sphinxupquote{test}} the program learned on fold \sphinxcode{\sphinxupquote{train}} you can run the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2142,12 +2702,14 @@ For example, to test on fold \sphinxcode{\sphinxupquote{test}} the program learn
 test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Or you can test the input program on the fold \sphinxcode{\sphinxupquote{test}} with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 ?\PYGZhy{} in(P),test(P,[test],LL,AUCROC,ROC,AUCPR,PR).
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 In \sphinxcode{\sphinxupquote{cplint}} on SWISH, by including
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2155,130 +2717,168 @@ In \sphinxcode{\sphinxupquote{cplint}} on SWISH, by including
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{n}{lpad}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
-in the code before \sphinxcode{\sphinxupquote{:- sc.}} the curves will be shown as graphs using C3.js and the output program will be pretty printed.
+\sphinxAtStartPar
+in the code before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} sc.}} the curves will be shown as graphs using C3.js and the output program will be pretty printed.
 
+\sphinxAtStartPar
 You can also draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH using R by loading library \sphinxcode{\sphinxupquote{cplint\_r}} with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{use\PYGZus{}module}\PYG{p}{(}\PYG{n}{library}\PYG{p}{(}\PYG{n}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 and using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{test\PYGZus{}r}\PYG{p}{(}\PYG{o}{+}\PYG{n}{Program}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n}{List\PYGZus{}of\PYGZus{}folds}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{LL}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCROC}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCPR}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 or predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{compute\PYGZus{}areas\PYGZus{}diagrams\PYGZus{}r}\PYG{p}{(}\PYG{o}{+}\PYG{n}{ExampleList}\PYG{p}{:}\PYG{n+nb}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCROC}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n}{AUCPR}\PYG{p}{:}\PYG{n+nb}{float}\PYG{p}{)} \PYG{o+ow}{is} \PYG{n}{det}
 \end{sphinxVerbatim}
 
-that takes as input a list \sphinxcode{\sphinxupquote{ExampleList}} of pairs probability-literal of the form that is returned by \sphinxcode{\sphinxupquote{test\_prob/6}}.
+\sphinxAtStartPar
+that takes as input a list \sphinxcode{\sphinxupquote{ExampleList}} of pairs probability\sphinxhyphen{}literal of the form that is returned by \sphinxcode{\sphinxupquote{test\_prob/6}}.
 
 
 \section{Parameters for Learning}
 \label{\detokenize{index:parameters-for-learning}}
+\sphinxAtStartPar
 Parameters are set with commands of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{n}{set\PYGZus{}sc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{n}{parameter}\PYG{o}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n}{value}\PYG{o}{\PYGZgt{}}\PYG{p}{)}\PYG{o}{.}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The available parameters are:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{specialization}}: (values: \sphinxcode{\sphinxupquote{\{bottom,mode\}}}, default value: \sphinxcode{\sphinxupquote{bottom}}, valid for SLIPCOVER) specialization mode.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{depth\_bound}}: (values: \sphinxcode{\sphinxupquote{\{true,false\}}}, default value: \sphinxcode{\sphinxupquote{true}}) if \sphinxcode{\sphinxupquote{true}}, the depth of the derivation of the goal is limited to the value of the \sphinxcode{\sphinxupquote{depth}} parameter.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{depth}} (values: integer, default value: 2): depth of derivations if \sphinxcode{\sphinxupquote{depth\_bound}} is set to \sphinxcode{\sphinxupquote{true}}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{single\_var}} (values: \sphinxcode{\sphinxupquote{\{true,false\}}}, default value: \sphinxcode{\sphinxupquote{false}}): if set to \sphinxcode{\sphinxupquote{true}}, there is a random variable for each clause, instead of a different random variable for each grounding of each clause
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{epsilon\_em}} (values: real, default value: 0.1): if the difference in the log likelihood in two successive parameter EM iteration is smaller than \sphinxcode{\sphinxupquote{epsilon\_em}}, then EM stops
 
 \item {} 
-\sphinxcode{\sphinxupquote{epsilon\_em\_fraction}} (values: real, default value: 0.01): if the difference in the log likelihood in two successive parameter EM iteration is smaller than \sphinxcode{\sphinxupquote{epsilon\_em\_fraction*(-current log likelihood)}}, then EM stops
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{epsilon\_em\_fraction}} (values: real, default value: 0.01): if the difference in the log likelihood in two successive parameter EM iteration is smaller than \sphinxcode{\sphinxupquote{epsilon\_em\_fraction*(\sphinxhyphen{}current log likelihood)}}, then EM stops
 
 \item {} 
-\sphinxcode{\sphinxupquote{iter}} (values: integer, defualt value: 1): maximum number of iteration of EM parameter learning. If set to -1, no maximum number of iterations is imposed
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{iter}} (values: integer, defualt value: 1): maximum number of iteration of EM parameter learning. If set to \sphinxhyphen{}1, no maximum number of iterations is imposed
 
 \item {} 
-\sphinxcode{\sphinxupquote{iterREF}} (values: integer, defualt value: 1, valid for SLIPCOVER and LEMUR): maximum number of iteration of EM parameter learning for refinements. If set to -1, no maximum number of iterations is imposed.
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{iterREF}} (values: integer, defualt value: 1, valid for SLIPCOVER and LEMUR): maximum number of iteration of EM parameter learning for refinements. If set to \sphinxhyphen{}1, no maximum number of iterations is imposed.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{random\_restarts\_number}} (values: integer, default value: 1, valid for EMBLEM, SLIPCOVER and LEMUR): number of random restarts of parameter EM learning
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{random\_restarts\_REFnumber}} (values: integer, default value: 1, valid for SLIPCOVER and LEMUR): number of random restarts of parameter EM learning for refinements
 
 \item {} 
-\sphinxcode{\sphinxupquote{seed}} (values: seed(integer) or seed(random), default value \sphinxcode{\sphinxupquote{seed(3032)}}): seed for the Prolog random functions, see \sphinxhref{http://www.swi-prolog.org/pldoc/man?predicate=set\_random/1}{SWI-Prolog manual}
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{seed}} (values: seed(integer) or seed(random), default value \sphinxcode{\sphinxupquote{seed(3032)}}): seed for the Prolog random functions, see \sphinxhref{http://www.swi-prolog.org/pldoc/man?predicate=set\_random/1}{SWI\sphinxhyphen{}Prolog manual}
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{c\_seed}} (values: unsigned integer, default value 21344)): seed for the C random functions
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{logzero}} (values: negative real, default value \(\log(0.000001)\): value assigned to \(\log(0)\)
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{max\_iter}} (values: integer, default value: 10, valid for SLIPCOVER): number of interations of beam search
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{max\_var}} (values: integer, default value: 4, valid for SLIPCOVER and LEMUR): maximum number of distinct variables in a clause
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{beamsize}} (values: integer, default value: 100, valid for SLIPCOVER): size of the beam
 
 \item {} 
-\sphinxcode{\sphinxupquote{megaex\_bottom}} (values: integer, default value: 1, valid for SLIPCOVER): number of mega-examples on which to build the bottom clauses
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{megaex\_bottom}} (values: integer, default value: 1, valid for SLIPCOVER): number of mega\sphinxhyphen{}examples on which to build the bottom clauses
 
 \item {} 
-\sphinxcode{\sphinxupquote{initial\_clauses\_per\_megaex}} (values: integer, default value: 1, valid for SLIPCOVER): number of bottom clauses to build for each mega-example (or model or interpretation)
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{initial\_clauses\_per\_megaex}} (values: integer, default value: 1, valid for SLIPCOVER): number of bottom clauses to build for each mega\sphinxhyphen{}example (or model or interpretation)
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{d}} (values: integer, default value: 1, valid for SLIPCOVER): number of saturation steps when building the bottom clause
 
 \item {} 
-\sphinxcode{\sphinxupquote{mcts\_beamsize}} (values: integer, default value: 3, valid for LEMUR): size of the Monte-Carlo tree search beam
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{mcts\_beamsize}} (values: integer, default value: 3, valid for LEMUR): size of the Monte\sphinxhyphen{}Carlo tree search beam
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mcts\_visits}} (values: integer, default value: +1e20, valid for LEMUR): maximum number of visits
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{max\_iter\_structure}} (values: integer, default value: 10000, valid for SLIPCOVER): maximum number of theory search iterations
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{background\_clauses}} (values: integer, default value: 50, valid for SLIPCOVER): maximum numbers of background clauses
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{maxdepth\_var}} (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in \sphinxcite{index:dblp-journals-ai-cohen95}).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mcts\_max\_depth}} (values: integer, default value: 8, valid for LEMUR): maximum depth of default policy search
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{mcts\_c}} (values: real, default value: 0.7, valid for LEMUR): value of parameter \(C\) in the computation of UCT
 
 \item {} 
-\sphinxcode{\sphinxupquote{mcts\_iter}} (values: integer, default value: 20, valid for LEMUR): number of Monte-Carlo tree search iterations
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{mcts\_iter}} (values: integer, default value: 20, valid for LEMUR): number of Monte\sphinxhyphen{}Carlo tree search iterations
 
 \item {} 
-\sphinxcode{\sphinxupquote{mcts\_maxrestarts}} (values: integer, default value: 20, valid for LEMUR): maximum number of Monte-Carlo tree search restarts
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{mcts\_maxrestarts}} (values: integer, default value: 20, valid for LEMUR): maximum number of Monte\sphinxhyphen{}Carlo tree search restarts
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{neg\_ex}} (values: \sphinxcode{\sphinxupquote{given}}, \sphinxcode{\sphinxupquote{cw}}, default value: \sphinxcode{\sphinxupquote{cw}}): if set to \sphinxcode{\sphinxupquote{given}}, the negative examples in training and testing are taken from the test folds interpretations, i.e., those examples \sphinxcode{\sphinxupquote{ex}} stored as \sphinxcode{\sphinxupquote{neg(ex)}}; if set to \sphinxcode{\sphinxupquote{cw}}, the negative examples in training and testing are generated according to the closed world assumption, i.e., all atoms for target predicates that are not positive examples. The set of all atoms is obtained by collecting the set of constants for each type of the arguments of the target predicate, so the target predicates must have at least one fact for \sphinxcode{\sphinxupquote{modeh/2}} or \sphinxcode{\sphinxupquote{modebb/2}} also for parameter learning.
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{alpha}} (values: floating point \(\geq 0\), default value: 0): parameter of the symmetric Dirichlet distribution used to initialize the parameters. If it takes value 0, a truncated Dirichlet process is used to sample parameters: the probability of being true of each Boolean random variable used to represent multivalued random variables is sampled uniformly and independently in {[}0,1{]}. If it takes a value \(\geq 0\), the parameters are sampled from a symmetric Dirichlet distribution, i.e. a Dirichlet distribution with vector of parameters \(\alpha,\ldots,\alpha\).
 
 \item {} 
+\sphinxAtStartPar
 \sphinxcode{\sphinxupquote{verbosity}} (values: integer in {[}1,3{]}, default value: 1): level of verbosity of the algorithms.
 
 \end{itemize}
@@ -2286,16 +2886,19 @@ The available parameters are:
 
 \chapter{Download Query Results through an API}
 \label{\detokenize{index:download-query-results-through-an-api}}
+\sphinxAtStartPar
 In cplint on SWISH the results of queries can also be downloaded programmatically by directly approaching the Pengine API.
 Example client code is \sphinxhref{https://github.com/friguzzi/swish/tree/master/client}{available}.
-For example, the \sphinxcode{\sphinxupquote{swish-ask.sh}} client can be used with bash to download the results for a query in CSV.
+For example, the \sphinxcode{\sphinxupquote{swish\sphinxhyphen{}ask.sh}} client can be used with bash to download the results for a query in CSV.
 
+\sphinxAtStartPar
 The call below downloads a CSV file for the coin example.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYGZdl{} bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}server=http://cplint.eu e/coin.pl Prob \PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The script can ask queries against Prolog scripts stored in \sphinxurl{http://cplint.eu} by specifying the script on the commandline.
 User defined files stored in \sphinxcode{\sphinxupquote{cplint}} on SWISH (locations of type \sphinxurl{http://cplint.eu/p/coin\_user.pl}) can be directly used, for example:
 
@@ -2303,8 +2906,10 @@ User defined files stored in \sphinxcode{\sphinxupquote{cplint}} on SWISH (locat
 \PYGZdl{} bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}server=http://cplint.eu coin\PYGZus{}user.pl Prob \PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 Example programs can be used by specifying the folder portion of the url of the example, as in the first coin example above where the url for the program is \sphinxurl{http://cplint.eu/e/coin.pl}.
 
+\sphinxAtStartPar
 You can also use an url for the program as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2313,7 +2918,8 @@ https://raw.githubusercontent.com/friguzzi/swish/\PYGZbs{}
 master/e/coin.pl Prob \PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}
 \end{sphinxVerbatim}
 
-Results can be downloaded in JSON using the option \sphinxcode{\sphinxupquote{-{-}json-s}} or \sphinxcode{\sphinxupquote{-{-}json-html}}. With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings.
+\sphinxAtStartPar
+Results can be downloaded in JSON using the option \sphinxcode{\sphinxupquote{\sphinxhyphen{}\sphinxhyphen{}json\sphinxhyphen{}s}} or \sphinxcode{\sphinxupquote{\sphinxhyphen{}\sphinxhyphen{}json\sphinxhyphen{}html}}. With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings.
 E.g.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2321,9 +2927,11 @@ E.g.
         coin\PYGZus{}user.pl Prob \PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
 The JSON format can also be modified.
 See \sphinxurl{http://www.swi-prolog.org/pldoc/doc\_for?object=pengines\%3Aevent\_to\_json/4}.
 
+\sphinxAtStartPar
 Prolog can exploit the Pengine API directly. For example, the above can be called as:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -2341,44 +2949,55 @@ Prob = 0.51.
 
 \chapter{Example Files}
 \label{\detokenize{index:example-files}}
-The \sphinxcode{\sphinxupquote{pack/cplint/prolog/examples}} folder in SWI-Prolog home contains some example programs.
+\sphinxAtStartPar
+The \sphinxcode{\sphinxupquote{pack/cplint/prolog/examples}} folder in SWI\sphinxhyphen{}Prolog home contains some example programs.
 The subfolder \sphinxcode{\sphinxupquote{learning}} contains some learning examples.
 The \sphinxcode{\sphinxupquote{pack/cplint/docs}} folder contains this manual in latex, html and pdf.
 
 
 \chapter{Manual in PDF}
 \label{\detokenize{index:manual-in-pdf}}
+\sphinxAtStartPar
 A PDF version of the manual is available at \sphinxurl{http://friguzzi.github.io/cplint/\_build/latex/cplint.pdf}.
 
 
 \chapter{License}
 \label{\detokenize{index:license}}
+\sphinxAtStartPar
 cplint follows the Artistic License 2.0 that you can find in cplint root folder.
 The copyright is by Fabrizio Riguzzi.
 
+\sphinxAtStartPar
 The library \sphinxhref{http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddIntro.html}{CUDD} for manipulating BDDs has the following license:
 
-Copyright (c) 1995-2004, Regents of the University of Colorado
+\sphinxAtStartPar
+Copyright (c) 1995\sphinxhyphen{}2004, Regents of the University of Colorado
 
+\sphinxAtStartPar
 All rights reserved.
 
+\sphinxAtStartPar
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
 \begin{itemize}
 \item {} 
+\sphinxAtStartPar
 Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
 \item {} 
+\sphinxAtStartPar
 Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 \item {} 
+\sphinxAtStartPar
 Neither the name of the University of Colorado nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 \end{itemize}
 
+\sphinxAtStartPar
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-“AS IS” AND ANY EXPRESS OR IMPLIED WARRAN-TIES, INCLUDING, BUT NOT
+“AS IS” AND ANY EXPRESS OR IMPLIED WARRAN\sphinxhyphen{}TIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -2394,56 +3013,87 @@ POSSIBILITY OF SUCH DAMAGE.
 
 \chapter{References}
 \label{\detokenize{index:references}}
+\sphinxAtStartPar
 
 
 \begin{sphinxthebibliography}{VdBTVODR}
+\bibitem[BARZ20]{index:belalbrig20-tplp-ij}
+\sphinxAtStartPar
+Elena Bellodi, Marco Alberti, Fabrizio Riguzzi, and Riccardo Zese. MAP inference for probabilistic logic programming. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 20(5):641â\texteuro{}“655, 2020. URL: \sphinxurl{https://arxiv.org/abs/2008.01394}, \sphinxhref{https://doi.org/10.1017/S1471068420000174}{doi:10.1017/S1471068420000174}.
 \bibitem[BR11]{index:belrig11-tr}
-Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS-2011-01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: \sphinxurl{http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf}.
+\sphinxAtStartPar
+Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS\sphinxhyphen{}2011\sphinxhyphen{}01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: \sphinxurl{http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf}.
 \bibitem[BR13a]{index:bellodi2013expectation}
+\sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013.
 \bibitem[BR13b]{index:belrig11-ida-ij}
+\sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf}.
 \bibitem[BR15]{index:belrig13-tplp-ij}
+\sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic programs by searching the clause space. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 15(2):169\textendash{}212, 2015. URL: \sphinxurl{http://arxiv.org/abs/1309.2080}, \sphinxhref{https://doi.org/10.1017/S1471068413000689}{doi:10.1017/S1471068413000689}.
 \bibitem[Coh95]{index:dblp-journals-ai-cohen95}
-William W. Cohen. Pac-learning non-recursive prolog clauses. \sphinxstyleemphasis{Artif. Intell.}, 79(1):1\textendash{}38, 1995.
+\sphinxAtStartPar
+William W. Cohen. Pac\sphinxhyphen{}learning non\sphinxhyphen{}recursive prolog clauses. \sphinxstyleemphasis{Artif. Intell.}, 79(1):1\textendash{}38, 1995.
 \bibitem[DRKT07]{index:dblp-conf-ijcai-raedtkt07}
+\sphinxAtStartPar
 L. De Raedt, A. Kimmig, and H. Toivonen. ProbLog: a probabilistic Prolog and its application in link discovery. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 2462\textendash{}2467. 2007.
 \bibitem[DRVL95]{index:raelae95-alt95}
+\sphinxAtStartPar
 L. De Raedt and W. Van Laer. Inductive constraint logic. In \sphinxstyleemphasis{Proceedings of the 6th Conference on Algorithmic Learning Theory (ALT 1995)}, volume 997 of LNAI, 80\textendash{}94. Fukuoka, Japan, 1995. Springer.
 \bibitem[DMBR15]{index:dimbelrig15-ml-ij}
-Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit-based Monte-Carlo structure learning of probabilistic logic programs. \sphinxstyleemphasis{Mach. Learn.}, 100(1):127\textendash{}156, July 2015. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf}, \sphinxhref{https://doi.org/10.1007/s10994-015-5510-3}{doi:10.1007/s10994-015-5510-3}.
+\sphinxAtStartPar
+Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit\sphinxhyphen{}based Monte\sphinxhyphen{}Carlo structure learning of probabilistic logic programs. \sphinxstyleemphasis{Mach. Learn.}, 100(1):127\textendash{}156, July 2015. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf}, \sphinxhref{https://doi.org/10.1007/s10994-015-5510-3}{doi:10.1007/s10994\sphinxhyphen{}015\sphinxhyphen{}5510\sphinxhyphen{}3}.
 \bibitem[FC90]{index:fung1990weighing}
-Robert M Fung and Kuo-Chu Chang. Weighing and integrating evidence for stochastic simulation in bayesian networks. In \sphinxstyleemphasis{Fifth Annual Conference on Uncertainty in Artificial Intelligence}, 209\textendash{}220. North-Holland Publishing Co., 1990.
+\sphinxAtStartPar
+Robert M Fung and Kuo\sphinxhyphen{}Chu Chang. Weighing and integrating evidence for stochastic simulation in bayesian networks. In \sphinxstyleemphasis{Fifth Annual Conference on Uncertainty in Artificial Intelligence}, 209\textendash{}220. North\sphinxhyphen{}Holland Publishing Co., 1990.
 \bibitem[IRR12]{index:tlp-8688161}
+\sphinxAtStartPar
 Muhammad Asiful Islam, CR Ramakrishnan, and IV Ramakrishnan. Inference in probabilistic logic programs with continuous random variables. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 12:505\textendash{}523, 7 2012. \sphinxhref{https://doi.org/10.1017/S1471068412000154}{doi:10.1017/S1471068412000154}.
 \bibitem[NR14]{index:nampally2014adaptive}
-Arun Nampally and CR Ramakrishnan. Adaptive mcmc-based inference in probabilistic logic programs. \sphinxstyleemphasis{arXiv preprint arXiv:1403.6036}, 2014. URL: \sphinxurl{http://arxiv.org/pdf/1403.6036.pdf}.
+\sphinxAtStartPar
+Arun Nampally and CR Ramakrishnan. Adaptive mcmc\sphinxhyphen{}based inference in probabilistic logic programs. \sphinxstyleemphasis{arXiv preprint arXiv:1403.6036}, 2014. URL: \sphinxurl{http://arxiv.org/pdf/1403.6036.pdf}.
 \bibitem[NDLDR16]{index:nitti2016}
-Davide Nitti, Tinne De Laet, and Luc De Raedt. Probabilistic logic programming for hybrid relational domains. \sphinxstyleemphasis{Mach. Learn.}, 103(3):407\textendash{}449, 2016. URL: \sphinxurl{http://dx.doi.org/10.1007/s10994-016-5558-8}, \sphinxhref{https://doi.org/10.1007/s10994-016-5558-8}{doi:10.1007/s10994-016-5558-8}.
+\sphinxAtStartPar
+Davide Nitti, Tinne De Laet, and Luc De Raedt. Probabilistic logic programming for hybrid relational domains. \sphinxstyleemphasis{Mach. Learn.}, 103(3):407\textendash{}449, 2016. URL: \sphinxurl{http://dx.doi.org/10.1007/s10994-016-5558-8}, \sphinxhref{https://doi.org/10.1007/s10994-016-5558-8}{doi:10.1007/s10994\sphinxhyphen{}016\sphinxhyphen{}5558\sphinxhyphen{}8}.
 \bibitem[Pea00]{index:pea00-book}
+\sphinxAtStartPar
 J. Pearl. \sphinxstyleemphasis{Causality}. Cambridge University Press, 2000.
 \bibitem[Poo97]{index:dblp-journals-ai-poole97}
-David Poole. The independent choice logic for modelling multiple agents under uncertainty. \sphinxstyleemphasis{Artificial Intelligence}, 94(1-2):7\textendash{}56, 1997.
+\sphinxAtStartPar
+David Poole. The independent choice logic for modelling multiple agents under uncertainty. \sphinxstyleemphasis{Artificial Intelligence}, 94(1\sphinxhyphen{}2):7\textendash{}56, 1997.
 \bibitem[Rig13]{index:rig13-fi-ij}
-Fabrizio Riguzzi. MCINTYRE: a Monte Carlo system for probabilistic logic programming. \sphinxstyleemphasis{Fundamenta Informaticae}, 124(4):521\textendash{}541, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf}, \sphinxhref{https://doi.org/10.3233/FI-2013-847}{doi:10.3233/FI-2013-847}.
+\sphinxAtStartPar
+Fabrizio Riguzzi. MCINTYRE: a Monte Carlo system for probabilistic logic programming. \sphinxstyleemphasis{Fundamenta Informaticae}, 124(4):521\textendash{}541, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf}, \sphinxhref{https://doi.org/10.3233/FI-2013-847}{doi:10.3233/FI\sphinxhyphen{}2013\sphinxhyphen{}847}.
 \bibitem[RS10]{index:rigswi10-iclp10-ic}
-Fabrizio Riguzzi and Terrance Swift. Tabling and Answer Subsumption for Reasoning on Logic Programs with Annotated Disjunctions. In \sphinxstyleemphasis{Technical Communications of the International Conference on Logic Programming}, volume 7 of Leibniz International Proceedings in Informatics (LIPIcs), 162\textendash{}171. Schloss Dagstuhl\textendash{}Leibniz-Zentrum fuer Informatik, 2010. \sphinxhref{https://doi.org/10.4230/LIPIcs.ICLP.2010.162}{doi:10.4230/LIPIcs.ICLP.2010.162}.
+\sphinxAtStartPar
+Fabrizio Riguzzi and Terrance Swift. Tabling and Answer Subsumption for Reasoning on Logic Programs with Annotated Disjunctions. In \sphinxstyleemphasis{Technical Communications of the International Conference on Logic Programming}, volume 7 of Leibniz International Proceedings in Informatics (LIPIcs), 162\textendash{}171. Schloss Dagstuhl\textendash{}Leibniz\sphinxhyphen{}Zentrum fuer Informatik, 2010. \sphinxhref{https://doi.org/10.4230/LIPIcs.ICLP.2010.162}{doi:10.4230/LIPIcs.ICLP.2010.162}.
 \bibitem[SK97]{index:dblp-conf-ijcai-satok97}
-Taisuke Sato and Yoshitaka Kameya. Prism: a language for symbolic-statistical modeling. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 1330\textendash{}1339. 1997.
+\sphinxAtStartPar
+Taisuke Sato and Yoshitaka Kameya. Prism: a language for symbolic\sphinxhyphen{}statistical modeling. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 1330\textendash{}1339. 1997.
 \bibitem[SK01]{index:dblp-journals-jair-satok01}
-Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic-statistical modeling. \sphinxstyleemphasis{J. Artif. Intell. Res.}, 15:391\textendash{}454, 2001.
+\sphinxAtStartPar
+Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic\sphinxhyphen{}statistical modeling. \sphinxstyleemphasis{J. Artif. Intell. Res.}, 15:391\textendash{}454, 2001.
+\bibitem[SRV+15]{index:dblp-conf-ilp-shterionovrvkmj14}
+\sphinxAtStartPar
+Dimitar Sht. Shterionov, Joris Renkens, Jonas Vlasselaer, Angelika Kimmig, Wannes Meert, and Gerda Janssens. The most probable explanation for probabilistic logic programs with annotated disjunctions. In Jesse Davis and Jan Ramon, editors, \sphinxstyleemphasis{International Conference on Inductive Logic Programming}, volume 9046 of LNCS, 139\textendash{}153. Berlin, Heidelberg, 2015. Springer. \sphinxhref{https://doi.org/10.1007/978-3-319-23708-4\_10}{doi:10.1007/978\sphinxhyphen{}3\sphinxhyphen{}319\sphinxhyphen{}23708\sphinxhyphen{}4\_10}.
 \bibitem[VdBTVODR10]{index:van2010dtproblog}
-Guy Van den Broeck, Ingo Thon, Martijn Van Otterlo, and Luc De Raedt. Dtproblog: a decision-theoretic probabilistic prolog. In \sphinxstyleemphasis{Twenty-Fourth AAAI Conference on Artificial Intelligence}. 2010.
+\sphinxAtStartPar
+Guy Van den Broeck, Ingo Thon, Martijn Van Otterlo, and Luc De Raedt. Dtproblog: a decision\sphinxhyphen{}theoretic probabilistic prolog. In \sphinxstyleemphasis{Twenty\sphinxhyphen{}Fourth AAAI Conference on Artificial Intelligence}. 2010.
 \bibitem[VDB06]{index:vendenbru-jelia06}
+\sphinxAtStartPar
 J. Vennekens, M. Denecker, and M. Bruynooghe. Representing causal information about a probabilistic process. In \sphinxstyleemphasis{Proceedings of the 10th European Conference on Logics in Artificial Intelligence}, LNAI. Springer, September 2006.
 \bibitem[VDB09]{index:dblp-journals-tplp-vennekensdb09}
-J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP-logic: a language of causal probabilistic events and its relation to logic programming. \sphinxstyleemphasis{Theory Pract. Log. Program.}, 9(3):245\textendash{}308, 2009.
+\sphinxAtStartPar
+J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP\sphinxhyphen{}logic: a language of causal probabilistic events and its relation to logic programming. \sphinxstyleemphasis{Theory Pract. Log. Program.}, 9(3):245\textendash{}308, 2009.
 \bibitem[VV03]{index:venver03-tr}
+\sphinxAtStartPar
 J. Vennekens and S. Verbaeten. Logic programs with annotated disjunctions. Technical Report CW386, K. U. Leuven, 2003.
 \bibitem[VVB04]{index:venver04-iclp04-ic}
+\sphinxAtStartPar
 J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated disjunctions. In \sphinxstyleemphasis{International Conference on Logic Programming}, volume 3131 of LNCS, 195\textendash{}209. Springer, 2004.
 \bibitem[VN51]{index:von195113}
+\sphinxAtStartPar
 John Von Neumann. Various techniques used in connection with random digits. \sphinxstyleemphasis{Nat. Bureau Stand. Appl. Math. Ser.}, 12:36\textendash{}38, 1951.
 \end{sphinxthebibliography}
 

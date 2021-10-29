@@ -14,10 +14,10 @@
 win :- red, green.
 win :- blue, yellow.
 
- 0.4::red.
- 0.9::green.
- 0.5::blue.
- 0.6::yellow.
+0.4::red.
+0.9::green.
+0.5::blue.
+0.6::yellow.
 
 
 :- end_lpad.

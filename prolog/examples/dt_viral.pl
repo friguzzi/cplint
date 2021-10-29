@@ -4,14 +4,14 @@
 
 :- begin_lpad.
 
-?:: marketed(theo).
-?:: marketed(bernd).
-?:: marketed(guy).
-?:: marketed(ingo).
-?:: marketed(angelika). 
-?:: marketed(martijn).
-?:: marketed(laura).
-?:: marketed(kurt).
+? :: marketed(theo).
+? :: marketed(bernd).
+? :: marketed(guy).
+? :: marketed(ingo).
+? :: marketed(angelika). 
+? :: marketed(martijn).
+? :: marketed(laura).
+? :: marketed(kurt).
 
 utility(marketed(theo),-2).
 utility(marketed(bernd),-2).

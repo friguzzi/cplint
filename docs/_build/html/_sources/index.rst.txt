@@ -234,6 +234,7 @@ where :code:`Density` is a special atom identifying a probability density on var
 - :code:`geometric(Var,P)` :code:`Var` follows a geometric distribution with parameter :code:`P` (success probability).
 - :code:`exponential(Var,Lambda)` :code:`Var` follows an exponential distribution with parameter :code:`Lambda` (rate, or inverse scale).
 - :code:`pascal(Var,R,P)` :code:`Var` follows an exponential distribution with parameters :code:`R` (number of failures) and :code:`P` (success probability).
+- :code:`multinomial(Var,N,P)` :code:`Var` (vector/list of event numbers) follows a multinomial distribution with parameters :code:`N` (number of trials) and :code:`P` (vector/list of event probabilities).
 
 For example ::
 
@@ -898,6 +899,133 @@ You can compute conditional expectations using particle filtering with ::
 
 that computes the expected value of :code:`Arg` in :code:`Query` given that :code:`Evidence` is true. 
 It uses :code:`N` particles.
+
+
+MPE, MAP and Viterbi Inference
+------------------------------
+:code:`pita` supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. :cite:`DBLP:conf/ilp/ShterionovRVKMJ14,BelAlbRig20-TPLP-IJ`.
+
+In MAP inference we look for the choices of head atoms of some clauses that lead to the probability of a query being
+maximal. The rules for which we want the choices, called *query*, are indicated in the input file by prepending
+the text :code:`map_query` to each query rule. For example, in the program `bag_1.pl <http://cplint.eu/e/bag_1.pl>`_ ::
+
+	0.6::red(b1); 0.3::green(b1); 0.1::blue(b1) :- pick(b1).
+	map_query 0.6::pick(b1); 0.4::no_pick(b1).
+
+	ev:- \+ blue(b1).
+
+we are asking for the choice for the second rule.
+The predicate to use is ::
+
+	map(:Query:atom,-Probability:float,-Exp:list) is nondet
+
+For example, the query on the program above ::
+
+	?- map(ev,P,Exp).
+
+asks for the chocie for the second rule that yelds the highest probability for :code:`ev`. The query returns ::
+
+	P = 0.5399999999999999,
+	Exp = [rule(1, pick(b1), [pick(b1):0.6, no_pick(b1):0.4], true)].
+
+In MPE inference we are interested in the choices for *all* rules. To perform MPE inference,
+we need to prepend  :code:`map_query` to each rule and use predicate :code:`map/3`.
+
+For example, on program `bag_game_mpe.pl <http://cplint.eu/e/bag_game_mpe.pl>`_ ::
+
+	win :- red, green.
+	win :- blue, yellow.
+
+	map_query 0.4::red.
+	map_query 0.9::green.
+	map_query 0.5::blue.
+	map_query 0.6::yellow.
+
+the query ::
+
+	?- map(win,P,Exp).
+
+returns ::
+
+	Exp = [
+	 	rule(0, '', [red:0.4, '' : 0.6], true),
+		rule(1, green, [green:0.9, '' : 0.09999999999999998], true),
+		rule(2, blue, [blue:0.5, '' : 0.5], true), 
+		rule(3, yellow, [yellow:0.6, '' : 0.4], true)],
+	P = 0.162,
+
+
+In Viterbi inference we are interested in the most probable proof of a query. See :cite:`DBLP:conf/ilp/ShterionovRVKMJ14`
+for the difference between the most probable proof and the most probable explanation.
+Module :code:`viterbi` looks for the most probable proof by using a meta interpreter
+that performs branch and bound.
+
+The predicate ::
+
+	viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
+
+computes the most probable proof of the conjunction of literals :code:`Query`.
+It returns the proof as explanation in :code:`Exp`.
+
+
+In example `bag_game_vit.pl <http://cplint.eu/e/bag_game_vit.pl>`_: ::
+
+	:- use_module(library(viterbi)).
+
+	:- viterbi.
+
+	:- begin_lpad.
+
+	win :- red, green.
+	win :- blue, yellow.
+
+	0.4::red.
+	0.9::green.
+	0.5::blue.
+	0.6::yellow.
+
+	:- end_lpad.
+
+the query ::
+
+	?- viterbi(win,P,Exp).
+
+returns ::
+
+	P=0.36,
+	Exp=[
+		rule(0, red, [red:0.4, '':0.6], []),
+		rule(1, green, [green:0.9, '':0.09999999999999998], [])])).
+
+As you can see the Viterbi explanation is different from the MPE one presented above.
+
+
+Note that :code:`viterbi/3`, in case the query contains variables, returns their instantiation
+leading to the highest probability of the grounding of the query. For example,
+in `hmm_vit.pl <http://cplint.eu/e/hmm_vit.pl>`_, the query ::
+
+	?-viterbi(hmm1(S,[a,g,g]),_P,_E).
+
+returns ::
+
+	S = [q2, q2, q1],
+
+
+Drawing BDDs for MAP/MPE
+^^^^^^^^^^^^^^^^^^^^^^^^
+With :code:`pita`, you can obtain the BDD for a MAP/MPE query with the predicate ::
+
+	map_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,
+		-Probability:float,-Delta:list) is nondet
+
+The BDD is represented in the dot format of graphviz and returned in :code:`DotString`. See :ref:`Drawing BDDs`
+for the graph format and for instruction on how to draw it.
+It returns the explanation in :code:`Delta` together with its :code:`Probability`
+The predicate returns :code:`LV` and :code:`LAV`, the association of variables to rules
+and of query variables to rules respectively.
+:code:`LV` and :code:`LAV` are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.
 
 Causal Inference
 ----------------

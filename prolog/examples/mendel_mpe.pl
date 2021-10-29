@@ -16,8 +16,6 @@ In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 
 :- pita.
 
-:- set_pita(tabling,explicit).
-
 :- begin_lpad.
 
 mother(m,s).
@@ -35,12 +33,12 @@ cg(f,1,w).
 cg(f,2,p).
 % we know with certainty the alleles of the parants of s
 
-cg(X,1,A):0.5 ; cg(X,1,B):0.5 :- mother(Y,X),cg(Y,1,A), cg(Y,2,B).
+map_query cg(X,1,A):0.5 ; cg(X,1,B):0.5 :- mother(Y,X),cg(Y,1,A), cg(Y,2,B).
 % the color allele of an individual on chromosome 1 is inherited from its
 % mother. The two alleles of the mother have equal probability of being
 % transmitted
 
-cg(X,2,A):0.5 ; cg(X,2,B):0.5 :- father(Y,X),cg(Y,1,A), cg(Y,2,B).
+map_query cg(X,2,A):0.5 ; cg(X,2,B):0.5 :- father(Y,X),cg(Y,1,A), cg(Y,2,B).
 % the color allele of an individual on chromosome 2 is inherited from its
 % father. The two alleles of the mother have equal probability of being
 % transmitted
@@ -58,18 +56,39 @@ color(X,white) :- cg(X,1,w), cg(X,2,w).
 
 /** <examples>
 
-?- vit_prob(color(s,purple),Prob,Exp).
+?- prob(color(s,purple),Prob). % what is the probability that the color of s' flowers is purple?
+% expected result 0.75
+?- prob(color(s,white),Prob). % what is the probability that the color of s' flowers is white?
+%  expected result 0.25
+?- prob(cg(s,1,p),Prob). % what is the probability that the color allele on chromosme 1 of s is p?
+% expected result 0.5
+?- prob(cg(s,1,w),Prob). % what is the probability that the color allele on chromosme 1 of s is w?
+% expected result 0.5
+?- prob(cg(s,2,p),Prob). % what is the probability that the color allele on chromosme 2 of s is p?
+%  expected result 0.5
+?- prob(cg(s,2,w),Prob). % what is the probability that the color allele on chromosme 2 of s is w?
+% expected result 0.5
+?- prob(color(s,purple),Prob),bar(Prob,C). % what is the probability that the color of s' flowers is purple?
+% expected result 0.75
+?- prob(color(s,white),Prob),bar(Prob,C). % what is the probability that the color of s' flowers is white?
+%  expected result 0.25
+?- prob(cg(s,1,p),Prob),bar(Prob,C). % what is the probability that the color allele on chromosme 1 of s is p?
+% expected result 0.5
+?- prob(cg(s,1,w),Prob),bar(Prob,C). % what is the probability that the color allele on chromosme 1 of s is w?
+% expected result 0.5
+?- prob(cg(s,2,p),Prob),bar(Prob,C). % what is the probability that the color allele on chromosme 2 of s is p?
+% expected result 0.5
+?- prob(cg(s,2,w),Prob),bar(Prob,C). % what is the probability that the color allele on chromosme 2 of s is w?
+% expected result 0.5
+?- mpe(color(s,purple),Prob,Exp).
 Prob = 0.5,
 Exp = [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
     [mother(m, s), cg(m, 1, p), cg(m, 2, w)])].
 
-?- vit_prob(color(s,white),Prob,Exp).
+?- mpe(color(s,white),Prob,Exp).
 Prob = 0.25,
 Exp = [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
     [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),
   rule(1, cg(s, 2, w), [cg(s, 2, w):0.5, cg(s, 2, p):0.5],
     [father(f, s), cg(f, 1, w), cg(f, 2, p)])].
-
-
-
 */

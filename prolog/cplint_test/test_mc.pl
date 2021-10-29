@@ -32,7 +32,8 @@ test_list([
     bitcoin_attack,
     lda,
     ship,
-    fruit
+    fruit,
+    multinomial
   ]).
 
 test_mc:-
@@ -501,3 +502,15 @@ test(banana):-
   close_to(P,0.162))).
 
 :- end_tests(fruit).
+
+:- begin_tests(multinomial, []).
+
+:-ensure_loaded(library(examples/multinomial)).
+
+test(100):-
+  run((
+    prob_query(100,[0.5,0.25,0.25],P),
+  close_to(P,1))).
+
+
+:- end_tests(multinomial).

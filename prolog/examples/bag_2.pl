@@ -9,30 +9,17 @@
 
 :- pita.
 
-:- set_pita(tabling,explicit).
-
 :- begin_lpad.
 
-win :- red, green.
-win :- blue, yellow.
+map_query 0.6::red(b1); 0.3::green(b1); 0.1::blue(b1) :- pick(b1).
+ 0.6::pick(b1); 0.4::no_pick(b1).
 
- 0.4::red.
- 0.9::green.
- 0.5::blue.
- 0.6::yellow.
-
+ev:- \+ blue(b1).
 
 :- end_lpad.
 
 /** <examples>
+?- map(ev,P,Exp).
 
-
-?- vit_prob(win,P,Exp).
-P=0.36
-Exp=[
-  rule(0, red, [red:0.4, '':0.6], []),
-  rule(1, green, [green:0.9, '':0.09999999999999998], [])]
-
-?-vit_bdd_dot_string(win,G,LV,P,MAP).
 
 */
