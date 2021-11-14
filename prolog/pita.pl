@@ -71,7 +71,6 @@ details.
 % :- dynamic utility/2.
 
 :-use_module(library(lists)).
-:-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
 
@@ -887,12 +886,12 @@ generate_rules_fact([Head:_P|T],Env,VC,R,Probs,N,[Clause|Clauses],Module):-
 generate_rules_fact_vars([],_Env,_R,_Probs,_N,[],_Module).
 
 generate_rules_fact_vars([Head:_P1,'':_P2],Env,R,Probs,N,[Clause],Module):-!,
-  extract_vars_list([Head],[],VC),
+  term_variables([Head],VC),
   add_bdd_arg(Head,Env,BDD,Module,Head1),
   Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equalityc(Env,V,N,BDD))).
 
 generate_rules_fact_vars([Head:_P|T],Env,R,Probs,N,[Clause|Clauses],Module):-
-  extract_vars_list([Head],[],VC),
+  term_variables([Head],VC),
   add_bdd_arg(Head,Env,BDD,Module,Head1),
   Clause=(Head1:-(get_var_n(Module,Env,R,VC,Probs,V),equalityc(Env,V,N,BDD))),
   N1 is N+1,
@@ -1106,38 +1105,6 @@ set_pita(M:Parameter,Value):-
 setting_pita(M:P,V):-
   M:local_pita_setting(P,V).
 
-extract_vars_list(L,[],V):-
-  rb_empty(T),
-  extract_vars_tree(L,T,T1),
-  rb_keys(T1,V).
-
-extract_vars(Term,V):-
-  rb_empty(T),
-  extract_vars_term(Term,T,T1),
-  rb_keys(T1,V).
-
-extract_vars_term(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (rb_lookup(Variable, Var0,_) ->
-    Var1 = Var0
-  ;
-    rb_insert(Var0,Variable,1,Var1)
-  ).
-
-extract_vars_term(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  % format('Term: ~w - Args: ~w ~n',[Term,Args]),
-  extract_vars_tree(Args, Var0, Var1).
-
-
-
-extract_vars_tree([], Var, Var).
-
-extract_vars_tree([Term|Tail], Var0, Var1) :-
-  extract_vars_term(Term, Var0, Var),
-  extract_vars_tree(Tail, Var, Var1).
-
-
 delete_equal([],_,[]).
 
 delete_equal([H|T],E,T):-
@@ -1340,7 +1307,7 @@ pita_expansion((Prob:- Constraint), Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_pita_setting(single_var,true)->
@@ -1369,7 +1336,7 @@ pita_expansion(map_query(Clause),[query_rule(R,HeadList,Body,VC)|Clauses]):-
   ;
     Clauses=[Clauses0]
   ),
-  extract_vars(Clause,VC),
+  term_variables(Clause,VC),
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList).
 
@@ -1383,7 +1350,7 @@ pita_expansion(abducible(Head),[Clause,abd(R,S,H)]) :-
     H=Head,
     Probs=[1.0,1.0]
   ),
-  extract_vars_list([H],[],VC),
+  term_variables([H],VC),
   get_next_rule_number(M,R),
   add_bdd_arg(H,Env,BDD,M,Head1), %***test single_var
   (M:local_pita_setting(single_var,true)->
@@ -1407,7 +1374,7 @@ pita_expansion(Head:-Body,[Clause,rule_by_num(R,H,Body1,[]),TabDir]) :-
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append([Head],BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),
   HeadList1 = [H1],
@@ -1422,7 +1389,7 @@ pita_expansion(Head,[Clause,rule_by_num(R,[H],[],VC),TabDir]) :-
   M:pita_on,
   (Head \= ((pita_expansion(_,_)) :- _ )),
   (Head = ((?) :: H) ; Head = decision(H)), ground(H), !,
-  extract_vars_list([Head],_,VC), % VC is [] so maybe avoid the computation
+  term_variables([Head],VC), % VC is [] so maybe avoid the computation
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),
   HeadList1 = [H1],
@@ -1442,7 +1409,7 @@ pita_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append([Head],BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   to_table(M,[Head],TabDir,HeadList1),  % <---------------------- if HEAD = H => U does NOT WORKS
   HeadList1 = [H1],
@@ -1472,7 +1439,7 @@ pita_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   ),
   length(D0,Len),
   Prob is 1.0/Len,
-  extract_vars_list([H],[],VH),
+  term_variables([H],VH),
   delete_equal(VH,Var,VH1),
   maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),
   get_next_rule_number(M,R),
@@ -1482,7 +1449,7 @@ pita_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -1505,7 +1472,7 @@ pita_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   ;
     true
   ),
-  extract_vars_list([H],[],VH),
+  term_variables([H],VH),
   delete_equal(VH,Var,VH1),
   maplist(gen_head_disc(H,VH1,Var),D,HeadList),
   get_next_rule_number(M,R),
@@ -1515,7 +1482,7 @@ pita_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -1538,7 +1505,7 @@ pita_expansion((Head :- Body),
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
@@ -1565,7 +1532,7 @@ pita_expansion((Head :- Body),
   append([onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
@@ -1629,7 +1596,7 @@ pita_expansion((Head :- Body), Clauses) :-
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_pita_setting(single_var,true)->
@@ -1653,7 +1620,7 @@ pita_expansion((Head :- Body), [rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :
   append([onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_pita_setting(single_var,true)->
@@ -1707,7 +1674,7 @@ pita_expansion(Head,
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pita_setting(single_var,true)->
@@ -1725,7 +1692,7 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pita_setting(single_var,true)->
@@ -1751,12 +1718,12 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ),
   length(D0,Len),
   Prob is 1.0/Len,
-  extract_vars_list([H],[],VH),
+  term_variables([H],VH),
   delete_equal(VH,Var,VH1),
   maplist(gen_head(H,Prob,VH1,Var),D0,HeadList),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -1779,12 +1746,12 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   ;
     true
   ),
-  extract_vars_list([H],[],VH),
+  term_variables([H],VH),
   delete_equal(VH,Var,VH1),
   maplist(gen_head_disc(H,VH1,Var),D,HeadList),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   (M:local_pita_setting(single_var,true)->
     VC1 = []
   ;
@@ -1835,7 +1802,7 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   (Head=(_H:_);Head=(_::_H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   to_table(M,HeadList,TabDir,[H1:_]),
@@ -1855,7 +1822,7 @@ pita_expansion(Head,[rule_by_num(R,HeadList,[],VC1)|Clauses]) :-
   (Head=(_H:_);Head=(_::_H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   to_table(M,HeadList,TabDir,[H1:_]),

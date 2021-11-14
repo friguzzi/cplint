@@ -53,7 +53,6 @@ Copyright (c) 2016, Fabrizio Riguzzi and Elena Bellodi
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
-:-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(cplint_util).
 :-set_prolog_flag(unknown,warning).
@@ -2574,30 +2573,6 @@ set_sc(M:Parameter,Value):-
 setting_sc(M:P,V):-
   M:local_setting(P,V).
 
-extract_vars_list(L,[],V):-
-  rb_new(T),
-  extract_vars_tree(L,T,T1),
-  rb_keys(T1,V).
-
-extract_vars_term(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (rb_lookup(Variable, Var0,_) ->
-    Var1 = Var0
-  ;
-    rb_insert(Var0,Variable,1,Var1)
-  ).
-
-extract_vars_term(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  extract_vars_tree(Args, Var0, Var1).
-
-
-
-extract_vars_tree([], Var, Var).
-
-extract_vars_tree([Term|Tail], Var0, Var1) :-
-  extract_vars_term(Term, Var0, Var),
-  extract_vars_tree(Tail, Var, Var1).
 
 
 difference([],_,[]).
@@ -2737,7 +2712,7 @@ gen_clause_cw(rule(_R,HeadList,BodyList,Lit,Tun),M,N,N1,
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList,Env,Body1,[],N,Probs,BDDAnd,0,Clauses,Module,M)
@@ -2784,7 +2759,7 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
     generate_rules_db(HeadList,Env,Body1,[],RI,Probs,DB,BDDAnd,0,Clauses,Module,M)
@@ -2805,7 +2780,7 @@ gen_clause(rule(R,HeadList,BodyList,Lit,Tun),M,N,N,
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
     generate_rules(HeadList,Env,Body1,[],RI,Probs,BDDAnd,0,Clauses,Module,M)
@@ -2906,7 +2881,7 @@ builtin(G) :-
 gen_cl_db_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun)):-
   process_body_db(BodyList,BDD,BDDAnd, DB,[],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_nonground_rule_number(M,R),
@@ -2925,7 +2900,7 @@ gen_cl_db_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,
    ).
 
 gen_cl_db_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
@@ -2942,7 +2917,7 @@ gen_cl_db_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
   ).
 
 gen_cl_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_nonground_rule_number(M,R),
   get_probs_t(HeadList,M,Probs,HeadList1),
   HeadList=[_:Ann|_],
@@ -2961,7 +2936,7 @@ gen_cl_fact_t(M,HeadList,Clauses,rule(ng(R,Vals),HeadList1,[],true,Tun)):-
 gen_cl_t(M,HeadList,BodyList,Clauses,rule(ng(R,Vals),HeadList1,BodyList,true,Tun)):-
   process_body(BodyList,BDD,BDDAnd, [],_Vars,BodyList1,Env,Module,M),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   get_next_nonground_rule_number(M,R),
@@ -3017,7 +2992,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3038,7 +3013,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3059,7 +3034,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3079,7 +3054,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   append([slipcover:onec(Env,BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3124,7 +3099,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_setting(single_var,true)->
@@ -3146,7 +3121,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,fix
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_setting(single_var,true)->
@@ -3203,7 +3178,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_setting(single_var,true)->
@@ -3224,7 +3199,7 @@ term_expansion_int((Head :- Body),M, (Clauses,[rule(R,HeadList,BodyList,true,tun
   append([slipcover:onec(Env,BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_setting(single_var,true)->
@@ -3270,7 +3245,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,fixed)])) :-
   Head=(_:p(_);_), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3286,7 +3261,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,fixed)])) :-
   Head=(_:p(_);_), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_setting(single_var,true)->
@@ -3323,7 +3298,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_setting(single_var,true)->
@@ -3339,7 +3314,7 @@ term_expansion_int(Head,M,(Clauses,[rule(R,HeadList,[],true,tunable)])) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_setting(single_var,true)->
@@ -3381,7 +3356,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   Head=(H:p(_)), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
@@ -3398,7 +3373,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,fixed)])) :-
   Head=(H:p(_)), !,
   list2or(HeadListOr, Head),
   process_head_fixed(HeadListOr,M,0,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var
@@ -3436,7 +3411,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   Head=(H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,Env,BDD,_DB,_Module,Head1),
@@ -3453,7 +3428,7 @@ term_expansion_int(Head,M,(Clause,[rule(R,HeadList,[],true,tunable)])) :-
   Head=(H:_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr,M,HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg(H,Env,BDD,_Module,Head1),%***test single_var

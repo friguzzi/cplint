@@ -153,7 +153,6 @@ details.
 :-meta_predicate setting_mc(:,-).
 
 :-use_module(library(lists)).
-:-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
 :-use_module(library(clpr)).
@@ -2948,30 +2947,6 @@ set_mc(M:Parameter,Value):-
 setting_mc(M:P,V):-
   M:local_mc_setting(P,V).
 
-extract_vars_list(L,[],V):-
-  rb_new(T),
-  extract_vars_term(L,T,T1),
-  rb_keys(T1,V).
-
-extract_vars_term(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (rb_lookup(Variable, Var0,_) ->
-    Var1 = Var0
-  ;
-    rb_insert(Var0,Variable,1,Var1)
-  ).
-
-extract_vars_term(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  extract_vars_tree(Args, Var0, Var1).
-
-
-
-extract_vars_tree([], Var, Var).
-
-extract_vars_tree([Term|Tail], Var0, Var1) :-
-  extract_vars_term(Term, Var0, Var),
-  extract_vars_tree(Tail, Var, Var1).
 
 delete_equal([],_,[]).
 
@@ -3105,7 +3080,7 @@ mcintyre_expansion((Head:=Body),Clause) :-
   Head=(H~Distr0), !,
   add_arg(H,Var,H1),
   switch_finite(Distr0,Distr),
-  extract_vars_list([Head,Body],[],VC),
+  term_variables([Head,Body],VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_distr(H1,Body,[],M,R,Var,Distr,Clause)
@@ -3122,7 +3097,7 @@ mcintyre_expansion((Head :- Body), Clauses):-
   Head = (_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list((Head :- Body),[],VC),
+  term_variables((Head :- Body),VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_rules(HeadList,Body,HeadList,[],M,R,0,Clauses)
@@ -3140,7 +3115,7 @@ mcintyre_expansion((Head:-Body),Clause) :-
   Distr0=..[D,Var|Pars],
   is_dist(M,D),!,
   Distr=..[D|Pars],
-  extract_vars_list([Head,Body],[],VC0),
+  term_variables([Head,Body],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3165,7 +3140,7 @@ mcintyre_expansion((Head :- Body), Clauses) :-
   (Head = (H:_);Head = (_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list((Head :- Body),[],VC),
+  term_variables((Head :- Body),VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_samp(H,Body,HeadList,[],M,R,0,Clauses)
@@ -3180,7 +3155,7 @@ mcintyre_expansion(Head,Clauses) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(Head,[],VC),
+  term_variables(Head,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_rules_fact(HeadList,HeadList,[],M,R,0,Clauses)
@@ -3197,7 +3172,7 @@ mcintyre_expansion(Head,Clause) :-
   !,
   switch_finite(Distr0,Distr),
   add_arg(H,Var,H1),
-  extract_vars_list(Head,[],VC),
+  term_variables(Head,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_distr(H1,true,[],M,R,Var,Distr,Clause)
@@ -3215,7 +3190,7 @@ mcintyre_expansion(Head,Clause) :-
   Distr0=..[D,Var|Pars],
   is_dist(M,D),!,
   Distr=..[D|Pars],
-  extract_vars_list([Head],[],VC0),
+  term_variables([Head],VC0),
   delete_equal(VC0,Var,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
@@ -3250,7 +3225,7 @@ mcintyre_expansion(Head,Clause) :-
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   (M:local_mc_setting(single_var,true)->
     generate_clause_samp(H,true,HeadList,[],M,R,0,Clause)

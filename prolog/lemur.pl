@@ -25,7 +25,6 @@ details.
 :-use_module(library(random)).
 :-use_module(library(system)).
 :-use_module(library(terms)).
-:-use_module(library(rbtrees)).
 
 
 :- set_prolog_flag(discontiguous_warnings,on).

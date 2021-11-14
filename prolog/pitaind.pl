@@ -37,7 +37,6 @@ It reads probabilistic program andcomputes the probability of queries.
 :-meta_predicate set_sw(:,+).
 
 :-use_module(library(lists)).
-:-use_module(library(rbtrees)).
 :-use_module(library(apply)).
 :-use_module(library(assoc)).
 
@@ -536,12 +535,12 @@ generate_rules_fact([Head:_P|T],VC,R,Probs,N,[Clause|Clauses],Module):-
 generate_rules_fact_vars([],__R,_Probs,_N,[],_Module).
 
 generate_rules_fact_vars([Head:_P1,'':_P2],R,Probs,N,[Clause],Module):-!,
-  extract_vars_list([Head],[],VC),
+  term_variables([Head],VC),
   add_bdd_arg(Head,BDD,Module,Head1),
   Clause=(Head1:-(get_var_n(Module,R,VC,Probs,V),equalityc(V,N,BDD))).
 
 generate_rules_fact_vars([Head:_P|T],R,Probs,N,[Clause|Clauses],Module):-
-  extract_vars_list([Head],[],VC),
+  term_variables([Head],VC),
   add_bdd_arg(Head,BDD,Module,Head1),
   Clause=(Head1:-(get_var_n(Module,R,VC,Probs,V),equalityc(V,N,BDD))),
   N1 is N+1,
@@ -815,30 +814,6 @@ set_pitaind(M:Parameter,Value):-
 setting_pitaind(M:P,V):-
   M:local_pitaind_setting(P,V).
 
-extract_vars_list(L,[],V):-
-  rb_new(T),
-  extract_vars_tree(L,T,T1),
-  rb_keys(T1,V).
-
-extract_vars_term(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (rb_lookup(Variable, Var0,_) ->
-    Var1 = Var0
-  ;
-    rb_insert(Var0,Variable,1,Var1)
-  ).
-
-extract_vars_term(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  extract_vars_tree(Args, Var0, Var1).
-
-
-
-extract_vars_tree([], Var, Var).
-
-extract_vars_tree([Term|Tail], Var0, Var1) :-
-  extract_vars_term(Term, Var0, Var),
-  extract_vars_tree(Tail, Var, Var1).
 
 
 delete_equal([],_,[]).
@@ -910,7 +885,7 @@ pitaind_expansion((Head :- Body), Clauses):-
   append([onec(BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pitaind_setting(single_var,true)->
@@ -930,7 +905,7 @@ pitaind_expansion((Head :- Body), Clauses):-
   append([onec(BDD)],BodyList1,BodyList2),
   list2and(BodyList2,Body1),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pitaind_setting(single_var,true)->
@@ -989,7 +964,7 @@ pitaind_expansion((Head :- Body), Clauses) :-
   append([onec(BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_pitaind_setting(single_var,true)->
@@ -1010,7 +985,7 @@ pitaind_expansion((Head :- Body), Clauses) :-
   append([onec(BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_pitaind_setting(single_var,true)->
@@ -1056,7 +1031,7 @@ pitaind_expansion(Head,Clauses) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pitaind_setting(single_var,true)->
@@ -1071,7 +1046,7 @@ pitaind_expansion(Head,Clauses) :-
   Head=(_;_), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pitaind_setting(single_var,true)->
@@ -1154,7 +1129,7 @@ pitaind_expansion(Head,Clause) :-
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,BDD,_DB,M,Head1),
@@ -1171,7 +1146,7 @@ pitaind_expansion(Head,Clause) :-
   (Head=(H:_);Head=(_::H)), !,
   list2or(HeadListOr, Head),
   process_head(HeadListOr, HeadList),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   add_bdd_arg(H,BDD,M,Head1),%***test single_var
