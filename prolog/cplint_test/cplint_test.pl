@@ -9,7 +9,7 @@
 perm(A,B):-
 	permutation(A,B),!.
 perm_map(L,LR):-
-    maplist(permutation,L,LR).
+    maplist(permutation,L,LR), !.
 
 run(M:H):-
 	copy_term(H,NH),
