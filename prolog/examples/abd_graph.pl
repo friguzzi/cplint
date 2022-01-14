@@ -44,7 +44,7 @@ abducible a(a,e).
 edge(a,e):0.1.
 
 :- a(X,Y), a(X,Z), Y \= Z.
-% integrity constraints that prevent that two adges with the same 
+% integrity constraints that prevent that two edges with the same 
 % source node are selected
 
 :- end_lpad.
@@ -67,7 +67,7 @@ graph(digraph([rankdir='LR'|G])):-
 % Prob = 0.1,
 % Delta = [[a(a, e)]].
 
-% If we set the probaiblity of edge(a,b) to 0.2,
+% If we set the probability of edge(a,b) to 0.2,
 % edge(a,b):0.2.
 % we get
 % ?- abd_prob(path(a,e),Prob,Delta).
