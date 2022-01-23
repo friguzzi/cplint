@@ -349,56 +349,22 @@ Internally <code class="code docutils literal notranslate"><span class="pre">cpl
 If <code class="code docutils literal notranslate"><span class="pre">Body</span></code> is empty, as in regular Prolog, the implication symbol <code class="code docutils literal notranslate"><span class="pre">:=</span></code> can be omitted.</p>
 <p>The Indian GPA problem from <a class="reference external" href="http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa">http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa</a> in distributional clauses syntax
 (<a class="reference external" href="https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl">https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl</a>) takes the form (<a class="reference external" href="http://cplint.eu/e/indian_gpadc.pl">indian_gpadc.pl</a>):</p>
-<div class="highlight-cplint notranslate"><div class="highlight"><pre><span></span><span class="s s-Atom">is_density_A</span><span class="o">:</span><span class="mf">0.95</span><span class="p">;</span><span class="s s-Atom">is_discrete_A</span><span class="o">:</span><span class="mf">0.05</span><span class="p">.</span>
-<span class="c1">% the probability distribution of GPA scores for American students is</span>
-<span class="c1">% continuous with probability 0.95 and discrete with probability 0.05</span>
+<div class="highlight-cplint notranslate"><div class="highlight"><pre><span></span><span class="s s-Atom">coin</span> <span class="o">~</span> <span class="nb">finite</span><span class="p">([</span><span class="mf">0.95</span><span class="o">:</span><span class="s s-Atom">true</span><span class="p">,</span><span class="mf">0.05</span><span class="o">:</span><span class="s s-Atom">false</span><span class="p">]).</span>
+<span class="s s-Atom">agpa</span> <span class="o">~</span> <span class="nb">beta</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">coin</span><span class="o">~=</span><span class="s s-Atom">true</span><span class="p">.</span>
+<span class="s s-Atom">american_gpa</span> <span class="o">~</span> <span class="nb">finite</span><span class="p">([</span><span class="mf">0.85</span><span class="o">:</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">0.15</span><span class="o">:</span><span class="mf">0.0</span><span class="p">])</span> <span class="o">:=</span> <span class="s s-Atom">coin</span><span class="o">~=</span><span class="s s-Atom">false</span><span class="p">.</span>
 
-<span class="nf">agpa</span><span class="p">(</span><span class="nv">A</span><span class="p">)</span><span class="o">:</span> <span class="nb">beta</span><span class="p">(</span><span class="nv">A</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">:-</span> <span class="s s-Atom">is_density_A</span><span class="p">.</span>
-<span class="c1">% the GPA of American students follows a beta distribution if the</span>
-<span class="c1">% distribution is continuous</span>
+<span class="s s-Atom">american_gpa</span> <span class="o">~</span> <span class="nf">val</span><span class="p">(</span><span class="nv">V</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">agpa</span> <span class="o">~=</span><span class="nv">A</span><span class="p">,</span> <span class="nv">V</span> <span class="o">is</span> <span class="nv">A</span><span class="o">*</span><span class="mf">4.0</span><span class="p">.</span>
 
-<span class="nf">american_gpa</span><span class="p">(</span><span class="nv">G</span><span class="p">)</span> <span class="o">:</span> <span class="nb">finite</span><span class="p">(</span><span class="nv">G</span><span class="p">,[</span><span class="mf">4.0</span><span class="o">:</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">0.0</span><span class="o">:</span><span class="mf">0.15</span><span class="p">])</span> <span class="o">:-</span> <span class="s s-Atom">is_discrete_A</span><span class="p">.</span>
-<span class="c1">% the GPA of American students is 4.0 with probability 0.85 and 0.0</span>
-<span class="c1">% with</span>
-<span class="c1">% probability 0.15 if the</span>
-<span class="c1">% distribution is discrete</span>
+<span class="s s-Atom">coin2</span> <span class="o">~</span> <span class="nb">finite</span><span class="p">([</span><span class="mf">0.99</span><span class="o">:</span><span class="s s-Atom">true</span><span class="p">,</span><span class="mf">0.01</span><span class="o">:</span><span class="s s-Atom">false</span><span class="p">]).</span>
+<span class="s s-Atom">igpa</span> <span class="o">~</span> <span class="nb">beta</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">coin2</span><span class="o">~=</span><span class="s s-Atom">true</span><span class="p">.</span>
+<span class="s s-Atom">indian_gpa</span> <span class="o">~</span> <span class="nb">finite</span><span class="p">([</span><span class="mf">0.1</span><span class="o">:</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.9</span><span class="o">:</span><span class="mf">10.0</span><span class="p">])</span> <span class="o">:=</span> <span class="s s-Atom">coin2</span><span class="o">~=</span><span class="s s-Atom">false</span><span class="p">.</span>
 
-<span class="nf">american_gpa</span><span class="p">(</span><span class="nv">A</span><span class="p">)</span><span class="o">:-</span> <span class="nf">agpa</span><span class="p">(</span><span class="nv">A0</span><span class="p">),</span> <span class="nv">A</span> <span class="o">is</span> <span class="nv">A0</span><span class="o">*</span><span class="mf">4.0</span><span class="p">.</span>
-<span class="c1">% the GPA of American students is obtained by rescaling the value of</span>
-<span class="c1">% agpa</span>
-<span class="c1">% to the (0.0,4.0) interval</span>
+<span class="s s-Atom">indian_gpa</span> <span class="o">~</span> <span class="nf">val</span><span class="p">(</span><span class="nv">V</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">igpa</span> <span class="o">~=</span><span class="nv">A</span><span class="p">,</span> <span class="nv">V</span> <span class="o">is</span> <span class="nv">A</span><span class="o">*</span><span class="mf">10.0</span><span class="p">.</span>
 
-<span class="s s-Atom">is_density_I</span> <span class="o">:</span> <span class="mf">0.99</span><span class="p">;</span> <span class="s s-Atom">is_discrete_I</span><span class="o">:</span><span class="mf">0.01</span><span class="p">.</span>
-<span class="c1">% the probability distribution of GPA scores for Indian students is</span>
-<span class="c1">% continuous with probability 0.99 and discrete with probability</span>
-<span class="c1">% 0.01</span>
+<span class="s s-Atom">nation</span> <span class="o">~</span> <span class="nb">finite</span><span class="p">([</span><span class="mf">0.25</span><span class="o">:</span><span class="s s-Atom">a</span><span class="p">,</span><span class="mf">0.75</span><span class="o">:</span><span class="s s-Atom">i</span><span class="p">]).</span>
 
-<span class="nf">igpa</span><span class="p">(</span><span class="nv">I</span><span class="p">)</span><span class="o">:</span> <span class="nb">beta</span><span class="p">(</span><span class="nv">I</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="o">:-</span> <span class="s s-Atom">is_density_I</span><span class="p">.</span>
-<span class="c1">% the GPA of Indian students follows a beta distribution if the</span>
-<span class="c1">% distribution is continuous</span>
-
-<span class="nf">indian_gpa</span><span class="p">(</span><span class="nv">I</span><span class="p">)</span><span class="o">:</span> <span class="nb">finite</span><span class="p">(</span><span class="nv">I</span><span class="p">,[</span><span class="mf">0.0</span><span class="o">:</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">10.0</span><span class="o">:</span><span class="mf">0.9</span><span class="p">])</span><span class="o">:-</span>  <span class="s s-Atom">is_discrete_I</span><span class="p">.</span>
-<span class="c1">% the GPA of Indian students is 10.0 with probability 0.9 and 0.0</span>
-<span class="c1">% with</span>
-<span class="c1">% probability 0.1 if the</span>
-<span class="c1">% distribution is discrete</span>
-
-<span class="nf">indian_gpa</span><span class="p">(</span><span class="nv">I</span><span class="p">)</span> <span class="o">:-</span> <span class="nf">igpa</span><span class="p">(</span><span class="nv">I0</span><span class="p">),</span> <span class="nv">I</span> <span class="o">is</span> <span class="nv">I0</span><span class="o">*</span><span class="mf">10.0</span><span class="p">.</span>
-<span class="c1">% the GPA of Indian students is obtained by rescaling the value</span>
-<span class="c1">% of igpa</span>
-<span class="c1">% to the (0.0,4.0) interval</span>
-
-<span class="nf">nation</span><span class="p">(</span><span class="nv">N</span><span class="p">)</span> <span class="o">:</span> <span class="nb">finite</span><span class="p">(</span><span class="nv">N</span><span class="p">,[</span><span class="s s-Atom">a</span><span class="p">:</span><span class="mf">0.25</span><span class="p">,</span><span class="s s-Atom">i</span><span class="p">:</span><span class="mf">0.75</span><span class="p">]).</span>
-<span class="c1">% the nation is America with probability 0.25 and India with</span>
-<span class="c1">% probability 0.75</span>
-
-<span class="nf">student_gpa</span><span class="p">(</span><span class="nv">G</span><span class="p">)</span><span class="o">:-</span> <span class="nf">nation</span><span class="p">(</span><span class="s s-Atom">a</span><span class="p">),</span><span class="nf">american_gpa</span><span class="p">(</span><span class="nv">G</span><span class="p">).</span>
-<span class="c1">% the GPA of the student is given by american_gpa if the nation is</span>
-<span class="c1">% America</span>
-
-<span class="nf">student_gpa</span><span class="p">(</span><span class="nv">G</span><span class="p">)</span> <span class="o">:-</span> <span class="nf">nation</span><span class="p">(</span><span class="s s-Atom">i</span><span class="p">),</span><span class="nf">indian_gpa</span><span class="p">(</span><span class="nv">G</span><span class="p">).</span>
-<span class="c1">% the GPA of the student is given by indian_gpa if the nation</span>
-<span class="c1">% is India</span>
+<span class="s s-Atom">student_gpa</span> <span class="o">~</span> <span class="nf">val</span><span class="p">(</span><span class="nv">A</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">nation</span><span class="o">~=</span><span class="s s-Atom">a</span><span class="p">,</span><span class="s s-Atom">american_gpa</span><span class="o">~=</span><span class="nv">A</span><span class="p">.</span>
+<span class="s s-Atom">student_gpa</span> <span class="o">~</span> <span class="nf">val</span><span class="p">(</span><span class="nv">I</span><span class="p">)</span> <span class="o">:=</span> <span class="s s-Atom">nation</span><span class="o">~=</span><span class="s s-Atom">i</span><span class="p">,</span><span class="s s-Atom">indian_gpa</span><span class="o">~=</span><span class="nv">I</span><span class="p">.</span>
 </pre></div>
 </div>
 </section>

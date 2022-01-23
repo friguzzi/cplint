@@ -344,57 +344,22 @@ If :code:`Body` is empty, as in regular Prolog, the implication symbol :code:`:=
 The Indian GPA problem from `<http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa>`_ in distributional clauses syntax 
 (`<https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl>`_) takes the form (`indian_gpadc.pl <http://cplint.eu/e/indian_gpadc.pl>`_): ::
 
-	is_density_A:0.95;is_discrete_A:0.05.
-	% the probability distribution of GPA scores for American students is
-	% continuous with probability 0.95 and discrete with probability 0.05
+	coin ~ finite([0.95:true,0.05:false]).
+	agpa ~ beta(8,2) := coin~=true.
+	american_gpa ~ finite([0.85:4.0,0.15:0.0]) := coin~=false.
 
-	agpa(A): beta(A,8,2) :- is_density_A.
-	% the GPA of American students follows a beta distribution if the
-	% distribution is continuous
+	american_gpa ~ val(V) := agpa ~=A, V is A*4.0.
 
-	american_gpa(G) : finite(G,[4.0:0.85,0.0:0.15]) :- is_discrete_A.
-	% the GPA of American students is 4.0 with probability 0.85 and 0.0
-	% with 
-	% probability 0.15 if the
-	% distribution is discrete
-	
-	american_gpa(A):- agpa(A0), A is A0*4.0.
-	% the GPA of American students is obtained by rescaling the value of
-	% agpa
-	% to the (0.0,4.0) interval
-	
-	is_density_I : 0.99; is_discrete_I:0.01.
-	% the probability distribution of GPA scores for Indian students is
-	% continuous with probability 0.99 and discrete with probability 
-	% 0.01
-	
-	igpa(I): beta(I,5,5) :- is_density_I.
-	% the GPA of Indian students follows a beta distribution if the
-	% distribution is continuous
-	
-	indian_gpa(I): finite(I,[0.0:0.1,10.0:0.9]):-  is_discrete_I.
-	% the GPA of Indian students is 10.0 with probability 0.9 and 0.0
-	% with
-	% probability 0.1 if the
-	% distribution is discrete
-	
-	indian_gpa(I) :- igpa(I0), I is I0*10.0.
-	% the GPA of Indian students is obtained by rescaling the value 
-	% of igpa
-	% to the (0.0,4.0) interval
-	
-	nation(N) : finite(N,[a:0.25,i:0.75]).
-	% the nation is America with probability 0.25 and India with 
-	% probability 0.75
-	
-	student_gpa(G):- nation(a),american_gpa(G).
-	% the GPA of the student is given by american_gpa if the nation is 
-	% America
-	
-	student_gpa(G) :- nation(i),indian_gpa(G).
-	% the GPA of the student is given by indian_gpa if the nation 
-	% is India
+	coin2 ~ finite([0.99:true,0.01:false]).
+	igpa ~ beta(5,5) := coin2~=true.
+	indian_gpa ~ finite([0.1:0.0,0.9:10.0]) := coin2~=false.
 
+	indian_gpa ~ val(V) := igpa ~=A, V is A*10.0.
+
+	nation ~ finite([0.25:a,0.75:i]).
+
+	student_gpa ~ val(A) := nation~=a,american_gpa~=A.
+	student_gpa ~ val(I) := nation~=i,indian_gpa~=I.
 
 Semantics
 ==================
