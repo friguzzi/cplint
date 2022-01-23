@@ -39,6 +39,7 @@ test_pita:-
     hmm_mpe,
     meta,
     pcfg,
+    pcfglrdb,
     var_objdb,
     card,
     dt_umbrella,
@@ -646,6 +647,17 @@ test(pcfg):-
   )).
 
 :- end_tests(pcfg).
+
+
+:- begin_tests(pcfglrdb, []).
+
+:-ensure_loaded(library(examples/pcfglrdb)).
+
+test(pcfglrdb):-
+  run((prob(pcfg([a]),Prob),close_to(Prob,0.3)
+  )).
+
+:- end_tests(pcfglrdb).
 
 :- begin_tests(card, []).
 
