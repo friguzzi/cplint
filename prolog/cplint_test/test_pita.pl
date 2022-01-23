@@ -642,7 +642,7 @@ test(nobj):-
 :-ensure_loaded(library(examples/pcfg)).
 
 test(pcfg):-
-  run((prob(pcfg([a,b,a,a]),Prob),close_to(Prob,0.0024)
+  run((prob(pcfg([a,b,a,a]),Prob),close_to(Prob,0.0024,0.0001)
   )).
 
 :- end_tests(pcfg).
