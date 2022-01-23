@@ -1,7 +1,8 @@
 /*
-Probabilistic contect-free grammar.
-0.2:S->aS
-0.2:S->bS
+Probabilistic context-free grammar. The grammar is left-recursive, MCINTYRE
+is necessary to ensure termination.
+Grammar:
+0.4:S->SS
 0.3:S->a
 0.3:S->b
 From
@@ -18,7 +19,7 @@ Theory and Practice of Logic Programming,  doi:10.1017/S1471068413000677.
 
 :- begin_lpad.
 % pcfg(LT): LT is string of terminals accepted by the grammar
-% pcfg(L,LT,LT0) L is a tring of terminals and not terminals that derives
+% pcfg(L,LT,LT0) L is a string of terminals and not terminals that derives
 % the list of terminals in LT-LT0
 
 pcfg(L):- pcfg(['S'],[],_Der,L,[]).
@@ -26,22 +27,22 @@ pcfg(L):- pcfg(['S'],[],_Der,L,[]).
 % string of previous terminals
 
 pcfg([A|R],Der0,Der,L0,L2):-
-  grammar_rule(A,Der0,RHS),
+  rule(A,Der0,RHS),
   pcfg(RHS,[rule(A,RHS)|Der0],Der1,L0,L1),
   pcfg(R,Der1,Der,L1,L2).
 % if there is a rule for A (i.e. it is a non-terminal), expand A using the rule
 % and continue with the rest of the list
 
 pcfg([A|R],Der0,Der,[A|L1],L2):-
-  \+ grammar_rule(A,_,_),
+  \+ rule(A,_,_),
   pcfg(R,Der0,Der,L1,L2).
 % if A is a terminal, move it to the output string
 
 pcfg([],Der,Der,L,L).
 % there are no more symbols to expand
 
-grammar_rule('S',Der,['S','S']):0.4; grammar_rule('S',Der,[a]):0.3; 
-  grammar_rule('S',Der,[b]):0.3.
+rule('S',Der,['S','S']):0.4; rule('S',Der,[a]):0.3; 
+  rule('S',Der,[b]):0.3.
 
 % encodes the three rules of the grammar
 

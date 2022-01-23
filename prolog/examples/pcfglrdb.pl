@@ -1,5 +1,6 @@
 /*
-Probabilistic contect-free grammar.
+Probabilistic context-free grammar. The grammar is left-recursive, depth bounded
+inference is necessary to ensure termination.
 0.4:S->SS
 0.3:S->a
 0.3:S->b
