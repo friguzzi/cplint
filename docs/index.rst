@@ -9,7 +9,7 @@ cplint on SWISH Manual - SWI-Prolog Version
 
 .. toctree::
 	:maxdepth: 2
-
+.. highlight:: cplint
 
 Introduction
 ============
@@ -39,7 +39,9 @@ It requires the packs
  * `auc <https://github.com/friguzzi/auc>`_
  * `matrix <https://github.com/friguzzi/matrix>`_
  
-They are installed automatically when installing pack `cplint` or can installed manually as ::
+They are installed automatically when installing pack `cplint` or can installed manually as 
+
+.. code-block:: console
 
 	$ swipl
 	?- pack_install(bddem).
@@ -52,7 +54,9 @@ They are installed automatically when installing pack `cplint` or can installed 
 
 On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page `<https://github.com/friguzzi/bddem>`_.
 
-You can upgrade the pack with ::
+You can upgrade the pack with
+
+.. code-block:: console
 
     $ swipl
     ?- pack_upgrade(cplint).
@@ -61,7 +65,8 @@ Note that the packs on which `cplint` depends are not upgraded automatically in 
 
 Example of use
 ---------------
-::
+
+.. code-block:: console
 
     $ cd <pack>/cplint/prolog/examples
     $ swipl
@@ -70,7 +75,8 @@ Example of use
 
 Testing the installation
 ------------------------
-::
+
+.. code-block:: console
 
     $ swipl
     ?- [library(cplint_test/test)].
@@ -321,9 +327,9 @@ Distributional Clauses Syntax
 You can also use the syntax of Distributional Clauses (DC) :cite:`Nitti2016`. 
 Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in ::
 	
-	T~Density' := Body.
+	T~Density := Body.
 
-Here :code:`:=` replaces the implication symbol, :code:`T` is a term and :code:`Density'` is one of the density atoms above without the :code:`Var` argument, because :code:`T` itself represents a random variables. 
+Here :code:`:=` replaces the implication symbol, :code:`T` is a term and :code:`Density` is one of the density atoms above without the :code:`Var` argument, because :code:`T` itself represents a random variables. 
 In the body of clauses you can use the infix operator :code:`~=` to equate a term representing a random variable with a logical variable or a constant as in :code:`T ~= X`. 
 Internally :code:`cplint` transforms the terms representing random variables into atoms with an extra argument for holding the variable. 
 
@@ -491,7 +497,9 @@ To run a query, you can simply load the Prolog file, for example `coin.pl <http:
 
 	?- [coin].
 
-or::
+or
+
+.. code-block:: console
 
 	$ swipl coin.pl
 
@@ -1486,7 +1494,8 @@ For example ::
 	determination(pos/0,circle/1).
 	determination(pos/0,in/2).
 	determination(pos/0,config/2).
-	state that :code:`triangle/1` can appear in the body of clauses for :code:`pos/0`.
+
+state that :code:`triangle/1` can appear in the body of clauses for :code:`pos/0`.
 
 SLIPCOVER and LEMUR also allow mode declarations of the form ::
 
@@ -1791,25 +1800,33 @@ In cplint on SWISH the results of queries can also be downloaded programmaticall
 Example client code is `available <https://github.com/friguzzi/swish/tree/master/client>`_. 
 For example, the :code:`swish-ask.sh` client can be used with bash to download the results for a query in CSV. 
 
-The call below downloads a CSV file for the coin example. ::
+The call below downloads a CSV file for the coin example
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu e/coin.pl Prob "prob(heads(coin),Prob)"
 
 The script can ask queries against Prolog scripts stored in `http://cplint.eu <http://cplint.eu>`_ by specifying the script on the commandline. 
-User defined files stored in :code:`cplint` on SWISH (locations of type `http://cplint.eu/p/coin_user.pl <http://cplint.eu/p/coin_user.pl>`_) can be directly used, for example: ::
+User defined files stored in :code:`cplint` on SWISH (locations of type `http://cplint.eu/p/coin_user.pl <http://cplint.eu/p/coin_user.pl>`_) can be directly used, for example:
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu coin_user.pl Prob "prob(heads(coin),Prob)"
 
 Example programs can be used by specifying the folder portion of the url of the example, as in the first coin example above where the url for the program is `<http://cplint.eu/e/coin.pl>`__.
 
-You can also use an url for the program as in ::
+You can also use an url for the program as in
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu \
   	https://raw.githubusercontent.com/friguzzi/swish/\  
   	master/e/coin.pl Prob "prob(heads(coin),Prob)"
 
 Results can be downloaded in JSON using the option :code:`--json-s` or :code:`--json-html`. With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. 
-E.g. ::
+E.g.
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --json-s --server=http://cplint.eu \
 		coin_user.pl Prob "prob(heads(coin),Prob)"

@@ -32,7 +32,7 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinxcontrib.bibtex','sphinx.ext.autosectionlabel','sphinx.ext.mathjax']
-
+bibtex_bibfiles = ['newbib.bib']
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
