@@ -9,7 +9,7 @@ cplint on SWISH Manual - SWI-Prolog Version
 
 .. toctree::
 	:maxdepth: 2
-
+.. highlight:: cplint
 
 Introduction
 ============
@@ -39,7 +39,9 @@ It requires the packs
  * `auc <https://github.com/friguzzi/auc>`_
  * `matrix <https://github.com/friguzzi/matrix>`_
  
-They are installed automatically when installing pack `cplint` or can installed manually as ::
+They are installed automatically when installing pack `cplint` or can installed manually as 
+
+.. code-block:: console
 
 	$ swipl
 	?- pack_install(bddem).
@@ -52,7 +54,9 @@ They are installed automatically when installing pack `cplint` or can installed 
 
 On 32 and 64 bits Linux this should work out of the box. On 64 bits Windows the library must be rebuilt by hand, see the pack page `<https://github.com/friguzzi/bddem>`_.
 
-You can upgrade the pack with ::
+You can upgrade the pack with
+
+.. code-block:: console
 
     $ swipl
     ?- pack_upgrade(cplint).
@@ -61,7 +65,8 @@ Note that the packs on which `cplint` depends are not upgraded automatically in 
 
 Example of use
 ---------------
-::
+
+.. code-block:: console
 
     $ cd <pack>/cplint/prolog/examples
     $ swipl
@@ -70,7 +75,8 @@ Example of use
 
 Testing the installation
 ------------------------
-::
+
+.. code-block:: console
 
     $ swipl
     ?- [library(cplint_test/test)].
@@ -321,9 +327,9 @@ Distributional Clauses Syntax
 You can also use the syntax of Distributional Clauses (DC) :cite:`Nitti2016`. 
 Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in ::
 	
-	T~Density' := Body.
+	T~Density := Body.
 
-Here :code:`:=` replaces the implication symbol, :code:`T` is a term and :code:`Density'` is one of the density atoms above without the :code:`Var` argument, because :code:`T` itself represents a random variables. 
+Here :code:`:=` replaces the implication symbol, :code:`T` is a term and :code:`Density` is one of the density atoms above without the :code:`Var` argument, because :code:`T` itself represents a random variables. 
 In the body of clauses you can use the infix operator :code:`~=` to equate a term representing a random variable with a logical variable or a constant as in :code:`T ~= X`. 
 Internally :code:`cplint` transforms the terms representing random variables into atoms with an extra argument for holding the variable. 
 
@@ -338,57 +344,22 @@ If :code:`Body` is empty, as in regular Prolog, the implication symbol :code:`:=
 The Indian GPA problem from `<http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa>`_ in distributional clauses syntax 
 (`<https://github.com/davidenitti/DC/blob/master/examples/indian-gpa.pl>`_) takes the form (`indian_gpadc.pl <http://cplint.eu/e/indian_gpadc.pl>`_): ::
 
-	is_density_A:0.95;is_discrete_A:0.05.
-	% the probability distribution of GPA scores for American students is
-	% continuous with probability 0.95 and discrete with probability 0.05
+	coin ~ finite([0.95:true,0.05:false]).
+	agpa ~ beta(8,2) := coin~=true.
+	american_gpa ~ finite([0.85:4.0,0.15:0.0]) := coin~=false.
 
-	agpa(A): beta(A,8,2) :- is_density_A.
-	% the GPA of American students follows a beta distribution if the
-	% distribution is continuous
+	american_gpa ~ val(V) := agpa ~=A, V is A*4.0.
 
-	american_gpa(G) : finite(G,[4.0:0.85,0.0:0.15]) :- is_discrete_A.
-	% the GPA of American students is 4.0 with probability 0.85 and 0.0
-	% with 
-	% probability 0.15 if the
-	% distribution is discrete
-	
-	american_gpa(A):- agpa(A0), A is A0*4.0.
-	% the GPA of American students is obtained by rescaling the value of
-	% agpa
-	% to the (0.0,4.0) interval
-	
-	is_density_I : 0.99; is_discrete_I:0.01.
-	% the probability distribution of GPA scores for Indian students is
-	% continuous with probability 0.99 and discrete with probability 
-	% 0.01
-	
-	igpa(I): beta(I,5,5) :- is_density_I.
-	% the GPA of Indian students follows a beta distribution if the
-	% distribution is continuous
-	
-	indian_gpa(I): finite(I,[0.0:0.1,10.0:0.9]):-  is_discrete_I.
-	% the GPA of Indian students is 10.0 with probability 0.9 and 0.0
-	% with
-	% probability 0.1 if the
-	% distribution is discrete
-	
-	indian_gpa(I) :- igpa(I0), I is I0*10.0.
-	% the GPA of Indian students is obtained by rescaling the value 
-	% of igpa
-	% to the (0.0,4.0) interval
-	
-	nation(N) : finite(N,[a:0.25,i:0.75]).
-	% the nation is America with probability 0.25 and India with 
-	% probability 0.75
-	
-	student_gpa(G):- nation(a),american_gpa(G).
-	% the GPA of the student is given by american_gpa if the nation is 
-	% America
-	
-	student_gpa(G) :- nation(i),indian_gpa(G).
-	% the GPA of the student is given by indian_gpa if the nation 
-	% is India
+	coin2 ~ finite([0.99:true,0.01:false]).
+	igpa ~ beta(5,5) := coin2~=true.
+	indian_gpa ~ finite([0.1:0.0,0.9:10.0]) := coin2~=false.
 
+	indian_gpa ~ val(V) := igpa ~=A, V is A*10.0.
+
+	nation ~ finite([0.25:a,0.75:i]).
+
+	student_gpa ~ val(A) := nation~=a,american_gpa~=A.
+	student_gpa ~ val(I) := nation~=i,indian_gpa~=I.
 
 Semantics
 ==================
@@ -491,7 +462,9 @@ To run a query, you can simply load the Prolog file, for example `coin.pl <http:
 
 	?- [coin].
 
-or::
+or
+
+.. code-block:: console
 
 	$ swipl coin.pl
 
@@ -1486,7 +1459,8 @@ For example ::
 	determination(pos/0,circle/1).
 	determination(pos/0,in/2).
 	determination(pos/0,config/2).
-	state that :code:`triangle/1` can appear in the body of clauses for :code:`pos/0`.
+
+state that :code:`triangle/1` can appear in the body of clauses for :code:`pos/0`.
 
 SLIPCOVER and LEMUR also allow mode declarations of the form ::
 
@@ -1791,25 +1765,33 @@ In cplint on SWISH the results of queries can also be downloaded programmaticall
 Example client code is `available <https://github.com/friguzzi/swish/tree/master/client>`_. 
 For example, the :code:`swish-ask.sh` client can be used with bash to download the results for a query in CSV. 
 
-The call below downloads a CSV file for the coin example. ::
+The call below downloads a CSV file for the coin example
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu e/coin.pl Prob "prob(heads(coin),Prob)"
 
 The script can ask queries against Prolog scripts stored in `http://cplint.eu <http://cplint.eu>`_ by specifying the script on the commandline. 
-User defined files stored in :code:`cplint` on SWISH (locations of type `http://cplint.eu/p/coin_user.pl <http://cplint.eu/p/coin_user.pl>`_) can be directly used, for example: ::
+User defined files stored in :code:`cplint` on SWISH (locations of type `http://cplint.eu/p/coin_user.pl <http://cplint.eu/p/coin_user.pl>`_) can be directly used, for example:
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu coin_user.pl Prob "prob(heads(coin),Prob)"
 
 Example programs can be used by specifying the folder portion of the url of the example, as in the first coin example above where the url for the program is `<http://cplint.eu/e/coin.pl>`__.
 
-You can also use an url for the program as in ::
+You can also use an url for the program as in
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --server=http://cplint.eu \
   	https://raw.githubusercontent.com/friguzzi/swish/\  
   	master/e/coin.pl Prob "prob(heads(coin),Prob)"
 
 Results can be downloaded in JSON using the option :code:`--json-s` or :code:`--json-html`. With the first the output is in a simple string format where Prolog terms are sent using quoted write, the latter serialize responses as HTML strings. 
-E.g. ::
+E.g.
+
+.. code-block:: console
 
 	$ bash swish-ask.sh --json-s --server=http://cplint.eu \
 		coin_user.pl Prob "prob(heads(coin),Prob)"

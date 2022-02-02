@@ -955,7 +955,7 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Env,Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1,bdd_notc(Env,BDDH,BDDN)),
+[H1,bdd_notc(Env,BDDH,BDDN),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg(H,Env,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Env,Module).
@@ -988,7 +988,7 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Env,Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
-[(H1,bdd_notc(Env,BDDH,BDDN)),
+[H1,bdd_notc(Env,BDDH,BDDN),
   andc(Env,BDD,BDDN,BDD2)|Rest],Env,Module):-!,
   add_bdd_arg_db(H,Env,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
@@ -1159,49 +1159,37 @@ to_table(M,Heads,ProcTabDir,Heads1):-
 
 tab_dir(_M,'':_,[],[]):-!.
 
-tab_dir(M,H:P,[],[H:P]):-
-  M:tabled(H),!.
-
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal except
 % (?)::H and H:P
-tab_dir(M,HT,[],[H]):-
-  (HT = ?::H ; HT = (?)::H),
+tab_dir(M,D::H,[],[H]):-
+  (D == ? ; D == (?)),
   M:tabled(H),!.
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal except
 % (?)::H and '$util'(A,B)
 tab_dir(M,H,[],[H]):-
-  M:tabled(H),!,
   H=..[F|_],
-  F = utility.
+  F = utility,
+  M:tabled(H),!.
+
+tab_dir(M,H:P,[],[H:P]):-
+  M:tabled(H),!.
+
+tab_dir(M,P::H,[],[H:P]):-
+  P \== ?,
+  M:tabled(H),!.
 
 
-tab_dir(M,H:P,[(:- table HT)],[H1:P]):-
-  functor(H,F,A0),
-  functor(PT,F,A0),
-  PT=..[F|Args0],
-  (M:local_pita_setting(depth_bound,true)->
-    ExtraArgs=[_,_,lattice(orc/3)]
-  ;
-    ExtraArgs=[_,lattice(orc/3)]
-  ),
-  append(Args0,ExtraArgs,Args),
-  HT=..[F|Args],
-  H=..[_|ArgsH],
-  H1=..[F|ArgsH],
-  assert(M:tabled(PT)),
-  zero_clause(M,F/A0,LZ),
-  assert(M:zero_clauses(LZ)).
 
 % tab dir for decision variables
 % merge with the previous one?
 % the predicates are equal
 % except variable n 2 and 4.
-tab_dir(M,HT1,[(:- table HT)],[H1]):-
-  (HT1 = ?::H ; HT1 = (?)::H),
+tab_dir(M,P::H,[(:- table HT)],[H1]):-
+  (P== ?;P == (?)),!,
   functor(H,F,A0),
   functor(PT,F,A0),
   PT=..[F|Args0],
@@ -1224,7 +1212,7 @@ tab_dir(M,HT1,[(:- table HT)],[H1]):-
 % except variable n 2 and 4.
 tab_dir(M,H,[(:- table HT)],[H1]):-
   H=..[F|_],
-  F = utility,
+  F = utility,!,
   functor(H,F,A0),
   functor(PT,F,A0),
   PT=..[F|Args0],
@@ -1240,6 +1228,26 @@ tab_dir(M,H,[(:- table HT)],[H1]):-
   assert(M:tabled(PT)),
   zero_clause(M,F/A0,LZ),
   assert(M:zero_clauses(LZ)).
+
+
+tab_dir(M,Head,[(:- table HT)],[H1:P]):-
+  (Head=H:P;Head=P::H),!,
+  functor(H,F,A0),
+  functor(PT,F,A0),
+  PT=..[F|Args0],
+  (M:local_pita_setting(depth_bound,true)->
+    ExtraArgs=[_,_,lattice(orc/3)]
+  ;
+    ExtraArgs=[_,lattice(orc/3)]
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
 
 pita_expansion(begin_of_file,_):-
   !,

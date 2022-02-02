@@ -1,7 +1,8 @@
 /*
-Probabilistic contect-free grammar.
-0.2:S->aS
-0.2:S->bS
+Probabilistic context-free grammar. The grammar is left-recursive, MCINTYRE
+is necessary to ensure termination.
+Grammar:
+0.4:S->SS
 0.3:S->a
 0.3:S->b
 From
@@ -18,7 +19,7 @@ Theory and Practice of Logic Programming,  doi:10.1017/S1471068413000677.
 
 :- begin_lpad.
 % pcfg(LT): LT is string of terminals accepted by the grammar
-% pcfg(L,LT,LT0) L is a tring of terminals and not terminals that derives
+% pcfg(L,LT,LT0) L is a string of terminals and not terminals that derives
 % the list of terminals in LT-LT0
 
 pcfg(L):- pcfg(['S'],[],_Der,L,[]).
