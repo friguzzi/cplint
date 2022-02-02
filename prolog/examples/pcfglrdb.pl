@@ -37,7 +37,7 @@ pcfg([A|R],Der0,Der,L0,L2):-
 % and continue with the rest of the list
 
 pcfg([A|R],Der0,Der,[A|L1],L2):-
-  \+ grammar_rule(A,_,_),
+  terminal(A),
   pcfg(R,Der0,Der,L1,L2).
 % if A is a terminal, move it to the output string
 
@@ -46,8 +46,10 @@ pcfg([],Der,Der,L,L).
 
 grammar_rule('S',Der,['S','S']):0.4; grammar_rule('S',Der,[a]):0.3; 
   grammar_rule('S',Der,[b]):0.3.
-
 % encodes the three rules of the grammar
+
+terminal(a).
+terminal(b).
 
 :- end_lpad.
 
