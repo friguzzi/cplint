@@ -1048,7 +1048,7 @@ process_head_ground([H], Prob, [Head:ProbHead1|Null]) :-
   (ProbLast > Eps ->
     Null = ['':ProbLast]
   ;
-    Null = ['':Eps]
+    Null = []
   ).
 
 process_head_ground([H|Tail], Prob, [Head:ProbHead1|Next]) :-
