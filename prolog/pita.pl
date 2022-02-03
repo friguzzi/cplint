@@ -1011,9 +1011,14 @@ process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Env,Module).
 
 
-process_head(HeadList, GroundHeadList) :-
+process_head(HeadList, GroundHeadList1) :-
   ground_prob(HeadList), !,
-  process_head_ground(HeadList, 0.0, GroundHeadList).
+  process_head_ground(HeadList, 0.0, GroundHeadList),
+  ( GroundHeadList = [V:P] -> 
+      P1 is 1.0 - P, 
+      GroundHeadList1 = [V:P,'':P1] ; 
+      GroundHeadList1 = GroundHeadList
+  ).
 
 process_head(HeadList0, HeadList):-
   get_probs(HeadList0,PL),
