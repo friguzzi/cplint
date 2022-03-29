@@ -1416,7 +1416,9 @@ pita_expansion(Head:-Body,[Clause,TabDir,'$util'(H,U)]) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !,
+  (Head = (H => U) ; Head = utility(H,U)),
+  ( ground(H) -> true ; throw(error("Expected ground decision fact in utility/2"))),
+  ( number(U) -> true ; throw(error("Expected a number for utility in utility/2"))), !,
   list2and(BodyList, Body),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList1,Env,M),
   append([onec(Env,BDD)],BodyList1,BodyList2),
@@ -1436,7 +1438,9 @@ pita_expansion(Head,'$util'(H,U)) :-
   pita_input_mod(M),
   M:pita_on,
   (Head \= ((pita_expansion(_,_)) :- _ )),
-  (Head = (H => U) ; Head = utility(H,U)), ground(H), number(U), !.
+  (Head = (H => U) ; Head = utility(H,U)),
+  ( ground(H) -> true ; throw(error("Expected ground decision fact in utility/2"))),
+  ( number(U) -> true ; throw(error("Expected a number for utility in utility/2"))), !.
 
 pita_expansion(Head:-Body,[rule_by_num(R,HeadList,BodyList,VC1)|Clauses]) :-
   prolog_load_context(module, M),pita_input_mod(M),M:pita_on,
