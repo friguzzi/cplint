@@ -2769,10 +2769,11 @@ exponential(Lambda,_M,V):-
 exponential(Lambda,_M,X,V):-
   V is Lambda*exp(-Lambda*X).
 
+
 /**
- * pascal(+N:int,+P:float,+M:module,-Value:int) is det
+ * negative_binomial(+N:int,+P:float,+M:module,-Value:int) is det
  *
- * samples a value from a pascal probability distribution with parameters
+ * samples a value from a negative binomial probability distribution with parameters
  * R and P and returns it in Value.
  * N is the number of successes
  * P is the success probability
@@ -2780,29 +2781,30 @@ exponential(Lambda,_M,X,V):-
 
 % N number of successes
 % P probability of success
-pascal(N,P,_M,Value):-
+negative_binomial(N,P,_M,Value):-
   random(RandomVal),
-  pascal_prob_(0,N,P,0,RandomVal,Value).
+  negative_binomial_prob_(0,N,P,0,RandomVal,Value).
 
-pascal_prob_(I,_,_,CurrentProb,RandomVal,I1):-
+negative_binomial_prob_(I,_,_,CurrentProb,RandomVal,I1):-
   RandomVal =< CurrentProb, !,
   I1 is I - 1.
-pascal_prob_(I,R,P,CurrentProb,RandomVal,V):-
-  pascal_int(I,R,P,V0),
+negative_binomial_prob_(I,R,P,CurrentProb,RandomVal,V):-
+  negative_binomial_int(I,R,P,V0),
   I1 is I+1,
   CurrentProb1 is V0 + CurrentProb,
-  pascal_prob_(I1,R,P,CurrentProb1,RandomVal,V).
+  negative_binomial_prob_(I1,R,P,CurrentProb1,RandomVal,V).
 
 /*
 * N number of successes
 * X number of failures
 * P probability of success
 */
-pascal_int(X,N,P,Value):-
+negative_binomial_int(X,N,P,Value):-
   XN1 is X+N-1,
   binomial_coeff(XN1,X,Bin),
   Value is Bin*(P**N)*(1-P)**X.
 
+binomial_coeff(N,K,0):- N < K, !.
 binomial_coeff(N,K,Val):-
   fact(N,1,NF),
   fact(K,1,KF),
@@ -3295,7 +3297,7 @@ is_dist(_M,D):-
     multinomial,
     geometric,
     exponential,
-    pascal,
+    negative_binomial,
     user
     ]),!.
 

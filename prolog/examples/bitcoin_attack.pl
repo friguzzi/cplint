@@ -13,7 +13,7 @@ PLP 2018 http://ceur-ws.org/Vol-2219/paper6.pdf
 % progress function
 attacker_progress_poisson(X):poisson(X,Lambda):-
    Lambda is 10*0.3/0.7.
-attacker_progress_pascal(X):pascal(X,10,0.3).
+attacker_progress_negative_binomial(X):negative_binomial(X,10,0.3).
 
 move(T,1):0.7; move(T,-1):0.3.
 
@@ -38,8 +38,8 @@ success_poisson:-
     	walk(V)
     ).
 
-success_pascal:-
-    attacker_progress_pascal(A),
+success_negative_binomial:-
+    attacker_progress_negative_binomial(A),
     V is 10 - A,
     (   V = 0 ->  
     	true;
@@ -50,5 +50,5 @@ success_pascal:-
 
 /** <examples>
 ?- mc_prob(success_poisson,Prob).
-?- mc_prob(success_pascal,Prob).
+?- mc_prob(success_negative_binomial,Prob).
 */
