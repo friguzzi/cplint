@@ -8,7 +8,7 @@ Gaussian with mean 2.0 and variance 1.0.
 If the widget is produced by machine b, the feature is distributed as a
 Gaussian with mean 3.0 and variance 1.0.
 The widget then is processed by a third machine that adds a random quantity to
-the feature distributed as a Gaussian with mean 0.5 and variance 1.5.
+the feature distributed as a Gaussian with mean 0.5 and variance 0.1.
 What is the distribution of the feature?
 What is the distribution of the feature given that the widget was procuded
 by machine a?
