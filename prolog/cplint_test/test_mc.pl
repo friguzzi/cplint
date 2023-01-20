@@ -418,8 +418,8 @@ test(topic_1_1_1_ww_g_b):-
 test(poisson):-
   run((mc_sample(success_poisson,1000,P),close_to(P,0.042))).
 
-test(pascal):-
-  run((mc_sample(success_pascal,1000,P),close_to(P,0.036))).
+test(negative_binomial):-
+  run((mc_sample(success_negative_binomial,1000,P),close_to(P,0.02))).
 
 :- end_tests(bitcoin_attack).
 
