@@ -43,7 +43,7 @@ st(a,X): gaussian(X,2.0, 1.0).
 
 st(b,X): gaussian(X,3.0, 1.0).
 
-pt(X): gaussian(X,0.5, 1.5).
+pt(X): gaussian(X,0.5, 0.1).
 
 
 :- end_lpad.
