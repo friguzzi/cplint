@@ -1008,6 +1008,12 @@ Actions in this setting are represented as literals of action predicates, that m
 
 	:- action predicate1/arity1,...,predicaten/arityn.
 
+for :code:`pita`, and ::
+
+	:- mcaction predicate1/arity1,...,predicaten/arityn.
+
+for :code:`mcintyre`.
+
 When performing causal reasoning, action literals must be enclosed in the :code:`do/1` functor and included in the evidence conjunction. 
 More than one action can be included (each with in a separate :code:`do/1` term) and actions and observations can be freely mixed. 
 All conditional inference goals can be used except those for particle filtering.
