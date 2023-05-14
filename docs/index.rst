@@ -1674,13 +1674,13 @@ Between two executions of :code:`induce_lm/2` you should exit SWI-Prolog to have
 
 Testing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-A program can also be tested on a test set in SLIPCOVER and LEMUR with ::
+A program can be tested on a test set in SLIPCOVER and LEMUR with ::
 
 	test(+Program:list,+List_of_folds:list,-LL:float,-AUCROC:float,-ROC:list,-AUCPR:float,-PR:list) is det
 
 or ::
 
-	test(+Program:list,+List_of_folds:list,-NPos:int,-NNeg:int,-LL:float,-ExampleList:list) is det
+	test_prob(+Program:list,+List_of_folds:list,-NPos:int,-NNeg:int,-LL:float,-ExampleList:list) is det
 
 where :code:`Program` is a list of terms representing clauses and :code:`List_of_folds` is a list of folds.
 

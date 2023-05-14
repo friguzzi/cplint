@@ -60,7 +60,7 @@
 
 
 \title{cplint Documentation}
-\date{Apr 20, 2023}
+\date{May 14, 2023}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -2640,7 +2640,7 @@ Between two executions of \sphinxcode{\sphinxupquote{induce\_lm/2}} you should e
 \subsection{Testing}
 \label{\detokenize{index:testing}}
 \sphinxAtStartPar
-A program can also be tested on a test set in SLIPCOVER and LEMUR with
+A program can be tested on a test set in SLIPCOVER and LEMUR with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n+nf}{test}\PYG{p}{(}\PYG{o}{+}\PYG{n+nv}{Program}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{List\PYGZus{}of\PYGZus{}folds}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{LL}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{AUCROC}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ROC}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{AUCPR}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{PR}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
@@ -2650,7 +2650,7 @@ A program can also be tested on a test set in SLIPCOVER and LEMUR with
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{test}\PYG{p}{(}\PYG{o}{+}\PYG{n+nv}{Program}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{List\PYGZus{}of\PYGZus{}folds}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{NPos}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{NNeg}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{LL}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ExampleList}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{test\PYGZus{}prob}\PYG{p}{(}\PYG{o}{+}\PYG{n+nv}{Program}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{List\PYGZus{}of\PYGZus{}folds}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{NPos}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{NNeg}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{LL}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ExampleList}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
