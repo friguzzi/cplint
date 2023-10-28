@@ -305,7 +305,7 @@ from_assign_to_exp(M,[Var-Val|TA],[Abd|TDelta]):-
  * the rule number and the grounding substitution.
  */
 bdd_dot_file(M:Goal,File,LV):-
-  must_be(atom,Goal),
+  must_be(nonvar,Goal),
   must_be(string,File),
   must_be(var,LV),
   abolish_all_tables,
@@ -326,7 +326,7 @@ bdd_dot_file(M:Goal,File,LV):-
  * the rule number and the grounding substitution.
  */
 bdd_dot_string(M:Goal,DotString,LV):-
-  must_be(atom,Goal),
+  must_be(nonvar,Goal),
   must_be(var,DotString),
   must_be(var,LV),
   DotString=dot(Dot),
@@ -350,6 +350,10 @@ bdd_dot_string(M:Goal,DotString,LV):-
  * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,DotString,LV,LAV):-
+  must_be(nonvar,Goal),
+  must_be(var,DotString),
+  must_be(var,LV),
+  must_be(var,LAV),
   abd_bdd_dot_string(M:Goal,DotString,LV,LAV,_P,_Delta).
 
 /**
@@ -365,7 +369,7 @@ abd_bdd_dot_string(M:Goal,DotString,LV,LAV):-
  * the rule number and the grounding substitution.
  */
 abd_bdd_dot_string(M:Goal,DotString,LV,LAV,P,Delta):-
-  must_be(atom,Goal),
+  must_be(nonvar,Goal),
   must_be(var,DotString),
   must_be(var,LV),
   must_be(var,LAV),
@@ -391,6 +395,9 @@ abd_bdd_dot_string(M:Goal,DotString,LV,LAV,P,Delta):-
  * It returns the explanation in Delta together with its Probability
  */
 map(M:Goal,P,MAP):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
+  must_be(var,MAP),
   map_int(Goal,M,_LV,_LAV,P,MAP,Env,_BDD),
   end(Env).
 
@@ -407,7 +414,14 @@ map(M:Goal,P,MAP):-
  * the multivalued variable number,
  * the rule number and the grounding substitution.
  */
-map_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,MAP):-
+map_bdd_dot_string(M:Goal,DotString,LV,LAV,P,MAP):-
+  must_be(nonvar,Goal),
+  must_be(var,DotString),
+  must_be(var,LV),
+  must_be(var,LAV),
+  must_be(var,P),
+  must_be(var,MAP),
+  DotString=dot(Dot),
   map_int(Goal,M,LV,LAV,P,MAP,Env,BDD),
   create_dot_string(Env,BDD,Dot),
   end(Env).
@@ -455,25 +469,32 @@ from_assign_to_map([Var-Val|TA],M,[rule(R,Head,HeadList,Body)|TDelta]):-
  * Query together with their probabilities
  */
 prob(M:Goal,P):-
+  must_be(nonvar,Goal),
   abolish_all_tables,
   prob_meta(M:Goal,P).
 
 
 /**
- * prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ * prob(:Query:conjunction,:Evidence:conjunction,-Probability:float) is nondet
  *
  * Equivalent to prob/4 with an empty option list.
  */
 prob(M:Goal,M:Evidence,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(var,P),
   abolish_all_tables,
   prob_meta(M:Goal,M:Evidence,P).
 
 /**
- * prob_meta(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ * prob_meta(:Query:conjunction,:Evidence:conjunction,-Probability:float) is nondet
  *
  * To be used in place of prob/3 for meta calls (doesn't abolish tables)
  */
 prob_meta(M:Goal,M:Evidence,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(var,P),
   get_next_goal_number(M,GN),
   atomic_concat('$ev',GN,NewEv),
   deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
@@ -501,7 +522,7 @@ prob_meta(M:Goal,M:Evidence,P):-
 
 
 /**
- * prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet
+ * prob(:Query:conjunction,:Evidence:conjunction,-Probability:float,+Options:list) is nondet
  *
  * The predicate computes the probability of Query given
  * Evidence
@@ -514,6 +535,10 @@ prob_meta(M:Goal,M:Evidence,P):-
  *   probability of success and a bar for the probability of failure.
  */
 prob(M:Goal,M:Evidence,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(var,P),
+  must_be(nonvar,Options),
   prob(M:Goal,M:Evidence,P),
   option(bar(Chart),Options,no),
   (nonvar(Chart)->
@@ -1119,6 +1144,8 @@ get_probs([_H:P|T], [P1|T1]) :-
  *
  */
 set_pita(M:Parameter,Value):-
+  must_be(atom,Parameter),
+  must_be(nonvar,Value),
   retract(M:local_pita_setting(Parameter,_)),
   assert(M:local_pita_setting(Parameter,Value)).
 
@@ -1131,6 +1158,7 @@ set_pita(M:Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_pita(M:P,V):-
+  must_be(atom,P),
   M:local_pita_setting(P,V).
 
 delete_equal([],_,[]).
