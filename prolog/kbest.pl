@@ -40,23 +40,30 @@ default_setting_kbest(prob_step, 0.001).
 
 
 /**
- * kbest(:Query:conjunction,+K:int,-Probability:float,-Exps:list) is nondet
+ * kbest(:Quer:conjunction_of_literals,+K:int,-Probability:float,-Exps:list) is nondet
  *
  * The predicate computes the K most probable explanations of the conjunction of literals Query.
  * It returns the explanations in Exps together with their Probability
  */
 kbest(M:Goals, K, P, Exps) :-
+  must_be(nonvar,Goals),
+	must_be(nonneg,K),
+  must_be(var,P),
+  must_be(var,Exps),
   compute_exp(Goals,M,K,BestK),
   convert_exps(BestK,M,Exps),
   compute_prob(BestK,M,P).
 
 /**
- * kbest(:Query:conjunction,+K:int,-Exps:list) is nondet
+ * kbest(:Quer:conjunction_of_literals,+K:int,-Exps:list) is nondet
  *
  * The predicate computes the K most probable explanations of the conjunction of literals Query.
  * It returns the explanations in Exps
  */
 kbest(M:Goals, K, Exps) :-
+  must_be(nonvar,Goals),
+	must_be(nonneg,K),
+  must_be(var,Exps),
   compute_exp(Goals,M,K,BestK),
   convert_exps(BestK,M,Exps).
 

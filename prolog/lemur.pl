@@ -118,8 +118,10 @@ default_setting_lm(alpha,0.0).
  * TrainFolds for training.
  * It returns in P the learned probabilistic program.
  */
-induce_lm(TrainFolds,P):-
-  induce_rules(TrainFolds,P0),
+induce_lm(M:TrainFolds,P):-
+  must_be(list,TrainFolds),
+  must_be(var,P),
+  induce_rules(M:TrainFolds,P0),
   rules2terms(P0,P).
 
 
@@ -1055,6 +1057,8 @@ delete_matching([H|T],El,[H|T1]):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_lm(M:Parameter,Value):-
+  must_be(atom,Parameter),
+  must_be(nonvar,Value),
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
@@ -1067,6 +1071,7 @@ set_lm(M:Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_lm(M:P,V):-
+  must_be(atom,P),
   M:local_setting(P,V).
 
 

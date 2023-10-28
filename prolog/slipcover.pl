@@ -148,8 +148,10 @@ default_setting_sc(alpha,0.0).
  * TrainFolds for training.
  * It returns in P the learned probabilistic program.
  */
-induce(TrainFolds,P):-
-  induce_rules(TrainFolds,P0),
+induce(M:TrainFolds,P):-
+  must_be(list,TrainFolds),
+  must_be(var,P),
+  induce_rules(M:TrainFolds,P0),
   rules2terms(P0,P).
 
 /**
@@ -162,8 +164,15 @@ induce(TrainFolds,P):-
  * of the ROC curve in ROC, the area under the Precision Recall curve in AUCPR
  * and a dict containing the points of the PR curve in PR
  */
-test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
-  test_prob(P,TestFolds,_NPos,_NNeg,LL,LG),
+test(M:P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
+  must_be(nonvar,P),
+  must_be(list,TestFolds),
+  must_be(var,LL),
+  must_be(var,AUCROC),
+  must_be(var,ROC),
+  must_be(var,AUCPR),
+  must_be(var,PR),
+  test_prob(M:P,TestFolds,_NPos,_NNeg,LL,LG),
   compute_areas_diagrams(LG,AUCROC,ROC,AUCPR,PR).
 
 /**
@@ -176,6 +185,12 @@ test(P,TestFolds,LL,AUCROC,ROC,AUCPR,PR):-
  * and in Results a list containing the probabilistic result for each query contained in TestFolds.
  */
 test_prob(M:P,TestFolds,NPos,NNeg,CLL,Results) :-
+  must_be(nonvar,P),
+  must_be(list,TestFolds),
+  must_be(var,NNeg),
+  must_be(var,CLL),
+  must_be(var,NPos),
+  must_be(var,Results),
   write2(M,'Testing\n'),
   findall(Exs,(member(F,TestFolds),M:fold(F,Exs)),L),
   append(L,TE),
@@ -411,8 +426,10 @@ cycle_structure([(RH,_Score)|RT],Mod,R0,S0,SP0,DB,R,S,M):-
  * of the input file using the folds indicated in TrainFolds for training.
  * It returns in P the input program with the updated parameters.
  */
-induce_par(Folds,ROut):-
-  induce_parameters(Folds,R),
+induce_par(M:Folds,ROut):-
+  must_be(list,Folds),
+  must_be(var,ROut),
+  induce_parameters(M:Folds,R),
   rules2terms(R,ROut).
 
 induce_parameters(M:Folds,R):-
@@ -2559,6 +2576,8 @@ given_cw(M,H):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_sc(M:Parameter,Value):-
+  must_be(atom,Parameter),
+  must_be(nonvar,Value),
   retract(M:local_setting(Parameter,_)),
   assert(M:local_setting(Parameter,Value)).
 
@@ -2571,6 +2590,7 @@ set_sc(M:Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_sc(M:P,V):-
+  must_be(atom,P),
   M:local_setting(P,V).
 
 
