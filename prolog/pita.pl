@@ -679,10 +679,10 @@ get_node(M:Goal,Env,BDD):-
     zeroc(Env,BDD)
   ).
 
-get_node_no_rec(M:Goal,Env,BDD):- %with DB=false
-  retractall(M:v(_,_,_)),
+get_node(M:Goal,Env,BDD):- %with DB=false
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
@@ -691,10 +691,10 @@ get_node_no_rec(M:Goal,Env,BDD):- %with DB=false
     % format("-------------------------Failed goal: ~w ~n",[M:Goal])
   ).
 
-get_node(M:Goal,Env,BDD):- %with DB=false
+  get_node_no_rec(M:Goal,Env,BDD):- %with DB=false
+  retractall(M:v(_,_,_)),
   retractall(M:v(_,_,_)),
   retractall(M:av(_,_,_)),
-  retractall(M:dec(_,_,_)),
   add_bdd_arg(Goal,Env,BDD,M,Goal1),
   (M:Goal1*->
     true
