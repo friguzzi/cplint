@@ -60,7 +60,7 @@
 
 
 \title{cplint Documentation}
-\date{May 14, 2023}
+\date{Oct 28, 2023}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -728,7 +728,7 @@ or
 The unconditional probability of an atom can be asked using \sphinxcode{\sphinxupquote{pita}} with the predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
+\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -743,7 +743,7 @@ If the query is non\sphinxhyphen{}ground, \sphinxcode{\sphinxupquote{prob/2}} re
 When using \sphinxcode{\sphinxupquote{mcintyre}}, the predicate for querying is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -766,7 +766,7 @@ For example
 You can also use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -777,7 +777,7 @@ In general, all the predicates that admit a list of options as an argument have 
 With \sphinxcode{\sphinxupquote{mcintyre}}, you can also take a given number of samples with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,} \PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,} \PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -821,7 +821,7 @@ samples \sphinxcode{\sphinxupquote{heads(coin)}} 1000 times and returns the esti
 You can also sample using Gibbs sampling with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -852,7 +852,7 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 Moreover, you can sample arguments of queries with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -894,7 +894,7 @@ of \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} that takes
 You can sample arguments of queries also with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}raw}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}raw}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -905,7 +905,7 @@ The value is \sphinxcode{\sphinxupquote{failure}} if the query fails.
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}first}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}first}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -924,7 +924,7 @@ samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquot
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}one}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}one}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -944,7 +944,7 @@ samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquot
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -955,7 +955,7 @@ The same options as those of \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/4}} ar
 Finally, you can compute expectations with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -978,7 +978,7 @@ of \sphinxcode{\sphinxupquote{T}} by taking 1000 samples.
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1033,7 +1033,7 @@ The conditional probability of an atom query given another atom evidence can be 
 with the predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
+\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1052,7 +1052,7 @@ The query and the evidence can be conjunctions of literals (positive or negative
 You also have
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
+\PYG{n+nf}{prob}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1100,7 +1100,7 @@ The final probability is given by the number of successes over the total number 
 You can take a given number of sample with rejection sampling using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1133,7 +1133,7 @@ The query and the evidence can be conjunctions of literals.
 You can take a given number of sample with Metropolis\sphinxhyphen{}Hastings MCMC using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1180,7 +1180,7 @@ in \sphinxcode{\sphinxupquote{F}} the number of samples where \sphinxcode{\sphin
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1208,9 +1208,9 @@ performs Gibbs sampling. \sphinxcode{\sphinxupquote{Options}} is a list of optio
 Moreover, you can sample arguments of queries with rejection sampling, Metropolis\sphinxhyphen{}Hastings MCMC or Gibbs sampling using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1238,7 +1238,7 @@ that return the distribution of values for \sphinxcode{\sphinxupquote{Arg}} in \
 The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1255,9 +1255,9 @@ of (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl}).
 To compute conditional expectations, use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1313,7 +1313,7 @@ After weighting, particles are resampled and the next element of the evidence is
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Prob}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Prob}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1335,7 +1335,7 @@ from \sphinxhref{http://cplint.eu/e/indian\_gpa.pl}{indian\_gpa.pl} samples 1000
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ValList}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ValList}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1353,7 +1353,7 @@ from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl} sa
 You can compute conditional expectations using likelihood weighting with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1364,7 +1364,7 @@ It takes \sphinxcode{\sphinxupquote{N}} samples of \sphinxcode{\sphinxupquote{Ar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1397,7 +1397,7 @@ The list of samples is returned in \sphinxcode{\sphinxupquote{{[}F1,F2,F3,F4{]}}
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Prob}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Prob}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1408,7 +1408,7 @@ The predicate returns in \sphinxcode{\sphinxupquote{Prob}} the probability that 
 You can compute conditional expectations using particle filtering with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1502,7 +1502,7 @@ that performs branch and bound.
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{K}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
+\PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Probability}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{nondet}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
