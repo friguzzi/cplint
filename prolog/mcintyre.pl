@@ -3134,6 +3134,8 @@ get_probs(Head, PL):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 set_mc(M:Parameter,Value):-
+  must_be(atom,Parameter),
+  must_be(nonvar,Value),
   retract(M:local_mc_setting(Parameter,_)),
   assert(M:local_mc_setting(Parameter,Value)).
 
@@ -3146,6 +3148,7 @@ set_mc(M:Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_mc(M:P,V):-
+  must_be(atom,P),
   M:local_mc_setting(P,V).
 
 
