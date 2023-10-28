@@ -433,7 +433,7 @@ test(bdd_a):-
 :-ensure_loaded(library(examples/abd1cons1)).
 
 test(a):-
-  run((abd_prob(a,P,[[e]]),close_to(P,0.6))).
+  run((abd_prob(a,P,Delta),Delta=[[e]],close_to(P,0.6))).
 
 :- end_tests(abd1cons1).
 

@@ -107,6 +107,7 @@ default_setting_pita(prism_memoization,false). %false: original prism semantics,
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
  */
 load(File):-
+  must_be(atom,File),
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
     load_file(FileLPAD)
@@ -126,6 +127,7 @@ load(File):-
  * Loads FileWithExtension.
  */
 load_file(File):-
+  must_be(atom,File),
   begin_lpad_pred,
   user:consult(File),
   end_lpad_pred.
@@ -141,6 +143,8 @@ load_file(File):-
 % this is a complete version, rename it dt_solve_complete
 % when the other version works
 dt_solve(M:Strategy,Cost):-
+  must_be(var,Strategy),
+  must_be(var,Cost),
   abolish_all_tables,
   findall([H,U],M:'$util'(H,U),LUtils),
   init(Env),
@@ -193,11 +197,13 @@ generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
 % dt_evaluate_strategy(LS,Cost).
 
 /**
- * prob_meta(:Query:atom,-Probability:float) is nondet
+ * prob_meta(:Query:conjunction,-Probability:float) is nondet
  *
  * To be used in place of prob/2 for meta calls (doesn't abolish tables)
  */
 prob_meta(M:Goal,P):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -222,12 +228,15 @@ prob_meta(M:Goal,P):-
   member((Goal,P),L).
 
 /**
- * abd_prob(:Query:atom,-Probability:float,-Delta:list) is nondet
+ * abd_prob(:Query:conjunction,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the most probable abductive explanation of the ground query Query.
  * It returns the explanation in Delta together with its Probability
  */
 abd_prob(M:Goal,P,Delta):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
+  must_be(var,Delta),
   abolish_all_tables,
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
@@ -296,6 +305,9 @@ from_assign_to_exp(M,[Var-Val|TA],[Abd|TDelta]):-
  * the rule number and the grounding substitution.
  */
 bdd_dot_file(M:Goal,File,LV):-
+  must_be(atom,Goal),
+  must_be(string,File),
+  must_be(var,LV),
   abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
@@ -313,7 +325,11 @@ bdd_dot_file(M:Goal,File,LV):-
  * the multivalued variable number,
  * the rule number and the grounding substitution.
  */
-bdd_dot_string(M:Goal,dot(Dot),LV):-
+bdd_dot_string(M:Goal,DotString,LV):-
+  must_be(atom,Goal),
+  must_be(var,DotString),
+  must_be(var,LV),
+  DotString=dot(Dot),
   abolish_all_tables,
   init(Env),
   get_node(M:Goal,Env,Out),
@@ -333,8 +349,8 @@ bdd_dot_string(M:Goal,dot(Dot),LV):-
  * the multivalued variable number,
  * the rule number and the grounding substitution.
  */
-abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
-  abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,_P,_Delta).
+abd_bdd_dot_string(M:Goal,DotString,LV,LAV):-
+  abd_bdd_dot_string(M:Goal,DotString,LV,LAV,_P,_Delta).
 
 /**
  * abd_bdd_dot_string(:Query:atom,-DotString:string,-LV:list,-LAV:list,-Probability:float,-Delta:list) is det
@@ -348,7 +364,14 @@ abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV):-
  * the multivalued variable number,
  * the rule number and the grounding substitution.
  */
-abd_bdd_dot_string(M:Goal,dot(Dot),LV,LAV,P,Delta):-
+abd_bdd_dot_string(M:Goal,DotString,LV,LAV,P,Delta):-
+  must_be(atom,Goal),
+  must_be(var,DotString),
+  must_be(var,LV),
+  must_be(var,LAV),
+  must_be(var,P),
+  must_be(var,Delta),
+  DotString=dot(Dot),
   abolish_all_tables,
   init(Env),
   get_cond_node(M:Goal,M:'$constraints',Env,Out,_),
