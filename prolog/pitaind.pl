@@ -175,7 +175,7 @@ equalityc(Probs,N,P):-
 
 
 /**
- * s(:Query:atom,-Probability:float) is nondet
+ * s(:Query:conjunction_of_literals,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query.
  * If Query is not ground, it returns in backtracking all instantiations of
@@ -201,7 +201,7 @@ s(M:Goal,P):-
 
 
 /**
- * prob_ind(:Query:atom,-Probability:float) is nondet
+ * prob_ind(:Query:conjunction_of_literals,-Probability:float) is nondet
  *
  * The predicate computes the probability of Query
  * If Query is not ground, it returns in backtracking all ground
@@ -209,10 +209,12 @@ s(M:Goal,P):-
  * Query together with their probabilities
  */
 prob_ind(M:Goal,P):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
   s(M:Goal,P).
 
 /**
- * prob_bar(:Query:atom,-Probability:dict) is nondet
+ * prob_bar(:Query:conjunction_of_literals,-Probability:dict) is nondet
  *
  * The predicate computes the probability of Query
  * and returns it as a dict for rendering with c3 as a bar chart with
@@ -223,6 +225,8 @@ prob_ind(M:Goal,P):-
  * Query together with their probabilities
  */
 prob_bar(M:Goal,Chart):-
+  must_be(nonvar,Goal),
+  must_be(var,Chart),
   s(M:Goal,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
@@ -233,7 +237,7 @@ prob_bar(M:Goal,Chart):-
 	          legend:_{show: false}}.
 
 /**
- * prob_ind(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+ * prob_ind(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float) is nondet
  *
  * The predicate computes the probability of Query given
  * Evidence
@@ -242,6 +246,9 @@ prob_bar(M:Goal,Chart):-
  * Query/Evidence together with their probabilities
  */
 prob_ind(M:Goal,M:Evidence,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(var,P),
   get_next_goal_number(M,GN),
   atomic_concat('$ev',GN,NewEv),
   deal_with_ev(Evidence,M,NewEv,EvNoAct,UpdatedClausesRefs,ClausesToReAdd),
@@ -358,7 +365,7 @@ ac(do(_)).
 nac(do(\+ _)).
 
 /**
- * prob_bar(:Query:atom,:Evidence:atom,-Probability:dict) is nondet
+ * prob_bar(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:dict) is nondet
  *
  * The predicate computes the probability of the Query given Evidence
  * and returns it as a dict for rendering with c3 as a bar chart with
@@ -369,6 +376,9 @@ nac(do(\+ _)).
  * Query/Evidence together with their probabilities
  */
 prob_bar(M:Goal,M:Evidence,Chart):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(var,Chart),
   prob_ind(M:Goal,M:Evidence,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
@@ -800,6 +810,8 @@ or_list1_exc([H|T],B0,B1):-
  *
  */
 set_pitaind(M:Parameter,Value):-
+  must_be(atom,Parameter),
+  must_be(nonvar,Value),
   retract(M:local_pitaind_setting(Parameter,_)),
   assert(M:local_pitaind_setting(Parameter,Value)).
 
@@ -812,6 +824,7 @@ set_pitaind(M:Parameter,Value):-
  * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
  */
 setting_pitaind(M:P,V):-
+  must_be(atom,P),
   M:local_pitaind_setting(P,V).
 
 
