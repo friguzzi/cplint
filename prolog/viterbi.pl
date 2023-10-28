@@ -23,12 +23,15 @@ of the query
 default_setting_viterbi(epsilon_parsing, 1e-5).
 
 /**
- * viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
+ * viterbi(:Query:conjunction,-Probability:float,-Exp:list) is nondet
  *
  * The predicate computes the most probable explanation of the conjunction of literals Query.
  * It returns the explanation in Exp.
  */
 viterbi(M:Goals,Prob,Exp):-
+  must_be(nonvar, Goals),
+  must_be(var,Prob),
+  must_be(var,Exp),  
   retractall(M:best_prob(_)),
   retractall(M:best_exp(_)),
   retractall(M:best_goal(_)),

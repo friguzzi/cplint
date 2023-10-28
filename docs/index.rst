@@ -935,7 +935,7 @@ that performs branch and bound.
 
 The predicate ::
 
-	viterbi(:Query:conjunction,+K:int,-Exp:list) is nondet
+	viterbi(:Query:conjunction,-Probability:float,-Exp:list) is nondet
 
 computes the most probable proof of the conjunction of literals :code:`Query`.
 It returns the proof as explanation in :code:`Exp`.
