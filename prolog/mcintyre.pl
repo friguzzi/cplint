@@ -231,6 +231,7 @@ default_setting_mc(prism_memoization,false). %false: original prism semantics, t
  * Loads File.lpad if it exists, otherwise loads File.cpl if it exists.
  */
 mc_load(File):-
+  must_be(atom,File),
   atomic_concat(File,'.lpad',FileLPAD),
   (exists_file(FileLPAD)->
     mc_load_file(FileLPAD)
@@ -247,12 +248,13 @@ mc_load(File):-
  * Loads FileWithExtension.
  */
 mc_load_file(File):-
+  must_be(atom,File),
   begin_lpad_pred,
   user:consult(File),
   end_lpad_pred.
 
 /**
- * s(:Query:atom,-Probability:float) is nondet
+ * s(:Query:conjunction_of_literals,-Probability:float) is nondet
  *
  * The predicate computes the probability of the ground query Query.
  * If Query is not ground, it returns in backtracking all instantiations of
@@ -501,6 +503,9 @@ accept(NC1,NC2):-
  *   probability of success and a bar for the probability of failure.
  */
 mc_prob(M:Goal,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
+  must_be(list,Options),
   s(M:Goal,P),
   option(bar(Chart),Options,no),
   (nonvar(Chart)->
@@ -509,15 +514,17 @@ mc_prob(M:Goal,P,Options):-
     bar(P,Chart)
   ).
 /**
- * mc_prob(:Query:atom,-Probability:float) is det
+ * mc_prob(:Query:conjunction_of_literals,-Probability:float) is det
  *
  * Equivalent to mc_prob/2 with an empty option list.
  */
 mc_prob(M:Goal,P):-
+  must_be(nonvar,Goal),
+  must_be(var,P),
   mc_prob(M:Goal,P,[]).
 
 /**
- * mc_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
+ * mc_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times and returns
  * the resulting Probability (Successes/Samples)
@@ -533,6 +540,10 @@ mc_prob(M:Goal,P):-
  *   number of successes and a bar for the number of failures.
  */
 mc_sample(M:Goal,S,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,P),
+  must_be(list,Options),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
   mc_sample(M:Goal,S,T,F,P),
@@ -544,15 +555,18 @@ mc_sample(M:Goal,S,P,Options):-
   ).
 
 /**
- * mc_sample(:Query:atom,+Samples:int,-Probability:float) is det
+ * mc_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float) is det
  *
  * Equivalent to mc_sample/4 with an empty option list.
  */
 mc_sample(M:Goal,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,P),
   mc_sample(M:Goal,S,P,[]).
 
 /**
- * mc_sample(:Query:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ * mc_sample(:Query:conjunction_of_literals,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times and returns
  * the number of Successes, of Failures and the
@@ -560,6 +574,11 @@ mc_sample(M:Goal,S,P):-
  * If Query is not ground, it considers it as an existential query
  */
 mc_sample(M:Goal,S,T,F,P):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,T),
+  must_be(var,F),
+  must_be(var,P),
   copy_term(Goal,Goal1),
   numbervars(Goal1),
   save_samples(M,Goal1),
@@ -570,7 +589,7 @@ mc_sample(M:Goal,S,T,F,P):-
   restore_samples_delete_copy(M,Goal1).
 
 /**
- * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+ * mc_rejection_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
@@ -586,19 +605,28 @@ mc_sample(M:Goal,S,T,F,P):-
  *   Number of failueres
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,P),
+  must_be(list,Options),
   option(successes(T),Options,_T),
   option(failures(F),Options,_F),
   mc_rejection_sample(M:Goal,M:Evidence,S,T,F,P).
 
 /**
- * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ * mc_rejection_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float) is det
  *
  * Equivalent to mc_rejection_sample/5 with an empty option list.
  */
 mc_rejection_sample(M:Goal,M:Evidence,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,P),
   mc_rejection_sample(M:Goal,M:Evidence,S,P,[]).
  /**
- * mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
+ * mc_rejection_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true and returns
@@ -609,6 +637,12 @@ mc_rejection_sample(M:Goal,M:Evidence,S,P):-
  * If Query/Evidence are not ground, it considers them an existential queries.
  */
 mc_rejection_sample(M:Goal,M:Evidence0,S,T,F,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,T),
+  must_be(var,F),
+  must_be(var,P),
   test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   rejection_montecarlo(S,0, 0, M:Goal,M:Evidence, N, T),
@@ -682,7 +716,7 @@ ac(do(_)).
 nac(do(\+ _)).
 
 /**
- * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
+ * mc_gibbs_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0)
  * times.
@@ -702,6 +736,10 @@ nac(do(\+ _)).
  *   Number of failueres
  */
 mc_gibbs_sample(M:Goal,S,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,P),
+  must_be(list,Options),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
   option(successes(T),Options,_T),
@@ -709,11 +747,14 @@ mc_gibbs_sample(M:Goal,S,P,Options):-
   mc_gibbs_sample(M:Goal,S,Mix,Block,T,F,P).
 
 /**
- * mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float) is det
+ * mc_gibbs_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float) is det
  *
  * Equivalent to mc_gibbs_sample/4 with an empty option list.
  */
 mc_gibbs_sample(M:Goal,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,P),
   mc_gibbs_sample(M:Goal,S,P,[]).
 
 mc_gibbs_sample(M:Goal,S,Mix,Block,T,F,P):-
@@ -775,7 +816,7 @@ check_sampled(M,S):-
 check_sam(M,(R,S)):-
   M:samp(R,S,_).
 /**
- * mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+ * mc_gibbs_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) times given that
  * Evidence
@@ -798,6 +839,11 @@ check_sam(M,(R,S)):-
  *   Number of failueres
  */
 mc_gibbs_sample(M:Goal,M:Evidence,S,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,P),
+  must_be(list,Options),
   test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
@@ -852,7 +898,7 @@ gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
 
 
 /**
- * mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times.
  * Arg should be a variable in Query.
@@ -876,6 +922,11 @@ gibbs_montecarlo(K0, T0,Block, M:Goal, M:Evidence,  T):-
  *   a world sampled at random.
  */
 mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
@@ -887,14 +938,18 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options):-
     argbar(ValList,Chart)
   ).
 /**
- * mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list) is det
  *
  * Equivalent to mc_gibbs_sample_arg/5 with an empty option list.
  */
 mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,[]).
 /**
- * mc_gibbs_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_gibbs_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_groundliterals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -919,6 +974,12 @@ mc_gibbs_sample_arg(M:Goal,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   test_prism(M),
   option(mix(Mix),Options,0),
   option(block(Block),Options,1),
@@ -955,7 +1016,7 @@ gibbs_sample_arg(K0,M:Goal, M:Evidence,Block, Arg,V0,V):-
 
 
 /**
- * mc_gibbs_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Block:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_gibbs_sample_arg0(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,+Mix:int,+Block:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -992,7 +1053,7 @@ mc_gibbs_sample_arg0(M:Goal,M:Evidence0,S,Mix,Block,Arg,ValList):-
   maplist(M:assertz,ClausesToReAdd).
 
 /**
- * mc_gibbs_sample_arg0(:Query:atom,+Samples:int,+Mix:int,+Block:int,?Arg:var,-Values:list) is det
+ * mc_gibbs_sample_arg0(:Query:conjunction_of_literals,+Samples:int,+Mix:int,+Block:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times.
  * Arg should be a variable in Query.
@@ -1041,7 +1102,7 @@ gibbs_sample_arg(K0,M:Goal,Block, Arg,V0,V):-
   gibbs_sample_arg(K1,M:Goal,Block,Arg,V1,V).
 
 /**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+ * mc_mh_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
  *
  * The predicate samples Query  a number of Mix+Samples (Mix is set with the options, default value 0) times given that
  * Evidence
@@ -1064,6 +1125,10 @@ gibbs_sample_arg(K0,M:Goal,Block, Arg,V0,V):-
  *   Number of failueres
  */
 mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,P),
+  must_be(list,Options),
   test_prism(M),
   option(lag(L),Options,1),
   option(mix(Mix),Options,0),
@@ -1072,15 +1137,19 @@ mc_mh_sample(M:Goal,M:Evidence,S,P,Options):-
   mc_mh_sample(M:Goal,M:Evidence,S,Mix,L,T,F,P).
 
 /**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float) is det
+ * mc_mh_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float) is det
  *
  * Equivalent to mc_mh_sample/5 with an empty option list.
  */
 mc_mh_sample(M:Goal,M:Evidence,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,P),
   mc_mh_sample(M:Goal,M:Evidence,S,P,[]).
 
 /**
- * mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
+ * mc_mh_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,+Mix:int,+Lag:int,-Successes:int,-Failures:int,-Probability:float) is det
  *
  * The predicate samples Query  a number of Mix+Samples times given that
  * Evidence
@@ -1093,6 +1162,14 @@ mc_mh_sample(M:Goal,M:Evidence,S,P):-
  * If Query/Evidence are not ground, it considers them as existential queries.
  */
 mc_mh_sample(M:Goal,M:Evidence0,S,Mix,L,T,F,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(nonneg,Mix),
+  must_be(nonneg,L),
+  must_be(var,T),
+  must_be(var,F),
+  must_be(var,P),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   initial_sample_cycle(M:Evidence),!,
   copy_term(Goal,Goal1),
@@ -1235,7 +1312,7 @@ listN(N,[N1|T]):-
   listN(N1,T).
 
 /**
- * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times.
  * Arg should be a variable in Query.
@@ -1252,6 +1329,11 @@ listN(N,[N1|T]):-
  *   a world sampled at random.
  */
 mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   empty_assoc(Values0),
   sample_arg(S,M:Goal,Arg, Values0,Values),
   erase_samples(M),
@@ -1264,15 +1346,19 @@ mc_sample_arg(M:Goal,S,Arg,ValList,Options):-
     argbar(ValList,Chart)
   ).
 /**
- * mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list) is det
  *
  * Equivalent to mc_sample_arg/5 with an empty option list.
  */
 mc_sample_arg(M:Goal,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_sample_arg(M:Goal,S,Arg,ValList,[]).
 
 /**
- * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_rejection_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query a number of Samples times given that
  * Evidence is true.
@@ -1291,6 +1377,12 @@ mc_sample_arg(M:Goal,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   empty_assoc(Values0),
@@ -1308,15 +1400,20 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,Options):-
   ).
 
 /**
- * mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_rejection_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list) is det
  *
  * Equivalent to mc_rejection_sample_arg/6 with an empty option list.
  */
 mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList,[]).
 
 /**
- * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+ * mc_mh_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1341,6 +1438,12 @@ mc_rejection_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
  *   a world sampled at random.
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   test_prism(M),
   option(mix(Mix),Options,0),
   option(lag(L),Options,1),
@@ -1353,15 +1456,20 @@ mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options):-
   ).
 
 /**
- * mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list) is det
+ * mc_mh_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list) is det
  *
  * Equivalent to mc_mh_sample_arg/6 with an empty option list.
  */
 mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[]).
 
 /**
- * mc_mh_sample_arg0(:Query:atom,:Evidence:atom,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
+ * mc_mh_sample_arg0(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,+Mix:int,+Lag:int,?Arg:var,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1483,7 +1591,7 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
   sample_arg(K2,M:Goals,Arg,V1,V).
 
 /**
- * mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:float) is det
+ * mc_particle_sample(:Query:conjunction_of_literals,:Evidence:list,+Samples:int,-Prob:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true. Evidence is a list of goals.
@@ -1495,6 +1603,10 @@ sample_arg(K1, M:Goals,Arg,V0,V):-
  * is considered.
  */
 mc_particle_sample(M:Goal,M:Evidence,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,P),
   M:asserta(('$goal'(1):-Goal,!),Ref1),
   M:asserta('$goal'(0),Ref0),
   mc_particle_sample_arg(M:'$goal'(A),M:Evidence,S,A,ValList),
@@ -1505,7 +1617,7 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
   erase(Ref0).
 
 /**
- * mc_particle_sample_arg(:Query:atom,+Evidence:list,+Samples:int,?Arg:term,-Values:list) is det
+ * mc_particle_sample_arg(:Query:conjunction_of_literals,+Evidence:list,+Samples:int,?Arg:term,-Values:list) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1532,13 +1644,19 @@ mc_particle_sample(M:Goal,M:Evidence,S,P):-
  * corresponding element of Query in each current particle and weighting
  * the particle by the likelihood of the evidence element.
  */
-mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,[V0|ValList]):-
+mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  ValList=[V0|ValList0],
   test_prism(M),
   Goal=[G1|GR],!,
   Evidence=[Ev1|EvR],
   Arg=[A1|AR],
   particle_sample_first_gl(0,S,M:G1,M:Ev1,A1,V0),
-  particle_sample_arg_gl(M:GR,M:EvR,AR,1,S,ValList),
+  particle_sample_arg_gl(M:GR,M:EvR,AR,1,S,ValList0),
   retractall(M:mem(_,_,_,_)),
   retractall(M:mem(_,_,_,_,_)),
   retractall(M:value_particle(_,_,_)),
@@ -1557,7 +1675,7 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
   maplist(norm(Norm),ValList0,ValList).
 
 /**
- * mc_particle_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+ * mc_particle_expectation(:Query:conjunction_of_literals,:Evidence:list,+N:int,?Arg:var,-Exp:float) is det
  *
  * The predicate computes the expected value of Arg in Query given Evidence by
  * particle filtering.
@@ -1566,6 +1684,11 @@ mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList):-
  * Arg should be a variable in Query.
  */
 mc_particle_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
   mc_particle_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
   average(ValList,E).
 
@@ -1703,7 +1826,7 @@ get_values(M,I,V):-
   findall(A-W,(M:value_particle(I,S,A),M:weight_particle(I,S,W)),V).
 
 /**
- * mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:float) is det
+ * mc_lw_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Prob:float) is det
  *
  * The predicate samples Query  a number of Samples times given that Evidence
  * is true.
@@ -1712,6 +1835,10 @@ get_values(M,I,V):-
  * likelihood of evidence in the sample.
  */
 mc_lw_sample(M:Goal,M:Evidence0,S,P):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,P),
   test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   erase_samples(M),
@@ -1739,6 +1866,11 @@ value_cont_single(H-W,S,S+H*W).
  * likelihood of evidence in the sample.
  */
 mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   lw_sample_arg(S,M:Goal,M:Evidence,Arg,ValList0),
@@ -1764,6 +1896,11 @@ mc_lw_sample_arg(M:Goal,M:Evidence0,S,Arg,ValList):-
  * weight is returned, useful when the evidence is very unlikely.
  */
 mc_lw_sample_arg_log(M:Goal,M:Evidence0,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence0),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   test_prism(M),
   deal_with_ev(Evidence0,M,Evidence,UpdatedClausesRefs,ClausesToReAdd),
   lw_sample_arg_log(S,M:Goal,M:Evidence,Arg,ValList),
@@ -1780,6 +1917,11 @@ mc_lw_sample_arg_log(M:Goal,M:Evidence0,S,Arg,ValList):-
  * Arg should be a variable in Query.
  */
 mc_lw_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),  
   mc_lw_sample_arg(M:Goal,M:Evidence,S,Arg,ValList),
   average(ValList,E).
 
@@ -2057,6 +2199,11 @@ is_var(S):-
  *   The size of the bar is the number of samples that returned that value.
  */
 mc_sample_arg_first(M:Goal,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   empty_assoc(Values0),
   sample_arg_first(S,M:Goal,Arg, Values0,Values),
   erase_samples(M),
@@ -2075,6 +2222,10 @@ mc_sample_arg_first(M:Goal,S,Arg,ValList,Options):-
  * Equivalent to mc_sample_arg_first/5 with an empty option list.
  */
 mc_sample_arg_first(M:Goal,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_sample_arg_first(M:Goal,S,Arg,ValList,[]).
 
 sample_arg_first(0,_Goals,_Arg,V,V):-!.
@@ -2117,6 +2268,11 @@ sample_arg_first(K1, M:Goals,Arg,V0,V):-
  *   The size of the bar is the number of samples.
  */
 mc_sample_arg_one(M:Goal,S,Arg,ValList,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
+  must_be(list,Options),
   empty_assoc(Values0),
   sample_arg_one(S,M:Goal,Arg, Values0,Values),
   erase_samples(M),
@@ -2135,6 +2291,10 @@ mc_sample_arg_one(M:Goal,S,Arg,ValList,Options):-
  * Equivalent to mc_sample_arg_one/5 with an empty option list.
  */
 mc_sample_arg_one(M:Goal,S,Arg,ValList):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,ValList),
   mc_sample_arg_one(M:Goal,S,Arg,ValList,[]).
 
 sample_arg_one(0,_Goals,_Arg,V,V):-!.
@@ -2187,6 +2347,10 @@ sample_backtracking(L,_El,El):-
  * The value is failure if the query fails.
  */
 mc_sample_arg_raw(M:Goal,S,Arg,Values):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,Values),
   sample_arg_raw(S,M:Goal,Arg,Values),
   erase_samples(M).
 
@@ -2215,6 +2379,10 @@ sample_arg_raw(K1, M:Goals,Arg,[Val|V]):-
  * Arg should be a variable in Query.
  */
 mc_expectation(M:Goal,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
   sample_val(S,M:Goal,Arg, 0,Sum),
   erase_samples(M),
   E is Sum/S.
@@ -2234,6 +2402,11 @@ mc_expectation(M:Goal,S,Arg,E):-
  *   The first Mix samples are discarded (mixing time), default value 0
  */
 mc_gibbs_expectation(M:Goal,S,Arg,E,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
+  must_be(list,Options),
   mc_gibbs_sample_arg(M:Goal,S,Arg,ValList,Options),
   average(ValList,[E]),
   erase_samples(M).
@@ -2244,6 +2417,10 @@ mc_gibbs_expectation(M:Goal,S,Arg,E,Options):-
  * Equivalent to mc_gibbs_expectation/5 with an empty option list.
  */
 mc_gibbs_expectation(M:Goal,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
   mc_gibbs_expectation(M:Goal,S,Arg,E,[]).
 
 
@@ -2257,6 +2434,11 @@ mc_gibbs_expectation(M:Goal,S,Arg,E):-
  * Arg should be a variable in Query.
  */
 mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
   mc_rejection_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,[]),
   average(ValList,[E]),
   erase_samples(M).
@@ -2277,6 +2459,12 @@ mc_rejection_expectation(M:Goal,M:Evidence,S,Arg,E):-
  *   The first Mix samples are discarded (mixing time), default value 0
  */
 mc_gibbs_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
+  must_be(list,Options),
   mc_gibbs_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options),
   average(ValList,[E]),
   erase_samples(M).
@@ -2297,6 +2485,12 @@ mc_gibbs_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
  *   lag between each sample, Lag sampled choices are forgotten, default value 1
  */
 mc_mh_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
+  must_be(list,Options),
   mc_mh_sample_arg(M:Goal,M:Evidence,S,Arg,ValList,Options),
   average(ValList,[E]),
   erase_samples(M).
@@ -2307,6 +2501,11 @@ mc_mh_expectation(M:Goal,M:Evidence,S,Arg,E,Options):-
  * Equivalent to mc_mh_expectation/6 with an empty option list.
  */
 mc_mh_expectation(M:Goal,M:Evidence,S,Arg,E):-
+  must_be(nonvar,Goal),
+  must_be(nonvar,Evidence),
+  must_be(nonneg,S),
+  must_be(var,Arg),
+  must_be(var,E),
   mc_mh_expectation(M:Goal,M:Evidence,S,Arg,E,[]).
 
 value_cont([]-_,0):-!.

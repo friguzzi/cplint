@@ -481,7 +481,7 @@ as in ::
 If the query is non-ground, :code:`prob/2` returns in backtracking the successful instantiations together with their probability.
 When using :code:`mcintyre`, the predicate for querying is ::
 
-	mc_prob(:Query:atom,-Probability:float,+Options:list) is det
+	mc_prob(:Query:conjunction_of_literals,-Probability:float,+Options:list) is det
 
 where :code:`Options` is a list of options, the following are recognised by :code:`mc_prob/3`:
 
@@ -493,14 +493,14 @@ For example ::
 
 You can also use ::
 
-	mc_prob(:Query:atom,-Probability:float) is det
+	mc_prob(:Query:conjunction_of_literals,-Probability:float) is det
 
 which is equivalent to :code:`mc_prob/3` with an empty option list. 
 In general, all the predicates that admit a list of options as an argument have a corresponding version without the list of options that is equivalent to calling the first with an empty option list.
 
 With :code:`mcintyre`, you can also take a given number of samples with ::
 
-	mc_sample(:Query:atom,+Samples:int,-Probability:float, Options:list) is det
+	mc_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float, Options:list) is det
 	
 where :code:`Options` is a list of options, the following are recognised by :code:`mc_sample/4`:
 
@@ -522,7 +522,7 @@ samples :code:`heads(coin)` 1000 times and returns the estimated probability tha
 
 You can also sample using Gibbs sampling with ::
 
-	mc_gibbs_sample(:Query:atom,+Samples:int,-Probability:float,+Options:list) is det
+	mc_gibbs_sample(:Query:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
 
 where :code:`Options` is a list of options, the following are recognised by :code:`mc_gibbs_sample/4`:
 
@@ -535,7 +535,7 @@ where :code:`Options` is a list of options, the following are recognised by :cod
 
 Moreover, you can sample arguments of queries with ::
 
-	mc_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
 The predicate samples :code:`Query` a number of :code:`Samples` times. :code:`Arg` should be a variable in :code:`Query`. 
 The predicate returns in :code:`Values` a list of couples :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random and :code:`N` is the number of samples returning that list of values. If :code:`L` is the empty list, it means that for that sample the query failed. 
@@ -558,14 +558,14 @@ of `markov_chain.pl <http://cplint.eu/e/markov_chain.pl>`_ that takes 50 samples
 
 You can sample arguments of queries also with ::
 
-	mc_sample_arg_raw(:Query:atom,+Samples:int,?Arg:var,-Values:list) is det
+	mc_sample_arg_raw(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list) is det
 	
 that samples :code:`Query` a number of :code:`Samples` times. The predicate returns in :code:`Values` a list of values of :code:`Arg` returned as the first answer by :code:`Query` in a world sampled at random. 
 The value is :code:`failure` if the query fails.
 
 The predicate ::
 
-	mc_sample_arg_first(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_sample_arg_first(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 	
 samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of couples :code:`V-N` where :code:`V` is the value of :code:`Arg` returned as the first answer by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. :code:`V` is failure if the query fails. :code:`mc_sample_arg_first/5` differs from :code:`mc_sample_arg/5` because the first just computes the first answer of the query for each sampled world.
 
@@ -575,7 +575,7 @@ samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Va
 
 The predicate ::
 
-	mc_sample_arg_one(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_sample_arg_one(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 	
 samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of couples :code:`V-N` where :code:`V` is a value sampled with uniform probability from those returned by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. 
 :code:`V` is failure if the query fails.
@@ -586,14 +586,14 @@ samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Va
 
 The predicate ::
 
-	mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
 samples an argument of the query using Gibbs sampling. 
 The same options as those of :code:`mc_gibbs_sample/4` are recognized.
 
 Finally, you can compute expectations with ::
 
-	mc_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+	mc_expectation(:Query:conjunction_of_literals,+N:int,?Arg:var,-Exp:float) is det
 
 that computes the expected value of :code:`Arg` in :code:`Query` by sampling. 
 It takes :code:`N` samples of :code:`Query` and sums up the value of :code:`Arg` for each sample. 
@@ -608,7 +608,7 @@ of :code:`T` by taking 1000 samples.
 
 The predicate ::
 
-	mc_gibbs_expectation(:Query:atom,+N:int,?Arg:var,-Exp:float) is det
+	mc_gibbs_expectation(:Query:conjunction_of_literals,+N:int,?Arg:var,-Exp:float) is det
 
 computes an expectation with Gibbs sampling.
 
@@ -691,7 +691,7 @@ The final probability is given by the number of successes over the total number 
 
 You can take a given number of sample with rejection sampling using ::
 
-	mc_rejection_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+	mc_rejection_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
 
 where :code:`Options` is a list of options, the following are recognised by :code:`mc_sample_arg/5`:
 
@@ -708,7 +708,7 @@ The query and the evidence can be conjunctions of literals.
 
 You can take a given number of sample with Metropolis-Hastings MCMC using ::
 
-	mc_mh_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+	mc_mh_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
 
 where :code:`Lag` (that is set with the options, default value 1) is the number of sampled choices to forget before taking a new sample.
 
@@ -730,7 +730,7 @@ in :code:`F` the number of samples where :code:`eval(2,4)` is false and in :code
 
 The predicate ::
 
-	mc_gibbs_sample(:Query:atom,:Evidence:atom,+Samples:int,-Probability:float,+Options:list) is det
+	mc_gibbs_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Probability:float,+Options:list) is det
 
 performs Gibbs sampling. :code:`Options` is a list of options, the following are recognised by :code:`mc_gibbs_sample/5`:
 
@@ -741,9 +741,9 @@ performs Gibbs sampling. :code:`Options` is a list of options, the following are
 
 Moreover, you can sample arguments of queries with rejection sampling, Metropolis-Hastings MCMC or Gibbs sampling using ::
 
-	mc_rejection_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
-	mc_mh_sample_arg(:Query:atom,:Evidence:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
-	mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_rejection_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_mh_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
 that return the distribution of values for :code:`Arg` in :code:`Query` in :code:`Samples` of :code:`Query` given that :code:`Evidence` is true. :code:`Options` is a list of options, the following are recognised:
 
@@ -754,7 +754,7 @@ that return the distribution of values for :code:`Arg` in :code:`Query` in :code
 
 The predicates return in :code:`Values` a list of couples :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random where :code:`Evidence` is true and :code:`N` is the number of samples returning that list of values. ::
 
-	mc_gibbs_sample_arg(:Query:atom,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
+	mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
 An example of use of the above predicates is ::
 
@@ -764,9 +764,9 @@ of (`arithm.pl <http://cplint.eu/e/arithm.pl>`_).
 
 To compute conditional expectations, use ::
 
-	mc_rejection_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
-	mc_mh_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
-	mc_gibbs_expectation(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-Exp:float,+Options:list) is det
+	mc_rejection_expectation(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+N:int,?Arg:var,-Exp:float) is det
+	mc_mh_expectation(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+N:int,?Arg:var,-Exp:float,+Options:list) is det
+	mc_gibbs_expectation(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+N:int,?Arg:var,-Exp:float,+Options:list) is det
 
 where :code:`Options` is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example ::
 
@@ -805,7 +805,7 @@ After weighting, particles are resampled and the next element of the evidence is
 
 The predicate ::
 
-	mc_lw_sample(:Query:atom,:Evidence:atom,+Samples:int,-Prob:float) is det
+	mc_lw_sample(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+Samples:int,-Prob:float) is det
 
 samples :code:`Query` a number of :code:`Samples` times given that :code:`Evidence` (a conjunction of atoms is allowed here) is true. 
 The predicate returns in :code:`Prob` the probability that the query is true. 
@@ -819,7 +819,7 @@ from `indian_gpa.pl <http://cplint.eu/e/indian_gpa.pl>`_ samples 1000 times the 
 
 The predicate ::
 
-	mc_lw_sample_arg(:Query:atom,:Evidence:atom,+N:int,?Arg:var,-ValList) is det
+	mc_lw_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+N:int,?Arg:var,-ValList) is det
 
 returns in :code:`ValList` a list of couples :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds and :code:`W` is the weight computed by likelihood weighting according to :code:`Evidence` (a conjunction of atoms is allowed here). 
 For example ::
@@ -830,14 +830,14 @@ from `gauss_mean_est.pl <http://cplint.eu/e/gauss_mean_est.pl>`_ samples 100 val
 
 You can compute conditional expectations using likelihood weighting with ::
 
-	mc_lw_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+	mc_lw_expectation(:Query:conjunction_of_literals,Evidence:conjunction_of_literals,+N:int,?Arg:var,-Exp:float) is det
 
 that computes the expected value of :code:`Arg` in :code:`Query` given that :code:`Evidence` is true. 
 It takes :code:`N` samples of :code:`Arg` in :code:`Query`, weighting each according to the evidence, and returns their weighted average.
 
 The predicate ::
 
-	mc_particle_sample_arg(:Query:atom,+Evidence:list,+Samples:int,?Arg:var,-Values:list) is det
+	mc_particle_sample_arg(:Query:conjunction_of_literals,+Evidence:list,+Samples:int,?Arg:var,-Values:list) is det
 
 samples argument :code:`Arg` of :code:`Query` using particle filtering given that :code:`Evidence` is true. :code:`Evidence` is a list of goals and :code:`Query` can be either a single goal or a list of goals. 
 When :code:`Query` is a single goal, the predicate returns in :code:`Values` a list of couples :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds in a particle in the last set of particles and :code:`W` is the weight of the particle. 
@@ -861,14 +861,14 @@ The list of samples is returned in :code:`[F1,F2,F3,F4]`, with each element bein
 
 The predicate ::
 
-	mc_particle_sample(:Query:atom,:Evidence:list,+Samples:int,-Prob:float) is det
+	mc_particle_sample(:Query:conjunction_of_literals,:Evidence:list,+Samples:int,-Prob:float) is det
 
 samples :code:`Query` a number of :code:`Samples` times given that :code:`Evidence` is true using particle filtering. :code:`Evidence` is a list of goals. 
 The predicate returns in :code:`Prob` the probability that the query is true.
 
 You can compute conditional expectations using particle filtering with ::
 
-	mc_particle_expectation(:Query:atom,Evidence:atom,+N:int,?Arg:var,-Exp:float) is det
+	mc_particle_expectation(:Query:conjunction_of_literals,Evidence:list,+N:int,?Arg:var,-Exp:float) is det
 
 that computes the expected value of :code:`Arg` in :code:`Query` given that :code:`Evidence` is true. 
 It uses :code:`N` particles.
