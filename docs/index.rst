@@ -472,7 +472,7 @@ Unconditional Queries
 ----------------------
 The unconditional probability of an atom can be asked using :code:`pita` with the predicate ::
 
-	prob(:Query:atom,-Probability:float) is nondet
+	prob(:Query:conjunction_of_literals,-Probability:float) is nondet
 
 as in ::
 
@@ -646,7 +646,7 @@ Conditional Queries on Discrete Variables
 The conditional probability of an atom query given another atom evidence can be asked using :code:`pita` 
 with the predicate ::
 
-	prob(:Query:atom,:Evidence:atom,-Probability:float) is nondet
+	prob(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float) is nondet
 
 as in ::
 
@@ -658,7 +658,7 @@ The query and the evidence can be conjunctions of literals (positive or negative
 
 You also have ::
 	
-	prob(:Query:atom,:Evidence:atom,-Probability:float,+Options:list) is nondet
+	prob(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float,+Options:list) is nondet
 
 where :code:`Options` is a list of options, the following are recognised by :code:`prob/4`:
 
@@ -935,7 +935,7 @@ that performs branch and bound.
 
 The predicate ::
 
-	viterbi(:Query:conjunction,-Probability:float,-Exp:list) is nondet
+	viterbi(:Query:conjunction_of_literals,-Probability:float,-Exp:list) is nondet
 
 computes the most probable proof of the conjunction of literals :code:`Query`.
 It returns the proof as explanation in :code:`Exp`.

@@ -197,7 +197,7 @@ generate_solution(Env,M,[[G,Cost]|TC],CurrentAdd,Solution,OptCost):-
 % dt_evaluate_strategy(LS,Cost).
 
 /**
- * prob_meta(:Query:conjunction,-Probability:float) is nondet
+ * prob_meta(:Query:conjunction_of_literals,-Probability:float) is nondet
  *
  * To be used in place of prob/2 for meta calls (doesn't abolish tables)
  */
@@ -228,7 +228,7 @@ prob_meta(M:Goal,P):-
   member((Goal,P),L).
 
 /**
- * abd_prob(:Query:conjunction,-Probability:float,-Delta:list) is nondet
+ * abd_prob(:Query:conjunction_of_literals,-Probability:float,-Delta:list) is nondet
  *
  * The predicate computes the most probable abductive explanation of the ground query Query.
  * It returns the explanation in Delta together with its Probability
@@ -475,7 +475,7 @@ prob(M:Goal,P):-
 
 
 /**
- * prob(:Query:conjunction,:Evidence:conjunction,-Probability:float) is nondet
+ * prob(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float) is nondet
  *
  * Equivalent to prob/4 with an empty option list.
  */
@@ -487,7 +487,7 @@ prob(M:Goal,M:Evidence,P):-
   prob_meta(M:Goal,M:Evidence,P).
 
 /**
- * prob_meta(:Query:conjunction,:Evidence:conjunction,-Probability:float) is nondet
+ * prob_meta(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float) is nondet
  *
  * To be used in place of prob/3 for meta calls (doesn't abolish tables)
  */
@@ -522,7 +522,7 @@ prob_meta(M:Goal,M:Evidence,P):-
 
 
 /**
- * prob(:Query:conjunction,:Evidence:conjunction,-Probability:float,+Options:list) is nondet
+ * prob(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,-Probability:float,+Options:list) is nondet
  *
  * The predicate computes the probability of Query given
  * Evidence
