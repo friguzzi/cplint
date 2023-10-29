@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 ===========================================
-cplint on SWISH Manual - SWI-Prolog Version
+cplint - SWI-Prolog Version
 ===========================================
 
 .. toctree::
