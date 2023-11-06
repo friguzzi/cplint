@@ -239,7 +239,7 @@ where :code:`Density` is a special atom identifying a probability density on var
 - :code:`binomial(Var,N,P)` :code:`Var` follows a binomial distribution with parameters :code:`N` (number of trials) and :code:`P` (success probability).
 - :code:`geometric(Var,P)` :code:`Var` follows a geometric distribution with parameter :code:`P` (success probability).
 - :code:`exponential(Var,Lambda)` :code:`Var` follows an exponential distribution with parameter :code:`Lambda` (rate, or inverse scale).
-- :code:`negative_binomial(Var,R,P)` :code:`Var` follows a negative binomial distribution with parameters :code:`N` (number of successes) and :code:`P` (success probability).
+- :code:`negative_binomial(Var,R,P)` :code:`Var` follows a negative binomial distribution with parameters :code:`R` (number of successes) and :code:`P` (success probability).
 - :code:`multinomial(Var,N,P)` :code:`Var` (vector/list of event numbers) follows a multinomial distribution with parameters :code:`N` (number of trials) and :code:`P` (vector/list of event probabilities).
 
 For example ::
