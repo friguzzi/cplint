@@ -2973,7 +2973,7 @@ exponential(Lambda,_M,X,V):-
  * negative_binomial(+N:int,+P:float,+M:module,-Value:int) is det
  *
  * samples a value from a negative binomial probability distribution with parameters
- * R and P and returns it in Value.
+ * N and P and returns it in Value.
  * N is the number of successes
  * P is the success probability
  */
