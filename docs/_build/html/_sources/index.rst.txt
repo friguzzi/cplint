@@ -320,7 +320,7 @@ Moreover, if the density is discrete, the program must include the fact ::
 	disc(predicate).
 
 also after :code:`:- end_lpad.`
-See for example `gauss_mean_est_user.pl <http://cplint.eu/e/gauss_mean_est.pl>`_ and `binomial.pl <http://cplint.eu/e/binomial.pl>`_
+See for example `gauss_mean_est_user.pl <http://cplint.eu/e/gauss_mean_est_user.pl>`_
 
 Distributional Clauses Syntax
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
