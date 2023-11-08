@@ -683,36 +683,6 @@ set_vit(M:Parameter,Value):-
 setting_vit(M:P,V):-
   M:local_kbest_setting(P,V).
 
-extract_vars_list(L,[],V):-
-  rb_new(T),
-  extract_vars_tree(L,T,T1),
-  rb_keys(T1,V).
-
-extract_vars(Term,V):-
-  rb_new(T),
-  extract_vars_term(Term,T,T1),
-  rb_keys(T1,V).
-
-extract_vars_term(Variable, Var0, Var1) :-
-  var(Variable), !,
-  (rb_lookup(Variable, Var0,_) ->
-    Var1 = Var0
-  ;
-    rb_insert(Var0,Variable,1,Var1)
-  ).
-
-extract_vars_term(Term, Var0, Var1) :-
-  Term=..[_F|Args],
-  extract_vars_tree(Args, Var0, Var1).
-
-
-
-extract_vars_tree([], Var, Var).
-
-extract_vars_tree([Term|Tail], Var0, Var1) :-
-  extract_vars_term(Term, Var0, Var),
-  extract_vars_tree(Tail, Var, Var1).
-
 assert_all([],_M,[]).
 
 assert_all([H|T],M,[HRef|TRef]):-
@@ -757,7 +727,7 @@ kbest_expansion((Head :- Body), []):-
 	listN(0, LH, NH),
   get_next_rule_number(M,R),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
   assert_rules(HeadList, M, 0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
@@ -772,7 +742,7 @@ kbest_expansion((Head :- Body), []):-
 	listN(0, LH, NH),
   get_next_rule_number(M,R),
   append(HeadList,BodyList,List),
-  extract_vars_list(List,[],VC),
+  term_variables(List,VC),
 	assert_rules(HeadList, M,0, HeadList, BodyList, NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, BodyList)).
 
@@ -789,7 +759,7 @@ kbest_expansion(Head , []):-
 	length(HeadList, LH),
 	listN(0, LH, NH),
   get_next_rule_number(M,R),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
@@ -801,7 +771,7 @@ kbest_expansion(Head , []):-
 	length(HeadList, LH),
 	listN(0, LH, NH),
   get_next_rule_number(M,R),
-  extract_vars_list(HeadList,[],VC),
+  term_variables(HeadList,VC),
   assert_rules(HeadList, M, 0, HeadList, [], NH, R, VC),
 	assertz(M:rule_by_num(R, VC, NH, HeadList, [])).
 
