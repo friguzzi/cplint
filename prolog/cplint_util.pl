@@ -14,8 +14,8 @@
   density2d/2,
   density2d/3,
   to_pair/2,
-  key/2,
-  value/2,
+  key_pair/2,
+  value_pair/2,
   bin/5,
   beta/2,
   to_atom/2,
@@ -136,7 +136,7 @@ histogram(L0,Chart):-
  */
 histogram(L0,Chart,Options):-
   maplist(to_pair,L0,L1),
-  maplist(key,L1,L2),
+  maplist(key_pair,L1,L2),
   max_list(L2,DMax0),
   min_list(L2,DMin),
   DMax is DMax0+(DMax0-DMin)/12,
@@ -159,8 +159,8 @@ histogram(L0,NBins,Min,Max,Chart):-
   D is Max-Min,
   BinWidth is D/NBins,
   bin(NBins,L,Min,BinWidth,LB),
-  maplist(key,LB,X),
-  maplist(value,LB,Y),
+  maplist(key_pair,LB,X),
+  maplist(value_pair,LB,Y),
   Chart = c3{data:_{x:x,
     columns:[[x|X],[freq|Y]], type:bar},
     axis:_{ x:_{ tick:_{fit:false}}},
@@ -191,8 +191,8 @@ densities(Pri0,Post0,Chart,Options):-
   option(nbins(NBins),Options,40),
   maplist(to_pair,Pri0,Pri1),
   maplist(to_pair,Post0,Post1),
-  maplist(key,Pri1,Pri),
-  maplist(key,Post1,Post),
+  maplist(key_pair,Pri1,Pri),
+  maplist(key_pair,Post1,Post),
   append(Pri,Post,All),
   max_list(All,DMax0),
   min_list(All,DMin),
@@ -205,9 +205,9 @@ densities(Pri0,Post0,Chart,Options):-
   keysort(Post1,Po),
   bin(NBins,Pr,Min,BinWidth,LPr),
   bin(NBins,Po,Min,BinWidth,LPo),
-  maplist(key,LPr,X),
-  maplist(value,LPr,YPr),
-  maplist(value,LPo,YPo),
+  maplist(key_pair,LPr,X),
+  maplist(value_pair,LPr,YPr),
+  maplist(value_pair,LPo,YPo),
   Chart = c3{data:_{x: x,
   columns: [[x|X],
     [pre|YPr],[post|YPo]]},
@@ -227,8 +227,8 @@ density(Post,NBins,Min,Max,Chart):-
   BinWidth is D/NBins,
   keysort(Post,Po),
   bin(NBins,Po,Min,BinWidth,LPo),
-  maplist(key,LPo,X),
-  maplist(value,LPo,YPo),
+  maplist(key_pair,LPo,X),
+  maplist(value_pair,LPo,YPo),
   Chart = c3{data:_{x: x,
   columns: [[x|X],
     [dens|YPo]]},
@@ -277,7 +277,7 @@ density(Post,Chart):-
  */
 density(Post,Chart,Options):-
   maplist(to_pair,Post,Post0),
-  maplist(key,Post0,PoK),
+  maplist(key_pair,Post0,PoK),
   max_list(PoK,DMax0),
   min_list(PoK,DMin),
   DMax is DMax0+(DMax0-DMin)/12,
@@ -336,18 +336,18 @@ to_pair([E]-W,E-W):- !.
 to_pair(E-W,E-W).
 
 /**
- * key(+Pair:pair,-Key:term) is det
+ * key_pair(+Pair:pair,-Key:term) is det
  *
  * Given a pair Key-Vaule, returns its first element Key
  */
-key(K-_,K).
+key_pair(K-_,K).
 
 /**
- * value(+Pair:pair,-Value:term) is det
+ * value_pair(+Pair:pair,-Value:term) is det
  *
  * Given a pair Key-Vaule, returns its second element Value
  */
-value(_ - Y,Y).
+value_pair(_ - Y,Y).
 
 key_x_y([X,Y]-_,X,Y).
 
@@ -595,9 +595,8 @@ sandbox:safe_primitive(cplint_util:density(_,_,_)).
 sandbox:safe_primitive(cplint_util:density2d(_,_)).
 sandbox:safe_primitive(cplint_util:density2d(_,_,_)).
 sandbox:safe_primitive(cplint_util:to_pair(_,_)).
-sandbox:safe_primitive(cplint_util:key(_,_)).
-sandbox:safe_primitive(cplint_util:value(_,_)).
-sandbox:safe_primitive(cplint_util:value(_,_)).
+sandbox:safe_primitive(cplint_util:key_pair(_,_)).
+sandbox:safe_primitive(cplint_util:value_pair(_,_)).
 sandbox:safe_primitive(cplint_util:bin(_,_,_,_,_)).
 sandbox:safe_primitive(cplint_util:beta(_,_)).
 
