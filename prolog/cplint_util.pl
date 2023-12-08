@@ -51,6 +51,7 @@ Utility module for cplint
  * a bar for the probability and a bar for one minus the probability.
  */
 bar(P,Chart):-
+  must_be(float,P),
   PF is 1.0-P,
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P,'F' -PF], type:bar},
           axis:_{x:_{type:category}, rotated: true,
@@ -66,6 +67,7 @@ bar(P,Chart):-
  * a bar for the probability
  */
 bar1(P,Chart):-
+  must_be(float,P),
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-P], type:bar},
           axis:_{x:_{type:category}, rotated: true,
                  y:_{min:0.0,max:1.0,padding:_{bottom:0.0,top:0.0},
@@ -79,6 +81,8 @@ bar1(P,Chart):-
  * a bar for the number of successes and a bar for the number of failures
  */
 bar(S,F,Chart):-
+  must_be(nonneg,S),
+  must_be(nonneg,F),
   Chart = c3{data:_{x:elem, rows:[elem-prob,'T'-S,'F' -F], type:bar},
           axis:_{x:_{type:category}, rotated: true,
                  y:_{min:0.0,padding:_{bottom:0.0}}},
@@ -95,10 +99,11 @@ bar(S,F,Chart):-
  * The size of the bar is given by N.
  */
 argbar(ValList,Chart):-
-        maplist(to_atom,ValList,ValList1),
-        Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
-            axis:_{x:_{type:category}, rotated: true,
-                   y:_{min:0.0,padding:_{bottom:0.0}}},
+  must_be(list,ValList),
+  maplist(to_atom,ValList,ValList1),
+  Chart = c3{data:_{x:elem, rows:[elem-prob|ValList1], type:bar},
+          axis:_{x:_{type:category}, rotated: true,
+                 y:_{min:0.0,padding:_{bottom:0.0}}},
              %  size:_{height: 100},
               legend:_{show: false}}.
 
@@ -135,6 +140,8 @@ histogram(L0,Chart):-
  *   the number of bins for dividing the domain, default value 40
  */
 histogram(L0,Chart,Options):-
+  must_be(list,L0),
+  must_be(list,Options),
   maplist(to_pair,L0,L1),
   maplist(key_pair,L1,L2),
   max_list(L2,DMax0),
@@ -188,6 +195,9 @@ densities(Pri,Post,Chart):-
  *   the number of bins for dividing the domain, default value 40
  * */
 densities(Pri0,Post0,Chart,Options):-
+  must_be(list,Pri0),
+  must_be(list,Post0),
+  must_be(list,Options),
   option(nbins(NBins),Options,40),
   maplist(to_pair,Pri0,Pri1),
   maplist(to_pair,Post0,Post1),
@@ -276,6 +286,8 @@ density(Post,Chart):-
  *   the number of bins for dividing the domain, default value 40
  */
 density(Post,Chart,Options):-
+  must_be(list,Post),
+  must_be(list,Options),
   maplist(to_pair,Post,Post0),
   maplist(key_pair,Post0,PoK),
   max_list(PoK,DMax0),
@@ -314,6 +326,8 @@ density2d(Post0,D):-
  *   the number of bins for dividing the X and Y domains, default value 40
  */
 density2d(Post0,D,Options):-
+  must_be(list,Post0),
+  must_be(list,Options),
   maplist(key_x_y,Post0,X,Y),
   max_list(X,DxMax),
   min_list(X,DxMin),
@@ -493,12 +507,9 @@ vector_sum(A,B,C):-
   matrix_sum([A],[B],[C]).
 
 /**
- * variance(+Values:list,-Average:float,-Variance:float) is det.
  * variance(+Values:list,-Variance:float) is det.
- * std_dev(+Values:list,-Average:float,-Dev:float) is det.
- * std_dev(+Values:list,-Dev:float) is det.
  *
- * Computes the variance or standard deviation (and the average) of Values.
+ * Computes the variance of Values.
  * Values can be
  *
  * * a list of numbers
@@ -511,14 +522,53 @@ vector_sum(A,B,C):-
 variance(L,Var):-
   variance(L,_Av,Var).
 
+/**
+ * variance(+Values:list,-Average:float,-Variance:float) is det.
+ *
+ * Computes the variance the average of Values.
+ * Values can be
+ *
+ * * a list of numbers
+ * * a list of couples number-weight, in which case each number is multiplied by the weight
+ *   before being considered
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ *   The matrix in each element of List must have the same dimension and are aggregated element-
+ *   wise
+ */
 variance(L,Av,Var):-
   average(L,Av),
   maplist(sq_diff(Av),L,LS),
   average(LS,Var).
 
+/**
+ * std_dev(+Values:list,-Dev:float) is det.
+ *
+ * Computes the standard deviation of Values.
+ * Values can be
+ *
+ * * a list of numbers
+ * * a list of couples number-weight, in which case each number is multiplied by the weight
+ *   before being considered
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ *   The matrix in each element of List must have the same dimension and are aggregated element-
+ *   wise
+ */
 std_dev(L,Dev):-
   std_dev(L,_Av,Dev).
 
+/**
+ * std_dev(+Values:list,-Average:float,-Dev:float) is det.
+ *
+ * Computes the standard deviation and the average of Values.
+ * Values can be
+ *
+ * * a list of numbers
+ * * a list of couples number-weight, in which case each number is multiplied by the weight
+ *   before being considered
+ * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ *   The matrix in each element of List must have the same dimension and are aggregated element-
+ *   wise
+ */
 std_dev(L,Av,Dev):-
   variance(L,Av,Var),
   root(Var,Dev).
