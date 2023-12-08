@@ -173,7 +173,7 @@ or ::
 
     A:finite(Var,D):-Body.
 
-where :code:`A` is an atom containing variable :code:`Var` and :code:`D` is a list of couples :code:`Value:Prob` assigning probability :code:`Prob` to :code:`Value`. 
+where :code:`A` is an atom containing variable :code:`Var` and :code:`D` is a list of pairs :code:`Value:Prob` assigning probability :code:`Prob` to :code:`Value`. 
 
 Moreover, you can use ::
 
@@ -338,7 +338,7 @@ DC can be used to represent also discrete distributions using ::
 	T~uniform(L) := Body.
 	T~finite(D) := Body.
 
-where :code:`L` is a list of values and :code:`D` is a list of couples :code:`P:V` with :code:`P` a probability and :code:`V` a value. 
+where :code:`L` is a list of values and :code:`D` is a list of pairs :code:`P:V` with :code:`P` a probability and :code:`V` a value. 
 If :code:`Body` is empty, as in regular Prolog, the implication symbol :code:`:=` can be omitted.
 
 The Indian GPA problem from `<http://www.robots.ox.ac.uk/~fwood/anglican/examples/viewer/?worksheet=indian-gpa>`_ in distributional clauses syntax 
@@ -538,9 +538,9 @@ Moreover, you can sample arguments of queries with ::
 	mc_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
 The predicate samples :code:`Query` a number of :code:`Samples` times. :code:`Arg` should be a variable in :code:`Query`. 
-The predicate returns in :code:`Values` a list of couples :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random and :code:`N` is the number of samples returning that list of values. If :code:`L` is the empty list, it means that for that sample the query failed. 
+The predicate returns in :code:`Values` a list of pairs :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random and :code:`N` is the number of samples returning that list of values. If :code:`L` is the empty list, it means that for that sample the query failed. 
 If :code:`L` is a list with a single element, it means that for that sample the query is determinate. 
-If, in all couples :code:`L-N`, :code:`L` is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. 
+If, in all pairs :code:`L-N`, :code:`L` is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true. 
 This is one of the assumptions taken for programs of the PRISM system :cite:`DBLP:journals/jair/SatoK01`. 
 For example `pcfglr.pl <http://cplint.eu/e/pcfglr.pl>`_ and `plcg.pl <http://cplint.eu/e/plcg.pl>`_ satisfy this constraint while `markov_chain.pl <http://cplint.eu/e/markov_chain.pl>`_ and `var_obj.pl <http://cplint.eu/e/var_obj.pl>`_ doesn’t.
 
@@ -567,7 +567,7 @@ The predicate ::
 
 	mc_sample_arg_first(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 	
-samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of couples :code:`V-N` where :code:`V` is the value of :code:`Arg` returned as the first answer by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. :code:`V` is failure if the query fails. :code:`mc_sample_arg_first/5` differs from :code:`mc_sample_arg/5` because the first just computes the first answer of the query for each sampled world.
+samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of pairs :code:`V-N` where :code:`V` is the value of :code:`Arg` returned as the first answer by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. :code:`V` is failure if the query fails. :code:`mc_sample_arg_first/5` differs from :code:`mc_sample_arg/5` because the first just computes the first answer of the query for each sampled world.
 
 :code:`Options` is a list of options, the following are recognised by :code:`mc_sample_arg_first/5`:
 
@@ -577,7 +577,7 @@ The predicate ::
 
 	mc_sample_arg_one(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 	
-samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of couples :code:`V-N` where :code:`V` is a value sampled with uniform probability from those returned by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. 
+samples :code:`Query` a number of :code:`Samples` times and returns in :code:`Values` a list of pairs :code:`V-N` where :code:`V` is a value sampled with uniform probability from those returned by :code:`Query` in a world sampled at random and :code:`N` is the number of samples returning that value. 
 :code:`V` is failure if the query fails.
 
 :code:`Options` is a list of options, the following are recognised by :code:`mc_sample_arg_one/5`:
@@ -752,7 +752,7 @@ that return the distribution of values for :code:`Arg` in :code:`Query` in :code
 - :code:`block(+Block:int)` Perform blocked Gibbs: :code:`Block` variables are sampled together, default value 1 (only Gibbs)
 - :code:`bar(-BarChar:dict)` :code:`BarChart` is a bar chart of the possible values
 
-The predicates return in :code:`Values` a list of couples :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random where :code:`Evidence` is true and :code:`N` is the number of samples returning that list of values. ::
+The predicates return in :code:`Values` a list of pairs :code:`L-N` where :code:`L` is the list of values of :code:`Arg` for which :code:`Query` succeeds in a world sampled at random where :code:`Evidence` is true and :code:`N` is the number of samples returning that list of values. ::
 
 	mc_gibbs_sample_arg(:Query:conjunction_of_literals,+Samples:int,?Arg:var,-Values:list,+Options:list) is det
 
@@ -821,7 +821,7 @@ The predicate ::
 
 	mc_lw_sample_arg(:Query:conjunction_of_literals,:Evidence:conjunction_of_literals,+N:int,?Arg:var,-ValList) is det
 
-returns in :code:`ValList` a list of couples :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds and :code:`W` is the weight computed by likelihood weighting according to :code:`Evidence` (a conjunction of atoms is allowed here). 
+returns in :code:`ValList` a list of pairs :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds and :code:`W` is the weight computed by likelihood weighting according to :code:`Evidence` (a conjunction of atoms is allowed here). 
 For example ::
 
 	?- mc_lw_sample_arg(val(0,X),(val(1,9),val(2,8)),100,X,L).
@@ -840,11 +840,11 @@ The predicate ::
 	mc_particle_sample_arg(:Query:conjunction_of_literals,+Evidence:list,+Samples:int,?Arg:var,-Values:list) is det
 
 samples argument :code:`Arg` of :code:`Query` using particle filtering given that :code:`Evidence` is true. :code:`Evidence` is a list of goals and :code:`Query` can be either a single goal or a list of goals. 
-When :code:`Query` is a single goal, the predicate returns in :code:`Values` a list of couples :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds in a particle in the last set of particles and :code:`W` is the weight of the particle. 
+When :code:`Query` is a single goal, the predicate returns in :code:`Values` a list of pairs :code:`V-W` where :code:`V` is a value of :code:`Arg` for which :code:`Query` succeeds in a particle in the last set of particles and :code:`W` is the weight of the particle. 
 For each element of :code:`Evidence`, the particles are obtained by sampling :code:`Query` in each current particle and weighting the particle by the likelihood of the evidence element.
 
 When :code:`Query` is a list of goals, :code:`Arg` is a list of variables, one for each query of :code:`Query` and :code:`Arg` and :code:`Query` must have the same length of :code:`Evidence`. 
-:code:`Values` is then list of the same length of :code:`Evidence` and each of its elements is a list of couples :code:`V-W` where :code:`V` is a value of the corresponding element of :code:`Arg` for which the corresponding element of :code:`Query` succeeds in a particle and :code:`W` is the weight of the particle. 
+:code:`Values` is then list of the same length of :code:`Evidence` and each of its elements is a list of pairs :code:`V-W` where :code:`V` is a value of the corresponding element of :code:`Arg` for which the corresponding element of :code:`Query` succeeds in a particle and :code:`W` is the weight of the particle. 
 For each element of :code:`Evidence`, the particles are obtained by sampling the corresponding element of :code:`Query` in each current particle and weighting the particle by the likelihood of the evidence element.
 
 For example ::
@@ -1039,7 +1039,7 @@ You can draw the probability of a query being true and being false as a bar char
 	bar(+Successes:int,+Failures:int,-Chart:dict) is det
 	argbar(+Values:list,-Chart:dict) is det
 
-They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where :code:`Values` is a list of couples :code:`V-N` where :code:`V` is the value and :code:`N` is the number of samples returning that value.
+They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where :code:`Values` is a list of pairs :code:`V-N` where :code:`V` is the value and :code:`N` is the number of samples returning that value.
 
 To render C3.js charts you have to include ::
 
@@ -1082,7 +1082,9 @@ The predicate ::
 
 	histogram(+List:list,-Chart:dict,+Options:list) is det
 
-draws a histogram of the samples in :code:`List` that must be a list of couples of the form :code:`[V]-W` or :code:`V-W` where :code:`V` is a sampled value and :code:`W` is its weight. 
+draws a histogram of the samples in :code:`List` that must be a list of pairs of the 
+form :code:`[V]-W` or :code:`V-W` where :code:`V` is a sampled value and :code:`W` is its weight,
+or a list of sampled values. 
 This is the format of the list of samples returned by argument sampling predicates.
 
 The predicate ::
@@ -1103,7 +1105,8 @@ The predicate ::
 
 	densities(+PriorList:list,+PostList:list,-Chart:dict,+Options:list) is det
 
-draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in :code:`PriorList` and :code:`PostList` can be either couples :code:`[V]-W` or :code:`V-W` where :code:`V` is a value and :code:`W` its weight. 
+draws a line chart of the density of two sets of samples, usually prior and post observations. 
+The samples in :code:`PriorList` and :code:`PostList` must take the same form as :code:`List` for :code:`histogram/3`. 
 The same options as for :code:`histogram/3` and :code:`density/3` are recognized.
 
 For example, the query ::
@@ -1686,7 +1689,7 @@ where :code:`Program` is a list of terms representing clauses and :code:`List_of
 
 :code:`test/7` returns the log likelihood of the test examples in :code:`LL`, the Area Under the ROC curve in :code:`AUCROC`, a dictionary containing the list of points (in the form of Prolog pairs :code:`x-y`) of the ROC curve in :code:`ROC`, the Area Under the PR curve in :code:`AUCPR`, a dictionary containing the list of points of the PR curve in :code:`PR`.
 
-:code:`test_prob/6` returns the log likelihood of the test examples in :code:`LL`, the numbers of positive and negative examples in :code:`NPos` and :code:`NNeg` and the list :code:`ExampleList` containing couples :code:`Prob-Ex` where :code:`Ex` is :code:`a` for :code:`a` a positive example and :code:`\+(a)` for :code:`a` a negative example and :code:`Prob` is the probability of example :code:`a`.
+:code:`test_prob/6` returns the log likelihood of the test examples in :code:`LL`, the numbers of positive and negative examples in :code:`NPos` and :code:`NNeg` and the list :code:`ExampleList` containing pairs :code:`Prob-Ex` where :code:`Ex` is :code:`a` for :code:`a` a positive example and :code:`\+(a)` for :code:`a` a negative example and :code:`Prob` is the probability of example :code:`a`.
 
 Then you can draw the curves in :code:`cplint` on SWISH using C3.js using ::
 

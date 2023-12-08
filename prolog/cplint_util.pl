@@ -91,11 +91,11 @@ bar(S,F,Chart):-
 /**
  * argbar(+Values:list,-Chart:dict) is det
  *
- * Values is a list of couples V-N where
+ * Values is a list of pairs V-N where
  * V is the value and N is the number of samples
  * returning that value.
  * The predicate returns a dict for rendering with c3 as a bar chart with
- * a bar each value V.
+ * a bar for each value V.
  * The size of the bar is given by N.
  */
 argbar(ValList,Chart):-
@@ -128,8 +128,8 @@ histogram(L0,Chart):-
 /**
  * histogram(+List:list,-Chart:dict,+Options:list) is det
  *
- * Draws a histogram of the samples in List. List must be a list of couples of the form [V]-W or V-W
- * where V is a sampled value and W is its weight.
+ * Draws a histogram of the samples in List. List must be a list of pairs of the form [V]-W or V-W
+ * where V is a sampled value and W is its weight, or a list of values.
  *
  * Options is a list of options, the following are recognised by histogram/3:
  * * min(+Min:float)
@@ -142,7 +142,11 @@ histogram(L0,Chart):-
 histogram(L0,Chart,Options):-
   must_be(list,L0),
   must_be(list,Options),
-  maplist(to_pair,L0,L1),
+  (L0=[_-_|_] ->
+    maplist(to_pair,L0,L1)
+  ;
+    maplist([X,Y]>>(Y=(X-1)),L0,L1)
+  ),
   maplist(key_pair,L1,L2),
   max_list(L2,DMax0),
   min_list(L2,DMin),
@@ -150,19 +154,18 @@ histogram(L0,Chart,Options):-
   option(max(Max),Options,DMax),
   option(min(Min),Options,DMin),
   option(nbins(NBins),Options,40),
-  histogram(L0,NBins,Min,Max,Chart).
+  histogram(L1,NBins,Min,Max,Chart).
 
 /**
  * histogram(+List:list,+NBins:int,+Min:float,+Max:float,-Chart:dict) is det
  *
  * Draws a histogram of the samples in List dividing the domain in
- * NBins bins. List must be a list of couples of the form [V]-W or V-W
+ * NBins bins. List must be a list of pairs of the form V-W
  * where V is a sampled value and W is its weight. The minimum and maximum
  * values of the domains must be provided.
  */
 histogram(L0,NBins,Min,Max,Chart):-
-  maplist(to_pair,L0,L1),
-  keysort(L1,L),
+  keysort(L0,L),
   D is Max-Min,
   BinWidth is D/NBins,
   bin(NBins,L,Min,BinWidth,LB),
@@ -188,8 +191,9 @@ densities(Pri,Post,Chart):-
  *
  * Draws a line chart of the density of two sets of samples, usually
  * prior and post observations. The samples from the prior are in PriorList
- * while the samples from the posterior are in PostList
- * as couples [V]-W or V-W where V is a value and W its weigth.
+ * while the samples from the posterior are in PostList. 
+ * PriorList and PostList must be lists of pairs of the form [V]-W or V-W
+ * where V is a sampled value and W is its weight, or lists of values V.
  * Options is a list of options, the following are recognised by histogram/3:
  * * nbins(+NBins:int)
  *   the number of bins for dividing the domain, default value 40
@@ -198,9 +202,17 @@ densities(Pri0,Post0,Chart,Options):-
   must_be(list,Pri0),
   must_be(list,Post0),
   must_be(list,Options),
+  (Pri0=[_-_|_] ->
+    maplist(to_pair,Pri0,Pri1)
+  ;
+    maplist([X,Y]>>(Y=(X-1)),Pri0,Pri1)
+  ),
+  (Post0=[_-_|_] ->
+    maplist(to_pair,Post0,Post1)
+  ;
+    maplist([X,Y]>>(Y=(X-1)),Post0,Post1)
+  ),
   option(nbins(NBins),Options,40),
-  maplist(to_pair,Pri0,Pri1),
-  maplist(to_pair,Post0,Post1),
   maplist(key_pair,Pri1,Pri),
   maplist(key_pair,Post1,Post),
   append(Pri,Post,All),
@@ -228,7 +240,7 @@ densities(Pri0,Post0,Chart,Options):-
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
- * as couples [V]-W or V-W where V is a value and W its weigth.
+ * as pairs [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
  * NBins bins. The X axis goes from Min to Max.
  */
@@ -250,7 +262,7 @@ density(Post,NBins,Min,Max,Chart):-
  *
  * Returns the density of a sets of two dimensional samples.
  * The samples are in List
- * as couples [V]-W or V-W where V is a value and W its weigth.
+ * as pairs [V]-W or V-W where V is a value and W its weigth.
  * The lines are drawn dividing the domain in
  * NBins bins. The X axis goes from Min to Max.
  */
@@ -275,7 +287,7 @@ density(Post,Chart):-
  *
  * Draws a line chart of the density of a sets of samples.
  * The samples are in List
- * as couples [V]-W or V-W where V is a value and W its weigth.
+ * as pairs [V]-W or V-W where V is a value and W its weigth.
  *
  * Options is a list of options, the following are recognised by density/3:
  * * min(+Min:float)
@@ -288,7 +300,11 @@ density(Post,Chart):-
 density(Post,Chart,Options):-
   must_be(list,Post),
   must_be(list,Options),
-  maplist(to_pair,Post,Post0),
+  (Post=[_-_|_] ->
+    maplist(to_pair,Post,Post0)
+  ;
+    maplist([X,Y]>>(Y=(X-1)),Post,Post0)
+  ),
   maplist(key_pair,Post0,PoK),
   max_list(PoK,DMax0),
   min_list(PoK,DMin),
@@ -299,7 +315,7 @@ density(Post,Chart,Options):-
   density(Post0,NBins,Min,Max,Chart).
 
 /**
- * density2d(+List:list,-Chart:dict) is det
+ * density2d(+List:list,-Dens:list) is det
  *
  *  Equivalent to density2d/3 with an empty option list.
  */
@@ -307,11 +323,12 @@ density2d(Post0,D):-
   density2d(Post0,D,[]).
 
 /**
- * density2d(+List:list,-Chart:dict,+Options:list) is det
+ * density2d(+List:list,-Dens:list,+Options:list) is det
  *
- * Draws a line chart of the density of a sets of samples.
+ * Returns a set of 3-dimensional points representing the plot of the 
+ * density of a sets of 2-dimensional samples.
  * The samples are in List
- * as couples [V]-W or V-W where V is a value and W its weigth.
+ * as pairs [X,Y]-W where (X,Y) is a point and W its weigth.
  *
  * Options is a list of options, the following are recognised by density2d/3:
  * * xmin(+XMin:float)
@@ -453,11 +470,11 @@ comp_lgamma(X,LnG):-
  * Values can be
  *
  * * a list of numbers
- * * a list of couples number-weight, in which case each number is multiplied by the weight
+ * * a list of pairs number-weight, in which case each number is multiplied by the weight
  *   before being summed
  * * a list of lists,  in which case lists are considered as matrices of numbers and averaged
  *   element-wise
- * * a list of couples list-weight, in which case the list is considered as a matrix of numbers.
+ * * a list of pairs list-weight, in which case the list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -513,9 +530,9 @@ vector_sum(A,B,C):-
  * Values can be
  *
  * * a list of numbers
- * * a list of couples number-weight, in which case each number is multiplied by the weight
+ * * a list of pairs number-weight, in which case each number is multiplied by the weight
  *   before being considered
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ * * a list of pairs list-weight, in which case list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -529,9 +546,9 @@ variance(L,Var):-
  * Values can be
  *
  * * a list of numbers
- * * a list of couples number-weight, in which case each number is multiplied by the weight
+ * * a list of pairs number-weight, in which case each number is multiplied by the weight
  *   before being considered
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ * * a list of pairs list-weight, in which case list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -547,9 +564,9 @@ variance(L,Av,Var):-
  * Values can be
  *
  * * a list of numbers
- * * a list of couples number-weight, in which case each number is multiplied by the weight
+ * * a list of pairs number-weight, in which case each number is multiplied by the weight
  *   before being considered
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ * * a list of pairs list-weight, in which case list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */
@@ -563,9 +580,9 @@ std_dev(L,Dev):-
  * Values can be
  *
  * * a list of numbers
- * * a list of couples number-weight, in which case each number is multiplied by the weight
+ * * a list of pairs number-weight, in which case each number is multiplied by the weight
  *   before being considered
- * * a list of couples list-weight, in which case list is considered as a matrix of numbers.
+ * * a list of pairs list-weight, in which case list is considered as a matrix of numbers.
  *   The matrix in each element of List must have the same dimension and are aggregated element-
  *   wise
  */

@@ -60,7 +60,7 @@
 
 
 \title{cplint Documentation}
-\date{Nov 07, 2023}
+\date{Dec 08, 2023}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -301,7 +301,7 @@ or
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{\sphinxupquote{Var}} and \sphinxcode{\sphinxupquote{D}} is a list of couples \sphinxcode{\sphinxupquote{Value:Prob}} assigning probability \sphinxcode{\sphinxupquote{Prob}} to \sphinxcode{\sphinxupquote{Value}}.
+where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{\sphinxupquote{Var}} and \sphinxcode{\sphinxupquote{D}} is a list of pairs \sphinxcode{\sphinxupquote{Value:Prob}} assigning probability \sphinxcode{\sphinxupquote{Prob}} to \sphinxcode{\sphinxupquote{Value}}.
 
 \sphinxAtStartPar
 Moreover, you can use
@@ -564,7 +564,7 @@ DC can be used to represent also discrete distributions using
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-where \sphinxcode{\sphinxupquote{L}} is a list of values and \sphinxcode{\sphinxupquote{D}} is a list of couples \sphinxcode{\sphinxupquote{P:V}} with \sphinxcode{\sphinxupquote{P}} a probability and \sphinxcode{\sphinxupquote{V}} a value.
+where \sphinxcode{\sphinxupquote{L}} is a list of values and \sphinxcode{\sphinxupquote{D}} is a list of pairs \sphinxcode{\sphinxupquote{P:V}} with \sphinxcode{\sphinxupquote{P}} a probability and \sphinxcode{\sphinxupquote{V}} a value.
 If \sphinxcode{\sphinxupquote{Body}} is empty, as in regular Prolog, the implication symbol \sphinxcode{\sphinxupquote{:=}} can be omitted.
 
 \sphinxAtStartPar
@@ -857,9 +857,9 @@ Moreover, you can sample arguments of queries with
 
 \sphinxAtStartPar
 The predicate samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times. \sphinxcode{\sphinxupquote{Arg}} should be a variable in \sphinxcode{\sphinxupquote{Query}}.
-The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
+The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
 If \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that for that sample the query is determinate.
-If, in all couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
+If, in all pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
 This is one of the assumptions taken for programs of the PRISM system {[}\hyperlink{cite.index:id50}{SK01}{]}.
 For example \sphinxhref{http://cplint.eu/e/pcfglr.pl}{pcfglr.pl} and \sphinxhref{http://cplint.eu/e/plcg.pl}{plcg.pl} satisfy this constraint while \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} and \sphinxhref{http://cplint.eu/e/var\_obj.pl}{var\_obj.pl} doesn’t.
 
@@ -909,7 +909,7 @@ The predicate
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value of \sphinxcode{\sphinxupquote{Arg}} returned as the first answer by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value. \sphinxcode{\sphinxupquote{V}} is failure if the query fails. \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}} differs from \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}} because the first just computes the first answer of the query for each sampled world.
+samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value of \sphinxcode{\sphinxupquote{Arg}} returned as the first answer by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value. \sphinxcode{\sphinxupquote{V}} is failure if the query fails. \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}} differs from \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}} because the first just computes the first answer of the query for each sampled world.
 
 \sphinxAtStartPar
 \sphinxcode{\sphinxupquote{Options}} is a list of options, the following are recognised by \sphinxcode{\sphinxupquote{mc\_sample\_arg\_first/5}}:
@@ -928,7 +928,7 @@ The predicate
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is a value sampled with uniform probability from those returned by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
+samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquote{Samples}} times and returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is a value sampled with uniform probability from those returned by \sphinxcode{\sphinxupquote{Query}} in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
 \sphinxcode{\sphinxupquote{V}} is failure if the query fails.
 
 \sphinxAtStartPar
@@ -1235,7 +1235,7 @@ that return the distribution of values for \sphinxcode{\sphinxupquote{Arg}} in \
 \end{itemize}
 
 \sphinxAtStartPar
-The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
+The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
@@ -1339,7 +1339,7 @@ The predicate
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-returns in \sphinxcode{\sphinxupquote{ValList}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds and \sphinxcode{\sphinxupquote{W}} is the weight computed by likelihood weighting according to \sphinxcode{\sphinxupquote{Evidence}} (a conjunction of atoms is allowed here).
+returns in \sphinxcode{\sphinxupquote{ValList}} a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds and \sphinxcode{\sphinxupquote{W}} is the weight computed by likelihood weighting according to \sphinxcode{\sphinxupquote{Evidence}} (a conjunction of atoms is allowed here).
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -1369,12 +1369,12 @@ The predicate
 
 \sphinxAtStartPar
 samples argument \sphinxcode{\sphinxupquote{Arg}} of \sphinxcode{\sphinxupquote{Query}} using particle filtering given that \sphinxcode{\sphinxupquote{Evidence}} is true. \sphinxcode{\sphinxupquote{Evidence}} is a list of goals and \sphinxcode{\sphinxupquote{Query}} can be either a single goal or a list of goals.
-When \sphinxcode{\sphinxupquote{Query}} is a single goal, the predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a particle in the last set of particles and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
+When \sphinxcode{\sphinxupquote{Query}} is a single goal, the predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a particle in the last set of particles and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
 For each element of \sphinxcode{\sphinxupquote{Evidence}}, the particles are obtained by sampling \sphinxcode{\sphinxupquote{Query}} in each current particle and weighting the particle by the likelihood of the evidence element.
 
 \sphinxAtStartPar
 When \sphinxcode{\sphinxupquote{Query}} is a list of goals, \sphinxcode{\sphinxupquote{Arg}} is a list of variables, one for each query of \sphinxcode{\sphinxupquote{Query}} and \sphinxcode{\sphinxupquote{Arg}} and \sphinxcode{\sphinxupquote{Query}} must have the same length of \sphinxcode{\sphinxupquote{Evidence}}.
-\sphinxcode{\sphinxupquote{Values}} is then list of the same length of \sphinxcode{\sphinxupquote{Evidence}} and each of its elements is a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of the corresponding element of \sphinxcode{\sphinxupquote{Arg}} for which the corresponding element of \sphinxcode{\sphinxupquote{Query}} succeeds in a particle and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
+\sphinxcode{\sphinxupquote{Values}} is then list of the same length of \sphinxcode{\sphinxupquote{Evidence}} and each of its elements is a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value of the corresponding element of \sphinxcode{\sphinxupquote{Arg}} for which the corresponding element of \sphinxcode{\sphinxupquote{Query}} succeeds in a particle and \sphinxcode{\sphinxupquote{W}} is the weight of the particle.
 For each element of \sphinxcode{\sphinxupquote{Evidence}}, the particles are obtained by sampling the corresponding element of \sphinxcode{\sphinxupquote{Query}} in each current particle and weighting the particle by the likelihood of the evidence element.
 
 \sphinxAtStartPar
@@ -1647,7 +1647,7 @@ You can draw the probability of a query being true and being false as a bar char
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where \sphinxcode{\sphinxupquote{Values}} is a list of couples \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
+They return a dict for rendering with C3.js as a bar chart: the first returns bar chart with a single bar for the probability, the second a chart with bar for the probability and a bar for one minus the probability, the third a chart with a bar for the number of successes and a bar for the number of failures, and the fourth a chart with a for bar each value, where \sphinxcode{\sphinxupquote{Values}} is a list of pairs \sphinxcode{\sphinxupquote{V\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{V}} is the value and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that value.
 
 \sphinxAtStartPar
 To render C3.js charts you have to include
@@ -1718,7 +1718,9 @@ The predicate
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-draws a histogram of the samples in \sphinxcode{\sphinxupquote{List}} that must be a list of couples of the form \sphinxcode{\sphinxupquote{{[}V{]}\sphinxhyphen{}W}} or \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a sampled value and \sphinxcode{\sphinxupquote{W}} is its weight.
+draws a histogram of the samples in \sphinxcode{\sphinxupquote{List}} that must be a list of pairs of the
+form \sphinxcode{\sphinxupquote{{[}V{]}\sphinxhyphen{}W}} or \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a sampled value and \sphinxcode{\sphinxupquote{W}} is its weight,
+or a list of sampled values.
 This is the format of the list of samples returned by argument sampling predicates.
 
 \sphinxAtStartPar
@@ -1759,7 +1761,8 @@ The predicate
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-draws a line chart of the density of two sets of samples, usually prior and post observations. The samples in \sphinxcode{\sphinxupquote{PriorList}} and \sphinxcode{\sphinxupquote{PostList}} can be either couples \sphinxcode{\sphinxupquote{{[}V{]}\sphinxhyphen{}W}} or \sphinxcode{\sphinxupquote{V\sphinxhyphen{}W}} where \sphinxcode{\sphinxupquote{V}} is a value and \sphinxcode{\sphinxupquote{W}} its weight.
+draws a line chart of the density of two sets of samples, usually prior and post observations.
+The samples in \sphinxcode{\sphinxupquote{PriorList}} and \sphinxcode{\sphinxupquote{PostList}} must take the same form as \sphinxcode{\sphinxupquote{List}} for \sphinxcode{\sphinxupquote{histogram/3}}.
 The same options as for \sphinxcode{\sphinxupquote{histogram/3}} and \sphinxcode{\sphinxupquote{density/3}} are recognized.
 
 \sphinxAtStartPar
@@ -2660,7 +2663,7 @@ where \sphinxcode{\sphinxupquote{Program}} is a list of terms representing claus
 \sphinxcode{\sphinxupquote{test/7}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the Area Under the ROC curve in \sphinxcode{\sphinxupquote{AUCROC}}, a dictionary containing the list of points (in the form of Prolog pairs \sphinxcode{\sphinxupquote{x\sphinxhyphen{}y}}) of the ROC curve in \sphinxcode{\sphinxupquote{ROC}}, the Area Under the PR curve in \sphinxcode{\sphinxupquote{AUCPR}}, a dictionary containing the list of points of the PR curve in \sphinxcode{\sphinxupquote{PR}}.
 
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing couples \sphinxcode{\sphinxupquote{Prob\sphinxhyphen{}Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{\textbackslash{}+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
+\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing pairs \sphinxcode{\sphinxupquote{Prob\sphinxhyphen{}Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{\textbackslash{}+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
 
 \sphinxAtStartPar
 Then you can draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH using C3.js using
