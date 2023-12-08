@@ -71,7 +71,7 @@ hist_mh_dis(Samples,Lag,NBins,Chart):-
 ?- hist_uncond(1000,40,G).
 % take 1000 samples of X in mix(X) and draw a histogram with 40 bins representing 
 % the probability density of X 
-?- mc_sample_arg(mix(X),1000,X,L),histogram(L,Chart,[nbins(40)]).
+?- mc_sample_arg_raw(mix(X),1000,X,_L),histogram(_L,Chart,[nbins(40)]).
 % take 1000 samples of X in mix(X) and draw a histogram with 40 bins representing 
 % the probability density of X
 ?- mc_expectation(mix(X),1000,X,E).
