@@ -70,17 +70,3 @@ Support
 
 Use the Google group [https://groups.google.com/forum/#!forum/cplint](https://groups.google.com/forum/#!forum/cplint).
 
-Further documentation
----------------------
-
-You can find further documentation (PlDoc) on the various modules at the links below:
-
-* [pita](https://www.swi-prolog.org/pack/file_details/cplint/prolog/pita.pl)
-* [mcintyre](https://www.swi-prolog.org/pack/file_details/cplint/prolog/mcintyre.pl)
-* [pitaind](https://www.swi-prolog.org/pack/file_details/cplint/prolog/pitaind.pl)
-* [viterbi](https://www.swi-prolog.org/pack/file_details/cplint/prolog/viterbi.pl)
-* [kbest](https://www.swi-prolog.org/pack/file_details/cplint/prolog/kbest.pl)
-* [slipcover](https://www.swi-prolog.org/pack/file_details/cplint/prolog/slipcover.pl)
-* [lemur](https://www.swi-prolog.org/pack/file_details/cplint/prolog/lemur.pl)
-* [cplint_util](https://www.swi-prolog.org/pack/file_details/cplint/prolog/cplint_util.pl)
- 
