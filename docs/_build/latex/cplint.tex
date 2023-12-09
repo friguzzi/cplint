@@ -80,7 +80,7 @@
 \chapter{Introduction}
 \label{\detokenize{index:introduction}}
 \sphinxAtStartPar
-cplint is a suite of programs for reasoning with LPADs/CP\sphinxhyphen{}logic programs {[}\hyperlink{cite.index:id66}{VDB06}, \hyperlink{cite.index:id67}{VDB09}, \hyperlink{cite.index:id65}{VV03}, \hyperlink{cite.index:id45}{VVB04}{]}.
+cplint is a suite of programs for reasoning with LPADs/CP\sphinxhyphen{}logic programs {[}\hyperlink{cite.index:id69}{VDB06}, \hyperlink{cite.index:id70}{VDB09}, \hyperlink{cite.index:id68}{VV03}, \hyperlink{cite.index:id48}{VVB04}{]}.
 It contains modules for both inference and learning.
 
 \sphinxAtStartPar
@@ -131,6 +131,18 @@ cplint on SWISH is a web application for using cplint available at \sphinxurl{ht
 \item {} 
 \sphinxAtStartPar
 \sphinxhref{https://friguzzi.github.io/cplint\_r}{cplint\_r}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxhref{https://friguzzi.github.io/auc}{auc}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxhref{https://friguzzi.github.io/matrix}{matrix}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxhref{https://friguzzi.github.io/bddem}{bddem}
 
 \end{itemize}
 
@@ -273,7 +285,7 @@ stands for:
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-The coin example {[}\hyperlink{cite.index:id45}{VVB04}{]} is represented as (file \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
+The coin example {[}\hyperlink{cite.index:id48}{VVB04}{]} is represented as (file \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
@@ -358,7 +370,7 @@ where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{
 \subsection{ProbLog Syntax}
 \label{\detokenize{index:problog-syntax}}
 \sphinxAtStartPar
-You can also use ProbLog {[}\hyperlink{cite.index:id46}{DRKT07}{]} syntax, so a general clause takes the form
+You can also use ProbLog {[}\hyperlink{cite.index:id49}{DRKT07}{]} syntax, so a general clause takes the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{l+s+sAtom}{p1}\PYG{o}{::}\PYG{l+s+sAtom}{h1} \PYG{p}{;} \PYG{p}{.}\PYG{p}{.}\PYG{p}{.} \PYG{p}{;} \PYG{l+s+sAtom}{pn}\PYG{p}{:}\PYG{o}{:}\PYG{n+nf}{hn} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{body}
@@ -371,7 +383,7 @@ where the \(pi\) are numeric expressions.
 \subsection{PRISM Syntax}
 \label{\detokenize{index:prism-syntax}}
 \sphinxAtStartPar
-You can also use PRISM {[}\hyperlink{cite.index:id47}{SK97}{]} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi\sphinxhyphen{}ary switch).
+You can also use PRISM {[}\hyperlink{cite.index:id50}{SK97}{]} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi\sphinxhyphen{}ary switch).
 A call \sphinxcode{\sphinxupquote{msw(term,value)}} means that a random variable associated to \sphinxcode{\sphinxupquote{term}} assumes value \sphinxcode{\sphinxupquote{value}}.
 
 \sphinxAtStartPar
@@ -584,7 +596,7 @@ See for example \sphinxhref{http://cplint.eu/e/gauss\_mean\_est\_user.pl}{gauss\
 \subsection{Distributional Clauses Syntax}
 \label{\detokenize{index:distributional-clauses-syntax}}
 \sphinxAtStartPar
-You can also use the syntax of Distributional Clauses (DC) {[}\hyperlink{cite.index:id48}{NDLDR16}{]}.
+You can also use the syntax of Distributional Clauses (DC) {[}\hyperlink{cite.index:id51}{NDLDR16}{]}.
 Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -642,10 +654,10 @@ The probability of a world is the product of the probabilities associated to the
 The probability of a ground atom (the query) is given by the sum of the probabilities of the worlds where the query is true.
 
 \sphinxAtStartPar
-If the LPAD contains function symbols, the definition is more complex, see {[}\hyperlink{cite.index:id49}{Poo97}, \hyperlink{cite.index:id50}{SK01}{]}.
-For the semantics of programs with continuous random variables, see {[}\hyperlink{cite.index:id51}{IRR12}{]} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)\sphinxhyphen{}algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
+If the LPAD contains function symbols, the definition is more complex, see {[}\hyperlink{cite.index:id52}{Poo97}, \hyperlink{cite.index:id53}{SK01}{]}.
+For the semantics of programs with continuous random variables, see {[}\hyperlink{cite.index:id54}{IRR12}{]} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)\sphinxhyphen{}algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
 The probability space is lifted to cover the entire program using the least model semantics of constraint logic programs.
-Alternatively, {[}\hyperlink{cite.index:id48}{NDLDR16}{]} defines the semantics of distributional clauses by resorting to a stochastic \(Tp\) operator.
+Alternatively, {[}\hyperlink{cite.index:id51}{NDLDR16}{]} defines the semantics of distributional clauses by resorting to a stochastic \(Tp\) operator.
 
 \sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} allows more freedom than distributional clauses in the use of continuous random variables in expressions,
@@ -656,8 +668,8 @@ for example \sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl}
 \label{\detokenize{index:inference}}
 \sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} answers queries using the module \sphinxcode{\sphinxupquote{pita}} or \sphinxcode{\sphinxupquote{mcintyre}}.
-The first performs the program transformation technique of {[}\hyperlink{cite.index:id52}{RS10}{]}.
-The latter performs approximate inference by sampling using a different program transformation technique and is described in {[}\hyperlink{cite.index:id53}{Rig13}{]}.
+The first performs the program transformation technique of {[}\hyperlink{cite.index:id55}{RS10}{]}.
+The latter performs approximate inference by sampling using a different program transformation technique and is described in {[}\hyperlink{cite.index:id56}{Rig13}{]}.
 Only \sphinxcode{\sphinxupquote{mcintyre}} is able to handle continuous random variables.
 
 \sphinxAtStartPar
@@ -901,7 +913,7 @@ The predicate samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode
 The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
 If \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that for that sample the query is determinate.
 If, in all pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
-This is one of the assumptions taken for programs of the PRISM system {[}\hyperlink{cite.index:id50}{SK01}{]}.
+This is one of the assumptions taken for programs of the PRISM system {[}\hyperlink{cite.index:id53}{SK01}{]}.
 For example \sphinxhref{http://cplint.eu/e/pcfglr.pl}{pcfglr.pl} and \sphinxhref{http://cplint.eu/e/plcg.pl}{plcg.pl} satisfy this constraint while \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} and \sphinxhref{http://cplint.eu/e/var\_obj.pl}{var\_obj.pl} doesn’t.
 
 \sphinxAtStartPar
@@ -1116,8 +1128,8 @@ as in
 \sphinxcode{\sphinxupquote{prob/3}} is equivalent to \sphinxcode{\sphinxupquote{prob/4}} with an empty option list.
 When using \sphinxcode{\sphinxupquote{mcintyre}}, you can ask conditional queries with rejection sampling,
 Metropolis\sphinxhyphen{}Hastings Markov Chain Monte Carlo or Gibbs sampling.
-In rejection sampling {[}\hyperlink{cite.index:id54}{VN51}{]}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded.
-In Metropolis\sphinxhyphen{}Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in {[}\hyperlink{cite.index:id55}{NR14}{]} (the non adaptive version).
+In rejection sampling {[}\hyperlink{cite.index:id57}{VN51}{]}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded.
+In Metropolis\sphinxhyphen{}Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in {[}\hyperlink{cite.index:id58}{NR14}{]} (the non adaptive version).
 A Markov chain is built by building an initial sample and by generating successor samples.
 
 \sphinxAtStartPar
@@ -1131,7 +1143,7 @@ A successor sample is obtained by deleting a fixed number (parameter \sphinxcode
 Then the evidence is queried using regular MCINTYRE starting with the undeleted choices.
 If the query succeeds, the goal is queried using regular MCINTYRE.
 The sample is accepted with a probability of \(\min\{1,\frac{N_0}{N_1}\) where \(N_0\) is the number of choices sampled in the previous sample and \(N_1\) is the number of choices sampled in the current sample.
-In {[}\hyperlink{cite.index:id55}{NR14}{]} the lag is always 1 but the proof in {[}\hyperlink{cite.index:id55}{NR14}{]} that the above acceptance probability yields a valid Metropolis\sphinxhyphen{}Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
+In {[}\hyperlink{cite.index:id58}{NR14}{]} the lag is always 1 but the proof in {[}\hyperlink{cite.index:id58}{NR14}{]} that the above acceptance probability yields a valid Metropolis\sphinxhyphen{}Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
 
 \sphinxAtStartPar
 Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample.
@@ -1334,7 +1346,7 @@ from (\sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl}) 
 
 \sphinxAtStartPar
 When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis\sphinxhyphen{}Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0.
-Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering {[}\hyperlink{cite.index:id56}{FC90}{]},:cite:\sphinxtitleref{koller2009probabilistic},:cite:\sphinxtitleref{Nitti2016} to obtain samples of continuous arguments of a goal.
+Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering {[}\hyperlink{cite.index:id59}{FC90}{]},:cite:\sphinxtitleref{koller2009probabilistic},:cite:\sphinxtitleref{Nitti2016} to obtain samples of continuous arguments of a goal.
 
 \sphinxAtStartPar
 For each sample to be taken, likelihood weighting uses a meta\sphinxhyphen{}interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample.
@@ -1460,7 +1472,7 @@ It uses \sphinxcode{\sphinxupquote{N}} particles.
 \section{MPE, MAP and Viterbi Inference}
 \label{\detokenize{index:mpe-map-and-viterbi-inference}}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. {[}\hyperlink{cite.index:id44}{BARZ20}, \hyperlink{cite.index:id43}{SRV+15}{]}.
+\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. {[}\hyperlink{cite.index:id47}{BARZ20}, \hyperlink{cite.index:id46}{SRV+15}{]}.
 
 \sphinxAtStartPar
 In MAP inference we look for the choices of head atoms of some clauses that lead to the probability of a query being
@@ -1534,7 +1546,7 @@ returns
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-In Viterbi inference we are interested in the most probable proof of a query. See {[}\hyperlink{cite.index:id43}{SRV+15}{]}
+In Viterbi inference we are interested in the most probable proof of a query. See {[}\hyperlink{cite.index:id46}{SRV+15}{]}
 for the difference between the most probable proof and the most probable explanation.
 Module \sphinxcode{\sphinxupquote{viterbi}} looks for the most probable proof by using a meta interpreter
 that performs branch and bound.
@@ -1632,7 +1644,7 @@ the rule number and the grounding substitution.
 \section{Causal Inference}
 \label{\detokenize{index:causal-inference}}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do\sphinxhyphen{}calculus {[}\hyperlink{cite.index:id57}{Pea00}{]}.
+\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do\sphinxhyphen{}calculus {[}\hyperlink{cite.index:id60}{Pea00}{]}.
 
 \sphinxAtStartPar
 Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive
@@ -1978,7 +1990,7 @@ If you want to set the seed of the random number generator, you can use SWI\sphi
 \section{Decision Theory}
 \label{\detokenize{index:decision-theory}}
 \sphinxAtStartPar
-cplint allows also to represent decision theory problem following the syntax of Dtproblog {[}\hyperlink{cite.index:id68}{VdBTVODR10}{]}.
+cplint allows also to represent decision theory problem following the syntax of Dtproblog {[}\hyperlink{cite.index:id71}{VdBTVODR10}{]}.
 
 \sphinxAtStartPar
 Decision facts can be expressed with the operator \sphinxcode{\sphinxupquote{?::}}
@@ -2012,15 +2024,15 @@ The following learning algorithms are available:
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs {[}\hyperlink{cite.index:id59}{BR11}, \hyperlink{cite.index:id64}{BR13a}, \hyperlink{cite.index:id58}{BR13b}{]}
+EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs {[}\hyperlink{cite.index:id62}{BR11}, \hyperlink{cite.index:id67}{BR13a}, \hyperlink{cite.index:id61}{BR13b}{]}
 
 \item {} 
 \sphinxAtStartPar
-SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately {[}\hyperlink{cite.index:id60}{BR15}{]}
+SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately {[}\hyperlink{cite.index:id63}{BR15}{]}
 
 \item {} 
 \sphinxAtStartPar
-LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte\sphinxhyphen{}Carlo tree search {[}\hyperlink{cite.index:id61}{DMBR15}{]}
+LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte\sphinxhyphen{}Carlo tree search {[}\hyperlink{cite.index:id64}{DMBR15}{]}
 
 \end{itemize}
 
@@ -2056,7 +2068,7 @@ example interpretations
 The preamble must come first, the order of the other parts can be changed.
 
 \sphinxAtStartPar
-For example, consider the Bongard problems of {[}\hyperlink{cite.index:id62}{DRVL95}{]}. \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for SLIPCOVER.
+For example, consider the Bongard problems of {[}\hyperlink{cite.index:id65}{DRVL95}{]}. \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for SLIPCOVER.
 \sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/example/lemur/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for LEMUR.
 
 
@@ -2873,7 +2885,7 @@ The available parameters are:
 
 \item {} 
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{maxdepth\_var}} (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in {[}\hyperlink{cite.index:id63}{Coh95}{]}).
+\sphinxcode{\sphinxupquote{maxdepth\_var}} (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in {[}\hyperlink{cite.index:id66}{Coh95}{]}).
 
 \item {} 
 \sphinxAtStartPar
@@ -3039,82 +3051,82 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 \begin{sphinxthebibliography}{VdBTVODR}
-\bibitem[BARZ20]{index:id44}
+\bibitem[BARZ20]{index:id47}
 \sphinxAtStartPar
 Elena Bellodi, Marco Alberti, Fabrizio Riguzzi, and Riccardo Zese. MAP inference for probabilistic logic programming. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 20(5):641â\texteuro{}“655, 2020. URL: \sphinxurl{https://arxiv.org/abs/2008.01394}, \sphinxhref{https://doi.org/10.1017/S1471068420000174}{doi:10.1017/S1471068420000174}.
-\bibitem[BR11]{index:id59}
+\bibitem[BR11]{index:id62}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS\sphinxhyphen{}2011\sphinxhyphen{}01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: \sphinxurl{http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf}.
-\bibitem[BR13a]{index:id64}
+\bibitem[BR13a]{index:id67}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013.
-\bibitem[BR13b]{index:id58}
+\bibitem[BR13b]{index:id61}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf}.
-\bibitem[BR15]{index:id60}
+\bibitem[BR15]{index:id63}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic programs by searching the clause space. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 15(2):169\textendash{}212, 2015. URL: \sphinxurl{http://arxiv.org/abs/1309.2080}, \sphinxhref{https://doi.org/10.1017/S1471068413000689}{doi:10.1017/S1471068413000689}.
-\bibitem[Coh95]{index:id63}
+\bibitem[Coh95]{index:id66}
 \sphinxAtStartPar
 William W. Cohen. Pac\sphinxhyphen{}learning non\sphinxhyphen{}recursive prolog clauses. \sphinxstyleemphasis{Artif. Intell.}, 79(1):1\textendash{}38, 1995.
-\bibitem[DRKT07]{index:id46}
+\bibitem[DRKT07]{index:id49}
 \sphinxAtStartPar
 L. De Raedt, A. Kimmig, and H. Toivonen. ProbLog: a probabilistic Prolog and its application in link discovery. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 2462\textendash{}2467. 2007.
-\bibitem[DRVL95]{index:id62}
+\bibitem[DRVL95]{index:id65}
 \sphinxAtStartPar
 L. De Raedt and W. Van Laer. Inductive constraint logic. In \sphinxstyleemphasis{Proceedings of the 6th Conference on Algorithmic Learning Theory (ALT 1995)}, volume 997 of LNAI, 80\textendash{}94. Fukuoka, Japan, 1995. Springer.
-\bibitem[DMBR15]{index:id61}
+\bibitem[DMBR15]{index:id64}
 \sphinxAtStartPar
 Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit\sphinxhyphen{}based Monte\sphinxhyphen{}Carlo structure learning of probabilistic logic programs. \sphinxstyleemphasis{Mach. Learn.}, 100(1):127\textendash{}156, July 2015. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf}, \sphinxhref{https://doi.org/10.1007/s10994-015-5510-3}{doi:10.1007/s10994\sphinxhyphen{}015\sphinxhyphen{}5510\sphinxhyphen{}3}.
-\bibitem[FC90]{index:id56}
+\bibitem[FC90]{index:id59}
 \sphinxAtStartPar
 Robert M Fung and Kuo\sphinxhyphen{}Chu Chang. Weighing and integrating evidence for stochastic simulation in bayesian networks. In \sphinxstyleemphasis{Fifth Annual Conference on Uncertainty in Artificial Intelligence}, 209\textendash{}220. North\sphinxhyphen{}Holland Publishing Co., 1990.
-\bibitem[IRR12]{index:id51}
+\bibitem[IRR12]{index:id54}
 \sphinxAtStartPar
 Muhammad Asiful Islam, CR Ramakrishnan, and IV Ramakrishnan. Inference in probabilistic logic programs with continuous random variables. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 12:505\textendash{}523, 7 2012. \sphinxhref{https://doi.org/10.1017/S1471068412000154}{doi:10.1017/S1471068412000154}.
-\bibitem[NR14]{index:id55}
+\bibitem[NR14]{index:id58}
 \sphinxAtStartPar
 Arun Nampally and CR Ramakrishnan. Adaptive mcmc\sphinxhyphen{}based inference in probabilistic logic programs. \sphinxstyleemphasis{arXiv preprint arXiv:1403.6036}, 2014. URL: \sphinxurl{http://arxiv.org/pdf/1403.6036.pdf}.
-\bibitem[NDLDR16]{index:id48}
+\bibitem[NDLDR16]{index:id51}
 \sphinxAtStartPar
 Davide Nitti, Tinne De Laet, and Luc De Raedt. Probabilistic logic programming for hybrid relational domains. \sphinxstyleemphasis{Mach. Learn.}, 103(3):407\textendash{}449, 2016. URL: \sphinxurl{http://dx.doi.org/10.1007/s10994-016-5558-8}, \sphinxhref{https://doi.org/10.1007/s10994-016-5558-8}{doi:10.1007/s10994\sphinxhyphen{}016\sphinxhyphen{}5558\sphinxhyphen{}8}.
-\bibitem[Pea00]{index:id57}
+\bibitem[Pea00]{index:id60}
 \sphinxAtStartPar
 J. Pearl. \sphinxstyleemphasis{Causality}. Cambridge University Press, 2000.
-\bibitem[Poo97]{index:id49}
+\bibitem[Poo97]{index:id52}
 \sphinxAtStartPar
 David Poole. The independent choice logic for modelling multiple agents under uncertainty. \sphinxstyleemphasis{Artificial Intelligence}, 94(1\sphinxhyphen{}2):7\textendash{}56, 1997.
-\bibitem[Rig13]{index:id53}
+\bibitem[Rig13]{index:id56}
 \sphinxAtStartPar
 Fabrizio Riguzzi. MCINTYRE: a Monte Carlo system for probabilistic logic programming. \sphinxstyleemphasis{Fundamenta Informaticae}, 124(4):521\textendash{}541, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf}, \sphinxhref{https://doi.org/10.3233/FI-2013-847}{doi:10.3233/FI\sphinxhyphen{}2013\sphinxhyphen{}847}.
-\bibitem[RS10]{index:id52}
+\bibitem[RS10]{index:id55}
 \sphinxAtStartPar
 Fabrizio Riguzzi and Terrance Swift. Tabling and Answer Subsumption for Reasoning on Logic Programs with Annotated Disjunctions. In \sphinxstyleemphasis{Technical Communications of the International Conference on Logic Programming}, volume 7 of Leibniz International Proceedings in Informatics (LIPIcs), 162\textendash{}171. Schloss Dagstuhl\textendash{}Leibniz\sphinxhyphen{}Zentrum fuer Informatik, 2010. \sphinxhref{https://doi.org/10.4230/LIPIcs.ICLP.2010.162}{doi:10.4230/LIPIcs.ICLP.2010.162}.
-\bibitem[SK97]{index:id47}
+\bibitem[SK97]{index:id50}
 \sphinxAtStartPar
 Taisuke Sato and Yoshitaka Kameya. Prism: a language for symbolic\sphinxhyphen{}statistical modeling. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 1330\textendash{}1339. 1997.
-\bibitem[SK01]{index:id50}
+\bibitem[SK01]{index:id53}
 \sphinxAtStartPar
 Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic\sphinxhyphen{}statistical modeling. \sphinxstyleemphasis{J. Artif. Intell. Res.}, 15:391\textendash{}454, 2001.
-\bibitem[SRV+15]{index:id43}
+\bibitem[SRV+15]{index:id46}
 \sphinxAtStartPar
 Dimitar Sht. Shterionov, Joris Renkens, Jonas Vlasselaer, Angelika Kimmig, Wannes Meert, and Gerda Janssens. The most probable explanation for probabilistic logic programs with annotated disjunctions. In Jesse Davis and Jan Ramon, editors, \sphinxstyleemphasis{International Conference on Inductive Logic Programming}, volume 9046 of LNCS, 139\textendash{}153. Berlin, Heidelberg, 2015. Springer. \sphinxhref{https://doi.org/10.1007/978-3-319-23708-4\_10}{doi:10.1007/978\sphinxhyphen{}3\sphinxhyphen{}319\sphinxhyphen{}23708\sphinxhyphen{}4\_10}.
-\bibitem[VdBTVODR10]{index:id68}
+\bibitem[VdBTVODR10]{index:id71}
 \sphinxAtStartPar
 Guy Van den Broeck, Ingo Thon, Martijn Van Otterlo, and Luc De Raedt. Dtproblog: a decision\sphinxhyphen{}theoretic probabilistic prolog. In \sphinxstyleemphasis{Twenty\sphinxhyphen{}Fourth AAAI Conference on Artificial Intelligence}. 2010.
-\bibitem[VDB06]{index:id66}
+\bibitem[VDB06]{index:id69}
 \sphinxAtStartPar
 J. Vennekens, M. Denecker, and M. Bruynooghe. Representing causal information about a probabilistic process. In \sphinxstyleemphasis{Proceedings of the 10th European Conference on Logics in Artificial Intelligence}, LNAI. Springer, September 2006.
-\bibitem[VDB09]{index:id67}
+\bibitem[VDB09]{index:id70}
 \sphinxAtStartPar
 J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP\sphinxhyphen{}logic: a language of causal probabilistic events and its relation to logic programming. \sphinxstyleemphasis{Theory Pract. Log. Program.}, 9(3):245\textendash{}308, 2009.
-\bibitem[VV03]{index:id65}
+\bibitem[VV03]{index:id68}
 \sphinxAtStartPar
 J. Vennekens and S. Verbaeten. Logic programs with annotated disjunctions. Technical Report CW386, K. U. Leuven, 2003.
-\bibitem[VVB04]{index:id45}
+\bibitem[VVB04]{index:id48}
 \sphinxAtStartPar
 J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated disjunctions. In \sphinxstyleemphasis{International Conference on Logic Programming}, volume 3131 of LNCS, 195\textendash{}209. Springer, 2004.
-\bibitem[VN51]{index:id54}
+\bibitem[VN51]{index:id57}
 \sphinxAtStartPar
 John Von Neumann. Various techniques used in connection with random digits. \sphinxstyleemphasis{Nat. Bureau Stand. Appl. Math. Ser.}, 12:36\textendash{}38, 1951.
 \end{sphinxthebibliography}

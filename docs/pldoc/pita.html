@@ -30,6 +30,9 @@ details.</p>
 <dl>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="load/1"><b class="pred">load</b><var class="arglist">(++File:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>File</var>.lpad if it exists, otherwise loads <var>File</var>.cpl if it exists.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="load_file/1"><b class="pred">load_file</b><var class="arglist">(++FileWithExtension:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>FileWithExtension</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dt_solve/2"><b class="pred">dt_solve</b><var class="arglist">(-Strategy:list, -Cost:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the best solution for the decision theory
+problem. It returns the best strategy in <var>Strategy</var> and it cost
+in <var>Cost</var>. Complete solution without pruning.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_meta/2"><b class="pred">prob_meta</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">To be used in place of <a href="pita.html#prob/2">prob/2</a> for meta calls (doesn't abolish tables)</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="abd_prob/3"><b class="pred">abd_prob</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float, -Delta:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the most probable abductive explanation of the ground query <var>Query</var>.
 It returns the explanation in <var>Delta</var> together with its <var>Probability</var></dd>
@@ -135,6 +138,8 @@ representing the negation of BDD <var>A</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
 <var>Environment</var> is a pointer to a data structure returned by a call
 to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability and a bar for one minus the probability.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
 representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
@@ -144,8 +149,6 @@ It frees the memory occupied by the BDD.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
 It returns an integer in <var>Context</var> that is a pointer to a
 context data structure for performing the EM algorithm.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
-a bar for the probability and a bar for one minus the probability.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
 NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
@@ -200,52 +203,51 @@ The following predicates are exported, but not or incorrectly documented.</p>
 
 <dl class="undoc">
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dt_solve/2"><b class="pred">dt_solve</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 </dl>
 
 </body>

@@ -14,7 +14,6 @@
   get_var_n/6,get_abd_var_n/6,
   get_dec_var_n/5,
   load/1,load_file/1,
-  % dt_solve_complete/2, % complete solution without pruning
   dt_solve/2,
   % op(600,fx,'?'),
   op(600,xfy,'::'),
@@ -65,7 +64,6 @@ details.
 :-meta_predicate set_pita(:,+).
 :-meta_predicate setting_pita(:,-).
 :-meta_predicate set_sw(:,+).
-% :-meta_predicate dt_solve_complete(:,-).
 :-meta_predicate dt_solve(:,-).
 
 % :- dynamic utility/2.
@@ -133,15 +131,13 @@ load_file(File):-
   end_lpad_pred.
 
 /**
- * dt_solve_complete(-Strategy:list,-Cost:float) is det
+ * dt_solve(-Strategy:list,-Cost:float) is det
  *
  * The predicate computes the best solution for the decision theory
  * problem. It returns the best strategy in Strategy and it cost
  * in Cost. Complete solution without pruning.
  */
 
-% this is a complete version, rename it dt_solve_complete
-% when the other version works
 dt_solve(M:Strategy,Cost):-
   must_be(var,Strategy),
   must_be(var,Cost),
@@ -1993,7 +1989,6 @@ sandbox:safe_meta(pita:msw(_,_,_,_), []).
 sandbox:safe_meta(pita:msw(_,_,_,_,_), []).
 sandbox:safe_meta(pita:set_pita(_,_),[]).
 sandbox:safe_meta(pita:setting_pita(_,_),[]).
-% sandbox:safe_meta(pita:dt_solve_complete(_,_),[]).
 sandbox:safe_meta(pita:dt_solve(_,_),[]).
 
 

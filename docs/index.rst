@@ -36,6 +36,9 @@ Predicate Reference
  * `pitaind <https://friguzzi.github.io/cplint/pldoc/pitaind.html>`_
  * `lemur <https://friguzzi.github.io/cplint/pldoc/lemur.html>`_
  * `cplint_r <https://friguzzi.github.io/cplint_r>`_
+ * `auc <https://friguzzi.github.io/auc>`_
+ * `matrix <https://friguzzi.github.io/matrix>`_
+ * `bddem <https://friguzzi.github.io/bddem>`_
 
 Installation
 ============
