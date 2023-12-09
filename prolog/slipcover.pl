@@ -32,7 +32,7 @@ This module performs learning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It performs both parameter and structure learning.
 
-See http://friguzzi.github.io/cplint/_build/html/index.html for
+See https://friguzzi.github.io/cplint/ for
 details.
 
 @author Fabrizio Riguzzi, Elena Bellodi
@@ -2572,8 +2572,7 @@ given_cw(M,H):-
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 set_sc(M:Parameter,Value):-
   must_be(atom,Parameter),
@@ -2586,8 +2585,7 @@ set_sc(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_sc(M:P,V):-
   must_be(atom,P),

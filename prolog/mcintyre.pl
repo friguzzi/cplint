@@ -62,8 +62,7 @@ Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries
 using sampling.
 
-See http://friguzzi.github.io/cplint/_build/html/index.html for
-details.
+See  https://friguzzi.github.io/cplint/ for details.
 
 @author Fabrizio Riguzzi
 @license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
@@ -3130,8 +3129,7 @@ get_probs(Head, PL):-
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 set_mc(M:Parameter,Value):-
   must_be(atom,Parameter),
@@ -3144,8 +3142,7 @@ set_mc(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_mc(M:P,V):-
   must_be(atom,P),

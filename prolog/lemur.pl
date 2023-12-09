@@ -12,7 +12,7 @@ Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi.
 Bandit-based Monte-Carlo structure learning of probabilistic logic programs. 
 Machine Learning, 100(1):127-156, July 2015
 
-See http://friguzzi.github.io/cplint/_build/html/index.html for
+See https://friguzzi.github.io/cplint/ for
 details.
 
 @author Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi
@@ -1053,8 +1053,7 @@ delete_matching([H|T],El,[H|T1]):-
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 set_lm(M:Parameter,Value):-
   must_be(atom,Parameter),
@@ -1067,8 +1066,7 @@ set_lm(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_lm(M:P,V):-
   must_be(atom,P),

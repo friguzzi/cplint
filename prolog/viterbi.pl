@@ -388,8 +388,7 @@ list2or([H|T],(H ; Ta)):-!,
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  *
  */
 set_vit(M:Parameter,Value):-
@@ -401,8 +400,7 @@ set_vit(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_vit(M:P,V):-
   M:local_viterbi_setting(P,V).

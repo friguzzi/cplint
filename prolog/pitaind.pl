@@ -805,9 +805,8 @@ or_list1_exc([H|T],B0,B1):-
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
- *
+ * https://friguzzi.github.io/cplint/
+ * 
  */
 set_pitaind(M:Parameter,Value):-
   must_be(atom,Parameter),
@@ -820,8 +819,7 @@ set_pitaind(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_pitaind(M:P,V):-
   must_be(atom,P),

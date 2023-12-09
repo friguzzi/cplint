@@ -32,7 +32,7 @@ This module performs reasoning over Logic Programs with Annotated
 Disjunctions and CP-Logic programs.
 It reads probabilistic program and computes the probability of queries.
 
-See http://friguzzi.github.io/cplint/_build/html/index.html for
+See https://friguzzi.github.io/cplint/ for
 details.
 
 @author Fabrizio Riguzzi
@@ -1139,8 +1139,7 @@ get_probs([_H:P|T], [P1|T1]) :-
  *
  * The predicate sets the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  *
  */
 set_pita(M:Parameter,Value):-
@@ -1154,8 +1153,7 @@ set_pita(M:Parameter,Value):-
  *
  * The predicate returns the value of a parameter
  * For a list of parameters see
- * https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf or
- * http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html
+ * https://friguzzi.github.io/cplint/
  */
 setting_pita(M:P,V):-
   must_be(atom,P),
