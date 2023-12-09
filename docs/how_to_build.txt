@@ -40,6 +40,10 @@ or
 
 to have less output.
 
+To generate the PlDoc
+
+    > make pldoc
+
 Note that you maybe need to run the command two times in order to link also the bibliography which is 
 located in newbib.bib
 
