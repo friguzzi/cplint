@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>kbest.pl -- kbest</title>
+
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>kbest.pl -- kbest</h1>
+
+<p>
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries
+using kbest inference.</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Stefano Bragaglia and Fabrizio Riguzzi</dd>
+<dt class="keyword-copyright">copyright</dt><dd class="keyword-copyright">- Stefano Bragaglia and Fabrizio Riguzzi</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- Artistic License 2.0 <a href="https://opensource.org/licenses/Artistic-2.0">https://opensource.org/licenses/Artistic-2.0</a></dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="kbest/4"><b class="pred">kbest</b><var class="arglist">(:Quer:conjunction_of_literals, +K:int, -Probability:float, -Exps:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the <var>K</var> most probable explanations of the conjunction of literals Query.
+It returns the explanations in <var>Exps</var> together with their <var>Probability</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="kbest/3"><b class="pred">kbest</b><var class="arglist">(:Quer:conjunction_of_literals, +K:int, -Exps:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the <var>K</var> most probable explanations of the conjunction of literals Query.
+It returns the explanations in <var>Exps</var></dd>
+</dl>
+
+</body>
+</html>

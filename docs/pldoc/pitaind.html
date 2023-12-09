@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>pitaind.pl -- pitaind</title>
+
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>pitaind.pl -- pitaind</h1>
+
+<p>
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program andcomputes the probability of queries.</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Fabrizio Riguzzi</dd>
+<dt class="keyword-copyright">copyright</dt><dd class="keyword-copyright">- Fabrizio Riguzzi</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- Artistic License 2.0</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc_ind/3"><b class="pred">orc_ind</b><var class="arglist">(++A:float, ++B:float, --AorB:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns <var>A</var> + <var>B</var> - <var>A</var>*<var>B</var> in <var>AorB</var> (or in case of independence)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc_exc/3"><b class="pred">orc_exc</b><var class="arglist">(++A:float, ++B:float, --AorB:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns <var>A</var> + <var>B</var> in <var>AorB</var> (or in case of exclusion)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="onec/1"><b class="pred">onec</b><var class="arglist">(--One:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns 1.0</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zeroc/1"><b class="pred">zeroc</b><var class="arglist">(--Zero:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns 0.0</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andc/3"><b class="pred">andc</b><var class="arglist">(++A:float, ++B:float, --AandB:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns <var>A</var>*<var>B</var> in <var>AandB</var> (and in case of idependence). Fails if either <var>A</var> or <var>B</var> is 0.0</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andcnf/3"><b class="pred">andcnf</b><var class="arglist">(++A:float, ++B:float, --AandB:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns <var>A</var>*<var>B</var> in <var>AandB</var> (and in case of idependence).</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="notc/2"><b class="pred">notc</b><var class="arglist">(++A:float, --NotA:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns 1-<var>A</var> in <var>NotA</var> (negation)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equalityc/3"><b class="pred">equalityc</b><var class="arglist">(++Variable:int, ++Value:int, --P:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>P</var> the probability that <var>Variable</var> takes <var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_ind/2"><b class="pred">prob_ind</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the probability of <var>Query</var>
+If <var>Query</var> is not ground, it returns in backtracking all ground
+instantiations of
+<var>Query</var> together with their probabilities</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_bar/2"><b class="pred">prob_bar</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:dict)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the probability of <var>Query</var>
+and returns it as a dict for rendering with c3 as a bar chart with
+a bar for the probability of <var>Query</var> true and a bar for the probability of
+<var>Query</var> false.
+If <var>Query</var> is not ground, it returns in backtracking all ground
+instantiations of
+<var>Query</var> together with their probabilities</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_ind/3"><b class="pred">prob_ind</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the probability of <var>Query</var> given
+<var>Evidence</var>
+If <var>Query</var>/<var>Evidence</var> are not ground, it returns in backtracking all
+ground instantiations of
+<var>Query</var>/<var>Evidence</var> together with their probabilities</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_bar/3"><b class="pred">prob_bar</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, -Probability:dict)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the probability of the <var>Query</var> given <var>Evidence</var>
+and returns it as a dict for rendering with c3 as a bar chart with
+a bar for the probability of <var>Query</var> true and a bar for the probability of
+<var>Query</var> false given <var>Evidence</var>.
+If <var>Query</var> /<var>Evidence</var> are not ground, it returns in backtracking all
+ground instantiations of
+<var>Query</var>/<var>Evidence</var> together with their probabilities</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_var_n/5"><b class="pred">get_var_n</b><var class="arglist">(++M:atomic, ++Rule:int, ++Substitution:term, ++Probabilities:list, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
+index <var>Rule</var>, grouding substitution <var>Substitution</var> and head distribution
+<var>Probabilities</var> in environment Environment.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list_pitaind/3"><b class="pred">or_list_pitaind</b><var class="arglist">(++ListOfProbs:list, ++Module:module, --P:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>P</var> the probability of the disjunction of the random variables
+whose probabilities are in <var>ListOfProbs</var>. <var>Module</var> is used to check the
+setting for disjunction, either independent or exclusive.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list_ind/2"><b class="pred">or_list_ind</b><var class="arglist">(++ListOfProbs:list, --P:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>P</var> the probability of the disjunction of the random variables
+whose probabilities are in <var>ListOfProbs</var> assuming independence.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list_exc/2"><b class="pred">or_list_exc</b><var class="arglist">(++ListOfProbs:list, --P:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>P</var> the probability of the disjunction of the random variables
+whose probabilities are in <var>ListOfProbs</var> assuming exclusiveness.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_pitaind/2"><b class="pred">set_pitaind</b><var class="arglist">(:Parameter:atom, +Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate sets the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="setting_pitaind/2"><b class="pred">setting_pitaind</b><var class="arglist">(:Parameter:atom, ?Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+</dl>
+
+</body>
+</html>

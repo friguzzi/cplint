@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>mcintyre.pl -- mcintyre</title>
+
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>mcintyre.pl -- mcintyre</h1>
+
+<p>
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries
+using sampling.</p>
+
+<p>
+See <a href="http://friguzzi.github.io/cplint/_build/html/index.html">http://friguzzi.github.io/cplint/_build/html/index.html</a> for
+details.</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Fabrizio Riguzzi</dd>
+<dt class="keyword-copyright">copyright</dt><dd class="keyword-copyright">- Fabrizio Riguzzi</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- Artistic License 2.0 <a href="https://opensource.org/licenses/Artistic-2.0">https://opensource.org/licenses/Artistic-2.0</a></dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_load/1"><b class="pred">mc_load</b><var class="arglist">(++File:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>File</var>.lpad if it exists, otherwise loads <var>File</var>.cpl if it exists.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_load_file/1"><b class="pred">mc_load_file</b><var class="arglist">(++FileWithExtension:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>FileWithExtension</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_prob/3"><b class="pred">mc_prob</b><var class="arglist">(:Query:atom, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the probability of the query <var>Query</var>
+If <var>Query</var> is not ground, it considers it as an existential query
+and returns the probability that there is a satisfying assignment to
+the query.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_prob/3">mc_prob/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChart:dict)</var></dt><dd><var>BarChart</var> is a dict for rendering with c3 as a bar chart with a bar for the
+probability of success and a bar for the probability of failure.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_prob/2"><b class="pred">mc_prob</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_prob/2">mc_prob/2</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample/4"><b class="pred">mc_sample</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times and returns
+the resulting <var>Probability</var> (Successes/<var>Samples</var>)
+If <var>Query</var> is not ground, it considers it as an existential query
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_sample/4">mc_sample/4</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">successes</b><var class="arglist">(-Successes:int)</var></dt><dd>Number of successes</dd>
+<dt class="term"><b class="pred">failures</b><var class="arglist">(-Failures:int)</var></dt><dd>Number of failures</dd>
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChart:dict)</var></dt><dd><var>BarChart</var> is a dict for rendering with c3 as a bar chart with a bar for the
+number of successes and a bar for the number of failures.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample/3"><b class="pred">mc_sample</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_sample/4">mc_sample/4</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_rejection_sample/5"><b class="pred">mc_rejection_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true and returns
+the <var>Probability</var> of <var>Query</var>.
+It performs rejection sampling: if in a sample <var>Evidence</var> is false, the
+sample is discarded.
+If <var>Query</var>/<var>Evidence</var> are not ground, it considers them an existential queries.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_rejection_sample/5">mc_rejection_sample/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">successes</b><var class="arglist">(-Successes:int)</var></dt><dd>Number of succeses</dd>
+<dt class="term"><b class="pred">failures</b><var class="arglist">(-Failures:int)</var></dt><dd>Number of failueres</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_rejection_sample/4"><b class="pred">mc_rejection_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_rejection_sample/5">mc_rejection_sample/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample/4"><b class="pred">mc_gibbs_sample</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of Mix+<var>Samples</var> (Mix is set with the options, default value 0)
+times.
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+a variable given the values of the variables in its Markov blanket.
+If <var>Query</var>/Evidence are not ground, it considers them as existential queries.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_gibbs_sample/4">mc_gibbs_sample/4</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">successes</b><var class="arglist">(-Successes:int)</var></dt><dd>Number of succeses</dd>
+<dt class="term"><b class="pred">failures</b><var class="arglist">(-Failures:int)</var></dt><dd>Number of failueres</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample/3"><b class="pred">mc_gibbs_sample</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_gibbs_sample/4">mc_gibbs_sample/4</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample/5"><b class="pred">mc_gibbs_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of Mix+<var>Samples</var> (Mix is set with the options, default value 0) times given that
+<var>Evidence</var>
+is true and returns
+the number of Successes, of Failures and the
+<var>Probability</var> (Successes/<var>Samples</var>).
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+a variable given the values of the variables in its Markov blanket.
+If <var>Query</var>/<var>Evidence</var> are not ground, it considers them as existential queries.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_gibbs_sample/5">mc_gibbs_sample/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">successes</b><var class="arglist">(-Successes:int)</var></dt><dd>Number of succeses</dd>
+<dt class="term"><b class="pred">failures</b><var class="arglist">(-Failures:int)</var></dt><dd>Number of failueres</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample_arg/5"><b class="pred">mc_gibbs_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples L-N where
+L is the list of values of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and N is the number of samples
+returning that list of values.
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+a variable given the values of the variables in its Markov blanket.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_gibbs_sample_arg/5">mc_gibbs_sample_arg/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+a bar for each possible value of L,
+the list of value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample_arg/4"><b class="pred">mc_gibbs_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_gibbs_sample_arg/5">mc_gibbs_sample_arg/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_sample_arg/6"><b class="pred">mc_gibbs_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_groundliterals, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples L-N where
+L is the list of values of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and N is the number of samples
+returning that list of values.
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Gibbs sampling: each sample is obtained from the previous one by resampling
+a variable given the values of the variables in its Markov blanket.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_gibbs_sample_arg/6">mc_gibbs_sample_arg/6</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+a bar for each possible value of L,
+the list of value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_sample/5"><b class="pred">mc_mh_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Probability:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of Mix+<var>Samples</var> (Mix is set with the options, default value 0) times given that
+<var>Evidence</var>
+is true and returns
+the number of Successes, of Failures and the
+<var>Probability</var> (Successes/<var>Samples</var>).
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Metropolis/Hastings sampling: between each sample, Lag (that is set with the options, default value 1) sampled
+choices are forgotten and each sample is accepted with a certain probability.
+If <var>Query</var>/<var>Evidence</var> are not ground, it considers them as existential queries.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_mh_sample/5">mc_mh_sample/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">lag</b><var class="arglist">(+Lag:int)</var></dt><dd>lag between each sample, <var>Lag</var> sampled choices are forgotten, default value 1</dd>
+<dt class="term"><b class="pred">successes</b><var class="arglist">(-Successes:int)</var></dt><dd>Number of succeses</dd>
+<dt class="term"><b class="pred">failures</b><var class="arglist">(-Failures:int)</var></dt><dd>Number of failueres</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_sample/4"><b class="pred">mc_mh_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_mh_sample/5">mc_mh_sample/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg/5"><b class="pred">mc_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples L-N where
+L is the list of values of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and N is the number of samples
+returning that list of values.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_sample_arg/5">mc_sample_arg/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+a bar for each possible value of L,
+the list of value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg/4"><b class="pred">mc_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_sample_arg/5">mc_sample_arg/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_rejection_sample_arg/6"><b class="pred">mc_rejection_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that
+<var>Evidence</var> is true.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples L-N where
+L is the list of values of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and N is the number of samples
+returning that list of values.
+Rejection sampling is performed.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_rejection_sample_arg/6">mc_rejection_sample_arg/6</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+a bar for each possible value of L,
+the list of value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_rejection_sample_arg/5"><b class="pred">mc_rejection_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_rejection_sample_arg/6">mc_rejection_sample_arg/6</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_sample_arg/6"><b class="pred">mc_mh_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples L-N where
+L is the list of values of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and N is the number of samples
+returning that list of values.
+The first Mix (that is set with the options, default value 0) samples are discarded (mixing time).
+It performs Metropolis/Hastings sampling: between each sample, Lag (that is set with the options, default value 1) sampled
+choices are forgotten and each sample is accepted with a certain probability.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_mh_sample_arg/6">mc_mh_sample_arg/6</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">lag</b><var class="arglist">(+Lag:int)</var></dt><dd>lag between each sample, <var>Lag</var> sampled choices are forgotten, default value 1</dd>
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+a bar for each possible value of L,
+the list of value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_sample_arg/5"><b class="pred">mc_mh_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_mh_sample_arg/6">mc_mh_sample_arg/6</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_particle_sample_arg/5"><b class="pred">mc_particle_sample_arg</b><var class="arglist">(:Query:conjunction_of_literals, +Evidence:list, +Samples:int, ?Arg:term, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+It performs particle filtering with likelihood weighting:
+each sample is weighted by the
+likelihood of an element of the <var>Evidence</var> list and constitutes a particle.
+After weighting, particles are resampled and the next element of <var>Evidence</var>
+is considered.
+<var>Arg</var> should be a variable in <var>Query</var>. <var>Evidence</var> is a list of goals.
+<var>Query</var> can be either a single goal or a list of goals.
+When <var>Query</var> is a single goal, the predicate returns in <var>Values</var>
+a list of couples V-W where V is a value of <var>Arg</var> for which <var>Query</var> succeeds in
+a particle in the last set of particles and W is the weight of the particle.
+For each element of <var>Evidence</var>, the particles are obtained by sampling <var>Query</var>
+in each current particle and weighting the particle by the likelihood
+of the evidence element.
+When <var>Query</var> is a list of goals, <var>Arg</var> is a list of variables, one for
+each query of <var>Query</var> and <var>Arg</var> and <var>Query</var> must have the same length of <var>Evidence</var>.
+<var>Values</var> is then list of the same length of <var>Evidence</var> and each of its
+elements is a list of couples V-W where
+V is a value of the corresponding element of <var>Arg</var> for which the corresponding
+element of <var>Query</var> succeeds in a particle and W is the weight of the particle.
+For each element of <var>Evidence</var>, the particles are obtained by sampling the
+corresponding element of <var>Query</var> in each current particle and weighting
+the particle by the likelihood of the evidence element.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_particle_expectation/5"><b class="pred">mc_particle_expectation</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:list, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> given <var>Evidence</var> by
+particle filtering.
+It uses <var>N</var> particle and sums up the weighted value of <var>Arg</var> for
+each particle. The overall sum is divided by the sum of weights to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_lw_sample/4"><b class="pred">mc_lw_sample</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, +Samples:int, -Prob:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+The predicate returns in <var>Prob</var> the probability that the query is true.
+It performs likelihood weighting: each sample is weighted by the
+likelihood of evidence in the sample.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_lw_sample_arg/5"><b class="pred">mc_lw_sample_arg</b><var class="arglist">(:Query:atom, :Evidence:atom, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples V-W where
+V is a value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and W is the weight of the sample.
+It performs likelihood weighting: each sample is weighted by the
+likelihood of evidence in the sample.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_lw_sample_arg_log/5"><b class="pred">mc_lw_sample_arg_log</b><var class="arglist">(:Query:atom, :Evidence:atom, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times given that <var>Evidence</var>
+is true.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples V-W where
+V is a value of <var>Arg</var> for which <var>Query</var> succeeds in
+a world sampled at random and W is the natural logarithm of the weight of \
+the sample.
+It performs likelihood weighting: each sample is weighted by the
+likelihood of evidence in the sample.
+It differs from <a href="mcintyre.html#mc_lw_sample_arg/5">mc_lw_sample_arg/5</a> because the natural logarithm of the
+weight is returned, useful when the evidence is very unlikely.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_lw_expectation/5"><b class="pred">mc_lw_expectation</b><var class="arglist">(:Query:atom, :Evidence:atom, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> given <var>Evidence</var> by
+likelihood weighting.
+It takes <var>N</var> samples of <var>Query</var> and sums up the weighted value of <var>Arg</var> for
+each sample. The overall sum is divided by the sum of weights to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg_first/5"><b class="pred">mc_sample_arg_first</b><var class="arglist">(:Query:atom, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples V-N where
+V is the value of <var>Arg</var> returned as the first answer by <var>Query</var> in
+a world sampled at random and N is the number of samples
+returning that value.
+V is failure if the query fails.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_sample_arg_first/5">mc_sample_arg_first/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart with
+with a bar for each value of <var>Arg</var> returned as a first answer by <var>Query</var> in
+a world sampled at random.
+The size of the bar is the number of samples that returned that value.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg_first/4"><b class="pred">mc_sample_arg_first</b><var class="arglist">(:Query:atom, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_sample_arg_first/5">mc_sample_arg_first/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg_one/5"><b class="pred">mc_sample_arg_one</b><var class="arglist">(:Query:atom, +Samples:int, ?Arg:var, -Values:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of couples V-N where
+V is a value of <var>Arg</var> sampled with uniform probability from those returned
+by <var>Query</var> in a world sampled at random and N is the number of samples
+returning that value.
+V is failure if the query fails.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_sample_arg_one/5">mc_sample_arg_one/5</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">bar</b><var class="arglist">(-BarChar:dict)</var></dt><dd>BarChart is a dict for rendering with c3 as a bar chart
+with a bar for each value of <var>Arg</var> returned by sampling with uniform
+probability one answer from those returned by <var>Query</var> in a world sampled
+at random.
+The size of the bar is the number of samples.</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg_one/4"><b class="pred">mc_sample_arg_one</b><var class="arglist">(:Query:atom, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_sample_arg_one/5">mc_sample_arg_one/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_sample_arg_raw/4"><b class="pred">mc_sample_arg_raw</b><var class="arglist">(:Query:atom, +Samples:int, ?Arg:var, -Values:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate samples <var>Query</var> a number of <var>Samples</var> times.
+<var>Arg</var> should be a variable in <var>Query</var>.
+The predicate returns in <var>Values</var> a list of values
+of <var>Arg</var> returned as the first answer by <var>Query</var> in
+a world sampled at random.
+The value is failure if the query fails.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_expectation/4"><b class="pred">mc_expectation</b><var class="arglist">(:Query:atom, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> by
+sampling.
+It takes <var>N</var> samples of <var>Query</var> and sums up the value of <var>Arg</var> for
+each sample. The overall sum is divided by <var>N</var> to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_expectation/5"><b class="pred">mc_gibbs_expectation</b><var class="arglist">(:Query:atom, +N:int, ?Arg:var, -Exp:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> by
+sampling.
+It takes <var>N</var> samples of <var>Query</var> and sums up the value of <var>Arg</var> for
+each sample. The overall sum is divided by <var>N</var> to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_mh_sample_arg/6">mc_mh_sample_arg/6</a>:
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_expectation/4"><b class="pred">mc_gibbs_expectation</b><var class="arglist">(:Query:atom, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_gibbs_expectation/5">mc_gibbs_expectation/5</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_rejection_expectation/5"><b class="pred">mc_rejection_expectation</b><var class="arglist">(:Query:atom, :Evidence:atom, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> by
+sampling.
+It takes <var>N</var> samples of <var>Query</var> and sums up the value of <var>Arg</var> for
+each sample. The overall sum is divided by <var>N</var> to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_gibbs_expectation/6"><b class="pred">mc_gibbs_expectation</b><var class="arglist">(:Query:atom, :Evidence:atom, +N:int, ?Arg:var, -Exp:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> by
+Gibbs sampling.
+It takes <var>N</var> samples of <var>Query</var> and sums up the value of <var>Arg</var> for
+each sample. The overall sum is divided by <var>N</var> to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_mh_expectation/6">mc_mh_expectation/6</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">block</b><var class="arglist">(+Block:int)</var></dt><dd>Perform blocked Gibbs: <var>Block</var> variables are sampled together, default value 1</dd>
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_expectation/6"><b class="pred">mc_mh_expectation</b><var class="arglist">(:Query:atom, :Evidence:atom, +N:int, ?Arg:var, -Exp:float, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate computes the expected value of <var>Arg</var> in <var>Query</var> by
+Metropolis Hastings sampling.
+It takes <var>N</var> samples of <var>Query</var> and sums up the value of <var>Arg</var> for
+each sample. The overall sum is divided by <var>N</var> to give <var>Exp</var>.
+<var>Arg</var> should be a variable in <var>Query</var>.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a href="mcintyre.html#mc_mh_expectation/6">mc_mh_expectation/6</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">mix</b><var class="arglist">(+Mix:int)</var></dt><dd>The first <var>Mix</var> samples are discarded (mixing time), default value 0</dd>
+<dt class="term"><b class="pred">lag</b><var class="arglist">(+Lag:int)</var></dt><dd>lag between each sample, <var>Lag</var> sampled choices are forgotten, default value 1</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mc_mh_expectation/5"><b class="pred">mc_mh_expectation</b><var class="arglist">(:Query:atom, :Evidence:atom, +N:int, ?Arg:var, -Exp:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a href="mcintyre.html#mc_mh_expectation/6">mc_mh_expectation/6</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="sample_head/5"><b class="pred">sample_head</b><var class="arglist">(+R:int, +Variables:list, +M:module, +HeadList:list, -HeadNumber:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">samples a head from rule <var>R</var> instantiated as indicated by <var>Variables</var> (list of
+constants, one per variable. <var>HeadList</var> contains the head as a list.
+<var>HeadNumber</var> is the number of the sample head.
+Internal predicates used by the transformed input program</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="take_a_sample/5"><b class="pred">take_a_sample</b><var class="arglist">(+R:int, +VC:list, +M:module, +Distr:term, -S:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>S</var> a sample for a random variable with distribution <var>Distr</var>
+associated to rule <var>R</var> with substitution <var>VC</var>. If the variable
+has already been sampled, it retrieves the sampled value, otherwise
+it takes a new sample and records it for rule <var>R</var> with substitution <var>VC</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gaussian/4"><b class="pred">gaussian</b><var class="arglist">(+Mean:float, +Variance:float, +M:module, -S:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">samples a value from a Gaussian with mean <var>Mean</var> and variance
+<var>Variance</var> and returns it in <var>S</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gaussian/5"><b class="pred">gaussian</b><var class="arglist">(+Mean:float, +Variance:float, +M:module, +S:float, -Density:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the probability density of value <var>S</var> according to a Gaussian with
+mean <var>Mean</var> and variance <var>Variance</var> and returns it in <var>Density</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_prob/3"><b class="pred">add_prob</b><var class="arglist">(?Prob:float, :Goal:atom, ?AnnGoal:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">From <var>Prob</var> and <var>Goal</var> builds the annotated atom <var>AnnGoal</var>=<var>Goal</var>:<var>Prob</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_mc/2"><b class="pred">set_mc</b><var class="arglist">(:Parameter:atom, +Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate sets the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="setting_mc/2"><b class="pred">setting_mc</b><var class="arglist">(:Parameter:atom, ?Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_sw/2"><b class="pred">set_sw</b><var class="arglist">(:Var:term, +List:lit)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sets the domain of the random variable <var>Var</var> to <var>List</var>.
+This is a predicate for programs in the PRISM syntax</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="msw/2"><b class="pred">msw</b><var class="arglist">(:Var:term, ?Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Gets or tests the <var>Value</var> of the random variable <var>Var</var>.
+This is a predicate for programs in the PRISM syntax</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="swap/2"><b class="pred">swap</b><var class="arglist">(?Term1:term, ?Term2:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">If <var>Term1</var> is of the form A:B, then <var>Term2</var> is of the form B:A.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="~=/2"><var class="arglist">:Term:term</var> <b class="pred">~=</b> <var class="arglist">+B:term</var></a> is <b class="det">det</b></dt><dd class="defbody">equality predicate for distributional clauses</dd>
+</dl>
+
+<h2 class="wiki">Re-exported predicates</h2>
+
+<p>
+The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability and a bar for one minus the probability.</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="clp_type/2"><b class="pred">clp_type</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bb_inf/3"><b class="pred">bb_inf</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="minimize/1"><b class="pred">minimize</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bb_inf/5"><b class="pred">bb_inf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dump/3"><b class="pred">dump</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="maximize/1"><b class="pred">maximize</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ordering/1"><b class="pred">ordering</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/2"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="inf/4"><b class="pred">inf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="{}/1"><b class="pred">{</b><var class="arglist">Arg1</var><b class="pred">}</b></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/4"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="entailed/1"><b class="pred">entailed</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="inf/2"><b class="pred">inf</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+</dl>
+
+</body>
+</html>

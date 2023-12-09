@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>pita.pl -- pita</title>
+
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>pita.pl -- pita</h1>
+
+<p>
+This module performs reasoning over Logic Programs with Annotated
+Disjunctions and CP-Logic programs.
+It reads probabilistic program and computes the probability of queries.</p>
+
+<p>
+See <a href="http://friguzzi.github.io/cplint/_build/html/index.html">http://friguzzi.github.io/cplint/_build/html/index.html</a> for
+details.</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Fabrizio Riguzzi</dd>
+<dt class="keyword-copyright">copyright</dt><dd class="keyword-copyright">- Fabrizio Riguzzi</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- Artistic License 2.0 <a href="https://opensource.org/licenses/Artistic-2.0">https://opensource.org/licenses/Artistic-2.0</a></dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="load/1"><b class="pred">load</b><var class="arglist">(++File:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>File</var>.lpad if it exists, otherwise loads <var>File</var>.cpl if it exists.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="load_file/1"><b class="pred">load_file</b><var class="arglist">(++FileWithExtension:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Loads <var>FileWithExtension</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_meta/2"><b class="pred">prob_meta</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">To be used in place of <a href="pita.html#prob/2">prob/2</a> for meta calls (doesn't abolish tables)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="abd_prob/3"><b class="pred">abd_prob</b><var class="arglist">(:Query:conjunction_of_literals, -Probability:float, -Delta:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the most probable abductive explanation of the ground query <var>Query</var>.
+It returns the explanation in <var>Delta</var> together with its <var>Probability</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_dot_file/3"><b class="pred">bdd_dot_file</b><var class="arglist">(:Query:atom, +FileName:string, -LV:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate builds the BDD for <var>Query</var> and writes its dot representation
+to file <var>FileName</var> and a list in <var>LV</var> with the association of variables to rules.
+<var>LV</var> is a list of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_dot_string/3"><b class="pred">bdd_dot_string</b><var class="arglist">(:Query:atom, -DotString:string, -LV:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate builds the BDD for <var>Query</var> and returns its dot representation
+in <var>DotString</var> and a list in <var>LV</var> with the association of variables to rules.
+<var>LV</var> is a list of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="abd_bdd_dot_string/4"><b class="pred">abd_bdd_dot_string</b><var class="arglist">(:Query:atom, -DotString:string, -LV:list, -LAV:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate builds the BDD for the abductive explanations for <var>Query</var>
+and returns its dot representation
+in <var>DotString</var> and lists <var>LV</var> and <var>LAV</var>, the association of variables to rules
+and to abductive variables to rules respectively.
+<var>LV</var> and <var>LAV</var> are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="abd_bdd_dot_string/6"><b class="pred">abd_bdd_dot_string</b><var class="arglist">(:Query:atom, -DotString:string, -LV:list, -LAV:list, -Probability:float, -Delta:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate builds the BDD for the abductive explanations for <var>Query</var>
+It returns the explanation in <var>Delta</var> together with its <var>Probability</var>.
+The predicate builds the BDD for <var>Query</var> and returns its dot representation
+in <var>DotString</var> and lists <var>LV</var> and <var>LAV</var>, the association of variables to rules
+and to abductive variables to rules respectively.
+<var>LV</var> and <var>LAV</var> are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="map/3"><b class="pred">map</b><var class="arglist">(:Query:atom, -Probability:float, -Delta:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the explanation of the ground query <var>Query</var>
+with Maximum A Posteriori (MAP) probability.
+It returns the explanation in <var>Delta</var> together with its <var>Probability</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="map_bdd_dot_string/6"><b class="pred">map_bdd_dot_string</b><var class="arglist">(:Query:atom, -DotString:string, -LV:list, -LAV:list, -Probability:float, -Delta:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the explanation of the ground query <var>Query</var>
+with Maximum A Posteriori (MAP) probability.
+It returns the explanation in <var>Delta</var> together with its <var>Probability</var>
+The predicate builds the BDD for <var>Query</var> and returns its dot representation
+in <var>DotString</var> and lists <var>LV</var> and <var>LAV</var>, the association of variables to rules
+and of query variables to rules respectively.
+<var>LV</var> and <var>LAV</var> are lists of list, each sublist has three elements:
+the multivalued variable number,
+the rule number and the grounding substitution.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob/2"><b class="pred">prob</b><var class="arglist">(:Query:atom, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate computes the probability of <var>Query</var>
+If <var>Query</var> is not ground, it returns in backtracking all ground
+instantiations of
+<var>Query</var> together with their probabilities</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob/3"><b class="pred">prob</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Equivalent to <a href="pita.html#prob/4">prob/4</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="prob_meta/3"><b class="pred">prob_meta</b><var class="arglist">(:Query:conjunction_of_literals, :Evidence:conjunction_of_literals, -Probability:float)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">To be used in place of <a href="pita.html#prob/3">prob/3</a> for meta calls (doesn't abolish tables)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_var_n/6"><b class="pred">get_var_n</b><var class="arglist">(++M:atomic, ++Environment:int, ++Rule:int, ++Substitution:term, ++Probabilities:list, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
+index <var>Rule</var>, grounding substitution <var>Substitution</var> and head distribution
+<var>Probabilities</var> in environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_dec_var_n/5"><b class="pred">get_dec_var_n</b><var class="arglist">(++M:atomic, ++Environment:int, ++Rule:int, ++Substitution:term, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
+index <var>Rule</var> in environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_abd_var_n/6"><b class="pred">get_abd_var_n</b><var class="arglist">(++M:atomic, ++Environment:int, ++Rule:int, ++Substitution:term, ++Probabilities:list, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
+index <var>Rule</var>, grounding substitution <var>Substitution</var> and head distribution
+<var>Probabilities</var> in environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="msw/4"><b class="pred">msw</b><var class="arglist">(:Var:term, ?Value:term, ++Environment:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>BDD</var> representing <var>Var</var>=<var>Value</var>.
+This is a predicate for programs in the PRISM syntax</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="msw/5"><b class="pred">msw</b><var class="arglist">(:Var:term, ?Value:term, ++Environment:int, --BDD:int, ?DB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>BDD</var> representing <var>Var</var>=<var>Value</var> when there is a depth bound on
+derivations.
+This is a predicate for programs in the PRISM syntax</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_pita/2"><b class="pred">set_pita</b><var class="arglist">(:Parameter:atom, +Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate sets the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="setting_pita/2"><b class="pred">setting_pita</b><var class="arglist">(:Parameter:atom, ?Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the value of a parameter
+For a list of parameters see
+<a href="https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf">https://github.com/friguzzi/cplint/blob/master/doc/manual.pdf</a> or
+<a href="http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html">http://ds.ing.unife.it/~friguzzi/software/cplint-swi/manual.html</a></dd>
+</dl>
+
+<h2 class="wiki">Re-exported predicates</h2>
+
+<p>
+The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero/2"><b class="pred">zero</b><var class="arglist">(++Environment:int, --Zero:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init/1"><b class="pred">init</b><var class="arglist">(--Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for storing a single BDD.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for inference only (no learning).</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
+It calls the C function srand.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
+Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
+Boolean random variable that represent <var>Variable</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc/3"><b class="pred">orc</b><var class="arglist">(++A:couple, ++B:couple, --AorB:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (Environment, BDDA) and (Environment, BDDB) respectively
+Returns in <var>AorB</var> a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
+representing the disjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_abd_prob/4"><b class="pred">ret_abd_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -Explanation:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the abductive <var>Explanation</var> of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
+<var>Context</var> is an integer that is a pointer to a context data structure
+created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
+to file FileName.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD <var>A</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
+<var>Environment</var> is a pointer to a data structure returned by a call
+to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
+<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
+It frees the memory occupied by the BDD.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
+It returns an integer in <var>Context</var> that is a pointer to a
+context data structure for performing the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability and a bar for one minus the probability.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="em/9"><b class="pred">em</b><var class="arglist">(++Context:int, ++RuleInfo:list, ++ListOfBDDs:list, ++EA:float, ++ER:float, ++Iterations:int, -LL:float, -Parameters:list, -ExampleProbabilities:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">NumberOfHeads is a list of terms, one for each rule. Each term is either
+an integer, indicating the number
+of head atoms in the rule, or a list [N] where N
+is the number of head atoms. In the first case, the parameters of the rule are tunable,
+in the latter they are fixed.
+
+<p>
+Performs EM learning.
+Takes as input the <var>Context</var>, information on the rules,
+a list of BDDs each representing one example,
+the minimum absolute difference <var>EA</var> and relative difference <var>ER</var> between the
+log likelihood of examples in two different iterations and the maximum number of iterations
+<var>Iterations</var>.
+<var>RuleInfo</var> is a list of elements, one for each rule, with are either</p>
+<ul>
+<li>an integer, indicating the number of heads, in which case the parameters of the
+corresponding rule should be randomized,</li>
+<li>a list of floats, in which case the parameters should be set to those indicated
+in the list and not changed during learning (fixed parameters)</li>
+<li>[a list of floats], in which case the initial values of the parameters should
+be set to those indicated
+in the list and changed during learning (initial values of the parameters)
+Returns the final log likelihood of examples <var>LL</var>, the list of new <var>Parameters</var>
+and a list with the final probabilities of each example.
+<var>Parameters</var> is a list whose elements are of the form [N,P] where N is the rule
+number and P is a list of probabilities, one for each head atom of rule N,
+in reverse order.</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_em/1"><b class="pred">end_em</b><var class="arglist">(++Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the context data structure for performing parameter learning.
+<var>Context</var> is a pointer to a context data structure for performing
+the EM algorithm.
+<var>Context</var> must have been returned by a call to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+It frees the memory occupied by <var>Context</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="and/4"><b class="pred">and</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AandB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AandB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equality/4"><b class="pred">equality</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> the <var>BDD</var> belonging to environment <var>Environment</var>
+that represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_query_var/4"><b class="pred">add_query_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable to be queried in MAP inference with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.
+The variable belongs to <var>Environment</var>.</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dt_solve/2"><b class="pred">dt_solve</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+</dl>
+
+</body>
+</html>
