@@ -24,6 +24,18 @@ for the XSB version at `<http://xsb.sourceforge.net/manual2/manual2.pdf>`_.
 
 cplint on SWISH is a web application for using cplint available at `<http://cplint.eu>`_.
 
+Predicate Reference
+===================
+
+ * `pita <https://friguzzi.github.io/cplint/docs/pldoc/pita.html>`_
+ * `mcintyre <https://friguzzi.github.io/cplint/docs/pldoc/mcintyre.html>`_
+ * `slipcover <https://friguzzi.github.io/cplint/docs/pldoc/slipcover.html>`_
+ * `viterbi <https://friguzzi.github.io/cplint/docs/pldoc/viterbi.html>`_
+ * `cplint_util <https://friguzzi.github.io/cplint/docs/pldoc/cplint_util.html>`_
+ * `kbest <https://friguzzi.github.io/cplint/docs/pldoc/kbest.html>`_
+ * `pitaind <https://friguzzi.github.io/cplint/docs/pldoc/pitaind.html>`_
+ * `lemur <https://friguzzi.github.io/cplint/docs/pldoc/lemur.html>`_
+
 Installation
 ============
 cplint is distributed as a `pack <http://www.swi-prolog.org/pack/list?p=cplint>`_ of `SWI-Prolog <http://www.swi-prolog.org/>`_. 
