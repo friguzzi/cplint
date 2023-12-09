@@ -27,14 +27,14 @@ cplint on SWISH is a web application for using cplint available at `<http://cpli
 Predicate Reference
 ===================
 
- * `pita <https://friguzzi.github.io/cplint/docs/pldoc/pita.html>`_
- * `mcintyre <https://friguzzi.github.io/cplint/docs/pldoc/mcintyre.html>`_
- * `slipcover <https://friguzzi.github.io/cplint/docs/pldoc/slipcover.html>`_
- * `viterbi <https://friguzzi.github.io/cplint/docs/pldoc/viterbi.html>`_
- * `cplint_util <https://friguzzi.github.io/cplint/docs/pldoc/cplint_util.html>`_
- * `kbest <https://friguzzi.github.io/cplint/docs/pldoc/kbest.html>`_
- * `pitaind <https://friguzzi.github.io/cplint/docs/pldoc/pitaind.html>`_
- * `lemur <https://friguzzi.github.io/cplint/docs/pldoc/lemur.html>`_
+ * `pita <https://friguzzi.github.io/cplint/pldoc/pita.html>`_
+ * `mcintyre <https://friguzzi.github.io/cplint/pldoc/mcintyre.html>`_
+ * `slipcover <https://friguzzi.github.io/cplint/pldoc/slipcover.html>`_
+ * `viterbi <https://friguzzi.github.io/cplint/pldoc/viterbi.html>`_
+ * `cplint_util <https://friguzzi.github.io/cplint/pldoc/cplint_util.html>`_
+ * `kbest <https://friguzzi.github.io/cplint/pldoc/kbest.html>`_
+ * `pitaind <https://friguzzi.github.io/cplint/pldoc/pitaind.html>`_
+ * `lemur <https://friguzzi.github.io/cplint/pldoc/lemur.html>`_
 
 Installation
 ============
