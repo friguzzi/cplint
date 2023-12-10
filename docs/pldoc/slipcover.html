@@ -136,59 +136,63 @@ the necessary term for the tabling directive in <var>TableSpec</var>.
 <var>Module</var> is used to store the information in the correct module</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero_clause/3"><b class="pred">zero_clause</b><var class="arglist">(+Module:atom, +PredSpec:pred_spec, -ZeroClause:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Generates the zero clause for predicate <var>PredSpec</var>.
 <var>Module</var> is the module of the input file.</dd>
-</dl>
-
-<h2 class="wiki">Re-exported predicates</h2>
-
-<p>
-The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
-
-<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(++Alpha:float, ++K:int, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a symmetric Dirichlet distribution with parameter <var>Alpha</var>.
+<var>K</var> is the number of dimensions of the result.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="and/4"><b class="pred">and</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AandB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AandB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_em/1"><b class="pred">end_em</b><var class="arglist">(++Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the context data structure for performing parameter learning.
+<var>Context</var> is a pointer to a context data structure for performing
+the EM algorithm.
+<var>Context</var> must have been returned by a call to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+It frees the memory occupied by <var>Context</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(++Shape:float, ++Scale:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a gamma distribution with parameters <var>Shape</var> and <var>Scale</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --EBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>EBDD</var> a couple (<var>Environment</var>,BDD) where BDD belongs to environment <var>Environment</var>
+and represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
+to file FileName.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(++Environment:int, ++EBDD:couple, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,BDD)
+Returns the <var>Probability</var> of BDD belonging to environment <var>Environment</var>
+Uses</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.
+fails if BDDB represents the zero function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equality/4"><b class="pred">equality</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> the <var>BDD</var> belonging to environment <var>Environment</var>
+that represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(++Environment:int, -Variable:out)</var></a> is <b class="det">det</b></dt><dd class="defbody">Prints the debug information which is the result of the call
+of Cudd_ReadDead, Cudd_CheckZeroRef, Cudd_CheckKeys and
+Cudd_DebugCheck(env-&gt;mgr));</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_query_var/4"><b class="pred">add_query_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable to be queried in MAP inference with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.
+The variable belongs to <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(++Environment:int, ++BDD:int, --ADD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Converts the <var>BDD</var> belonging to environment <var>Environment</var> into an <var>ADD</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero/2"><b class="pred">zero</b><var class="arglist">(++Environment:int, --Zero:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a pointer to a BDD belonging to environment <var>Environment</var>
 representing the zero Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(++Theta:list, --Value:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a discrete distribution with parameters <var>Theta</var>.
+<var>Theta</var> is a list of floating point numbers in [0,1] that sum to 1.
+<var>Value</var> is in 0..(<code>length(Theta)</code>-1)</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init/1"><b class="pred">init</b><var class="arglist">(--Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for storing a single BDD.
 Returns an integer <var>Environment</var> that is a pointer to a data structure for
 storing a single BDD to be used for inference only (no learning).</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
-It calls the C function srand.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
-Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
-Boolean random variable that represent <var>Variable</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(++Mean:float, ++Variance:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Gaussian distribution with parameters <var>Mean</var> and <var>Variance</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a pointer to a <var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in <var>ListOfBDDs</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc/3"><b class="pred">orc</b><var class="arglist">(++A:couple, ++B:couple, --AorB:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (Environment, BDDA) and (Environment, BDDB) respectively
 Returns in <var>AorB</var> a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
 representing the disjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(++Environment:int, --Zero:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(++Environment:int, ++ADDIn:int, ++Utility:float, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Multiplies the ADD belonging to environment <var>Environment</var>
+with the value <var>Utility</var> and stores the result in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_abd_prob/4"><b class="pred">ret_abd_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -Explanation:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the abductive <var>Explanation</var> of <var>BDD</var> and its <var>Probability</var>.
 <var>BDD</var> belongs to environment <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the one Boolean function.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
-<var>Context</var> is an integer that is a pointer to a context data structure
-created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
-Returns an integer <var>Environment</var> that is a pointer to a data structure for
-storing a single BDD to be used for the EM algorithm.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
-to file FileName.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
-NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the negation of BDD <var>A</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
 <var>Environment</var> is a pointer to a data structure returned by a call
 to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
-<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
-It frees the memory occupied by the BDD.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
-It returns an integer in <var>Context</var> that is a pointer to a
-context data structure for performing the EM algorithm.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
-NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
-<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="em/9"><b class="pred">em</b><var class="arglist">(++Context:int, ++RuleInfo:list, ++ListOfBDDs:list, ++EA:float, ++ER:float, ++Iterations:int, -LL:float, -Parameters:list, -ExampleProbabilities:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">NumberOfHeads is a list of terms, one for each rule. Each term is either
 an integer, indicating the number
 of head atoms in the rule, or a list [N] where N
@@ -218,48 +222,202 @@ number and P is a list of probabilities, one for each head atom of rule N,
 in reverse order.</li>
 </ul>
 </dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(++Environment:int, ++Alpha:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sets the type of parameter initialization for EM on <var>Environment</var>:
+if <var>Alpha</var> is 0.0, it uses a truncated Dirichlet process
+if <var>Alpha</var> is a float &gt; 0.0, it uses a symmetric Dirichlet distribution
+with that value as parameter</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
+<var>Context</var> is an integer that is a pointer to a context data structure
+created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(--Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a uniform distribution in [0,1]</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a couple (Env,B) with B a pointer to a
+<var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in
+<var>ListOfBDDs</var> (a list of couples (Env,<var>BDD</var>))</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(++Environment:int, ++EBDD:couple, --NotEBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,A)
+Returns in <var>NotEBDD</var> a couple (<var>Environment</var>,NotA) where NotA is
+pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD A</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(++Environment:int, --One:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(++Environment:int, ++ADD1:int, ++ADD2:int, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the sum of the two ADDs <var>ADD1</var> <var>ADD2</var> belonging to environment <var>Environment</var>.
+The result in saved in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD <var>A</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
+<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
+It frees the memory occupied by the BDD.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(++Environment:int, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new decision variable in <var>Environment</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
+It returns an integer in <var>Context</var> that is a pointer to a
+context data structure for performing the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(++Alpha:list, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Dirichlet distribution with parameters <var>Alpha</var>.
+<var>Alpha</var> and <var>Value</var> are lists of floating point numbers of the same length.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
+It calls the C function srand.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
+Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
+Boolean random variable that represent <var>Variable</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(++Environment:int, ++ADD:int, --Decision:list, --Cost:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the optimal strategy given a pointer to the <var>ADD</var> belonging to environment <var>Environment</var>.
+<var>Decision</var> is a list of selected facts, <var>Cost</var> is the total cost.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+</dl>
+
+<h2 class="wiki">Re-exported predicates</h2>
+
+<p>
+The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(++Alpha:float, ++K:int, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a symmetric Dirichlet distribution with parameter <var>Alpha</var>.
+<var>K</var> is the number of dimensions of the result.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="and/4"><b class="pred">and</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AandB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AandB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs <var>A</var> and <var>B</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_em/1"><b class="pred">end_em</b><var class="arglist">(++Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the context data structure for performing parameter learning.
 <var>Context</var> is a pointer to a context data structure for performing
 the EM algorithm.
 <var>Context</var> must have been returned by a call to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
 It frees the memory occupied by <var>Context</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="and/4"><b class="pred">and</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AandB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AandB</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the conjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(++Shape:float, ++Scale:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a gamma distribution with parameters <var>Shape</var> and <var>Scale</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --EBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>EBDD</var> a couple (<var>Environment</var>,BDD) where BDD belongs to environment <var>Environment</var>
+and represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
+to file FileName.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(++Environment:int, ++EBDD:couple, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,BDD)
+Returns the <var>Probability</var> of BDD belonging to environment <var>Environment</var>
+Uses</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.
+fails if BDDB represents the zero function</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equality/4"><b class="pred">equality</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> the <var>BDD</var> belonging to environment <var>Environment</var>
 that represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(++Environment:int, -Variable:out)</var></a> is <b class="det">det</b></dt><dd class="defbody">Prints the debug information which is the result of the call
+of Cudd_ReadDead, Cudd_CheckZeroRef, Cudd_CheckKeys and
+Cudd_DebugCheck(env-&gt;mgr));</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_query_var/4"><b class="pred">add_query_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable to be queried in MAP inference with
 NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.
 The variable belongs to <var>Environment</var>.</dd>
-</dl>
-
-<h2 class="undoc">Undocumented predicates</h2>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(++Environment:int, ++BDD:int, --ADD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Converts the <var>BDD</var> belonging to environment <var>Environment</var> into an <var>ADD</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero/2"><b class="pred">zero</b><var class="arglist">(++Environment:int, --Zero:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(++Theta:list, --Value:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a discrete distribution with parameters <var>Theta</var>.
+<var>Theta</var> is a list of floating point numbers in [0,1] that sum to 1.
+<var>Value</var> is in 0..(<code>length(Theta)</code>-1)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init/1"><b class="pred">init</b><var class="arglist">(--Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for storing a single BDD.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for inference only (no learning).</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(++Mean:float, ++Variance:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Gaussian distribution with parameters <var>Mean</var> and <var>Variance</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a pointer to a <var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in <var>ListOfBDDs</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc/3"><b class="pred">orc</b><var class="arglist">(++A:couple, ++B:couple, --AorB:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (Environment, BDDA) and (Environment, BDDB) respectively
+Returns in <var>AorB</var> a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
+representing the disjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(++Environment:int, --Zero:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(++Environment:int, ++ADDIn:int, ++Utility:float, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Multiplies the ADD belonging to environment <var>Environment</var>
+with the value <var>Utility</var> and stores the result in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_abd_prob/4"><b class="pred">ret_abd_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -Explanation:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the abductive <var>Explanation</var> of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
+<var>Environment</var> is a pointer to a data structure returned by a call
+to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="em/9"><b class="pred">em</b><var class="arglist">(++Context:int, ++RuleInfo:list, ++ListOfBDDs:list, ++EA:float, ++ER:float, ++Iterations:int, -LL:float, -Parameters:list, -ExampleProbabilities:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">NumberOfHeads is a list of terms, one for each rule. Each term is either
+an integer, indicating the number
+of head atoms in the rule, or a list [N] where N
+is the number of head atoms. In the first case, the parameters of the rule are tunable,
+in the latter they are fixed.
 
 <p>
-The following predicates are exported, but not or incorrectly documented.</p>
-
-<dl class="undoc">
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+Performs EM learning.
+Takes as input the <var>Context</var>, information on the rules,
+a list of BDDs each representing one example,
+the minimum absolute difference <var>EA</var> and relative difference <var>ER</var> between the
+log likelihood of examples in two different iterations and the maximum number of iterations
+<var>Iterations</var>.
+<var>RuleInfo</var> is a list of elements, one for each rule, with are either</p>
+<ul>
+<li>an integer, indicating the number of heads, in which case the parameters of the
+corresponding rule should be randomized,</li>
+<li>a list of floats, in which case the parameters should be set to those indicated
+in the list and not changed during learning (fixed parameters)</li>
+<li>[a list of floats], in which case the initial values of the parameters should
+be set to those indicated
+in the list and changed during learning (initial values of the parameters)
+Returns the final log likelihood of examples <var>LL</var>, the list of new <var>Parameters</var>
+and a list with the final probabilities of each example.
+<var>Parameters</var> is a list whose elements are of the form [N,P] where N is the rule
+number and P is a list of probabilities, one for each head atom of rule N,
+in reverse order.</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(++Environment:int, ++Alpha:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sets the type of parameter initialization for EM on <var>Environment</var>:
+if <var>Alpha</var> is 0.0, it uses a truncated Dirichlet process
+if <var>Alpha</var> is a float &gt; 0.0, it uses a symmetric Dirichlet distribution
+with that value as parameter</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
+<var>Context</var> is an integer that is a pointer to a context data structure
+created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(--Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a uniform distribution in [0,1]</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a couple (Env,B) with B a pointer to a
+<var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in
+<var>ListOfBDDs</var> (a list of couples (Env,<var>BDD</var>))</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(++Environment:int, ++EBDD:couple, --NotEBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,A)
+Returns in <var>NotEBDD</var> a couple (<var>Environment</var>,NotA) where NotA is
+pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD A</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(++Environment:int, --One:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(++Environment:int, ++ADD1:int, ++ADD2:int, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the sum of the two ADDs <var>ADD1</var> <var>ADD2</var> belonging to environment <var>Environment</var>.
+The result in saved in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD <var>A</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
+<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
+It frees the memory occupied by the BDD.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(++Environment:int, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new decision variable in <var>Environment</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
+It returns an integer in <var>Context</var> that is a pointer to a
+context data structure for performing the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(++Alpha:list, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Dirichlet distribution with parameters <var>Alpha</var>.
+<var>Alpha</var> and <var>Value</var> are lists of floating point numbers of the same length.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
+It calls the C function srand.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
+Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
+Boolean random variable that represent <var>Variable</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(++Environment:int, ++ADD:int, --Decision:list, --Cost:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the optimal strategy given a pointer to the <var>ADD</var> belonging to environment <var>Environment</var>.
+<var>Decision</var> is a list of selected facts, <var>Cost</var> is the total cost.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
 </dl>
 
 </body>

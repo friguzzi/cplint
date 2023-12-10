@@ -438,6 +438,158 @@ This is a predicate for programs in the PRISM syntax</dd>
 This is a predicate for programs in the PRISM syntax</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="swap/2"><b class="pred">swap</b><var class="arglist">(?Term1:term, ?Term2:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">If <var>Term1</var> is of the form A:B, then <var>Term2</var> is of the form B:A.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="~=/2"><var class="arglist">:Term:term</var> <b class="pred">~=</b> <var class="arglist">+B:term</var></a> is <b class="det">det</b></dt><dd class="defbody">equality predicate for distributional clauses</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(+Pair:pair, -FlattenedPair:pair)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair E-W, returns a pair Ep-W where
+Ep=EE if E=[EE], otherwise Ep=E</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(+List:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density/3">density/3</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(+List:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability and a bar for one minus the probability.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(+Values:list, -Dev:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the standard deviation of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(+Alphas:list, -Beta:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the value of the multivariate beta function for vector <var>Alphas</var>
+<a href="https://en.wikipedia.org/wiki/Beta_function#Multivariate_beta_function">https://en.wikipedia.org/wiki/Beta_function#Multivariate_beta_function</a>
+<var>Alphas</var> is a list of floats</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(+Pair:pair, -Key:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair <var>Key</var>-Vaule, returns its first element <var>Key</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(+List:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a line chart of the density of a sets of samples.
+The samples are in <var>List</var>
+as pairs [V]-W or V-W where V is a value and W its weigth.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density/3">density/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">min</b><var class="arglist">(+Min:float)</var></dt><dd>the minimum value of domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">max</b><var class="arglist">(+Max:float)</var></dt><dd>the maximum value of domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(+List:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a histogram of the samples in <var>List</var>. <var>List</var> must be a list of pairs of the form [V]-W or V-W
+where V is a sampled value and W is its weight, or a list of values.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">min</b><var class="arglist">(+Min:float)</var></dt><dd>the minimum value of domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">max</b><var class="arglist">(+Max:float)</var></dt><dd>the maximum value of domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(+Successes:int, +Failures:int, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the number of successes and a bar for the number of failures</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(+In:pair, -Out:pair)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given <var>In</var>=A0-N, <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=to_atom/2">to_atom/2</a> returns <var>Out</var>=A-N
+where A is an atom representing A0</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(+Values:list, -Average:float, -Dev:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the standard deviation and the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(+Values:list, -Average:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being summed</li>
+<li>a list of lists, in which case lists are considered as matrices of numbers and averaged
+element-wise</li>
+<li>a list of pairs list-weight, in which case the list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(+Pair:pair, -Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair Key-Vaule, returns its second element <var>Value</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(+List:list, -Dens:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density2d/3">density2d/3</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(+PriorList:list, +PostList:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=densities/4">densities/4</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(+Couple:atom, +PartialSum:number, -Sum:number)</var></a> is <b class="det">det</b></dt><dd class="defbody">Aggregate values by summation. The first argument is a couple _-N with
+N the new value to sum to <var>PartialSum</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(+Values:list, -Variance:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the variance of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(+List:list, -Dens:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a set of 3-dimensional points representing the plot of the
+density of a sets of 2-dimensional samples.
+The samples are in <var>List</var>
+as pairs [X,Y]-W where (X,Y) is a point and W its weigth.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density2d/3">density2d/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">xmin</b><var class="arglist">(+XMin:float)</var></dt><dd>the minimum value of the X domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">xmax</b><var class="arglist">(-XMax:float)</var></dt><dd>the maximum value of the X domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">ymin</b><var class="arglist">(-YMin:float)</var></dt><dd>the minimum value of the Y domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">ymax</b><var class="arglist">(-YMax:float)</var></dt><dd>the maximum value of the Y domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the X and Y domains, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(+N:int, +Values:list, +Lower:number, +BinWidth:number, -Couples:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a list of numeric <var>Values</var>, a <var>Lower</var> value and <var>BinWidth</var>, returns in <var>Couples</var>
+a list of <var>N</var> pairs V-Freq where V is the midpoint of a bin and Freq is the number
+of values that are inside the bin interval [V-<var>BinWidth</var>/2,V+<var>BinWidth</var>/2)
+starting with the bin where V-<var>BinWidth</var>/2=<var>Lower</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dump/3"><b class="pred">dump</b><var class="arglist">(+Target, -NewVars, -Constraints)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Constraints</var>, the constraints that currently hold on
+<var>Target</var> where all variables in <var>Target</var> are copied to new variables in
+<var>NewVars</var> and the constraints are given on these new variables. In
+short, you can safely manipulate <var>NewVars</var> and <var>Constraints</var> without
+changing the constraints on <var>Target</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(+Values:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>Values</var> is a list of pairs V-N where
+V is the value and N is the number of samples
+returning that value.
+The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for each value V.
+The size of the bar is given by N.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(+PriorList:list, +PostList:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a line chart of the density of two sets of samples, usually
+prior and post observations. The samples from the prior are in <var>PriorList</var>
+while the samples from the posterior are in <var>PostList</var>.
+<var>PriorList</var> and <var>PostList</var> must be lists of pairs of the form [V]-W or V-W
+where V is a sampled value and W is its weight, or lists of values V.
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a>:
+
+<dl class="termlist">
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40
+*/</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(+Values:list, -Average:float, -Variance:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the variance the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(+Goal:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Succeeds if <var>Goal</var> is an atom whose predicate is defined in Prolog
+(either builtin or defined in a standard library).</dd>
 </dl>
 
 <h2 class="wiki">Re-exported predicates</h2>
@@ -446,8 +598,158 @@ This is a predicate for programs in the PRISM syntax</dd>
 The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
 
 <dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(+Pair:pair, -FlattenedPair:pair)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair E-W, returns a pair Ep-W where
+Ep=EE if E=[EE], otherwise Ep=E</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(+List:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density/3">density/3</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(+List:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a> with an empty option list.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/2"><b class="pred">bar</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
 a bar for the probability and a bar for one minus the probability.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(+Values:list, -Dev:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the standard deviation of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(+Alphas:list, -Beta:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the value of the multivariate beta function for vector <var>Alphas</var>
+<a href="https://en.wikipedia.org/wiki/Beta_function#Multivariate_beta_function">https://en.wikipedia.org/wiki/Beta_function#Multivariate_beta_function</a>
+<var>Alphas</var> is a list of floats</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(+Pair:pair, -Key:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair <var>Key</var>-Vaule, returns its first element <var>Key</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(+List:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a line chart of the density of a sets of samples.
+The samples are in <var>List</var>
+as pairs [V]-W or V-W where V is a value and W its weigth.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density/3">density/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">min</b><var class="arglist">(+Min:float)</var></dt><dd>the minimum value of domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">max</b><var class="arglist">(+Max:float)</var></dt><dd>the maximum value of domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(+List:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a histogram of the samples in <var>List</var>. <var>List</var> must be a list of pairs of the form [V]-W or V-W
+where V is a sampled value and W is its weight, or a list of values.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">min</b><var class="arglist">(+Min:float)</var></dt><dd>the minimum value of domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">max</b><var class="arglist">(+Max:float)</var></dt><dd>the maximum value of domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(+Successes:int, +Failures:int, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the number of successes and a bar for the number of failures</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(+In:pair, -Out:pair)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given <var>In</var>=A0-N, <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=to_atom/2">to_atom/2</a> returns <var>Out</var>=A-N
+where A is an atom representing A0</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(+Values:list, -Average:float, -Dev:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the standard deviation and the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(+Values:list, -Average:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being summed</li>
+<li>a list of lists, in which case lists are considered as matrices of numbers and averaged
+element-wise</li>
+<li>a list of pairs list-weight, in which case the list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(+Pair:pair, -Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a pair Key-Vaule, returns its second element <var>Value</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(+List:list, -Dens:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density2d/3">density2d/3</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(+PriorList:list, +PostList:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">Equivalent to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=densities/4">densities/4</a> with an empty option list.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(+Probability:float, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for the probability</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(+Couple:atom, +PartialSum:number, -Sum:number)</var></a> is <b class="det">det</b></dt><dd class="defbody">Aggregate values by summation. The first argument is a couple _-N with
+N the new value to sum to <var>PartialSum</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(+Values:list, -Variance:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the variance of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(+List:list, -Dens:list, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a set of 3-dimensional points representing the plot of the
+density of a sets of 2-dimensional samples.
+The samples are in <var>List</var>
+as pairs [X,Y]-W where (X,Y) is a point and W its weigth.
+
+<p>
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=density2d/3">density2d/3</a>:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">xmin</b><var class="arglist">(+XMin:float)</var></dt><dd>the minimum value of the X domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">xmax</b><var class="arglist">(-XMax:float)</var></dt><dd>the maximum value of the X domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">ymin</b><var class="arglist">(-YMin:float)</var></dt><dd>the minimum value of the Y domain, default value the minimum in <var>List</var></dd>
+<dt class="term"><b class="pred">ymax</b><var class="arglist">(-YMax:float)</var></dt><dd>the maximum value of the Y domain, default value the maximum in <var>List</var></dd>
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the X and Y domains, default value 40</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(+N:int, +Values:list, +Lower:number, +BinWidth:number, -Couples:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Given a list of numeric <var>Values</var>, a <var>Lower</var> value and <var>BinWidth</var>, returns in <var>Couples</var>
+a list of <var>N</var> pairs V-Freq where V is the midpoint of a bin and Freq is the number
+of values that are inside the bin interval [V-<var>BinWidth</var>/2,V+<var>BinWidth</var>/2)
+starting with the bin where V-<var>BinWidth</var>/2=<var>Lower</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dump/3"><b class="pred">dump</b><var class="arglist">(+Target, -NewVars, -Constraints)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Constraints</var>, the constraints that currently hold on
+<var>Target</var> where all variables in <var>Target</var> are copied to new variables in
+<var>NewVars</var> and the constraints are given on these new variables. In
+short, you can safely manipulate <var>NewVars</var> and <var>Constraints</var> without
+changing the constraints on <var>Target</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(+Values:list, -Chart:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>Values</var> is a list of pairs V-N where
+V is the value and N is the number of samples
+returning that value.
+The predicate returns a dict for rendering with c3 as a bar chart with
+a bar for each value V.
+The size of the bar is given by N.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(+PriorList:list, +PostList:list, -Chart:dict, +Options:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Draws a line chart of the density of two sets of samples, usually
+prior and post observations. The samples from the prior are in <var>PriorList</var>
+while the samples from the posterior are in <var>PostList</var>.
+<var>PriorList</var> and <var>PostList</var> must be lists of pairs of the form [V]-W or V-W
+where V is a sampled value and W is its weight, or lists of values V.
+<var>Options</var> is a list of options, the following are recognised by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=histogram/3">histogram/3</a>:
+
+<dl class="termlist">
+<dt class="term"><b class="pred">nbins</b><var class="arglist">(+NBins:int)</var></dt><dd>the number of bins for dividing the domain, default value 40
+*/</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(+Values:list, -Average:float, -Variance:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the variance the average of <var>Values</var>.
+<var>Values</var> can be
+<ul>
+<li>a list of numbers</li>
+<li>a list of pairs number-weight, in which case each number is multiplied by the weight
+before being considered</li>
+<li>a list of pairs list-weight, in which case list is considered as a matrix of numbers.
+The matrix in each element of List must have the same dimension and are aggregated element-
+wise</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(+Goal:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Succeeds if <var>Goal</var> is an atom whose predicate is defined in Prolog
+(either builtin or defined in a standard library).</dd>
 </dl>
 
 <h2 class="undoc">Undocumented predicates</h2>
@@ -456,43 +758,18 @@ a bar for the probability and a bar for one minus the probability.</dd>
 The following predicates are exported, but not or incorrectly documented.</p>
 
 <dl class="undoc">
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar1/2"><b class="pred">bar1</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/4"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="minimize/1"><b class="pred">minimize</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="agg_val/3"><b class="pred">agg_val</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="average/2"><b class="pred">average</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="value_pair/2"><b class="pred">value_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/2"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="entailed/1"><b class="pred">entailed</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/3"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bar/3"><b class="pred">bar</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/2"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="maximize/1"><b class="pred">maximize</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="swi_builtin/1"><b class="pred">swi_builtin</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_atom/2"><b class="pred">to_atom</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="key_pair/2"><b class="pred">key_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/3"><b class="pred">density</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ordering/1"><b class="pred">ordering</b><var class="arglist">(Arg1)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/3"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="histogram/2"><b class="pred">histogram</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="inf/4"><b class="pred">inf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="bb_inf/5"><b class="pred">bb_inf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/2"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/3"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="beta/2"><b class="pred">beta</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="{}/1"><b class="pred">{</b><var class="arglist">Arg1</var><b class="pred">}</b></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="to_pair/2"><b class="pred">to_pair</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density/2"><b class="pred">density</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="dump/3"><b class="pred">dump</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="argbar/2"><b class="pred">argbar</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bb_inf/3"><b class="pred">bb_inf</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="ordering/1"><b class="pred">ordering</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/2"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="inf/4"><b class="pred">inf</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="sup/4"><b class="pred">sup</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="entailed/1"><b class="pred">entailed</b><var class="arglist">(Arg1)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="inf/2"><b class="pred">inf</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="std_dev/3"><b class="pred">std_dev</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="variance/2"><b class="pred">variance</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bin/5"><b class="pred">bin</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="density2d/3"><b class="pred">density2d</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="densities/4"><b class="pred">densities</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="clp_type/2"><b class="pred">clp_type</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="bb_inf/3"><b class="pred">bb_inf</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="minimize/1"><b class="pred">minimize</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="{}/1"><b class="pred">{</b><var class="arglist">Arg1</var><b class="pred">}</b></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="maximize/1"><b class="pred">maximize</b><var class="arglist">(Arg1)</var></a></dt>
 </dl>
 
 </body>

@@ -1,20 +1,29 @@
-:- consult('../prolog/cplint_util').
-:- consult('../prolog/pita').
-:- consult('../prolog/mcintyre').
-:- consult('../prolog/slipcover').
-:- consult('../prolog/viterbi').
-:- consult('../prolog/kbest').
-:- consult('../prolog/pitaind').
-:- consult('../prolog/lemur').
+:- use_module(library(pldoc)).
+:- use_module(library(doc_files)).
+:- use_module(library(filesex)).
 
-:- doc_save('../prolog/pita.pl',[doc_root('./pldoc'),index_file(pita)]).
-:- doc_save('../prolog/mcintyre.pl',[doc_root('./pldoc'),index_file(mcintyre)]).
-:- doc_save('../prolog/slipcover.pl',[doc_root('./pldoc'),index_file(slipcover)]).
-:- doc_save('../prolog/viterbi.pl',[doc_root('./pldoc'),index_file(viterbi)]).
-:- doc_save('../prolog/cplint_util.pl',[doc_root('./pldoc'),index_file(cplint_util)]).
-:- doc_save('../prolog/kbest.pl',[doc_root('./pldoc'),index_file(kbest)]).
-:- doc_save('../prolog/pitaind.pl',[doc_root('./pldoc'),index_file(pitaind)]).
-:- doc_save('../prolog/lemur.pl',[doc_root('./pldoc'),index_file(lemur)]).
+:- initialization(gen_doc, main).
 
+doc_file(cplint_util).
+doc_file(pita).
+doc_file(mcintyre).
+doc_file(slipcover).
+doc_file(viterbi).
+doc_file(kbest).
+doc_file(pitaind).
+doc_file(lemur).
+load_all :-
+    ensure_loaded(library(clpr)),
+    forall(doc_file(File),
+           ( directory_file_path('../prolog', File, Path),
+             ensure_loaded(Path))).
 
-:- halt.
+gen_doc :-
+    load_all,
+    Opts = [ doc_root('./pldoc'),
+             include_reexported(true)
+           ],
+
+    forall(doc_file(File),
+           ( directory_file_path('../prolog', File, Path),
+             doc_save(Path, Opts))).
