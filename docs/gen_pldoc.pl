@@ -12,6 +12,8 @@ doc_file(viterbi).
 doc_file(kbest).
 doc_file(pitaind).
 doc_file(lemur).
+doc_file(highlight).
+
 load_all :-
     ensure_loaded(library(clpr)),
     forall(doc_file(File),
