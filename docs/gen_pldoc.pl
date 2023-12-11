@@ -21,7 +21,7 @@ load_all :-
 gen_doc :-
     load_all,
     Opts = [ doc_root('./pldoc'),
-             include_reexported(true)
+             include_reexported(false)
            ],
 
     forall(doc_file(File),

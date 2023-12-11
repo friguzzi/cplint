@@ -34,6 +34,8 @@ It reads probabilistic program and computes the probability of queries.
 See https://friguzzi.github.io/cplint/ for
 details.
 
+Reexports [cplint_util](https://friguzzi.github.io/cplint/pldoc/cplint_util.html) and [bddem](https://friguzzi.github.io/bddem/)
+
 @author Fabrizio Riguzzi
 @license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
 @copyright Fabrizio Riguzzi

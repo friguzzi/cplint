@@ -10,3 +10,10 @@ doc/manual.log
 doc/manual.out
 
 *.dot
+*.aux
+*.sty
+*.log
+*.toc
+*.fls
+*.out
+*.fdb_latexmk

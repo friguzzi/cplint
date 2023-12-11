@@ -15,6 +15,8 @@ Machine Learning, 100(1):127-156, July 2015
 See https://friguzzi.github.io/cplint/ for
 details.
 
+Reexports [slipcover](https://friguzzi.github.io/cplint/pldoc/slipcover.html)
+
 @author Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi
 @license Artistic License 2.0
 @copyright Nicola di Mauro, Fabrizio Riguzzi, Elena Bellodi

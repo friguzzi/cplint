@@ -35,6 +35,8 @@ It performs both parameter and structure learning.
 See https://friguzzi.github.io/cplint/ for
 details.
 
+Reexports [bddem](https://friguzzi.github.io/bddem/)
+
 @author Fabrizio Riguzzi, Elena Bellodi
 @license Artistic License 2.0
 @copyright Fabrizio Riguzzi, Elena Bellodi

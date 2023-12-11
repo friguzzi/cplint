@@ -64,6 +64,8 @@ using sampling.
 
 See  https://friguzzi.github.io/cplint/ for details.
 
+Reexports [cplint_util](https://friguzzi.github.io/cplint/pldoc/cplint_util.html) and [clpr](https://www.swi-prolog.org/pldoc/man?section=clpqr).
+
 @author Fabrizio Riguzzi
 @license Artistic License 2.0 https://opensource.org/licenses/Artistic-2.0
 @copyright Fabrizio Riguzzi
