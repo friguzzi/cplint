@@ -407,7 +407,8 @@ test(topic_1_1_1_ww_g):-
   run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[]),close_to(G,0.5,0.5))).
 test(topic_1_1_1_ww_g_b):-
   run((mc_gibbs_sample(topic(1,1,1),(word(1,1,1),word(1,2,1)),100,G,[block(2)]),close_to(G,0.5,0.5))).
-
+test(topic_1_1_1_ww_g_b_part):-
+run((mc_particle_sample(topic(1,1,1),[word(1,1,1),word(1,2,1)],100,G),close_to(G,0.5,0.5))).
 :- end_tests(lda).
 
 

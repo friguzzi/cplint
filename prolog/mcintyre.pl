@@ -40,6 +40,7 @@
   mc_lw_sample_arg_log/5,
   mc_lw_expectation/5,
   mc_particle_sample_arg/5,
+  mc_particle_sample/4,
   mc_particle_expectation/5,
   gaussian/5,
   gaussian/4,
@@ -127,6 +128,7 @@ Reexports [cplint_util](https://friguzzi.github.io/cplint/pldoc/cplint_util.html
 :-meta_predicate mc_lw_expectation(:,:,+,?,-).
 :-meta_predicate mc_particle_expectation(:,:,+,?,-).
 :-meta_predicate mc_particle_sample_arg(:,:,+,?,-).
+:-meta_predicate mc_particle_sample(:,:,+,-).
 :-meta_predicate particle_sample_arg(:,:,+,?,-).
 :-meta_predicate particle_sample_first(+,+,:,:,?).
 :-meta_predicate particle_sample_arg_gl(:,:,+,+,+,-).
@@ -3582,6 +3584,7 @@ sandbox:safe_meta(mcintyre:mc_lw_sample_arg_log(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_lw_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_particle_expectation(_,_,_,_,_), []).
 sandbox:safe_meta(mcintyre:mc_particle_sample_arg(_,_,_,_,_), []).
+sandbox:safe_meta(mcintyre:mc_particle_sample(_,_,_,_), []).
 sandbox:safe_meta(mcintyre:msw(_,_), []).
 
 sandbox:safe_meta(mcintyre:set_mc(_,_), []).
