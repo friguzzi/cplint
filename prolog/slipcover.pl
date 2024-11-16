@@ -453,7 +453,9 @@ induce_parameters(M:Folds,R):-
   ;
     true
   ),
+  set_sc(M:compiling,off),
   M:in(R00),
+  set_sc(M:compiling,on),
   process_clauses(R00,M,[],_,[],R0),
   statistics(walltime,[_,_]),
   learn_params(DB,M,R0,R,Score),
