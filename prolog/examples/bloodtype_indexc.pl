@@ -18,9 +18,9 @@ Inductive Logic Programming. Springer Berlin Heidelberg, 2010. 96-109.
 
 :- pitaind.
 
-
-:- begin_lpad.
 :- set_pitaind(or,exc).
+:- begin_lpad.
+
 
 % mchrom(Person,C) means that the chromosome of Person inherited from his mother
 % (or mother chromosome) has allele C. The alleles are a, b and null

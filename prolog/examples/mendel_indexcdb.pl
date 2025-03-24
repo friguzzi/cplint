@@ -16,6 +16,8 @@ In Inductive Logic Programming (ILP 2004), Work in Progress Track, 2004.
 
 :- pitaind.
 :- set_pitaind(or,exc).
+:- set_pitaind(depth_bound,true).
+:- set_pitaind(depth,5).
 
 :- begin_lpad.
 

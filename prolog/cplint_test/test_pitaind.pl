@@ -74,3 +74,18 @@ test(s_2_w):-
   run((prob_ind(cg(s,2,w),P),close_to(P,0.5))).
 
 :- end_tests(mendel_indexc).
+
+:- begin_tests(mendel_indexcdb, []).
+
+:-ensure_loaded(library(examples/mendel_indexcdb)).
+
+test(s_1_p):-
+  run((prob_ind(cg(s,1,p),P),close_to(P,0.5))).
+test(s_1_w):-
+  run((prob_ind(cg(s,1,w),P),close_to(P,0.5))).
+test(s_2_p):-
+  run((prob_ind(cg(s,2,p),P),close_to(P,0.5))).
+test(s_2_w):-
+  run((prob_ind(cg(s,2,w),P),close_to(P,0.5))).
+
+:- end_tests(mendel_indexcdb).

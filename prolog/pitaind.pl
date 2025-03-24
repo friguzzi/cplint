@@ -182,6 +182,22 @@ equalityc(Probs,N,P):-
  * Query together with their probabilities
  */
 s(M:Goal,P):-
+  M:local_pitaind_setting(depth_bound,true),!,
+  term_variables(Goal,VG),
+  get_next_goal_number(M,GN),
+  atomic_concat('$goal',GN,NewGoal),
+  Goal1=..[NewGoal|VG],
+  list2and(GoalL,Goal),
+  process_body_db(GoalL,BDD,BDDAnd,DB,[],_Vars,BodyList2,M),
+  append([onec(BDD)],BodyList2,BodyList3),
+  list2and(BodyList3,Body2),
+  add_bdd_arg_db(Goal1,BDDAnd,DB,M,Head1),
+  M:(asserta((Head1 :- Body2),Ref)),
+  findall((Goal,P),get_p(M:Goal1,P),L),
+  erase(Ref),
+  member((Goal,P),L).
+
+s(M:Goal,P):-
   term_variables(Goal,VG),
   get_next_goal_number(M,GN),
   atomic_concat('$goal',GN,NewGoal),
@@ -1145,9 +1161,9 @@ pitaind_expansion(Head,Clause) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,BDD,_DB,M,Head1),
   (M:local_pitaind_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equality(V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equality(V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
   ).
 
 pitaind_expansion(Head,Clause) :-
@@ -1162,9 +1178,9 @@ pitaind_expansion(Head,Clause) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,BDD,M,Head1),%***test single_var
   (M:local_pitaind_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equality(V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equality(V,0,BDD)))
+    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
   ).
 
 pitaind_expansion((:- set_pitaind(P,V)), []) :-!,
@@ -1269,7 +1285,7 @@ user:term_expansion((:- pitaind), []) :-!,
   retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
-  M:(dynamic v/3),
+  M:(dynamic v/3,pitaind_on/0),
   style_check(-discontiguous).
 
 user:term_expansion(end_of_file, end_of_file) :-
