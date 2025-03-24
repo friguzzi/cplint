@@ -15,6 +15,7 @@
   get_dec_var_n/5,
   load/1,load_file/1,
   dt_solve/2,
+  parse/2,
   op(600,xfy,'::'),
   op(600,xfx,'=>'),
   op(1150,fx,action),
@@ -130,6 +131,97 @@ load_file(File):-
   user:consult(File),
   end_lpad_pred.
 
+/**
+ * parse(++FileIn:atom,++FileOut:atom) is det
+ * applies the pita transformation to FileIn and writes the result to FileOut
+ */
+parse(FileIn,FileOut):-
+  prolog_load_context(module, M),
+  assert(M:pita_on),
+  initialize_pita,
+  open(FileIn,read,SI),
+	read_clauses(SI,C),
+	close(SI),
+	process_clauses(C,[],C1),
+  findall(LZ,M:zero_clauses(LZ),L0),
+  retractall(M:zero_clauses(_)),
+  retractall(M:tabled(_)),
+  append(C1,L0,Cl0),
+	open(FileOut,write,SO),
+  divide_tab_dyn_dir(Cl0,T,Dyn,Cl),
+	write_clauses([(:- dynamic query_rule/4)|Dyn],SO),
+	write_tab_dir(T,SO),
+	write_clauses(Cl,SO),
+	close(SO).
+
+divide_tab_dyn_dir([],[],[],[]).
+
+divide_tab_dyn_dir([(:- table A)|T],[(:- table A)|TT],Dyn,Cl):-!,
+  divide_tab_dyn_dir(T,TT,Dyn,Cl).
+
+divide_tab_dyn_dir([(:- dynamic A)|T],Tab,[(:- dynamic A)|Dyn],Cl):-!,
+  divide_tab_dyn_dir(T,Tab,Dyn,Cl).
+
+divide_tab_dyn_dir([H|T],TT,Dyn,[H|Cl]):-
+  divide_tab_dyn_dir(T,TT,Dyn,Cl).
+
+/* output predicates */
+write_tab_dir([],S):-
+	nl(S).
+
+write_tab_dir([H|T],S):-
+  copy_term(H,H1),
+  numbervars(H1,0,_),
+	format(S,"~w.",[H1]),
+	nl(S),
+	write_tab_dir(T,S).
+
+
+write_clauses([],_).
+
+write_clauses([H|T],S):-
+  copy_term(H,H1),
+  numbervars(H1,0,_),
+	format(S,"~q.",[H1]),
+	nl(S),
+	write_clauses(T,S).
+
+read_clauses(S,[Cl|Out]):-
+        read_term(S,Cl,[]),
+	(Cl=end_of_file->
+		Out=[]
+	;
+		read_clauses(S,Out)
+	).
+/* clause processing */
+process_clauses([end_of_file],C,C).
+
+process_clauses([H|T],C0,C1):-
+	(pita_expansion(H,H1)->
+		true
+	;
+		H1=H
+	),
+	(is_list(H1)->
+		append(C0,H1,C2)
+	;
+		append(C0,[H1],C2)
+	),
+	process_clauses(T,C2,C1).
+
+initialize_pita:-
+  prolog_load_context(module, M),
+  retractall(M:local_pita_setting(_,_)),
+  findall(local_pita_setting(P,V),default_setting_pita(P,V),L),
+  assert_all(L,M,_),
+  assert(pita_input_mod(M)),
+  retractall(M:rule_n(_)),
+  retractall(M:goal_n(_)),
+  assert(M:rule_n(0)),
+  assert(M:goal_n(0)),
+  (dynamic M:v/3, M:av/3,  %M:rule_by_num/4,
+    M:zero_clauses/1, M:pita_on/0, M:if_on/0, M:tabled/1),
+  retractall(M:query_rule(_,_,_,_)).
 /**
  * dt_solve(-Strategy:list,-Cost:float) is det
  *
