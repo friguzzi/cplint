@@ -7,6 +7,7 @@
   get_var_n/5,or_list_pitaind/3,
   or_list_ind/2,or_list_exc/2,
   equalityc/3,
+  parse/2,
   op(600,xfy,'::'),
   op(1150,fx,action)
     ]).
@@ -172,7 +173,65 @@ equalityc(Probs,N,P):-
   nth0(N,Probs,P).
 
 
+/**
+ * parse(++FileIn:atom,++FileOut:atom) is det
+ * applies the pita transformation to FileIn and writes the result to FileOut
+ */
+parse(FileIn,FileOut):-
+  prolog_load_context(module, M),
+  assert(M:pitaind_on),
+  initialize_pitaind,
+  open(FileIn,read,SI),
+	read_clauses(SI,C),
+	close(SI),
+	process_clauses(C,[],C1),
+	open(FileOut,write,SO),
+  write_clauses(C1,SO),
+	close(SO).
 
+write_clauses([],_).
+
+write_clauses([H|T],S):-
+  copy_term(H,H1),
+  numbervars(H1,0,_),
+	format(S,"~q.",[H1]),
+	nl(S),
+	write_clauses(T,S).
+
+read_clauses(S,[Cl|Out]):-
+        read_term(S,Cl,[]),
+	(Cl=end_of_file->
+		Out=[]
+	;
+		read_clauses(S,Out)
+	).
+/* clause processing */
+process_clauses([end_of_file],C,C).
+
+process_clauses([H|T],C0,C1):-
+	(pitaind_expansion(H,H1)->
+		true
+	;
+		H1=H
+	),
+	(is_list(H1)->
+		append(C0,H1,C2)
+	;
+		append(C0,[H1],C2)
+	),
+	process_clauses(T,C2,C1).
+initialize_pitaind:-
+  prolog_load_context(module, M),
+  retractall(M:local_pitaind_setting(_,_)),
+  findall(local_pitaind_setting(P,V),default_setting_pitaind(P,V),L),
+  assert_all(L,M,_),
+  assert(pitaind_input_mod(M)),
+  retractall(M:rule_n(_)),
+  retractall(M:goal_n(_)),
+  assert(M:rule_n(0)),
+  assert(M:goal_n(0)),
+  M:(dynamic v/3),
+  style_check(-discontiguous).
 
 /**
  * s(:Query:conjunction_of_literals,-Probability:float) is nondet
