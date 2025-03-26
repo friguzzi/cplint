@@ -194,7 +194,7 @@ read_clauses(S,[Cl|Out]):-
 		read_clauses(S,Out)
 	).
 /* clause processing */
-process_clauses([end_of_file],C,C).
+process_clauses([end_of_file],C,C):-!.
 
 process_clauses([H|T],C0,C1):-
 	(pita_expansion(H,H1)->
