@@ -301,15 +301,15 @@ test(s_2_w):-
 test(s_p):-
   run((map(color(s,purple),Prob,Exp),close_to(Prob,0.5),
 	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-	 [mother(m, s), cg(m, 1, p), cg(m, 2, w)])]))).
+	 (mother(m, s), cg(m, 1, p), cg(m, 2, w)))]))).
 
 
 test(s_w):-
   run((map(color(s,white),Prob,Exp),close_to(Prob,0.25),
   perm(Exp, [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-     [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),
+     (mother(m, s), cg(m, 1, p), cg(m, 2, w))),
 	 rule(1, cg(s, 2, w), [cg(s, 2, w):0.5, cg(s, 2, p):0.5],
-	   [father(f, s), cg(f, 1, w), cg(f, 2, p)])]))).
+	   (father(f, s), cg(f, 1, w), cg(f, 2, p)))]))).
 
 :- end_tests(mendel_mpe).
 
