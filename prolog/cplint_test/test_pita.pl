@@ -16,6 +16,8 @@ test_pita:-
     threesideddice,
     bloodtype,
     mendel,
+    mendel_map,
+    mendel_mpe,
     coin2,
     simpson,
     viral,
@@ -47,7 +49,10 @@ test_pita:-
     dt_weather,
     dt_viral,
     tabling_probs,
-    event_calculus
+    event_calculus,
+    card_body,
+    card_disc,
+    card_disc_body
     ]).
 
 :-use_module(library(cplint_test/cplint_test)).
@@ -298,12 +303,6 @@ test(s_2_w):-
 
 :-ensure_loaded(library(examples/mendel_mpe)).
 
-test(s_p):-
-  run((map(color(s,purple),Prob,Exp),close_to(Prob,0.5),
-	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-	 (mother(m, s), cg(m, 1, p), cg(m, 2, w)))]))).
-
-
 test(s_w):-
   run((map(color(s,white),Prob,Exp),close_to(Prob,0.25),
   perm(Exp, [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
@@ -313,6 +312,16 @@ test(s_w):-
 
 :- end_tests(mendel_mpe).
 
+:- begin_tests(mendel_map, []).
+
+:-ensure_loaded(library(examples/mendel_map)).
+
+test(s_p):-
+  run((map(color(s,purple),Prob,Exp),close_to(Prob,0.5),
+	perm(Exp, [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
+	 (mother(m, s), cg(m, 1, p), cg(m, 2, w)))]))).
+
+:- end_tests(mendel_map).
 :- begin_tests(coin2, []).
 
 :-ensure_loaded(library(examples/coin2)).
