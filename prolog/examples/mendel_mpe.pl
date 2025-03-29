@@ -80,12 +80,8 @@ color(X,white) :- cg(X,1,w), cg(X,2,w).
 % expected result 0.5
 ?- prob(cg(s,2,w),Prob),bar(Prob,C). % what is the probability that the color allele on chromosme 2 of s is w?
 % expected result 0.5
-?- mpe(color(s,purple),Prob,Exp).
-Prob = 0.5,
-Exp = [rule(0, cg(s, 1, p), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
-    [mother(m, s), cg(m, 1, p), cg(m, 2, w)])].
 
-?- mpe(color(s,white),Prob,Exp).
+?- map(color(s,white),Prob,Exp).
 Prob = 0.25,
 Exp = [rule(0, cg(s, 1, w), [cg(s, 1, p):0.5, cg(s, 1, w):0.5],
     [mother(m, s), cg(m, 1, p), cg(m, 2, w)]),

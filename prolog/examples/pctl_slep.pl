@@ -39,7 +39,7 @@ See also http://www.prismmodelchecker.org/casestudies/synchronous_leader.php
 
 % What is the expected number of rounds to elect a leader?
 ?- mc_expectation(eventually(elect,T),1000,T,E).
-% expected result 1.2
+% expected result 1.33
 
 
 ?- graph_prob(G). 
