@@ -1,5 +1,6 @@
 :- set_test_options([load(always)]).
 :- use_module(test_pita).
+:- use_module(test_pitaind).
 :- use_module(test_mc).
 :- use_module(test_kbest).
 :- use_module(test_viterbi).
@@ -19,6 +20,7 @@ test:-
                    test_viterbi,
                    test_sc,
                    test_lemur,
+                   test_pitaind,
                    test_util
                  ], Failed),
   (   Failed == []
