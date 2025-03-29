@@ -18,7 +18,7 @@ test_list([
     pctl_slep,
     arithm,
     gaussian_mixture,
-    %kalman_filter,
+    kalman_filter,
     gauss_mean_est,
     gauss_mean_est_user,
     slp_pdcg,
@@ -30,6 +30,7 @@ test_list([
     viralmc,
     uwcsemc,
     bitcoin_attack,
+    bitcoin_two_phase,
     lda,
     ship,
     fruit,
@@ -242,7 +243,7 @@ test(mix_X_mix):-
 test(exp_kf):-
 	run((mc_expectation(kf(1,_O2,[T]),1000,T,E),close_to(E,0,0.1))).
 test(lw_exp_kf):-
-	run((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,[E]),relatively_close_to(E,0.6324846033555553,0.2))).
+	run((mc_lw_expectation(kf(1,_O2,T),kf(1,[2.5],_T),3000,T,R),R=[E],relatively_close_to(E,0.6324846033555553,0.2))).
 
 :- end_tests(kalman_filter).
 
