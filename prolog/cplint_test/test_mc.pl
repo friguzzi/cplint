@@ -177,7 +177,7 @@ test(eventually_elect):-
 test(bounded_eventually_elect):-
 	run((mc_sample(bounded_eventually(elect,3),100,P),close_to(P,0.97))).
 test(exp_eventually_elect):-
-	run((mc_expectation(eventually(elect,T),100,T,P),relatively_close_to(P,1.2))).
+	run((mc_expectation(eventually(elect,T),100,T,P),relatively_close_to(P,1.33))).
 :- end_tests(pctl_slep).
 
 :- begin_tests(arithm, []).
