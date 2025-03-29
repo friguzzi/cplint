@@ -51,9 +51,9 @@ Requirements
 -------------
 It requires the packs
 
- * `bddem <https://github.com/friguzzi/bddem>`_
- * `auc <https://github.com/friguzzi/auc>`_
- * `matrix <https://github.com/friguzzi/matrix>`_
+ * `bddem <https://github.com/friguzzi/bddem>`__
+ * `auc <https://github.com/friguzzi/auc>`__
+ * `matrix <https://github.com/friguzzi/matrix>`__
  
 They are installed automatically when installing pack `cplint` or can installed manually as 
 
@@ -1273,7 +1273,7 @@ and query the program with ::
 The result is the same as for PITA but the computation is faster.
 
 To use PITA(IND,IND) you use :code:`set_pitaind/2` with
-the directive :code:`:- set_pitaind(or,ind).` `ind` is the default value
+the directive :code:`:- set_pitaind(or,ind).` :code:`ind` is the default value
 for the option :code:`or`.
 
 
