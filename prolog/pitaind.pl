@@ -7,7 +7,7 @@
   get_var_n/5,or_list_pitaind/3,
   or_list_ind/2,or_list_exc/2,
   equalityc/3,
-  parse/2,
+  parse_ind/2,
   op(600,xfy,'::'),
   op(1150,fx,action)
     ]).
@@ -174,10 +174,10 @@ equalityc(Probs,N,P):-
 
 
 /**
- * parse(++FileIn:atom,++FileOut:atom) is det
+ * parse_ind(++FileIn:atom,++FileOut:atom) is det
  * applies the pita transformation to FileIn and writes the result to FileOut
  */
-parse(FileIn,FileOut):-
+parse_ind(FileIn,FileOut):-
   prolog_load_context(module, M),
   assert(M:pitaind_on),
   initialize_pitaind,
