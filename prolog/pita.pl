@@ -152,10 +152,10 @@ parse(FileIn,FileOut):-
   divide_tab_dyn_dir(Cl0,T,Dyn,Cl),
   writeln(SO,':- use_module(library(pita)).'),
   writeln(SO,':- style_check(-discontiguous).'),
+  writeln(SO,':- pita.'),  
   write_clauses([(:- dynamic query_rule/4)|Dyn],SO),
 	write_tab_dir(T,SO),
 	write_clauses(Cl,SO),
-  writeln(SO,':- pita.'),  
 	close(SO).
 
 divide_tab_dyn_dir([],[],[],[]).

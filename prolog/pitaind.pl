@@ -194,10 +194,10 @@ parse_ind(FileIn,FileOut):-
 	open(FileOut,write,SO),
   writeln(SO,':- use_module(library(pitaind)).'),
   writeln(SO,':- style_check(-discontiguous).'),
+  writeln(SO,':- pitaind.'),
 	write_clauses(Dyn,SO),
 	write_tab_dir(T,SO),
   write_clauses(Cl,SO),
-  writeln(SO,':- pitaind.'),
 	close(SO).
 
 divide_tab_dyn_dir([],[],[],[]).
@@ -241,6 +241,11 @@ read_clauses(S,[Cl|Out]):-
 	).
 /* clause processing */
 process_clauses([end_of_file],C,C):-!.
+
+process_clauses([:- set_pitaind(S,V) |T],C0,[:- set_pitaind(S,V)|C1]):-!,
+  prolog_load_context(module, M),
+  set_pitaind(M:S,V),
+  process_clauses(T,C0,C1).
 
 process_clauses([:- _ |T],C0,C1):-!,
   process_clauses(T,C0,C1).
