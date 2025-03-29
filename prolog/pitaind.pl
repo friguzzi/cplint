@@ -175,6 +175,7 @@ equalityc(Probs,N,P):-
 
 /**
  * parse_ind(++FileIn:atom,++FileOut:atom) is det
+ * 
  * applies the pita transformation to FileIn and writes the result to FileOut
  */
 parse_ind(FileIn,FileOut):-

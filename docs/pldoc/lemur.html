@@ -52,97 +52,43 @@ For a list of parameters see
 The following predicates are exported from this file while their implementation is defined in imported modules or non-module files loaded by this module.</p>
 
 <dl>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="test/7"><b class="pred">test</b><var class="arglist">(:P:probabilistic_program, +TestFolds:list_of_atoms, -LL:float, -AUCROC:float, -ROC:dict, -AUCPR:float, -PR:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate takes as input in <var>P</var> a probabilistic program,
-tests <var>P</var> on the folds indicated in <var>TestFolds</var> and returns the
-log likelihood of the test examples in <var>LL</var>, the area under the Receiver
-Operating Characteristic curve in <var>AUCROC</var>, a dict containing the points
-of the <var>ROC</var> curve in <var>ROC</var>, the area under the Precision Recall curve in <var>AUCPR</var>
-and a dict containing the points of the <var>PR</var> curve in <var>PR</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
-Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
-Boolean random variable that represent <var>Variable</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(++Environment:int, ++EBDD:couple, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,BDD)
-Returns the <var>Probability</var> of BDD belonging to environment <var>Environment</var>
-Uses</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write_rules2/3"><b class="pred">write_rules2</b><var class="arglist">(+Module:atom, +Rules:list, +Stream:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate write the rules in <var>Rules</var> on stream <var>Stream</var> if the verbosity is at least 2.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write2/2"><b class="pred">write2</b><var class="arglist">(+Module:atom, +Message:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>write(Message)</code> if the verbosity is at least 2.
-<var>Module</var> is used to get the verbosity setting</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_query_var/4"><b class="pred">add_query_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable to be queried in MAP inference with
-NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.
-The variable belongs to <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="take_var_args/3"><b class="pred">take_var_args</b><var class="arglist">(+ArgSpec:list, +TypeVars:list, -Vars:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns in <var>Vars</var> the list of vars corresponding to
-variables arguments in <var>ArgSpec</var> (those with argument specification
-+type or -type). <var>TypeVars</var> is a list of terns of the form
-Variable=Types as returnd by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=extract_type_vars/3">extract_type_vars/3</a>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_next_rule_number/2"><b class="pred">get_next_rule_number</b><var class="arglist">(+Module:atom, -R:integer)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the next rule number. <var>Module</var> is used to access local
-data.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
-Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
-representing the conjunction of BDDs BDDA and BDDB.
-fails if BDDB represents the zero function</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="generate_body/3"><b class="pred">generate_body</b><var class="arglist">(+ModeDecs:list, +Module:atom, -BottomClauses:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Generates the body of bottom clauses and returns the bottom clauses in <var>BottomClauses</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_sc_var_n/6"><b class="pred">get_sc_var_n</b><var class="arglist">(++M:atomic, ++Environment:int, ++Rule:int, ++Substitution:term, ++Probabilities:list, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
-index <var>Rule</var>, grouding substitution <var>Substitution</var> and head distribution
-<var>Probabilities</var> in environment <var>Environment</var>.
-Differs from <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=get_var_n/6">get_var_n/6</a> of pita because R can be <code>ng(RN,Vals)</code>, indicating a rule for which
-different instantiations get different parameters.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(++Environment:int, -Variable:out)</var></a> is <b class="det">det</b></dt><dd class="defbody">Prints the debug information which is the result of the call
-of Cudd_ReadDead, Cudd_CheckZeroRef, Cudd_CheckKeys and
-Cudd_DebugCheck(env-&gt;mgr));</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero/2"><b class="pred">zero</b><var class="arglist">(++Environment:int, --Zero:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the zero Boolean function.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(++Environment:int, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new decision variable in <var>Environment</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(++Environment:int, ++ADD:int, --Decision:list, --Cost:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the optimal strategy given a pointer to the <var>ADD</var> belonging to environment <var>Environment</var>.
-<var>Decision</var> is a list of selected facts, <var>Cost</var> is the total cost.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(++Alpha:list, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Dirichlet distribution with parameters <var>Alpha</var>.
-<var>Alpha</var> and <var>Value</var> are lists of floating point numbers of the same length.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
+It returns an integer in <var>Context</var> that is a pointer to a
+context data structure for performing the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_em/1"><b class="pred">end_em</b><var class="arglist">(++Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the context data structure for performing parameter learning.
+<var>Context</var> is a pointer to a context data structure for performing
+the EM algorithm.
+<var>Context</var> must have been returned by a call to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+It frees the memory occupied by <var>Context</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
+<var>Context</var> is an integer that is a pointer to a context data structure
+created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
+Returns an integer <var>Environment</var> that is a pointer to a data structure for
+storing a single BDD to be used for the EM algorithm.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
+<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
+It frees the memory occupied by the BDD.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init/1"><b class="pred">init</b><var class="arglist">(--Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for storing a single BDD.
 Returns an integer <var>Environment</var> that is a pointer to a data structure for
 storing a single BDD to be used for inference only (no learning).</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="setting_sc/2"><b class="pred">setting_sc</b><var class="arglist">(:Parameter:atom, -Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the value of a parameter
-For a list of parameters see
-<a href="https://friguzzi.github.io/cplint/">https://friguzzi.github.io/cplint/</a></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
-It calls the C function srand.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a couple (Env,B) with B a pointer to a
-<var>BDD</var> belonging to environment <var>Environment</var>
-representing the disjunction of all the BDDs in
-<var>ListOfBDDs</var> (a list of couples (Env,<var>BDD</var>))</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="sample/4"><b class="pred">sample</b><var class="arglist">(+N, List:list, -Sampled:list, -Rest:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Samples <var>N</var> elements from <var>List</var> and returns them in <var>Sampled</var>.
-The rest of <var>List</var> is returned in <var>Rest</var>
-If <var>List</var> contains less than <var>N</var> elements, <var>Sampled</var> is <var>List</var> and <var>Rest</var>
-is [].</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="nl3/1"><b class="pred">nl3</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate prints a newline if the verbosity is at least 3.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="format3/3"><b class="pred">format3</b><var class="arglist">(+Module:atom, +Format, :Arguments)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>format(Format,Arguments)</code> if the verbosity is at least 3.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc/3"><b class="pred">orc</b><var class="arglist">(++A:couple, ++B:couple, --AorB:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (Environment, BDDA) and (Environment, BDDB) respectively
-Returns in <var>AorB</var> a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
-representing the disjunction of BDDs BDDA and BDDB.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_one/3"><b class="pred">delete_one</b><var class="arglist">(+List:list, -Rest:list, +Element:term)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">As the library predicate delete(+List1, @Elem, -List2) but
-<var>Element</var> is unified with the deleted element (so it can be
-instantiated by the call).</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(++Environment:int, --Zero:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
-representing the zero Boolean function</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_abd_prob/4"><b class="pred">ret_abd_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -Explanation:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the abductive <var>Explanation</var> of <var>BDD</var> and its <var>Probability</var>.
-<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="banned_clause/3"><b class="pred">banned_clause</b><var class="arglist">(+Module:atom, -Head:term, -Body:term)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate checks whether <var>Head</var>:-<var>Body</var> is a banned clause, as specified
-by the user in the input file. <var>Module</var> is the module of the input file.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="assert_all/3"><b class="pred">assert_all</b><var class="arglist">(+Terms:list, +Module:atom, -Refs:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate asserts all terms in <var>Terms</var> in module <var>Module</var> using <code>assertz(M:Term,Ref)</code> and
-returns the list of references in <var>Refs</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="process_clauses/6"><b class="pred">process_clauses</b><var class="arglist">(+InputClauses:list, +Module:atom, +Rules:list, -RulesOut:list, +Clauses:list, -ClausesOut:list)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>InputClauses</var> is a list of probabilistic clauses in input syntax.
-The predicate translates them into the internal format.
-<var>RulesOut</var>/<var>Rules</var> is a difference list of term of the form <code>rule(R,HeadList,BodyList,Lit,Tun)</code>.
-<var>ClausesOut</var>/<var>Clauses</var> is a difference list of clauses to be asserted.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
+<var>Environment</var> is a pointer to a data structure returned by a call
+to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero/2"><b class="pred">zero</b><var class="arglist">(++Environment:int, --Zero:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="and/4"><b class="pred">and</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AandB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AandB</var> a pointer to a BDD belonging to environment <var>Environment</var>
 representing the conjunction of BDDs <var>A</var> and <var>B</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_dynamic/1"><b class="pred">make_dynamic</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes the predicates required for learning dynamic.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(++Environment:int, ++Alpha:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sets the type of parameter initialization for EM on <var>Environment</var>:
-if <var>Alpha</var> is 0.0, it uses a truncated Dirichlet process
-if <var>Alpha</var> is a float &gt; 0.0, it uses a symmetric Dirichlet distribution
-with that value as parameter</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_prob/3"><b class="pred">ret_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the <var>Probability</var> of <var>BDD</var> belonging to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_abd_prob/4"><b class="pred">ret_abd_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -Explanation:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the abductive <var>Explanation</var> of <var>BDD</var> and its <var>Probability</var>.
+<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
+representing the negation of BDD <var>A</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equality/4"><b class="pred">equality</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> the <var>BDD</var> belonging to environment <var>Environment</var>
 that represents the equation <var>Variable</var>=<var>Value</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="em/9"><b class="pred">em</b><var class="arglist">(++Context:int, ++RuleInfo:list, ++ListOfBDDs:list, ++EA:float, ++ER:float, ++Iterations:int, -LL:float, -Parameters:list, -ExampleProbabilities:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">NumberOfHeads is a list of terms, one for each rule. Each term is either
@@ -174,64 +120,146 @@ number and P is a list of probabilities, one for each head atom of rule N,
 in reverse order.</li>
 </ul>
 </dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(++Environment:int, ++ADD1:int, ++ADD2:int, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the sum of the two ADDs <var>ADD1</var> <var>ADD2</var> belonging to environment <var>Environment</var>.
-The result in saved in <var>ADDOut</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(--Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a uniform distribution in [0,1]</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_em/1"><b class="pred">end_em</b><var class="arglist">(++Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the context data structure for performing parameter learning.
-<var>Context</var> is a pointer to a context data structure for performing
-the EM algorithm.
-<var>Context</var> must have been returned by a call to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
-It frees the memory occupied by <var>Context</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="induce/2"><b class="pred">induce</b><var class="arglist">(:TrainFolds:list_of_atoms, -P:probabilistic_program)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate performs structure learning using the folds indicated in
-<var>TrainFolds</var> for training.
-It returns in <var>P</var> the learned probabilistic program.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="learn_params/5"><b class="pred">learn_params</b><var class="arglist">(+DB:list_of_atoms, +M:atom, +R0:probabilistic_program, -P:probabilistic_program, -Score:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate learns the parameters of the program <var>R0</var> and returns
-the updated program in R and the score in <var>Score</var>.
-<var>DB</var> contains the list of interpretations ids and <var>M</var> the module where
-the data is stored.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="nl2/1"><b class="pred">nl2</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate prints a newline if the verbosity is at least 2.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end/1"><b class="pred">end</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the environment data structure for storing a single BDD.
-<var>Environment</var> is a pointer to a data structure returned by a call
-to <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init/1">init/1</a>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a pointer to a <var>BDD</var> belonging to environment <var>Environment</var>
-representing the disjunction of all the BDDs in <var>ListOfBDDs</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="list2or/2"><b class="pred">list2or</b><var class="arglist">(+List:list, -Or:term)</var></a> is <b class="det">det</b></dt>
-<dt class="pubdef"><b class="pred">list2or</b><var class="arglist">(-List:list, +Or:term)</var> is <b class="det">det</b></dt><dd class="defbody">The predicate succeeds when <var>Or</var> is a disjunction (using the ; operator)
-of the terms in <var>List</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="member_eq/2"><b class="pred">member_eq</b><var class="arglist">(+List:list, +Element:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Checks the presence of <var>Element</var> in <var>List</var>. Equality is checked with ==.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="retract_all/1"><b class="pred">retract_all</b><var class="arglist">(+Refs:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate erases all references in <var>Refs</var> (using <a class="builtin" href="http://www.swi-prolog.org/pldoc/man?predicate=erase/1">erase/1</a>).</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="format2/3"><b class="pred">format2</b><var class="arglist">(+Module:atom, +Format, :Arguments)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>format(Format,Arguments)</code> if the verbosity is at least 2.
-<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_query_var/4"><b class="pred">add_query_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable to be queried in MAP inference with
+NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.
+The variable belongs to <var>Environment</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_query_var/3"><b class="pred">make_query_var</b><var class="arglist">(++Environment:int, +Variable:int, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes <var>Variable</var> belonging to <var>Environment</var> a query random variable for MAP inference.
+Returns in <var>BDD</var> the diagram of the formula encoding the required constraints among the
+Boolean random variable that represent <var>Variable</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
+to file FileName.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rand_seed/1"><b class="pred">rand_seed</b><var class="arglist">(+Seed:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">The pseudo-random number generator is initialized using the argument passed as <var>Seed</var>.
+It calls the C function srand.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="orc/3"><b class="pred">orc</b><var class="arglist">(++A:couple, ++B:couple, --AorB:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (Environment, BDDA) and (Environment, BDDB) respectively
+Returns in <var>AorB</var> a couple (Environment, BDDAorB) where BDDAorB is pointer to a BDD belonging to environment Environment
+representing the disjunction of BDDs BDDA and BDDB.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(++Environment:int, --One:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the one Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zeroc/2"><b class="pred">zeroc</b><var class="arglist">(++Environment:int, --Zero:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Zero</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
+representing the zero Boolean function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andc/4"><b class="pred">andc</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.
+fails if BDDB represents the zero function</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
+Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
+representing the conjunction of BDDs BDDA and BDDB.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_notc/3"><b class="pred">bdd_notc</b><var class="arglist">(++Environment:int, ++EBDD:couple, --NotEBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,A)
 Returns in <var>NotEBDD</var> a couple (<var>Environment</var>,NotA) where NotA is
 pointer to a BDD belonging to environment <var>Environment</var>
 representing the negation of BDD A</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="extract_type_vars/3"><b class="pred">extract_type_vars</b><var class="arglist">(+Literals:list, +Module:atom, +Types:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate extracts the type of variables from the list of literals
-<var>Literals</var>. <var>Types</var> is a list of elements of the form Variable=Type</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_abd_var/4"><b class="pred">add_abd_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new abducible random variable in <var>Environment</var> with
-NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="onec/2"><b class="pred">onec</b><var class="arglist">(++Environment:int, --One:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a couple (<var>Environment</var>,BDD) where BDD is pointer to a BDD belonging to environment <var>Environment</var>
-representing the one Boolean function</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="linked_clause/3"><b class="pred">linked_clause</b><var class="arglist">(+Literals:list, +Module:atom, +PrevLits:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate checks whether <var>Literals</var> form a linked list of literals
-given that <var>PrevLits</var> are the previous literals.
-In a linked list of literals input variables of a literal are output variables in
-a previous literal.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero_clause/3"><b class="pred">zero_clause</b><var class="arglist">(+Module:atom, +PredSpec:pred_spec, -ZeroClause:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Generates the zero clause for predicate <var>PredSpec</var>.
-<var>Module</var> is the module of the input file.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --EBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>EBDD</var> a couple (<var>Environment</var>,BDD) where BDD belongs to environment <var>Environment</var>
+and represents the equation <var>Variable</var>=<var>Value</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_probc/3"><b class="pred">ret_probc</b><var class="arglist">(++Environment:int, ++EBDD:couple, -Probability:float)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>EBDD</var> is a couple (<var>Environment</var>,BDD)
+Returns the <var>Probability</var> of BDD belonging to environment <var>Environment</var>
+Uses</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="initial_values/2"><b class="pred">initial_values</b><var class="arglist">(++Environment:int, ++Alpha:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sets the type of parameter initialization for EM on <var>Environment</var>:
+if <var>Alpha</var> is 0.0, it uses a truncated Dirichlet process
+if <var>Alpha</var> is a float &gt; 0.0, it uses a symmetric Dirichlet distribution
+with that value as parameter</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_list/3"><b class="pred">or_list</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a pointer to a <var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in <var>ListOfBDDs</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or_listc/3"><b class="pred">or_listc</b><var class="arglist">(++ListOfBDDs:list, ++Environment, --BDD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>BDD</var> a couple (Env,B) with B a pointer to a
+<var>BDD</var> belonging to environment <var>Environment</var>
+representing the disjunction of all the BDDs in
+<var>ListOfBDDs</var> (a list of couples (Env,<var>BDD</var>))</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(++Shape:float, ++Scale:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a gamma distribution with parameters <var>Shape</var> and <var>Scale</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(++Mean:float, ++Variance:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Gaussian distribution with parameters <var>Mean</var> and <var>Variance</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="uniform_sample/1"><b class="pred">uniform_sample</b><var class="arglist">(--Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a uniform distribution in [0,1]</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="dirichlet_sample/2"><b class="pred">dirichlet_sample</b><var class="arglist">(++Alpha:list, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Dirichlet distribution with parameters <var>Alpha</var>.
+<var>Alpha</var> and <var>Value</var> are lists of floating point numbers of the same length.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(++Alpha:float, ++K:int, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a symmetric Dirichlet distribution with parameter <var>Alpha</var>.
+<var>K</var> is the number of dimensions of the result.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(++Theta:list, --Value:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a discrete distribution with parameters <var>Theta</var>.
+<var>Theta</var> is a list of floating point numbers in [0,1] that sum to 1.
+<var>Value</var> is in 0..(<code>length(Theta)</code>-1)</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(++Environment:int, ++BDD:int, --ADD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Converts the <var>BDD</var> belonging to environment <var>Environment</var> into an <var>ADD</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(++Environment:int, ++ADDIn:int, ++Utility:float, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Multiplies the ADD belonging to environment <var>Environment</var>
+with the value <var>Utility</var> and stores the result in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_sum/4"><b class="pred">add_sum</b><var class="arglist">(++Environment:int, ++ADD1:int, ++ADD2:int, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the sum of the two ADDs <var>ADD1</var> <var>ADD2</var> belonging to environment <var>Environment</var>.
+The result in saved in <var>ADDOut</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_strategy/4"><b class="pred">ret_strategy</b><var class="arglist">(++Environment:int, ++ADD:int, --Decision:list, --Cost:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Computes the optimal strategy given a pointer to the <var>ADD</var> belonging to environment <var>Environment</var>.
+<var>Decision</var> is a list of selected facts, <var>Cost</var> is the total cost.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_decision_var/3"><b class="pred">add_decision_var</b><var class="arglist">(++Environment:int, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new decision variable in <var>Environment</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="debug_cudd_var/2"><b class="pred">debug_cudd_var</b><var class="arglist">(++Environment:int, -Variable:out)</var></a> is <b class="det">det</b></dt><dd class="defbody">Prints the debug information which is the result of the call
+of Cudd_ReadDead, Cudd_CheckZeroRef, Cudd_CheckKeys and
+Cudd_DebugCheck(env-&gt;mgr));</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="induce/2"><b class="pred">induce</b><var class="arglist">(:TrainFolds:list_of_atoms, -P:probabilistic_program)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate performs structure learning using the folds indicated in
+<var>TrainFolds</var> for training.
+It returns in <var>P</var> the learned probabilistic program.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="test/7"><b class="pred">test</b><var class="arglist">(:P:probabilistic_program, +TestFolds:list_of_atoms, -LL:float, -AUCROC:float, -ROC:dict, -AUCPR:float, -PR:dict)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate takes as input in <var>P</var> a probabilistic program,
+tests <var>P</var> on the folds indicated in <var>TestFolds</var> and returns the
+log likelihood of the test examples in <var>LL</var>, the area under the Receiver
+Operating Characteristic curve in <var>AUCROC</var>, a dict containing the points
+of the <var>ROC</var> curve in <var>ROC</var>, the area under the Precision Recall curve in <var>AUCPR</var>
+and a dict containing the points of the <var>PR</var> curve in <var>PR</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="test_prob/6"><b class="pred">test_prob</b><var class="arglist">(:P:probabilistic_program, +TestFolds:list_of_atoms, -NPos:int, -NNeg:int, -LL:float, -Results:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate takes as input in <var>P</var> a probabilistic program,
 tests <var>P</var> on the folds indicated in <var>TestFolds</var> and returns
 the number of positive examples in <var>NPos</var>, the number of negative examples
 in <var>NNeg</var>, the log likelihood in <var>LL</var>
 and in <var>Results</var> a list containing the probabilistic result for each query contained in <var>TestFolds</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="end_ex/1"><b class="pred">end_ex</b><var class="arglist">(++Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Terminates the evnironment data structure for storing a BDD.
-<var>Environment</var> is a pointer to a data structure returned by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_ex/2">init_ex/2</a>.
-It frees the memory occupied by the BDD.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="make_dynamic/1"><b class="pred">make_dynamic</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes the predicates required for learning dynamic.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="induce_par/2"><b class="pred">induce_par</b><var class="arglist">(:TrainFolds:list_of_atoms, -P:probabilistic_program)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate learns the parameters of the program stored in the <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=in/1">in/1</a> fact
+of the input file using the folds indicated in <var>TrainFolds</var> for training.
+It returns in <var>P</var> the input program with the updated parameters.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="learn_params/5"><b class="pred">learn_params</b><var class="arglist">(+DB:list_of_atoms, +M:atom, +R0:probabilistic_program, -P:probabilistic_program, -Score:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate learns the parameters of the program <var>R0</var> and returns
+the updated program in R and the score in <var>Score</var>.
+<var>DB</var> contains the list of interpretations ids and <var>M</var> the module where
+the data is stored.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rules2terms/2"><b class="pred">rules2terms</b><var class="arglist">(:R:list_of_rules, -T:tern)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate translates a list of rules from the internal
+representation format (<a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=rule/4">rule/4</a> and <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=def_rule/3">def_rule/3</a>) to the
+LPAD syntax.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="list2or/2"><b class="pred">list2or</b><var class="arglist">(+List:list, -Or:term)</var></a> is <b class="det">det</b></dt>
+<dt class="pubdef"><b class="pred">list2or</b><var class="arglist">(-List:list, +Or:term)</var> is <b class="det">det</b></dt><dd class="defbody">The predicate succeeds when <var>Or</var> is a disjunction (using the ; operator)
+of the terms in <var>List</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="list2and/2"><b class="pred">list2and</b><var class="arglist">(+List:list, -And:term)</var></a> is <b class="det">det</b></dt>
 <dt class="pubdef"><b class="pred">list2and</b><var class="arglist">(-List:list, +And:term)</var> is <b class="det">det</b></dt><dd class="defbody">The predicate succeeds when <var>And</var> is a conjunction (using the , operator)
 of the terms in <var>List</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="or/4"><b class="pred">or</b><var class="arglist">(++Environment:int, ++A:int, ++B:int, --AorB:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>AorB</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the disjunction of BDDs <var>A</var> and <var>B</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="sample/4"><b class="pred">sample</b><var class="arglist">(+N, List:list, -Sampled:list, -Rest:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Samples <var>N</var> elements from <var>List</var> and returns them in <var>Sampled</var>.
+The rest of <var>List</var> is returned in <var>Rest</var>
+If <var>List</var> contains less than <var>N</var> elements, <var>Sampled</var> is <var>List</var> and <var>Rest</var>
+is [].</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="generate_body/3"><b class="pred">generate_body</b><var class="arglist">(+ModeDecs:list, +Module:atom, -BottomClauses:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Generates the body of bottom clauses and returns the bottom clauses in <var>BottomClauses</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="remove_duplicates/2"><b class="pred">remove_duplicates</b><var class="arglist">(+List1:list, -List2:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes duplicates from <var>List1</var>. Equality is checked with ==.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="banned_clause/3"><b class="pred">banned_clause</b><var class="arglist">(+Module:atom, -Head:term, -Body:term)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">The predicate checks whether <var>Head</var>:-<var>Body</var> is a banned clause, as specified
+by the user in the input file. <var>Module</var> is the module of the input file.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="linked_clause/3"><b class="pred">linked_clause</b><var class="arglist">(+Literals:list, +Module:atom, +PrevLits:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate checks whether <var>Literals</var> form a linked list of literals
+given that <var>PrevLits</var> are the previous literals.
+In a linked list of literals input variables of a literal are output variables in
+a previous literal.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="extract_type_vars/3"><b class="pred">extract_type_vars</b><var class="arglist">(+Literals:list, +Module:atom, +Types:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate extracts the type of variables from the list of literals
+<var>Literals</var>. <var>Types</var> is a list of elements of the form Variable=Type</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="take_var_args/3"><b class="pred">take_var_args</b><var class="arglist">(+ArgSpec:list, +TypeVars:list, -Vars:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns in <var>Vars</var> the list of vars corresponding to
+variables arguments in <var>ArgSpec</var> (those with argument specification
++type or -type). <var>TypeVars</var> is a list of terns of the form
+Variable=Types as returnd by <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=extract_type_vars/3">extract_type_vars/3</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="extract_fancy_vars/2"><b class="pred">extract_fancy_vars</b><var class="arglist">(+Term:term, -Vars:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Given <var>Term</var>, it returns the list of all of its variables
+in the form 'VN'=Var where VN is an atom with N an increasing integer
+starting from 1 and Var a variable in <var>Term</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_one/3"><b class="pred">delete_one</b><var class="arglist">(+List:list, -Rest:list, +Element:term)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">As the library predicate delete(+List1, @Elem, -List2) but
+<var>Element</var> is unified with the deleted element (so it can be
+instantiated by the call).</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="assert_all/3"><b class="pred">assert_all</b><var class="arglist">(+Terms:list, +Module:atom, -Refs:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate asserts all terms in <var>Terms</var> in module <var>Module</var> using <code>assertz(M:Term,Ref)</code> and
+returns the list of references in <var>Refs</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="retract_all/1"><b class="pred">retract_all</b><var class="arglist">(+Refs:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate erases all references in <var>Refs</var> (using <a class="builtin" href="http://www.swi-prolog.org/pldoc/man?predicate=erase/1">erase/1</a>).</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="process_clauses/6"><b class="pred">process_clauses</b><var class="arglist">(+InputClauses:list, +Module:atom, +Rules:list, -RulesOut:list, +Clauses:list, -ClausesOut:list)</var></a> is <b class="det">det</b></dt><dd class="defbody"><var>InputClauses</var> is a list of probabilistic clauses in input syntax.
+The predicate translates them into the internal format.
+<var>RulesOut</var>/<var>Rules</var> is a difference list of term of the form <code>rule(R,HeadList,BodyList,Lit,Tun)</code>.
+<var>ClausesOut</var>/<var>Clauses</var> is a difference list of clauses to be asserted.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_next_rule_number/2"><b class="pred">get_next_rule_number</b><var class="arglist">(+Module:atom, -R:integer)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the next rule number. <var>Module</var> is used to access local
+data.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_sc/2"><b class="pred">set_sc</b><var class="arglist">(:Parameter:atom, +Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate sets the value of a parameter
+For a list of parameters see
+<a href="https://friguzzi.github.io/cplint/">https://friguzzi.github.io/cplint/</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="setting_sc/2"><b class="pred">setting_sc</b><var class="arglist">(:Parameter:atom, -Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the value of a parameter
+For a list of parameters see
+<a href="https://friguzzi.github.io/cplint/">https://friguzzi.github.io/cplint/</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="member_eq/2"><b class="pred">member_eq</b><var class="arglist">(+List:list, +Element:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Checks the presence of <var>Element</var> in <var>List</var>. Equality is checked with ==.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="generate_clauses/6"><b class="pred">generate_clauses</b><var class="arglist">(+Rules0:list, +Module:atom, +StartingIndex:integer, -Rules:list, +Clauses:list, -ClausesOut:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate generate the internal representation of rules to produce clauses to be
 asserted in the database.
 <var>Rules0</var> is a list of term of the form <code>rule(R,HeadList,BodyList,Lit,Tun)</code>.
@@ -239,64 +267,36 @@ asserted in the database.
 <code>rule(N,HeadList,BodyList,Lit,Tun)</code> where N is
 an increasing index starting from <var>StartingIndex</var>.
 <var>ClausesOut</var>/<var>Clauses</var> is a difference list of clauses to be asserted.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="discrete_sample/2"><b class="pred">discrete_sample</b><var class="arglist">(++Theta:list, --Value:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a discrete distribution with parameters <var>Theta</var>.
-<var>Theta</var> is a list of floating point numbers in [0,1] that sum to 1.
-<var>Value</var> is in 0..(<code>length(Theta)</code>-1)</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_prod/4"><b class="pred">add_prod</b><var class="arglist">(++Environment:int, ++ADDIn:int, ++Utility:float, --ADDOut:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Multiplies the ADD belonging to environment <var>Environment</var>
-with the value <var>Utility</var> and stores the result in <var>ADDOut</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_em/1"><b class="pred">init_em</b><var class="arglist">(--Context:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes a data structure for performing parameter learning.
-It returns an integer in <var>Context</var> that is a pointer to a
-context data structure for performing the EM algorithm.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="induce_par/2"><b class="pred">induce_par</b><var class="arglist">(:TrainFolds:list_of_atoms, -P:probabilistic_program)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate learns the parameters of the program stored in the <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=in/1">in/1</a> fact
-of the input file using the folds indicated in <var>TrainFolds</var> for training.
-It returns in <var>P</var> the input program with the updated parameters.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gauss_sample/3"><b class="pred">gauss_sample</b><var class="arglist">(++Mean:float, ++Variance:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a Gaussian distribution with parameters <var>Mean</var> and <var>Variance</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot_string/3"><b class="pred">create_dot_string</b><var class="arglist">(++Env:int, ++BDD:int, -Dot:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate returns the <var>BDD</var> in dot format.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="andcnf/4"><b class="pred">andcnf</b><var class="arglist">(++Environment:int, ++A:couple, ++B:couple, --AandB:couple)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>A</var> and <var>B</var> are couples (<var>Environment</var>, BDDA) and (<var>Environment</var>, BDDB) respectively
-Returns in <var>AandB</var> a couple (<var>Environment</var>, BDDAandB) where BDDAandB is pointer to a BDD belonging to environment <var>Environment</var>
-representing the conjunction of BDDs BDDA and BDDB.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write_rules3/3"><b class="pred">write_rules3</b><var class="arglist">(+Module:atom, +Rules:list, +Stream:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate write the rules in <var>Rules</var> on stream <var>Stream</var> if the verbosity is at least 3.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="equalityc/4"><b class="pred">equalityc</b><var class="arglist">(++Environment:int, ++Variable:int, ++Value:int, --EBDD:couple)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>EBDD</var> a couple (<var>Environment</var>,BDD) where BDD belongs to environment <var>Environment</var>
-and represents the equation <var>Variable</var>=<var>Value</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write3/2"><b class="pred">write3</b><var class="arglist">(+Module:atom, +Message:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>write(Message)</code> if the verbosity is at least 3.
-<var>Module</var> is used to get the verbosity setting.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_var/4"><b class="pred">add_var</b><var class="arglist">(++Environment:int, ++ProbabilityDistribution:list, ++Rule:int, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>Variable</var> the index of a new random variable in <var>Environment</var> with
-NumberOHeads values and probability distribution <var>ProbabilityDistribution</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="remove_duplicates/2"><b class="pred">remove_duplicates</b><var class="arglist">(+List1:list, -List2:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes duplicates from <var>List1</var>. Equality is checked with ==.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ret_map_prob/4"><b class="pred">ret_map_prob</b><var class="arglist">(++Environment:int, ++BDD:int, -Probability:float, -MAPState:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the MAP state MPAState of <var>BDD</var> and its <var>Probability</var>.
-<var>BDD</var> belongs to environment <var>Environment</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tab/3"><b class="pred">tab</b><var class="arglist">(+Module:atom, +PredSpec:pred_spec, -TableSpec:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Records the fact that predicate <var>PredSpec</var> must be tabled and returns
-the necessary term for the tabling directive in <var>TableSpec</var>.
-<var>Module</var> is used to store the information in the correct module</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="extract_fancy_vars/2"><b class="pred">extract_fancy_vars</b><var class="arglist">(+Term:term, -Vars:list)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Given <var>Term</var>, it returns the list of all of its variables
-in the form 'VN'=Var where VN is an atom with N an increasing integer
-starting from 1 and Var a variable in <var>Term</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="generate_clauses_bg/2"><b class="pred">generate_clauses_bg</b><var class="arglist">(+Rules:list, -Clauses:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate generate clauses to be
 asserted in the database for the rules from the background.
 <var>Rules</var> is a list of term of the form <code>def_rule(H,BodyList,_Lit)</code>.
 <var>Clauses</var> is a list of clauses to be asserted.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="probability_dd/3"><b class="pred">probability_dd</b><var class="arglist">(++Environment:int, ++BDD:int, --ADD:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Converts the <var>BDD</var> belonging to environment <var>Environment</var> into an <var>ADD</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="bdd_not/3"><b class="pred">bdd_not</b><var class="arglist">(++Environment:int, ++A:int, --NotA:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>NotA</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the negation of BDD <var>A</var>.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="rules2terms/2"><b class="pred">rules2terms</b><var class="arglist">(:R:list_of_rules, -T:tern)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate translates a list of rules from the internal
-representation format (<a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=rule/4">rule/4</a> and <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=def_rule/3">def_rule/3</a>) to the
-LPAD syntax.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="one/2"><b class="pred">one</b><var class="arglist">(++Environment:int, --One:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns in <var>One</var> a pointer to a BDD belonging to environment <var>Environment</var>
-representing the one Boolean function.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="symmetric_dirichlet_sample/3"><b class="pred">symmetric_dirichlet_sample</b><var class="arglist">(++Alpha:float, ++K:int, --Value:list)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a symmetric Dirichlet distribution with parameter <var>Alpha</var>.
-<var>K</var> is the number of dimensions of the result.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="init_ex/2"><b class="pred">init_ex</b><var class="arglist">(++Context:int, --Environment:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Initializes an enviroment data structure for storing a BDD.
-<var>Context</var> is an integer that is a pointer to a context data structure
-created using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=init_em/1">init_em/1</a>.
-Returns an integer <var>Environment</var> that is a pointer to a data structure for
-storing a single BDD to be used for the EM algorithm.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="gamma_sample/3"><b class="pred">gamma_sample</b><var class="arglist">(++Shape:float, ++Scale:float, --Value:float)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns a <var>Value</var> sampled from a gamma distribution with parameters <var>Shape</var> and <var>Scale</var></dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="create_dot/3"><b class="pred">create_dot</b><var class="arglist">(++Env:int, ++BDD:int, ++File:string)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate writes the <var>BDD</var> in dot format to
-to file FileName.</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="set_sc/2"><b class="pred">set_sc</b><var class="arglist">(:Parameter:atom, +Value:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate sets the value of a parameter
-For a list of parameters see
-<a href="https://friguzzi.github.io/cplint/">https://friguzzi.github.io/cplint/</a></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_sc_var_n/6"><b class="pred">get_sc_var_n</b><var class="arglist">(++M:atomic, ++Environment:int, ++Rule:int, ++Substitution:term, ++Probabilities:list, -Variable:int)</var></a> is <b class="det">det</b></dt><dd class="defbody">Returns the index <var>Variable</var> of the random variable associated to rule with
+index <var>Rule</var>, grouding substitution <var>Substitution</var> and head distribution
+<var>Probabilities</var> in environment <var>Environment</var>.
+Differs from <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=get_var_n/6">get_var_n/6</a> of pita because R can be <code>ng(RN,Vals)</code>, indicating a rule for which
+different instantiations get different parameters.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write2/2"><b class="pred">write2</b><var class="arglist">(+Module:atom, +Message:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>write(Message)</code> if the verbosity is at least 2.
+<var>Module</var> is used to get the verbosity setting</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write3/2"><b class="pred">write3</b><var class="arglist">(+Module:atom, +Message:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>write(Message)</code> if the verbosity is at least 3.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="nl2/1"><b class="pred">nl2</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate prints a newline if the verbosity is at least 2.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="nl3/1"><b class="pred">nl3</b><var class="arglist">(+Module:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate prints a newline if the verbosity is at least 3.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="format2/3"><b class="pred">format2</b><var class="arglist">(+Module:atom, +Format, :Arguments)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>format(Format,Arguments)</code> if the verbosity is at least 2.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="format3/3"><b class="pred">format3</b><var class="arglist">(+Module:atom, +Format, :Arguments)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate calls <code>format(Format,Arguments)</code> if the verbosity is at least 3.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write_rules2/3"><b class="pred">write_rules2</b><var class="arglist">(+Module:atom, +Rules:list, +Stream:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate write the rules in <var>Rules</var> on stream <var>Stream</var> if the verbosity is at least 2.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="write_rules3/3"><b class="pred">write_rules3</b><var class="arglist">(+Module:atom, +Rules:list, +Stream:atom)</var></a> is <b class="det">det</b></dt><dd class="defbody">The predicate write the rules in <var>Rules</var> on stream <var>Stream</var> if the verbosity is at least 3.
+<var>Module</var> is used to get the verbosity setting.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tab/3"><b class="pred">tab</b><var class="arglist">(+Module:atom, +PredSpec:pred_spec, -TableSpec:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Records the fact that predicate <var>PredSpec</var> must be tabled and returns
+the necessary term for the tabling directive in <var>TableSpec</var>.
+<var>Module</var> is used to store the information in the correct module</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="zero_clause/3"><b class="pred">zero_clause</b><var class="arglist">(+Module:atom, +PredSpec:pred_spec, -ZeroClause:term)</var></a> is <b class="det">det</b></dt><dd class="defbody">Generates the zero clause for predicate <var>PredSpec</var>.
+<var>Module</var> is the module of the input file.</dd>
 </dl>
 
 </body>

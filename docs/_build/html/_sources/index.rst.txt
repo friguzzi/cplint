@@ -395,9 +395,11 @@ for example `kalman_filter.pl <http://cplint.eu/e/kalman_filter.pl>`_ would not 
 
 Inference
 ==================
-:code:`cplint` answers queries using the module :code:`pita` or :code:`mcintyre`. 
+:code:`cplint` answers queries using the modules :code:`pita`, :code:`pitaind` or :code:`mcintyre`. 
 The first performs the program transformation technique of :cite:`RigSwi10-ICLP10-IC`. 
-The latter performs approximate inference by sampling using a different program transformation technique and is described in :cite:`Rig13-FI-IJ`. 
+The second is a variant of :code:`pita` that is faster but is correct only
+for a subset of the programs :cite:`RigSwi11-ICLP11-IJ`.
+The last performs approximate inference by sampling using a different program transformation technique and is described in :cite:`Rig13-FI-IJ`. 
 Only :code:`mcintyre` is able to handle continuous random variables.
 
 For answering queries, you have to prepare a Prolog file where you first load the inference module (for example :code:`pita`), initialize it with a directive (for example :code:`:- pita`) and then enclose the LPAD clauses in :code:`:-begin_lpad.` or :code:`:-begin_plp.` and :code:`:-end_lpad.` or :code:`:-end_plp.` 
@@ -442,7 +444,7 @@ For example (`testdb.pl <http://cplint.eu/example/inference/testdb.pl>`_) ::
 	:- pita.
 	:- begin_lpad.
 	sampled_male(X):0.5:-
-	db(male(X)).
+	  db(male(X)).
 	:- end_lpad.
 	male(john).
 	male(david).
@@ -1237,6 +1239,57 @@ In order to compute the best strategy, you can use :code:`dt_solve/2` ::
 	dt_solve(Strategy,Value).
 
 which returns in :code:`Strategy` a set of decision facts and in `Value` the value of the computed best strategy. 
+
+PITA(IND,IND) and PITA(IND,EXC)
+-------------------------------
+The systems PITA(IND,IND) and PITA(IND,EXC) of :cite:`RigSwi11-ICLP11-IJ` are
+implemented in the library :code:`pitaind`.
+
+Both systems assume that literals in a conjunction are independent.
+Furthermore, PITA(IND,IND) assumes that atoms in a disjunction are independent,
+while PITA(IND,EXC) assumes that they are exclusive.
+
+For example, you can apply PITA(IND,EXC) to the coin program with::
+
+  :- use_module(library(pitaind)).
+  :- pitaind.
+  :- set_pitaind(or,exc).
+  :- begin_lpad.
+  heads(Coin):1/2 ; tails(Coin):1/2:-
+  toss(Coin),\+biased(Coin).
+
+  heads(Coin):0.6 ; tails(Coin):0.4:-
+  toss(Coin),biased(Coin).
+
+  fair(Coin):0.9 ; biased(Coin):0.1.
+
+  toss(coin).
+  :- end_lpad.
+
+and query the program with ::
+
+	?- prob_ind(heads(coin),P).
+
+The result is the same as for PITA but the computation is faster.
+
+To use PITA(IND,IND) you use :code:`set_pitaind/2` with
+the directive :code:`:- set_pitaind(or,ind).` `ind` is the default value
+for the option :code:`or`.
+
+
+Inspecting the PITA transformation
+-----------------------------------
+You can inspect the result of the PITA transformation with the predicates ::
+
+	parse(++FileIn:atom,++FileOut:atom)
+	parse_ind(++FileIn:atom,++FileOut:atom)
+
+They parse the input file :code:`FileIn` and write the result of the transformation in :code:`FileOut`.
+The first predicate is offered by the library :code:`pita` and the second by the library :code:`pitaind`.
+
+The output is a Prolog file that can be read back and direcly queried with the :code:`pita` and
+:code:`pitaind` predicates.
+
 
 Learning
 ==================

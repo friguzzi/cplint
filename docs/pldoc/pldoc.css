@@ -438,7 +438,14 @@ div.synopsis code
 { background-color: #e0e0e0;
 }
 
-span.autoload, span.builtin, span.cfunc
+span.autoload
+{ margin-left: 5pt;
+  font-style: italic;
+  font-size: 80%;
+  color: #888;
+}
+
+span.builtin, span.cfunc
 { margin-left: 5pt;
   font-style: italic;
 }
@@ -615,4 +622,18 @@ blockquote
   margin-left: 5px;
   padding: 0px 14px;
   color: #555;
+}
+
+code.copy::after, a.copy::after
+{ content: "\29C9";
+  vertical-align: super;
+  font-size: 80%;
+}
+
+code.copy::after
+{ background-color: #f6f5ee;
+}
+
+code.copy, a.copy
+{ cursor: copy;
 }

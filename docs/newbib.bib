@@ -348,3 +348,59 @@ approaches in terms of classification abilities.},
   booktitle={Twenty-Fourth AAAI Conference on Artificial Intelligence},
   year={2010}
 }
+@article{RigSwi11-ICLP11-IJ,
+  author = {Fabrizio Riguzzi and Terrance Swift},
+  title = {The {PITA} System: Tabling and Answer Subsumption for Reasoning under Uncertainty},
+  year = {2011},
+  journal = {Theory and Practice of Logic Programming, 27th International
+Conference on Logic Programming (ICLP'11) Special Issue, Lexington, Kentucky
+6-10 July 2011},
+  editor = {John Gallagher and Michael Gelfond},
+  volume = {11},
+  number = {4--5},
+  publisher = {Cambridge University Press},
+  copyright = {Cambridge University Press},
+  abstract = {Many real world domains require the representation of a measure of
+uncertainty.  The most common such representation is probability, and
+the combination of probability with logic programs has given rise to
+the field of Probabilistic Logic Programming (PLP), leading to
+languages such as the Independent Choice Logic, Logic Programs with
+Annotated Disjunctions (LPADs), Problog, PRISM and others. These languages
+share a similar distribution semantics, and methods have been devised
+to translate programs between these languages. 
+The complexity of computing the probability of queries to these
+general PLP programs is very high due to the need to combine the
+probabilities of explanations that may not be exclusive.  As one
+alternative, the PRISM system reduces the complexity of query
+answering by restricting the form of programs it can evaluate.  As an
+entirely different alternative, Possibilistic Logic Programs adopt a
+simpler metric of uncertainty than probability.
+
+Each of these approaches -- general PLP, restricted PLP, and
+Possibilistic Logic Programming -- can be useful in different domains
+depending on the form of uncertainty to be represented, on the form of
+programs needed to model problems, and on the scale of the problems to
+be solved.  In this paper, we show how the PITA system, which
+originally supported the general PLP language of LPADs, can also
+efficiently support restricted PLP and Possibilistic Logic Programs.
+PITA relies on tabling with answer subsumption and consists of a
+transformation along with an API for library functions that interface
+with answer subsumption.  We show that, by adapting its transformation
+and library functions, PITA can be parameterized to PITA(IND,EXC) 
+which supports the restricted PLP of PRISM, including optimizations
+that reduce non-discriminating arguments and the computation of
+Viterbi paths.  Furthermore, we show PITA to be competitive with PRISM
+for complex queries to Hidden Markov Model examples, and sometimes
+much faster.
+We further show how PITA can be parameterized to PITA(COUNT) which
+computes the number of different explanations for a subgoal, and to
+PITA(POSS) which scalably implements Possibilistic Logic Programming.
+PITA is a supported package in version 3.3 of XSB.
+},
+  keywords = {Probabilistic Logic Programming, Possibilistic Logic Programming, Tabling, Answer Subsumption, Program Transformation},
+  pages = {433--449},
+  pdf = {http://ml.unife.it/wp-content/uploads/Papers/RigSwi-ICLP11.pdf},
+  doi = {10.1017/S147106841100010X},
+  url = {http://arxiv.org/pdf/1107.4747v1},
+  arxiv = {1107.4747}
+}

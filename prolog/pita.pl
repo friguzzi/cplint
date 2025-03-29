@@ -133,6 +133,7 @@ load_file(File):-
 
 /**
  * parse(++FileIn:atom,++FileOut:atom) is det
+ * 
  * applies the pita transformation to FileIn and writes the result to FileOut
  */
 parse(FileIn,FileOut):-
@@ -149,9 +150,12 @@ parse(FileIn,FileOut):-
   append(C1,L0,Cl0),
 	open(FileOut,write,SO),
   divide_tab_dyn_dir(Cl0,T,Dyn,Cl),
-	write_clauses([(:- dynamic query_rule/4)|Dyn],SO),
+  writeln(SO,':- use_module(library(pita)).'),
+  writeln(SO,':- style_check(-discontiguous).'),
+  write_clauses([(:- dynamic query_rule/4)|Dyn],SO),
 	write_tab_dir(T,SO),
 	write_clauses(Cl,SO),
+  writeln(SO,':- pita.'),  
 	close(SO).
 
 divide_tab_dyn_dir([],[],[],[]).
@@ -170,14 +174,18 @@ write_tab_dir([],S):-
 	nl(S).
 
 write_tab_dir([H|T],S):-
-  copy_term(H,H1),
-  numbervars(H1,0,_),
-	format(S,"~w.",[H1]),
+	format(S,"~q.",[H]),
 	nl(S),
 	write_tab_dir(T,S).
 
 
 write_clauses([],_).
+
+write_clauses([:- use_module(library(pita))|T],S):-!,
+  write_clauses(T,S).
+
+write_clauses([:- pita|T],S):-!,
+  write_clauses(T,S).
 
 write_clauses([H|T],S):-
   copy_term(H,H1),
@@ -1292,11 +1300,11 @@ zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(Env,BDD))):-
 to_table(M,Heads,[],Heads):-
   M:local_pita_setting(tabling,explicit),!.
 
-to_table(M,Heads,ProcTabDir,Heads1):-
+to_table(M,Heads,TabDir,Heads1):-
   maplist(tab_dir(M),Heads,TabDirList,Heads1L),
   append(TabDirList,TabDir),
-  maplist(system:term_expansion,TabDir,ProcTabDirL),
-  append(ProcTabDirL,ProcTabDir),
+%  maplist(system:term_expansion,TabDir,ProcTabDirL),
+%  append(ProcTabDirL,ProcTabDir),
   append(Heads1L,Heads1).
 
 tab_dir(_M,'':_,[],[]):-!.
@@ -1433,6 +1441,12 @@ pita_expansion((:- Constraint), Clauses) :-
   Constraint\= (table _),
   Constraint\=(multifile _),
   Constraint\=set_sw(_,_),!,
+  Constraint\= (use_module(_)),
+  Constraint\= (pita),
+  Constraint\= (set_pita(_,_)),
+  Constraint\= (if(_)),
+  Constraint\= (endif),
+  Constraint\= (use_rendering(_)),
   list2and(BodyList, Constraint),
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,Env,M),
   append([onec(Env,BDD)],BodyList2,BodyList3),

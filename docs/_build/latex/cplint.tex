@@ -10,6 +10,9 @@
 %% let collapsible pdf bookmarks panel have high depth per default
 \PassOptionsToPackage{bookmarksdepth=5}{hyperref}
 
+\PassOptionsToPackage{booktabs}{sphinx}
+\PassOptionsToPackage{colorrows}{sphinx}
+
 \PassOptionsToPackage{warn}{textcomp}
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
@@ -60,13 +63,18 @@
 
 
 \title{cplint Documentation}
-\date{Dec 09, 2023}
+\date{Mar 29, 2025}
 \release{4.5}
 \author{Riguzzi Fabrizio, Azzolini Damiano}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{Release}
 \makeindex
 \begin{document}
+
+\ifdefined\shorthandoff
+  \ifnum\catcode`\=\string=\active\shorthandoff{=}\fi
+  \ifnum\catcode`\"=\active\shorthandoff{"}\fi
+\fi
 
 \pagestyle{empty}
 \sphinxmaketitle
@@ -80,7 +88,7 @@
 \chapter{Introduction}
 \label{\detokenize{index:introduction}}
 \sphinxAtStartPar
-cplint is a suite of programs for reasoning with LPADs/CP\sphinxhyphen{}logic programs {[}\hyperlink{cite.index:id69}{VDB06}, \hyperlink{cite.index:id70}{VDB09}, \hyperlink{cite.index:id68}{VV03}, \hyperlink{cite.index:id48}{VVB04}{]}.
+cplint is a suite of programs for reasoning with LPADs/CP\sphinxhyphen{}logic programs {[}\hyperlink{cite.index:id71}{VDB06}, \hyperlink{cite.index:id72}{VDB09}, \hyperlink{cite.index:id70}{VV03}, \hyperlink{cite.index:id50}{VVB04}{]}.
 It contains modules for both inference and learning.
 
 \sphinxAtStartPar
@@ -154,7 +162,7 @@ cplint is distributed as a \sphinxhref{http://www.swi-prolog.org/pack/list?p=cpl
 To install it, use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{pack\PYGZus{}install}\PYG{p}{(}\PYG{l+s+sAtom}{cplint}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{pack\PYGZus{}install}\PYG{p}{(}\PYG{l+s+sAtom}{cplint}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 
@@ -191,7 +199,7 @@ They are installed automatically when installing pack \sphinxtitleref{cplint} or
 \sphinxtitleref{bddem} uses a foreign library and contains the library binaries for 32 and 64 bits Linux, MacOs and 64 bits Windows. If you want to recompile the foreign library you can use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{pack\PYGZus{}rebuild}\PYG{p}{(}\PYG{l+s+sAtom}{bdeem}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{pack\PYGZus{}rebuild}\PYG{p}{(}\PYG{l+s+sAtom}{bdeem}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -212,7 +220,7 @@ Note that the packs on which \sphinxtitleref{cplint} depends are not upgraded au
 \section{Example of use}
 \label{\detokenize{index:example-of-use}}
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }\PYG{n+nb}{cd} \PYGZlt{}pack\PYGZgt{}/cplint/prolog/examples
+\PYG{g+gp}{\PYGZdl{} }\PYG{n+nb}{cd}\PYG{+w}{ }\PYGZlt{}pack\PYGZgt{}/cplint/prolog/examples
 \PYG{g+gp}{\PYGZdl{} }swipl
 \PYG{g+go}{?\PYGZhy{} [coin].}
 \PYG{g+go}{?\PYGZhy{} prob(heads(coin),P).}
@@ -281,17 +289,17 @@ the form of a normal prolog clause, i.e.:
 stands for:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{h1}\PYG{o}{:}\PYG{l+m+mi}{1} \PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{l+s+sAtom}{h1}\PYG{o}{:}\PYG{l+m+mi}{1} \PYG{o}{:\PYGZhy{}} \PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-The coin example {[}\hyperlink{cite.index:id48}{VVB04}{]} is represented as (file \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
+The coin example {[}\hyperlink{cite.index:id50}{VVB04}{]} is represented as (file \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{o}{:\PYGZhy{}}
     \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+s+sAtom}{\PYGZbs{}+}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4} \PYG{o}{:\PYGZhy{}}
     \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
 \PYG{n+nf}{fair}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.9} \PYG{p}{;} \PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.1}\PYG{p}{.}
@@ -317,7 +325,7 @@ thus allowing nested probability computations.
 For example (\sphinxhref{http://cplint.eu/e/meta.pl}{meta.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{a}\PYG{p}{:}\PYG{l+m+mf}{0.2}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{l+s+sAtom}{a}\PYG{p}{:}\PYG{l+m+mf}{0.2}\PYG{o}{:\PYGZhy{}}
     \PYG{n+nf}{prob}\PYG{p}{(}\PYG{l+s+sAtom}{b}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{,}
     \PYG{n+nv}{P} \PYG{o}{\PYGZgt{}} \PYG{l+m+mf}{0.2}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -331,7 +339,7 @@ Moreover, the probabilistic annotations can be variables, as in (\sphinxhref{htt
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n+nf}{red}\PYG{p}{(}\PYG{n+nv}{Prob}\PYG{p}{)}\PYG{o}{:}\PYG{n+nv}{Prob}\PYG{p}{.}
 
-\PYG{n+nf}{draw\PYGZus{}red}\PYG{p}{(}\PYG{n+nv}{R}\PYG{p}{,} \PYG{n+nv}{G}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{draw\PYGZus{}red}\PYG{p}{(}\PYG{n+nv}{R}\PYG{p}{,} \PYG{n+nv}{G}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}
     \PYG{n+nv}{Prob} \PYG{o}{is} \PYG{n+nv}{R}\PYG{l+s+sAtom}{/}\PYG{p}{(}\PYG{n+nv}{R} \PYG{o}{+} \PYG{n+nv}{G}\PYG{p}{)}\PYG{p}{,}
     \PYG{n+nf}{red}\PYG{p}{(}\PYG{n+nv}{Prob}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -343,14 +351,14 @@ Variables in probabilistic annotations must be ground when resolution reaches th
 Alternative ways of specifying probability distribution include
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{discrete}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{discrete}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{finite}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{finite}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -360,7 +368,7 @@ where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{
 Moreover, you can use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{uniform}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{uniform}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{D}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -370,7 +378,7 @@ where \sphinxcode{\sphinxupquote{A}} is an atom containing variable \sphinxcode{
 \subsection{ProbLog Syntax}
 \label{\detokenize{index:problog-syntax}}
 \sphinxAtStartPar
-You can also use ProbLog {[}\hyperlink{cite.index:id49}{DRKT07}{]} syntax, so a general clause takes the form
+You can also use ProbLog {[}\hyperlink{cite.index:id51}{DRKT07}{]} syntax, so a general clause takes the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{l+s+sAtom}{p1}\PYG{o}{::}\PYG{l+s+sAtom}{h1} \PYG{p}{;} \PYG{p}{.}\PYG{p}{.}\PYG{p}{.} \PYG{p}{;} \PYG{l+s+sAtom}{pn}\PYG{p}{:}\PYG{o}{:}\PYG{n+nf}{hn} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{body}
@@ -383,7 +391,7 @@ where the \(pi\) are numeric expressions.
 \subsection{PRISM Syntax}
 \label{\detokenize{index:prism-syntax}}
 \sphinxAtStartPar
-You can also use PRISM {[}\hyperlink{cite.index:id50}{SK97}{]} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi\sphinxhyphen{}ary switch).
+You can also use PRISM {[}\hyperlink{cite.index:id52}{SK97}{]} syntax, so a program is composed of a set of regular Prolog rules whose body may contain calls to the \sphinxcode{\sphinxupquote{msw/2}} predicate (multi\sphinxhyphen{}ary switch).
 A call \sphinxcode{\sphinxupquote{msw(term,value)}} means that a random variable associated to \sphinxcode{\sphinxupquote{term}} assumes value \sphinxcode{\sphinxupquote{value}}.
 
 \sphinxAtStartPar
@@ -391,7 +399,7 @@ The admissible values for a discrete random variable are specified using facts f
 of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{values}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{val}\PYG{n+nf}{ues}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -399,7 +407,7 @@ where \sphinxcode{\sphinxupquote{T}} is a term (possibly containing variables) a
 The distribution over values is specified using directives for \sphinxcode{\sphinxupquote{set\_sw/2}} of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{LP}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{LP}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -412,13 +420,13 @@ Its default value is \sphinxcode{\sphinxupquote{false}}, i.e., no memoization.
 For example, the coin example above in PRISM syntax becomes (\sphinxhref{http://cplint.eu/e/coinmsw.pl}{coinmsw.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{values}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{heads}\PYG{p}{,}\PYG{l+s+sAtom}{tails}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{l+s+sAtom}{fair}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{l+s+sAtom}{biased}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.6}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{values}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{fair}\PYG{p}{,}\PYG{l+s+sAtom}{biased}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.9}\PYG{p}{,}\PYG{l+m+mf}{0.1}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{res}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{R}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{fairness}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{msw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{R}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{fairness}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{msw}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{val}\PYG{n+nf}{ues}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{heads}\PYG{p}{,}\PYG{l+s+sAtom}{tails}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{l+s+sAtom}{fair}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{l+s+sAtom}{biased}\PYG{p}{)}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.6}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{val}\PYG{n+nf}{ues}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{fair}\PYG{p}{,}\PYG{l+s+sAtom}{biased}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sw}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.9}\PYG{p}{,}\PYG{l+m+mf}{0.1}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{res}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{R}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{fairness}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{msw}\PYG{p}{(}\PYG{n+nf}{throw}\PYG{p}{(}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{R}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{fairness}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{n+nv}{Coin}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)} \PYG{o}{:\PYGZhy{}} \PYG{n+nf}{msw}\PYG{p}{(}\PYG{l+s+sAtom}{fairness}\PYG{p}{,}\PYG{n+nv}{Fairness}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
@@ -430,7 +438,7 @@ For example, the coin example above in PRISM syntax becomes (\sphinxhref{http://
 To specify a probability density on an argument \sphinxcode{\sphinxupquote{Var}} of an atom \sphinxcode{\sphinxupquote{A}} you can used rules of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nv}{Density}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nv}{Body}
+\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nv}{Density}\PYG{o}{:\PYGZhy{}} \PYG{n+nv}{Body}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -507,8 +515,8 @@ For example, \sphinxhref{http://cplint.eu/e/gaussian\_mixture.pl}{gaussian\_mixt
 \PYG{l+s+sAtom}{heads}\PYG{p}{:}\PYG{l+m+mf}{0.6}\PYG{p}{;}\PYG{l+s+sAtom}{tails}\PYG{p}{:}\PYG{l+m+mf}{0.4}\PYG{p}{.}
 \PYG{n+nf}{g}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:} \PYG{n+nb}{gaussian}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{h}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:} \PYG{n+nb}{gaussian}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{mix}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{heads}\PYG{p}{,} \PYG{n+nf}{g}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{mix}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{tails}\PYG{p}{,} \PYG{n+nf}{h}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{mix}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{heads}\PYG{p}{,} \PYG{n+nf}{g}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{mix}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{tails}\PYG{p}{,} \PYG{n+nf}{h}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -516,11 +524,11 @@ The argument \sphinxcode{\sphinxupquote{X}} of \sphinxcode{\sphinxupquote{mix(X)
 The parameters of the distribution atoms can be taken from the probabilistic atom, the example (\sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
     \PYG{n+nf}{mean}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{)}\PYG{p}{,}
-    \PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
+    \PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{mean}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{)}\PYG{o}{:} \PYG{n+nb}{gaussian}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{l+m+mf}{5.0}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{val}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:} \PYG{n+nb}{gaussian}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,} \PYG{l+m+mf}{2.0}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{val}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:} \PYG{n+nb}{gaussian}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{,} \PYG{l+m+mf}{2.0}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -529,11 +537,11 @@ Any operation is allowed on continuous random variables.
 The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl}) encodes a Kalman filter:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{kf}\PYG{p}{(}\PYG{n+nv}{N}\PYG{p}{,}\PYG{n+nv}{O}\PYG{p}{,} \PYG{n+nv}{T}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{kf}\PYG{p}{(}\PYG{n+nv}{N}\PYG{p}{,}\PYG{n+nv}{O}\PYG{p}{,} \PYG{n+nv}{T}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
     \PYG{n+nf}{init}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}
     \PYG{n+nf}{kf\PYGZus{}part}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{O}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,} \PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{S}\PYG{p}{,}\PYG{p}{[}\PYG{n+nv}{V}\PYG{p}{|}\PYG{n+nv}{RO}\PYG{p}{]}\PYG{p}{,} \PYG{n+nv}{T}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,} \PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{S}\PYG{p}{,}\PYG{p}{[}\PYG{n+nv}{V}\PYG{p}{|}\PYG{n+nv}{RO}\PYG{p}{]}\PYG{p}{,} \PYG{n+nv}{T}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
     \PYG{n+nv}{I} \PYG{o}{\PYGZlt{}} \PYG{n+nv}{N}\PYG{p}{,}
     \PYG{n+nv}{NextI} \PYG{o}{is} \PYG{n+nv}{I}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,}
     \PYG{n+nf}{trans}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{NextS}\PYG{p}{)}\PYG{p}{,}
@@ -541,11 +549,11 @@ The example below (\sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_fil
     \PYG{n+nf}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n+nv}{NextI}\PYG{p}{,} \PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{NextS}\PYG{p}{,}\PYG{n+nv}{RO}\PYG{p}{,} \PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{kf\PYGZus{}part}\PYG{p}{(}\PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{N}\PYG{p}{,} \PYG{n+nv}{S}\PYG{p}{,} \PYG{p}{[}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{trans}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{NextS}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{trans}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{NextS}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
     \PYG{p}{\PYGZob{}}\PYG{n+nv}{NextS} \PYG{o}{=:=} \PYG{n+nv}{E} \PYG{o}{+} \PYG{n+nv}{S}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
     \PYG{n+nf}{trans\PYGZus{}err}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{E}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{emit}\PYG{p}{(}\PYG{n+nv}{NextS}\PYG{p}{,}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{emit}\PYG{p}{(}\PYG{n+nv}{NextS}\PYG{p}{,}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
     \PYG{p}{\PYGZob{}}\PYG{n+nv}{NextS} \PYG{o}{=:=} \PYG{n+nv}{V}\PYG{o}{+}\PYG{n+nv}{X}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
     \PYG{n+nf}{obs\PYGZus{}err}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{.}
 
@@ -563,7 +571,7 @@ In case random variables are not sufficiently instantiated to exploit expression
 Moreover, user defined distributions are allowed with the syntax:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{user}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{Density}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{A}\PYG{o}{:}\PYG{n+nb}{user}\PYG{p}{(}\PYG{n+nv}{Var}\PYG{p}{,}\PYG{n+nv}{Density}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}\PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -596,11 +604,11 @@ See for example \sphinxhref{http://cplint.eu/e/gauss\_mean\_est\_user.pl}{gauss\
 \subsection{Distributional Clauses Syntax}
 \label{\detokenize{index:distributional-clauses-syntax}}
 \sphinxAtStartPar
-You can also use the syntax of Distributional Clauses (DC) {[}\hyperlink{cite.index:id51}{NDLDR16}{]}.
+You can also use the syntax of Distributional Clauses (DC) {[}\hyperlink{cite.index:id53}{NDLDR16}{]}.
 Continuous random variables are represented in this case by term whose distribution can be specified with density atoms as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nv}{Density} \PYG{o}{:}\PYG{o}{=} \PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nv}{Density} \PYG{o}{:=} \PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -612,8 +620,8 @@ Internally \sphinxcode{\sphinxupquote{cplint}} transforms the terms representing
 DC can be used to represent also discrete distributions using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nb}{uniform}\PYG{p}{(}\PYG{n+nv}{L}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{n+nv}{Body}\PYG{p}{.}
-\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nb}{finite}\PYG{p}{(}\PYG{n+nv}{D}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nb}{uniform}\PYG{p}{(}\PYG{n+nv}{L}\PYG{p}{)} \PYG{o}{:=} \PYG{n+nv}{Body}\PYG{p}{.}
+\PYG{n+nv}{T}\PYG{o}{\PYGZti{}}\PYG{n+nb}{finite}\PYG{p}{(}\PYG{n+nv}{D}\PYG{p}{)} \PYG{o}{:=} \PYG{n+nv}{Body}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -626,21 +634,21 @@ The Indian GPA problem from \sphinxurl{http://www.robots.ox.ac.uk/~fwood/anglica
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{l+s+sAtom}{coin} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.95}\PYG{o}{:}\PYG{l+s+sAtom}{true}\PYG{p}{,}\PYG{l+m+mf}{0.05}\PYG{o}{:}\PYG{l+s+sAtom}{false}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{l+s+sAtom}{agpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{beta}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{coin}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{true}\PYG{p}{.}
-\PYG{l+s+sAtom}{american\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.85}\PYG{o}{:}\PYG{l+m+mf}{4.0}\PYG{p}{,}\PYG{l+m+mf}{0.15}\PYG{o}{:}\PYG{l+m+mf}{0.0}\PYG{p}{]}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{coin}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{false}\PYG{p}{.}
+\PYG{l+s+sAtom}{agpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{beta}\PYG{p}{(}\PYG{l+m+mi}{8}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{coin}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{true}\PYG{p}{.}
+\PYG{l+s+sAtom}{american\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.85}\PYG{o}{:}\PYG{l+m+mf}{4.0}\PYG{p}{,}\PYG{l+m+mf}{0.15}\PYG{o}{:}\PYG{l+m+mf}{0.0}\PYG{p}{]}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{coin}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{false}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{american\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{agpa} \PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{,} \PYG{n+nv}{V} \PYG{o}{is} \PYG{n+nv}{A}\PYG{o}{*}\PYG{l+m+mf}{4.0}\PYG{p}{.}
+\PYG{l+s+sAtom}{american\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{agpa} \PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{,} \PYG{n+nv}{V} \PYG{o}{is} \PYG{n+nv}{A}\PYG{o}{*}\PYG{l+m+mf}{4.0}\PYG{p}{.}
 
 \PYG{l+s+sAtom}{coin2} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.99}\PYG{o}{:}\PYG{l+s+sAtom}{true}\PYG{p}{,}\PYG{l+m+mf}{0.01}\PYG{o}{:}\PYG{l+s+sAtom}{false}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
-\PYG{l+s+sAtom}{igpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{beta}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{coin2}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{true}\PYG{p}{.}
-\PYG{l+s+sAtom}{indian\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{o}{:}\PYG{l+m+mf}{0.0}\PYG{p}{,}\PYG{l+m+mf}{0.9}\PYG{o}{:}\PYG{l+m+mf}{10.0}\PYG{p}{]}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{coin2}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{false}\PYG{p}{.}
+\PYG{l+s+sAtom}{igpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{beta}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{coin2}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{true}\PYG{p}{.}
+\PYG{l+s+sAtom}{indian\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{o}{:}\PYG{l+m+mf}{0.0}\PYG{p}{,}\PYG{l+m+mf}{0.9}\PYG{o}{:}\PYG{l+m+mf}{10.0}\PYG{p}{]}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{coin2}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{false}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{indian\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{igpa} \PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{,} \PYG{n+nv}{V} \PYG{o}{is} \PYG{n+nv}{A}\PYG{o}{*}\PYG{l+m+mf}{10.0}\PYG{p}{.}
+\PYG{l+s+sAtom}{indian\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{V}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{igpa} \PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{,} \PYG{n+nv}{V} \PYG{o}{is} \PYG{n+nv}{A}\PYG{o}{*}\PYG{l+m+mf}{10.0}\PYG{p}{.}
 
 \PYG{l+s+sAtom}{nation} \PYG{o}{\PYGZti{}} \PYG{n+nb}{finite}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{o}{:}\PYG{l+s+sAtom}{a}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{o}{:}\PYG{l+s+sAtom}{i}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{student\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{nation}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{a}\PYG{p}{,}\PYG{l+s+sAtom}{american\PYGZus{}gpa}\PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{.}
-\PYG{l+s+sAtom}{student\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nf}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{)} \PYG{o}{:}\PYG{o}{=} \PYG{l+s+sAtom}{nation}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{i}\PYG{p}{,}\PYG{l+s+sAtom}{indian\PYGZus{}gpa}\PYG{o}{\PYGZti{}=}\PYG{n+nv}{I}\PYG{p}{.}
+\PYG{l+s+sAtom}{student\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{nation}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{a}\PYG{p}{,}\PYG{l+s+sAtom}{american\PYGZus{}gpa}\PYG{o}{\PYGZti{}=}\PYG{n+nv}{A}\PYG{p}{.}
+\PYG{l+s+sAtom}{student\PYGZus{}gpa} \PYG{o}{\PYGZti{}} \PYG{n+nb}{val}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{)} \PYG{o}{:=} \PYG{l+s+sAtom}{nation}\PYG{o}{\PYGZti{}=}\PYG{l+s+sAtom}{i}\PYG{p}{,}\PYG{l+s+sAtom}{indian\PYGZus{}gpa}\PYG{o}{\PYGZti{}=}\PYG{n+nv}{I}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 
@@ -654,10 +662,10 @@ The probability of a world is the product of the probabilities associated to the
 The probability of a ground atom (the query) is given by the sum of the probabilities of the worlds where the query is true.
 
 \sphinxAtStartPar
-If the LPAD contains function symbols, the definition is more complex, see {[}\hyperlink{cite.index:id52}{Poo97}, \hyperlink{cite.index:id53}{SK01}{]}.
-For the semantics of programs with continuous random variables, see {[}\hyperlink{cite.index:id54}{IRR12}{]} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)\sphinxhyphen{}algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
+If the LPAD contains function symbols, the definition is more complex, see {[}\hyperlink{cite.index:id54}{Poo97}, \hyperlink{cite.index:id55}{SK01}{]}.
+For the semantics of programs with continuous random variables, see {[}\hyperlink{cite.index:id56}{IRR12}{]} that defines the probability space for \(N\) continuous random variables by considering the Borel \(\sigma\)\sphinxhyphen{}algebra over \(\mathbb{R}^N\) and defines a Lebesgue measure on this set as the probability measure.
 The probability space is lifted to cover the entire program using the least model semantics of constraint logic programs.
-Alternatively, {[}\hyperlink{cite.index:id51}{NDLDR16}{]} defines the semantics of distributional clauses by resorting to a stochastic \(Tp\) operator.
+Alternatively, {[}\hyperlink{cite.index:id53}{NDLDR16}{]} defines the semantics of distributional clauses by resorting to a stochastic \(Tp\) operator.
 
 \sphinxAtStartPar
 \sphinxcode{\sphinxupquote{cplint}} allows more freedom than distributional clauses in the use of continuous random variables in expressions,
@@ -667,9 +675,11 @@ for example \sphinxhref{http://cplint.eu/e/kalman\_filter.pl}{kalman\_filter.pl}
 \chapter{Inference}
 \label{\detokenize{index:inference}}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{cplint}} answers queries using the module \sphinxcode{\sphinxupquote{pita}} or \sphinxcode{\sphinxupquote{mcintyre}}.
-The first performs the program transformation technique of {[}\hyperlink{cite.index:id55}{RS10}{]}.
-The latter performs approximate inference by sampling using a different program transformation technique and is described in {[}\hyperlink{cite.index:id56}{Rig13}{]}.
+\sphinxcode{\sphinxupquote{cplint}} answers queries using the modules \sphinxcode{\sphinxupquote{pita}}, \sphinxcode{\sphinxupquote{pitaind}} or \sphinxcode{\sphinxupquote{mcintyre}}.
+The first performs the program transformation technique of {[}\hyperlink{cite.index:id57}{RS10}{]}.
+The second is a variant of \sphinxcode{\sphinxupquote{pita}} that is faster but is correct only
+for a subset of the programs {[}\hyperlink{cite.index:id74}{RS11}{]}.
+The last performs approximate inference by sampling using a different program transformation technique and is described in {[}\hyperlink{cite.index:id58}{Rig13}{]}.
 Only \sphinxcode{\sphinxupquote{mcintyre}} is able to handle continuous random variables.
 
 \sphinxAtStartPar
@@ -677,38 +687,38 @@ For answering queries, you have to prepare a Prolog file where you first load th
 For example, the coin program above can be stored in \sphinxhref{http://cplint.eu/example/inference/coin.pl}{coin.pl} for performing inference with \sphinxcode{\sphinxupquote{pita}} as follows
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+s+sAtom}{\PYGZbs{}+}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
 \PYG{n+nf}{fair}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.9} \PYG{p}{;} \PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.1}\PYG{p}{.}
 
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 The same program for \sphinxcode{\sphinxupquote{mcintyre}} is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{mcintyre}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{mc}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{mcintyre}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{mc}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+s+sAtom}{\PYGZbs{}+}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
 
 \PYG{n+nf}{fair}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.9} \PYG{p}{;} \PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.1}\PYG{p}{.}
 
 \PYG{n+nf}{toss}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -718,12 +728,12 @@ In \sphinxcode{\sphinxupquote{pita}} subgoals in the body of probabilistic claus
 For example (\sphinxhref{http://cplint.eu/example/inference/testdb.pl}{testdb.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
-\PYG{n+nf}{sampled\PYGZus{}male}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.5}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
-\PYG{n+nf}{db}\PYG{p}{(}\PYG{n+nf}{male}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{n+nf}{sampled\PYGZus{}male}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.5}\PYG{o}{:\PYGZhy{}}
+  \PYG{n+nf}{db}\PYG{p}{(}\PYG{n+nf}{male}\PYG{p}{(}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
 \PYG{n+nf}{male}\PYG{p}{(}\PYG{l+s+sAtom}{john}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{male}\PYG{p}{(}\PYG{l+s+sAtom}{david}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -732,18 +742,18 @@ For example (\sphinxhref{http://cplint.eu/example/inference/testdb.pl}{testdb.pl
 You can also use \sphinxcode{\sphinxupquote{findall/3}} on subgoals defined by database clauses (\sphinxhref{http://cplint.eu/example/inference/persons.pl}{persons.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pita}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{pita}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{male}\PYG{p}{:}\PYG{n+nv}{M}\PYG{o}{/}\PYG{n+nv}{P}\PYG{p}{;} \PYG{l+s+sAtom}{female}\PYG{p}{:}\PYG{n+nv}{F}\PYG{o}{/}\PYG{n+nv}{P}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{l+s+sAtom}{male}\PYG{p}{:}\PYG{n+nv}{M}\PYG{o}{/}\PYG{n+nv}{P}\PYG{p}{;} \PYG{l+s+sAtom}{female}\PYG{p}{:}\PYG{n+nv}{F}\PYG{o}{/}\PYG{n+nv}{P}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{findall}\PYG{p}{(}\PYG{n+nv}{Male}\PYG{p}{,}\PYG{n+nf}{male}\PYG{p}{(}\PYG{n+nv}{Male}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{LM}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{findall}\PYG{p}{(}\PYG{n+nv}{Female}\PYG{p}{,}\PYG{n+nf}{female}\PYG{p}{(}\PYG{n+nv}{Female}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{LF}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{length}\PYG{p}{(}\PYG{n+nv}{LM}\PYG{p}{,}\PYG{n+nv}{M}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{length}\PYG{p}{(}\PYG{n+nv}{LF}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nv}{P} \PYG{o}{is} \PYG{n+nv}{F}\PYG{o}{+}\PYG{n+nv}{M}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
 
 \PYG{n+nf}{male}\PYG{p}{(}\PYG{l+s+sAtom}{john}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{male}\PYG{p}{(}\PYG{l+s+sAtom}{david}\PYG{p}{)}\PYG{p}{.}
@@ -764,14 +774,14 @@ You can also use \sphinxcode{\sphinxupquote{findall/3}}.
 To run a query, you can simply load the Prolog file, for example \sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl}, as:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{p}{[}\PYG{l+s+sAtom}{coin}\PYG{p}{]}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{p}{[}\PYG{l+s+sAtom}{coin}\PYG{p}{]}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }swipl coin.pl
+\PYG{g+gp}{\PYGZdl{} }swipl\PYG{+w}{ }coin.pl
 \end{sphinxVerbatim}
 
 
@@ -788,7 +798,7 @@ The unconditional probability of an atom can be asked using \sphinxcode{\sphinxu
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -812,7 +822,7 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -854,7 +864,7 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 For example (\sphinxhref{http://cplint.eu/e/coinmc.pl}{coinmc.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -864,7 +874,7 @@ that samples \sphinxcode{\sphinxupquote{heads(coin)}} 1000 times and returns in 
 As another example, the call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Prob}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Prob}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -905,7 +915,7 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 Moreover, you can sample arguments of queries with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -913,7 +923,7 @@ The predicate samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode
 The predicate returns in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values. If \sphinxcode{\sphinxupquote{L}} is the empty list, it means that for that sample the query failed.
 If \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that for that sample the query is determinate.
 If, in all pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}}, \sphinxcode{\sphinxupquote{L}} is a list with a single element, it means that the clauses in the program are mutually exclusive, i.e., that in every sample, only one clause for each subgoal has the body true.
-This is one of the assumptions taken for programs of the PRISM system {[}\hyperlink{cite.index:id53}{SK01}{]}.
+This is one of the assumptions taken for programs of the PRISM system {[}\hyperlink{cite.index:id55}{SK01}{]}.
 For example \sphinxhref{http://cplint.eu/e/pcfglr.pl}{pcfglr.pl} and \sphinxhref{http://cplint.eu/e/plcg.pl}{plcg.pl} satisfy this constraint while \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} and \sphinxhref{http://cplint.eu/e/var\_obj.pl}{var\_obj.pl} doesn’t.
 
 \sphinxAtStartPar
@@ -937,7 +947,7 @@ For example \sphinxhref{http://cplint.eu/e/pcfglr.pl}{pcfglr.pl} and \sphinxhref
 An example of use of \sphinxcode{\sphinxupquote{mc\_sample\_arg/4}} is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{Values}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{Values}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -947,7 +957,7 @@ of \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl} that takes
 You can sample arguments of queries also with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}raw}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}raw}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -958,7 +968,7 @@ The value is \sphinxcode{\sphinxupquote{failure}} if the query fails.
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}first}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}first}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -977,7 +987,7 @@ samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquot
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}one}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg\PYGZus{}one}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -997,7 +1007,7 @@ samples \sphinxcode{\sphinxupquote{Query}} a number of \sphinxcode{\sphinxupquot
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1008,7 +1018,7 @@ The same options as those of \sphinxcode{\sphinxupquote{mc\_gibbs\_sample/4}} ar
 Finally, you can compute expectations with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1020,7 +1030,7 @@ The overall sum is divided by \sphinxcode{\sphinxupquote{N}} to give \sphinxcode
 An example of use of the above predicate is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{n+nf}{eventually}\PYG{p}{(}\PYG{l+s+sAtom}{elect}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{E}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}expectation}\PYG{p}{(}\PYG{n+nf}{eventually}\PYG{p}{(}\PYG{l+s+sAtom}{elect}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{,}\PYG{n+nv}{E}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1031,7 +1041,7 @@ of \sphinxcode{\sphinxupquote{T}} by taking 1000 samples.
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1061,7 +1071,7 @@ The table \sphinxcode{\sphinxupquote{Var}} contains the associations between the
 The BDD can be drawn in \sphinxcode{\sphinxupquote{cplint}} on SWISH by using the \sphinxcode{\sphinxupquote{graphviz}} renderer by including
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{graphviz}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{graphviz}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1071,7 +1081,7 @@ before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} pita.}}
 For example (\sphinxhref{http://cplint.eu/e/coin.pl}{coin.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{bdd\PYGZus{}dot\PYGZus{}string}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{BDD}\PYG{p}{,}\PYG{n+nv}{Var}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{bdd\PYGZus{}dot\PYGZus{}string}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{BDD}\PYG{p}{,}\PYG{n+nv}{Var}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1093,7 +1103,7 @@ with the predicate
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1121,15 +1131,15 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{\PYGZcb{}}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{\PYGZcb{}}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 \sphinxcode{\sphinxupquote{prob/3}} is equivalent to \sphinxcode{\sphinxupquote{prob/4}} with an empty option list.
 When using \sphinxcode{\sphinxupquote{mcintyre}}, you can ask conditional queries with rejection sampling,
 Metropolis\sphinxhyphen{}Hastings Markov Chain Monte Carlo or Gibbs sampling.
-In rejection sampling {[}\hyperlink{cite.index:id57}{VN51}{]}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded.
-In Metropolis\sphinxhyphen{}Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in {[}\hyperlink{cite.index:id58}{NR14}{]} (the non adaptive version).
+In rejection sampling {[}\hyperlink{cite.index:id59}{VN51}{]}, you first query the evidence and, if the query is successful, query the goal in the same sample, otherwise the sample is discarded.
+In Metropolis\sphinxhyphen{}Hastings MCMC, \sphinxcode{\sphinxupquote{mcintyre}} follows the algorithm proposed in {[}\hyperlink{cite.index:id60}{NR14}{]} (the non adaptive version).
 A Markov chain is built by building an initial sample and by generating successor samples.
 
 \sphinxAtStartPar
@@ -1143,7 +1153,7 @@ A successor sample is obtained by deleting a fixed number (parameter \sphinxcode
 Then the evidence is queried using regular MCINTYRE starting with the undeleted choices.
 If the query succeeds, the goal is queried using regular MCINTYRE.
 The sample is accepted with a probability of \(\min\{1,\frac{N_0}{N_1}\) where \(N_0\) is the number of choices sampled in the previous sample and \(N_1\) is the number of choices sampled in the current sample.
-In {[}\hyperlink{cite.index:id58}{NR14}{]} the lag is always 1 but the proof in {[}\hyperlink{cite.index:id58}{NR14}{]} that the above acceptance probability yields a valid Metropolis\sphinxhyphen{}Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
+In {[}\hyperlink{cite.index:id60}{NR14}{]} the lag is always 1 but the proof in {[}\hyperlink{cite.index:id60}{NR14}{]} that the above acceptance probability yields a valid Metropolis\sphinxhyphen{}Hastings algorithm holds also when forgetting more than one sampled choice, so the lag is user defined in \sphinxcode{\sphinxupquote{cplint}}.
 
 \sphinxAtStartPar
 Then the number of successes of the query is increased by 1 if the query succeeded in the last accepted sample.
@@ -1173,7 +1183,7 @@ where \sphinxcode{\sphinxupquote{Options}} is a list of options, the following a
 as in (\sphinxhref{http://cplint.eu/e/coinmc.pl}{coinmc.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1222,7 +1232,7 @@ With \sphinxcode{\sphinxupquote{Mix}} specified it takes \sphinxcode{\sphinxupqu
 For example (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{10000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{,} \PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{10000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{successes}\PYG{p}{(}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{,} \PYG{n+nf}{failures}\PYG{p}{(}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1261,9 +1271,9 @@ performs Gibbs sampling. \sphinxcode{\sphinxupquote{Options}} is a list of optio
 Moreover, you can sample arguments of queries with rejection sampling, Metropolis\sphinxhyphen{}Hastings MCMC or Gibbs sampling using
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1291,14 +1301,14 @@ that return the distribution of values for \sphinxcode{\sphinxupquote{Arg}} in \
 The predicates return in \sphinxcode{\sphinxupquote{Values}} a list of pairs \sphinxcode{\sphinxupquote{L\sphinxhyphen{}N}} where \sphinxcode{\sphinxupquote{L}} is the list of values of \sphinxcode{\sphinxupquote{Arg}} for which \sphinxcode{\sphinxupquote{Query}} succeeds in a world sampled at random where \sphinxcode{\sphinxupquote{Evidence}} is true and \sphinxcode{\sphinxupquote{N}} is the number of samples returning that list of values.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 An example of use of the above predicates is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{V}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{V}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1308,16 +1318,16 @@ of (\sphinxhref{http://cplint.eu/e/arithm.pl}{arithm.pl}).
 To compute conditional expectations, use
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
-\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}rejection\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}gibbs\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Options}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 where \sphinxcode{\sphinxupquote{Options}} is a list of options, the same as those of the predicates for conditional argument sampling are recognised. For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{E}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}mh\PYGZus{}expectation}\PYG{p}{(}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{eval}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{E}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1338,7 +1348,7 @@ When you do not have evidence or you have evidence on atoms not depending on con
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{val}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nb}{val}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1346,7 +1356,7 @@ from (\sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl}) 
 
 \sphinxAtStartPar
 When you have evidence on ground atoms that have continuous values as arguments, you cannot use rejection sampling or Metropolis\sphinxhyphen{}Hastings, as the probability of the evidence is 0. For example, the probability of sampling a specific value from a Gaussian is 0.
-Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering {[}\hyperlink{cite.index:id59}{FC90}{]},:cite:\sphinxtitleref{koller2009probabilistic},:cite:\sphinxtitleref{Nitti2016} to obtain samples of continuous arguments of a goal.
+Continuous variables have probability densities instead of distributions as discrete variables. In this case, you can use likelihood weighting or particle filtering {[}\hyperlink{cite.index:id61}{FC90}{]},:cite:\sphinxtitleref{koller2009probabilistic},:cite:\sphinxtitleref{Nitti2016} to obtain samples of continuous arguments of a goal.
 
 \sphinxAtStartPar
 For each sample to be taken, likelihood weighting uses a meta\sphinxhyphen{}interpreter to find a sample where the goal is true, randomizing the choice of clauses when more than one resolves with the goal in order to obtain an unbiased sample.
@@ -1378,7 +1388,7 @@ It performs likelihood weighting: each sample is weighted by the likelihood of e
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{nation}\PYG{p}{(}\PYG{l+s+sAtom}{a}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{student\PYGZus{}gpa}\PYG{p}{(}\PYG{l+m+mf}{4.0}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{nation}\PYG{p}{(}\PYG{l+s+sAtom}{a}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{student\PYGZus{}gpa}\PYG{p}{(}\PYG{l+m+mf}{4.0}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1388,7 +1398,7 @@ from \sphinxhref{http://cplint.eu/e/indian\_gpa.pl}{indian\_gpa.pl} samples 1000
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ValList}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{:}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{ValList}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1396,7 +1406,7 @@ returns in \sphinxcode{\sphinxupquote{ValList}} a list of pairs \sphinxcode{\sph
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{val}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{p}{(}\PYG{n+nf}{val}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{9}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{val}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nb}{val}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{p}{(}\PYG{n+nb}{val}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{9}\PYG{p}{)}\PYG{p}{,}\PYG{n+nb}{val}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1406,7 +1416,7 @@ from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl} sa
 You can compute conditional expectations using likelihood weighting with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1417,7 +1427,7 @@ It takes \sphinxcode{\sphinxupquote{N}} samples of \sphinxcode{\sphinxupquote{Ar
 The predicate
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{Samples}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Values}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1434,7 +1444,7 @@ For each element of \sphinxcode{\sphinxupquote{Evidence}}, the particles are obt
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}}\PYG{p}{[}\PYG{n+nv}{O1}\PYG{p}{,}\PYG{n+nv}{O2}\PYG{p}{,}\PYG{n+nv}{O3}\PYG{p}{,}\PYG{n+nv}{O4}\PYG{p}{]}\PYG{o}{=}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.133}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1.183}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{3.212}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{4.586}\PYG{p}{]}\PYG{p}{,}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}}\PYG{p}{[}\PYG{n+nv}{O1}\PYG{p}{,}\PYG{n+nv}{O2}\PYG{p}{,}\PYG{n+nv}{O3}\PYG{p}{,}\PYG{n+nv}{O4}\PYG{p}{]}\PYG{o}{=}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.133}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{1.183}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{3.212}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{4.586}\PYG{p}{]}\PYG{p}{,}
 \PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{p}{[}\PYG{n+nf}{kf\PYGZus{}fin}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n+nv}{T1}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{kf\PYGZus{}fin}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{T2}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{kf\PYGZus{}fin}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{n+nv}{T3}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{kf\PYGZus{}fin}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{,}\PYG{n+nv}{T4}\PYG{p}{)}\PYG{p}{]}\PYG{p}{,}
 \PYG{p}{[}\PYG{n+nf}{kf\PYGZus{}o}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n+nv}{O1}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{kf\PYGZus{}o}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n+nv}{O2}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{kf\PYGZus{}o}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,}\PYG{n+nv}{O3}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{kf\PYGZus{}o}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{,}\PYG{n+nv}{O4}\PYG{p}{)}\PYG{p}{]}\PYG{p}{,}\PYG{l+m+mi}{100}\PYG{p}{,}
@@ -1461,7 +1471,7 @@ The predicate returns in \sphinxcode{\sphinxupquote{Prob}} the probability that 
 You can compute conditional expectations using particle filtering with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{l+s+sAtom}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
+\PYG{n+nf}{mc\PYGZus{}particle\PYGZus{}expectation}\PYG{p}{(}\PYG{o}{:}\PYG{n+nv}{Query}\PYG{o}{:}\PYG{l+s+sAtom}{conjunction\PYGZus{}of\PYGZus{}literals}\PYG{p}{,}\PYG{n+nv}{Evidence}\PYG{o}{:}\PYG{l+s+sAtom}{list}\PYG{p}{,}\PYG{o}{+}\PYG{n+nv}{N}\PYG{o}{:}\PYG{l+s+sAtom}{int}\PYG{p}{,}\PYG{n+nb}{?}\PYG{n+nv}{Arg}\PYG{o}{:}\PYG{l+s+sAtom}{var}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{n+nv}{Exp}\PYG{o}{:}\PYG{l+s+sAtom}{float}\PYG{p}{)} \PYG{o}{is} \PYG{l+s+sAtom}{det}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1472,7 +1482,7 @@ It uses \sphinxcode{\sphinxupquote{N}} particles.
 \section{MPE, MAP and Viterbi Inference}
 \label{\detokenize{index:mpe-map-and-viterbi-inference}}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. {[}\hyperlink{cite.index:id47}{BARZ20}, \hyperlink{cite.index:id46}{SRV+15}{]}.
+\sphinxcode{\sphinxupquote{pita}} supports MPE (Most Probable Explanation) and MAP (Maximum A Posteriori) inference. {[}\hyperlink{cite.index:id49}{BARZ20}, \hyperlink{cite.index:id48}{SRV+15}{]}.
 
 \sphinxAtStartPar
 In MAP inference we look for the choices of head atoms of some clauses that lead to the probability of a query being
@@ -1480,8 +1490,8 @@ maximal. The rules for which we want the choices, called \sphinxstyleemphasis{qu
 the text \sphinxcode{\sphinxupquote{map\_query}} to each query rule. For example, in the program \sphinxhref{http://cplint.eu/e/bag\_1.pl}{bag\_1.pl}
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{n+nf}{red}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.3}\PYG{o}{::}\PYG{n+nf}{green}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.1}\PYG{o}{::}\PYG{n+nf}{blue}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{.}
-\PYG{l+s+sAtom}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{n+nf}{pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.4}\PYG{o}{::}\PYG{n+nf}{no\PYGZus{}pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{.}
+\PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{n+nf}{red}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.3}\PYG{o}{::}\PYG{n+nf}{green}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.1}\PYG{o}{::}\PYG{n+nf}{blue}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)} \PYG{o}{:\PYGZhy{}} \PYG{n+nf}{pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{.}
+\PYG{k}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{n+nf}{pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{;} \PYG{l+m+mf}{0.4}\PYG{o}{::}\PYG{n+nf}{no\PYGZus{}pick}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{.}
 
 \PYG{l+s+sAtom}{ev}\PYG{p}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{\PYGZbs{}+} \PYG{n+nf}{blue}\PYG{p}{(}\PYG{l+s+sAtom}{b1}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -1498,7 +1508,7 @@ The predicate to use is
 For example, the query on the program above
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{map}\PYG{p}{(}\PYG{l+s+sAtom}{ev}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{map}\PYG{p}{(}\PYG{l+s+sAtom}{ev}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1520,17 +1530,17 @@ For example, on program \sphinxhref{http://cplint.eu/e/bag\_game\_mpe.pl}{bag\_g
 \PYG{n+nf}{win} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{red}\PYG{p}{,} \PYG{l+s+sAtom}{green}\PYG{p}{.}
 \PYG{n+nf}{win} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{blue}\PYG{p}{,} \PYG{l+s+sAtom}{yellow}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{map\PYGZus{}query} \PYG{l+m+mf}{0.4}\PYG{o}{::}\PYG{l+s+sAtom}{red}\PYG{p}{.}
-\PYG{l+s+sAtom}{map\PYGZus{}query} \PYG{l+m+mf}{0.9}\PYG{o}{::}\PYG{l+s+sAtom}{green}\PYG{p}{.}
-\PYG{l+s+sAtom}{map\PYGZus{}query} \PYG{l+m+mf}{0.5}\PYG{o}{::}\PYG{l+s+sAtom}{blue}\PYG{p}{.}
-\PYG{l+s+sAtom}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{l+s+sAtom}{yellow}\PYG{p}{.}
+\PYG{k}{map\PYGZus{}query} \PYG{l+m+mf}{0.4}\PYG{o}{::}\PYG{l+s+sAtom}{red}\PYG{p}{.}
+\PYG{k}{map\PYGZus{}query} \PYG{l+m+mf}{0.9}\PYG{o}{::}\PYG{l+s+sAtom}{green}\PYG{p}{.}
+\PYG{k}{map\PYGZus{}query} \PYG{l+m+mf}{0.5}\PYG{o}{::}\PYG{l+s+sAtom}{blue}\PYG{p}{.}
+\PYG{k}{map\PYGZus{}query} \PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{l+s+sAtom}{yellow}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{map}\PYG{p}{(}\PYG{l+s+sAtom}{win}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{map}\PYG{p}{(}\PYG{l+s+sAtom}{win}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1546,7 +1556,7 @@ returns
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-In Viterbi inference we are interested in the most probable proof of a query. See {[}\hyperlink{cite.index:id46}{SRV+15}{]}
+In Viterbi inference we are interested in the most probable proof of a query. See {[}\hyperlink{cite.index:id48}{SRV+15}{]}
 for the difference between the most probable proof and the most probable explanation.
 Module \sphinxcode{\sphinxupquote{viterbi}} looks for the most probable proof by using a meta interpreter
 that performs branch and bound.
@@ -1566,11 +1576,11 @@ It returns the proof as explanation in \sphinxcode{\sphinxupquote{Exp}}.
 In example \sphinxhref{http://cplint.eu/e/bag\_game\_vit.pl}{bag\_game\_vit.pl}:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{viterbi}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{viterbi}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{viterbi}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{viterbi}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
 
 \PYG{n+nf}{win} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{red}\PYG{p}{,} \PYG{l+s+sAtom}{green}\PYG{p}{.}
 \PYG{n+nf}{win} \PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{blue}\PYG{p}{,} \PYG{l+s+sAtom}{yellow}\PYG{p}{.}
@@ -1580,14 +1590,14 @@ In example \sphinxhref{http://cplint.eu/e/bag\_game\_vit.pl}{bag\_game\_vit.pl}:
 \PYG{l+m+mf}{0.5}\PYG{o}{::}\PYG{l+s+sAtom}{blue}\PYG{p}{.}
 \PYG{l+m+mf}{0.6}\PYG{o}{::}\PYG{l+s+sAtom}{yellow}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{l+s+sAtom}{win}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{l+s+sAtom}{win}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{n+nv}{Exp}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1609,7 +1619,7 @@ leading to the highest probability of the grounding of the query. For example,
 in \sphinxhref{http://cplint.eu/e/hmm\_vit.pl}{hmm\_vit.pl}, the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}}\PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{n+nf}{hmm1}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{a}\PYG{p}{,}\PYG{l+s+sAtom}{g}\PYG{p}{,}\PYG{l+s+sAtom}{g}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}\PYG{k}{\PYGZus{}}\PYG{n+nv}{P}\PYG{p}{,}\PYG{k}{\PYGZus{}}\PYG{n+nv}{E}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}}\PYG{n+nf}{viterbi}\PYG{p}{(}\PYG{n+nf}{hmm1}\PYG{p}{(}\PYG{n+nv}{S}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{a}\PYG{p}{,}\PYG{l+s+sAtom}{g}\PYG{p}{,}\PYG{l+s+sAtom}{g}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}\PYG{k}{\PYGZus{}}\PYG{n+nv}{P}\PYG{p}{,}\PYG{k}{\PYGZus{}}\PYG{n+nv}{E}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1631,7 +1641,7 @@ With \sphinxcode{\sphinxupquote{pita}}, you can obtain the BDD for a MAP/MPE que
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-The BDD is represented in the dot format of graphviz and returned in \sphinxcode{\sphinxupquote{DotString}}. See {\hyperref[\detokenize{index:drawing-bdds}]{\sphinxcrossref{\DUrole{std,std-ref}{Drawing BDDs}}}}
+The BDD is represented in the dot format of graphviz and returned in \sphinxcode{\sphinxupquote{DotString}}. See {\hyperref[\detokenize{index:drawing-bdds}]{\sphinxcrossref{\DUrole{std}{\DUrole{std-ref}{Drawing BDDs}}}}}
 for the graph format and for instruction on how to draw it.
 It returns the explanation in \sphinxcode{\sphinxupquote{Delta}} together with its \sphinxcode{\sphinxupquote{Probability}}
 The predicate returns \sphinxcode{\sphinxupquote{LV}} and \sphinxcode{\sphinxupquote{LAV}}, the association of variables to rules
@@ -1644,20 +1654,20 @@ the rule number and the grounding substitution.
 \section{Causal Inference}
 \label{\detokenize{index:causal-inference}}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do\sphinxhyphen{}calculus {[}\hyperlink{cite.index:id60}{Pea00}{]}.
+\sphinxcode{\sphinxupquote{pita}} and \sphinxcode{\sphinxupquote{mcintyre}} support causal reasoning, i.e., computing the effect of actions using the do\sphinxhyphen{}calculus {[}\hyperlink{cite.index:id62}{Pea00}{]}.
 
 \sphinxAtStartPar
 Actions in this setting are represented as literals of action predicates, that must be declared as such with the directive
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{action} \PYG{l+s+sAtom}{predicate1}\PYG{o}{/}\PYG{l+s+sAtom}{arity1}\PYG{p}{,}\PYG{p}{.}\PYG{p}{.}\PYG{p}{.}\PYG{p}{,}\PYG{l+s+sAtom}{predicaten}\PYG{o}{/}\PYG{l+s+sAtom}{arityn}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{action} \PYG{l+s+sAtom}{predicate1}\PYG{o}{/}\PYG{l+s+sAtom}{arity1}\PYG{p}{,}\PYG{p}{.}\PYG{p}{.}\PYG{p}{.}\PYG{p}{,}\PYG{l+s+sAtom}{predicaten}\PYG{o}{/}\PYG{l+s+sAtom}{arityn}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 for \sphinxcode{\sphinxupquote{pita}}, and
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{mcaction} \PYG{l+s+sAtom}{predicate1}\PYG{o}{/}\PYG{l+s+sAtom}{arity1}\PYG{p}{,}\PYG{p}{.}\PYG{p}{.}\PYG{p}{.}\PYG{p}{,}\PYG{l+s+sAtom}{predicaten}\PYG{o}{/}\PYG{l+s+sAtom}{arityn}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{mcaction} \PYG{l+s+sAtom}{predicate1}\PYG{o}{/}\PYG{l+s+sAtom}{arity1}\PYG{p}{,}\PYG{p}{.}\PYG{p}{.}\PYG{p}{.}\PYG{p}{,}\PYG{l+s+sAtom}{predicaten}\PYG{o}{/}\PYG{l+s+sAtom}{arityn}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1672,7 +1682,7 @@ All conditional inference goals can be used except those for particle filtering.
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{l+s+sAtom}{recovery}\PYG{p}{,}\PYG{n+nf}{do}\PYG{p}{(}\PYG{l+s+sAtom}{drug}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{l+s+sAtom}{recovery}\PYG{p}{,}\PYG{n+nf}{do}\PYG{p}{(}\PYG{l+s+sAtom}{drug}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1706,7 +1716,7 @@ They return a dict for rendering with C3.js as a bar chart: the first returns ba
 To render C3.js charts you have to include
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{c3}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{c3}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1716,7 +1726,7 @@ before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} pita.}}
 You can also use the \sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}Chart:dict)}} option of many predicates as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1726,14 +1736,14 @@ You can also use the \sphinxcode{\sphinxupquote{bar(\sphinxhyphen{}Chart:dict)}}
 Another example is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 that returns a chart representation of the probability.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1746,7 +1756,7 @@ The options of \sphinxcode{\sphinxupquote{mc\_sample\_arg/5}}, \sphinxcode{\sphi
 An example is
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{ValList}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{ValList}\PYG{p}{,}\PYG{p}{[}\PYG{n+nf}{bar}\PYG{p}{(}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1756,7 +1766,7 @@ of \sphinxhref{http://cplint.eu/e/markov\_chain.pl}{markov\_chain.pl}.
 The same result can be achieved with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{ValList}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{argbar}\PYG{p}{(}\PYG{n+nv}{ValList}\PYG{p}{,}\PYG{n+nv}{Chart}\PYG{p}{)}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{reach}\PYG{p}{(}\PYG{l+s+sAtom}{s0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{50}\PYG{p}{,}\PYG{n+nv}{S}\PYG{p}{,}\PYG{n+nv}{ValList}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{argbar}\PYG{p}{(}\PYG{n+nv}{ValList}\PYG{p}{,}\PYG{n+nv}{Chart}\PYG{p}{)}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1822,7 +1832,7 @@ The same options as for \sphinxcode{\sphinxupquote{histogram/3}} and \sphinxcode
 For example, the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}}  \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{value}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{histogram}\PYG{p}{(}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{n+nv}{Chart}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}}  \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nb}{val}\PYG{n+nf}{ue}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{histogram}\PYG{p}{(}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{n+nv}{Chart}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1832,9 +1842,9 @@ from \sphinxhref{http://cplint.eu/e/gauss\_mean\_est.pl}{gauss\_mean\_est.pl}, t
 Instead
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{value}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}
-\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nf}{value}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}
-\PYG{p}{(}\PYG{n+nf}{value}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{9}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{value}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{,}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{mc\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nb}{val}\PYG{n+nf}{ue}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{Y}\PYG{p}{,}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{,}
+\PYG{n+nf}{mc\PYGZus{}lw\PYGZus{}sample\PYGZus{}arg}\PYG{p}{(}\PYG{n+nb}{val}\PYG{n+nf}{ue}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{)}\PYG{p}{,}
+\PYG{p}{(}\PYG{n+nb}{val}\PYG{n+nf}{ue}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{9}\PYG{p}{)}\PYG{p}{,}\PYG{n+nb}{val}\PYG{n+nf}{ue}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{8}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}\PYG{l+m+mi}{1000}\PYG{p}{,}\PYG{n+nv}{X}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{densities}\PYG{p}{(}\PYG{n+nv}{L0}\PYG{p}{,}\PYG{n+nv}{L}\PYG{p}{,}\PYG{n+nv}{Chart}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
@@ -1851,7 +1861,7 @@ Predicates \sphinxcode{\sphinxupquote{histogram/3}}, \sphinxcode{\sphinxupquote{
 You have to load library \sphinxcode{\sphinxupquote{cplint\_r}} (a SWI\sphinxhyphen{}Prolog pack) with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1901,14 +1911,14 @@ The inference modules have a number of parameters in order to control their beha
 They can be set with the directive
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}pita}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{value}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}pita}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{val}\PYG{l+s+sAtom}{ue}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}mc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{value}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}mc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{val}\PYG{l+s+sAtom}{ue}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1916,14 +1926,14 @@ after initialization (\sphinxcode{\sphinxupquote{:\sphinxhyphen{}pita.}} or \sph
 The current value can be read with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{setting\PYGZus{}pita}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{Value}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{setting\PYGZus{}pita}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{Value}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 or
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{setting\PYGZus{}mc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{Value}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{setting\PYGZus{}mc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{Value}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -1990,13 +2000,13 @@ If you want to set the seed of the random number generator, you can use SWI\sphi
 \section{Decision Theory}
 \label{\detokenize{index:decision-theory}}
 \sphinxAtStartPar
-cplint allows also to represent decision theory problem following the syntax of Dtproblog {[}\hyperlink{cite.index:id71}{VdBTVODR10}{]}.
+cplint allows also to represent decision theory problem following the syntax of Dtproblog {[}\hyperlink{cite.index:id73}{VdBTVODR10}{]}.
 
 \sphinxAtStartPar
 Decision facts can be expressed with the operator \sphinxcode{\sphinxupquote{?::}}
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?} \PYG{o}{::} \PYG{l+s+sAtom}{umbrella}\PYG{p}{.}
+\PYG{n+nb}{?} \PYG{o}{::} \PYG{l+s+sAtom}{umbrella}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2017,6 +2027,72 @@ In order to compute the best strategy, you can use \sphinxcode{\sphinxupquote{dt
 which returns in \sphinxcode{\sphinxupquote{Strategy}} a set of decision facts and in \sphinxtitleref{Value} the value of the computed best strategy.
 
 
+\section{PITA(IND,IND) and PITA(IND,EXC)}
+\label{\detokenize{index:pita-ind-ind-and-pita-ind-exc}}
+\sphinxAtStartPar
+The systems PITA(IND,IND) and PITA(IND,EXC) of {[}\hyperlink{cite.index:id74}{RS11}{]} are
+implemented in the library \sphinxcode{\sphinxupquote{pitaind}}.
+
+\sphinxAtStartPar
+Both systems assume that literals in a conjunction are independent.
+Furthermore, PITA(IND,IND) assumes that atoms in a disjunction are independent,
+while PITA(IND,EXC) assumes that they are exclusive.
+
+\sphinxAtStartPar
+For example, you can apply PITA(IND,EXC) to the coin program with:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pitaind}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{pitaind}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}pitaind}\PYG{p}{(}\PYG{l+s+sAtom}{or}\PYG{p}{,}\PYG{l+s+sAtom}{exc}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}lpad}\PYG{p}{.}
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{o}{:\PYGZhy{}}
+\PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{l+s+sAtom}{\PYGZbs{}+}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
+
+\PYG{n+nf}{heads}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.6} \PYG{p}{;} \PYG{n+nf}{tails}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.4}\PYG{o}{:\PYGZhy{}}
+\PYG{n+nf}{toss}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{p}{.}
+
+\PYG{n+nf}{fair}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.9} \PYG{p}{;} \PYG{n+nf}{biased}\PYG{p}{(}\PYG{n+nv}{Coin}\PYG{p}{)}\PYG{o}{:}\PYG{l+m+mf}{0.1}\PYG{p}{.}
+
+\PYG{n+nf}{toss}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}lpad}\PYG{p}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+and query the program with
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{prob\PYGZus{}ind}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+The result is the same as for PITA but the computation is faster.
+
+\sphinxAtStartPar
+To use PITA(IND,IND) you use \sphinxcode{\sphinxupquote{set\_pitaind/2}} with
+the directive \sphinxcode{\sphinxupquote{:\sphinxhyphen{} set\_pitaind(or,ind).}} \sphinxtitleref{ind} is the default value
+for the option \sphinxcode{\sphinxupquote{or}}.
+
+
+\section{Inspecting the PITA transformation}
+\label{\detokenize{index:inspecting-the-pita-transformation}}
+\sphinxAtStartPar
+You can inspect the result of the PITA transformation with the predicates
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n+nf}{parse}\PYG{p}{(}\PYG{l+s+sAtom}{++}\PYG{n+nv}{FileIn}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{l+s+sAtom}{++}\PYG{n+nv}{FileOut}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{)}
+\PYG{n+nf}{parse\PYGZus{}ind}\PYG{p}{(}\PYG{l+s+sAtom}{++}\PYG{n+nv}{FileIn}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{,}\PYG{l+s+sAtom}{++}\PYG{n+nv}{FileOut}\PYG{o}{:}\PYG{l+s+sAtom}{atom}\PYG{p}{)}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+They parse the input file \sphinxcode{\sphinxupquote{FileIn}} and write the result of the transformation in \sphinxcode{\sphinxupquote{FileOut}}.
+The first predicate is offered by the library \sphinxcode{\sphinxupquote{pita}} and the second by the library \sphinxcode{\sphinxupquote{pitaind}}.
+
+\sphinxAtStartPar
+The output is a Prolog file that can be read back and direcly queried with the \sphinxcode{\sphinxupquote{pita}} and
+\sphinxcode{\sphinxupquote{pitaind}} predicates.
+
+
 \chapter{Learning}
 \label{\detokenize{index:learning}}
 \sphinxAtStartPar
@@ -2024,15 +2100,15 @@ The following learning algorithms are available:
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs {[}\hyperlink{cite.index:id62}{BR11}, \hyperlink{cite.index:id67}{BR13a}, \hyperlink{cite.index:id61}{BR13b}{]}
+EMBLEM (EM over Bdds for probabilistic Logic programs Efficient Mining): an implementation of EM for learning parameters that computes expectations directly on BDDs {[}\hyperlink{cite.index:id64}{BR11}, \hyperlink{cite.index:id69}{BR13a}, \hyperlink{cite.index:id63}{BR13b}{]}
 
 \item {} 
 \sphinxAtStartPar
-SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately {[}\hyperlink{cite.index:id63}{BR15}{]}
+SLIPCOVER (Structure LearnIng of Probabilistic logic programs by searChing OVER the clause space): an algorithm for learning the structure of programs by searching the clause space and the theory space separately {[}\hyperlink{cite.index:id65}{BR15}{]}
 
 \item {} 
 \sphinxAtStartPar
-LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte\sphinxhyphen{}Carlo tree search {[}\hyperlink{cite.index:id64}{DMBR15}{]}
+LEMUR (LEarning with a Monte carlo Upgrade of tRee search): an algorithm for learning the structure of programs by searching the clase space using Monte\sphinxhyphen{}Carlo tree search {[}\hyperlink{cite.index:id66}{DMBR15}{]}
 
 \end{itemize}
 
@@ -2068,7 +2144,7 @@ example interpretations
 The preamble must come first, the order of the other parts can be changed.
 
 \sphinxAtStartPar
-For example, consider the Bongard problems of {[}\hyperlink{cite.index:id65}{DRVL95}{]}. \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for SLIPCOVER.
+For example, consider the Bongard problems of {[}\hyperlink{cite.index:id67}{DRVL95}{]}. \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/e/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for SLIPCOVER.
 \sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl} and \sphinxhref{http://cplint.eu/example/lemur/bongardkeys.pl}{bongardkeys.pl} represent a Bongard problem for LEMUR.
 
 
@@ -2078,24 +2154,24 @@ For example, consider the Bongard problems of {[}\hyperlink{cite.index:id65}{DRV
 In the preamble, the SLIPCOVER library is loaded with (\sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}):
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{slipcover}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{slipcover}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 Now you can initialize SLIPCOVER with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{sc}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{sc}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 At this point you can start setting parameters for SLIPCOVER such as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{megaex\PYGZus{}bottom}\PYG{p}{,}\PYG{l+m+mi}{20}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{max\PYGZus{}iter}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{max\PYGZus{}iter\PYGZus{}structure}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{megaex\PYGZus{}bottom}\PYG{p}{,}\PYG{l+m+mi}{20}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{max\PYGZus{}iter}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{max\PYGZus{}iter\PYGZus{}structure}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{l+s+sAtom}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2105,21 +2181,21 @@ We will see later the list of available parameters.
 In the preamble, the LEMUR library is loaded with (\sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl}):
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{lemur}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{lemur}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 Now you can initialize LEMUR with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{lemur}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{lemur}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 At this point you can start setting parameters for LEMUR such as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}lm}\PYG{p}{(}\PYG{l+s+sAtom}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}lm}\PYG{p}{(}\PYG{l+s+sAtom}{verbosity}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2141,17 +2217,17 @@ Alternatively, you can specify a set of clauses by including them in a section b
 For example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}bg}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}bg}\PYG{p}{.}
 
 \PYG{n+nf}{replaceable}\PYG{p}{(}\PYG{l+s+sAtom}{gear}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{replaceable}\PYG{p}{(}\PYG{l+s+sAtom}{wheel}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{replaceable}\PYG{p}{(}\PYG{l+s+sAtom}{chain}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{not\PYGZus{}replaceable}\PYG{p}{(}\PYG{l+s+sAtom}{engine}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{not\PYGZus{}replaceable}\PYG{p}{(}\PYG{l+s+sAtom}{control\PYGZus{}unit}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{component}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{replaceable}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{component}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{not\PYGZus{}replaceable}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{component}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{replaceable}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{component}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{not\PYGZus{}replaceable}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}bg}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}bg}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2173,13 +2249,13 @@ Remember to enclose each clause in parentheses because \sphinxcode{\sphinxupquot
 For example, \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} has the initial program
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-    \PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.197575} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+    \PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.197575} \PYG{o}{:\PYGZhy{}}
    \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
    \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
-\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000303421} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000303421} \PYG{o}{:\PYGZhy{}}
    \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
    \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
-\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000448807} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000448807} \PYG{o}{:\PYGZhy{}}
    \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
    \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -2188,19 +2264,19 @@ For example, \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl} has the init
 Alternatively, you can specify an input program in a section between \sphinxcode{\sphinxupquote{:\sphinxhyphen{} begin\_in.}} and \sphinxcode{\sphinxupquote{:\sphinxhyphen{} end\_in.}}, as for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}in}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{begin\PYGZus{}in}\PYG{p}{.}
 
-\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.197575} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.197575} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{.}
-\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000303421} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000303421} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{.}
-\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000448807} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.000448807} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{.}
 
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}in}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{l+s+sAtom}{end\PYGZus{}in}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2217,10 +2293,10 @@ If it takes a value \(\geq 0\), the parameters are sampled from a symmetric Diri
 The annotations of the head atoms of the initial program can also be \sphinxcode{\sphinxupquote{p(\textless{}prob\textgreater{})}} with \sphinxcode{\sphinxupquote{\textless{}prob\textgreater{}}} a probability, in this case the parameter is fixed so it is not tuned by learning, as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
-        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{p}\PYG{p}{(}\PYG{l+m+mf}{0.5}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{p}\PYG{p}{(}\PYG{l+m+mf}{0.5}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -2233,10 +2309,10 @@ In this case a different parameter is learned for every grounding of \sphinxcode
 For example, we can set the initial value of the parameter of the second clause to 0.9 with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
-        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{t}\PYG{p}{(}\PYG{l+m+mf}{0.9}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{t}\PYG{p}{(}\PYG{l+m+mf}{0.9}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{B}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -2245,10 +2321,10 @@ For example, we can set the initial value of the parameter of the second clause 
 With the program below we learn a different parameter for every instantiation of \sphinxcode{\sphinxupquote{C}} in the second clause:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{in}\PYG{p}{(}\PYG{p}{[}\PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{l+m+mf}{0.5} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{circle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{in}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
-        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{t}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{,}\PYG{n+nv}{C}\PYG{p}{)} \PYG{o}{:}\PYG{o}{\PYGZhy{}}
+        \PYG{p}{(}\PYG{l+s+sAtom}{pos}\PYG{p}{:}\PYG{n+nf}{t}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{p}{,}\PYG{n+nv}{C}\PYG{p}{)} \PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{triangle}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{config}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{)}\PYG{p}{]}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
@@ -2418,7 +2494,7 @@ An example of such a mode declaration (from \sphinxcode{\sphinxupquote{uwcselear
 If you want to specify negative literals for addition in the body of clauses, you should define a new predicate in the background as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{not\PYGZus{}worn}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{not\PYGZus{}worn}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}
         \PYG{n+nf}{component}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{,}
         \PYG{l+s+sAtom}{\PYGZbs{}+} \PYG{n+nf}{worn}\PYG{p}{(}\PYG{n+nv}{C}\PYG{p}{)}\PYG{p}{.}
 \PYG{n+nf}{one\PYGZus{}worn}\PYG{o}{:\PYGZhy{}}
@@ -2563,13 +2639,13 @@ Note that you can add background knowledge that is not probabilistic directly to
 For example (\sphinxcode{\sphinxupquote{carc.pl}}) contains
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{connected}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{Ring1}\PYG{p}{,}\PYG{n+nv}{Ring2}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{connected}\PYG{p}{(}\PYG{k}{\PYGZus{}}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{Ring1}\PYG{p}{,}\PYG{n+nv}{Ring2}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}
         \PYG{n+nv}{Ring1} \PYG{l+s+sAtom}{\PYGZbs{}=} \PYG{n+nv}{Ring2}\PYG{p}{,}
         \PYG{n+nf}{member}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{Ring1}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{member}\PYG{p}{(}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{Ring2}\PYG{p}{)}\PYG{p}{,} \PYG{p}{!}\PYG{p}{.}
 
-\PYG{n+nf}{symbond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{bond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{symbond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{bond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{symbond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{bond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{symbond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{bond}\PYG{p}{(}\PYG{n+nv}{Mod}\PYG{p}{,}\PYG{n+nv}{B}\PYG{p}{,}\PYG{n+nv}{A}\PYG{p}{,}\PYG{n+nv}{T}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2579,7 +2655,7 @@ where the first argument of all the atoms is the model.
 Example \sphinxhref{http://cplint.eu/e/registration.pl}{registration.pl} contains for example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{participant}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{k}{\PYGZus{}}\PYG{p}{,} \PYG{k}{\PYGZus{}}\PYG{p}{,} \PYG{n+nv}{P}\PYG{p}{,} \PYG{k}{\PYGZus{}}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
@@ -2588,8 +2664,8 @@ that defines intensionally the target predicate \sphinxcode{\sphinxupquote{party
 You can also define intensionally the negative examples with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{neg}\PYG{p}{(}\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{yes}\PYG{p}{)}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{no}\PYG{p}{)}\PYG{p}{.}
-\PYG{n+nf}{neg}\PYG{p}{(}\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{no}\PYG{p}{)}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{yes}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{neg}\PYG{p}{(}\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{yes}\PYG{p}{)}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{no}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nf}{neg}\PYG{p}{(}\PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{no}\PYG{p}{)}\PYG{p}{)}\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{party}\PYG{p}{(}\PYG{n+nv}{M}\PYG{p}{,}\PYG{l+s+sAtom}{yes}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2604,7 +2680,7 @@ Then you must indicate how the examples are divided in folds with facts of the f
 As the input file is a Prolog program, you can define intensionally the folds as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{all}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{o}{:}\PYG{o}{\PYGZhy{}}
+\PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{all}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{o}{:\PYGZhy{}}
 \PYG{n+nf}{findall}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{,}\PYG{n+nf}{int}\PYG{p}{(}\PYG{n+nv}{I}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
@@ -2612,7 +2688,7 @@ As the input file is a Prolog program, you can define intensionally the folds as
 \sphinxcode{\sphinxupquote{fold/2}} is dynamic so you can also write (\sphinxhref{http://cplint.eu/e/registration.pl}{registration.pl})
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{all}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{,}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{all}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{)}\PYG{p}{,}
         \PYG{n+nf}{sample}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{,}\PYG{n+nv}{F}\PYG{p}{,}\PYG{n+nv}{FTr}\PYG{p}{,}\PYG{n+nv}{FTe}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{assert}\PYG{p}{(}\PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{rand\PYGZus{}train}\PYG{p}{,}\PYG{n+nv}{FTr}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{assert}\PYG{p}{(}\PYG{n+nf}{fold}\PYG{p}{(}\PYG{l+s+sAtom}{rand\PYGZus{}test}\PYG{p}{,}\PYG{n+nv}{FTe}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
@@ -2633,7 +2709,7 @@ If \sphinxcode{\sphinxupquote{List}} has \sphinxcode{\sphinxupquote{N}} elements
 To execute EMBLEM, prepare an input file in the editor panel as indicated above and call
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{list} \PYG{l+s+sAtom}{of} \PYG{l+s+sAtom}{folds}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{list} \PYG{l+s+sAtom}{of} \PYG{l+s+sAtom}{folds}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2643,7 +2719,7 @@ where \sphinxcode{\sphinxupquote{\textless{}list of folds\textgreater{}}} is a l
 For example \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}, you can perform parameter learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 
@@ -2663,7 +2739,7 @@ where \sphinxcode{\sphinxupquote{List\_of\_folds}} is a list of the folds for tr
 For example \sphinxhref{http://cplint.eu/e/bongard.pl}{bongard.pl}, you can perform structure learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{induce}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{induce}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2686,7 +2762,7 @@ where \sphinxcode{\sphinxupquote{List\_of\_folds}} is a list of the folds for tr
 For example \sphinxhref{http://cplint.eu/example/lemur/bongard.pl}{bongard.pl}, you can perform structure learning on the \sphinxcode{\sphinxupquote{train}} fold with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}lm}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}lm}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2716,7 +2792,7 @@ where \sphinxcode{\sphinxupquote{Program}} is a list of terms representing claus
 \sphinxcode{\sphinxupquote{test/7}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the Area Under the ROC curve in \sphinxcode{\sphinxupquote{AUCROC}}, a dictionary containing the list of points (in the form of Prolog pairs \sphinxcode{\sphinxupquote{x\sphinxhyphen{}y}}) of the ROC curve in \sphinxcode{\sphinxupquote{ROC}}, the Area Under the PR curve in \sphinxcode{\sphinxupquote{AUCPR}}, a dictionary containing the list of points of the PR curve in \sphinxcode{\sphinxupquote{PR}}.
 
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing pairs \sphinxcode{\sphinxupquote{Prob\sphinxhyphen{}Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{\textbackslash{}+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
+\sphinxcode{\sphinxupquote{test\_prob/6}} returns the log likelihood of the test examples in \sphinxcode{\sphinxupquote{LL}}, the numbers of positive and negative examples in \sphinxcode{\sphinxupquote{NPos}} and \sphinxcode{\sphinxupquote{NNeg}} and the list \sphinxcode{\sphinxupquote{ExampleList}} containing pairs \sphinxcode{\sphinxupquote{Prob\sphinxhyphen{}Ex}} where \sphinxcode{\sphinxupquote{Ex}} is \sphinxcode{\sphinxupquote{a}} for \sphinxcode{\sphinxupquote{a}} a positive example and \sphinxcode{\sphinxupquote{+(a)}} for \sphinxcode{\sphinxupquote{a}} a negative example and \sphinxcode{\sphinxupquote{Prob}} is the probability of example \sphinxcode{\sphinxupquote{a}}.
 
 \sphinxAtStartPar
 Then you can draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH using C3.js using
@@ -2732,7 +2808,7 @@ Then you can draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH usi
 For example, to test on fold \sphinxcode{\sphinxupquote{test}} the program learned on fold \sphinxcode{\sphinxupquote{train}} you can run the query
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{,}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{induce\PYGZus{}par}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+sAtom}{train}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{,}
 \PYG{n+nf}{test}\PYG{p}{(}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{test}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{LL}\PYG{p}{,}\PYG{n+nv}{AUCROC}\PYG{p}{,}\PYG{n+nv}{ROC}\PYG{p}{,}\PYG{n+nv}{AUCPR}\PYG{p}{,}\PYG{n+nv}{PR}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
@@ -2740,15 +2816,15 @@ For example, to test on fold \sphinxcode{\sphinxupquote{test}} the program learn
 Or you can test the input program on the fold \sphinxcode{\sphinxupquote{test}} with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{test}\PYG{p}{(}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{test}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{LL}\PYG{p}{,}\PYG{n+nv}{AUCROC}\PYG{p}{,}\PYG{n+nv}{ROC}\PYG{p}{,}\PYG{n+nv}{AUCPR}\PYG{p}{,}\PYG{n+nv}{PR}\PYG{p}{)}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{in}\PYG{p}{(}\PYG{n+nv}{P}\PYG{p}{)}\PYG{p}{,}\PYG{n+nf}{test}\PYG{p}{(}\PYG{n+nv}{P}\PYG{p}{,}\PYG{p}{[}\PYG{l+s+sAtom}{test}\PYG{p}{]}\PYG{p}{,}\PYG{n+nv}{LL}\PYG{p}{,}\PYG{n+nv}{AUCROC}\PYG{p}{,}\PYG{n+nv}{ROC}\PYG{p}{,}\PYG{n+nv}{AUCPR}\PYG{p}{,}\PYG{n+nv}{PR}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
 In \sphinxcode{\sphinxupquote{cplint}} on SWISH, by including
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{c3}\PYG{p}{)}\PYG{p}{.}
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{lpad}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{c3}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}rendering}\PYG{p}{(}\PYG{l+s+sAtom}{lpad}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2758,7 +2834,7 @@ in the code before \sphinxcode{\sphinxupquote{:\sphinxhyphen{} sc.}} the curves 
 You can also draw the curves in \sphinxcode{\sphinxupquote{cplint}} on SWISH using R by loading library \sphinxcode{\sphinxupquote{cplint\_r}} with
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{use\PYGZus{}module}\PYG{p}{(}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{cplint\PYGZus{}r}\PYG{p}{)}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2785,7 +2861,7 @@ that takes as input a list \sphinxcode{\sphinxupquote{ExampleList}} of pairs pro
 Parameters are set with commands of the form
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{o}{:}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{value}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
+\PYG{o}{:\PYGZhy{}} \PYG{n+nf}{set\PYGZus{}sc}\PYG{p}{(}\PYG{o}{\PYGZlt{}}\PYG{l+s+sAtom}{parameter}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{,}\PYG{o}{\PYGZlt{}}\PYG{n+nb}{val}\PYG{l+s+sAtom}{ue}\PYG{l+s+sAtom}{\PYGZgt{}}\PYG{p}{)}\PYG{p}{.}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2885,7 +2961,7 @@ The available parameters are:
 
 \item {} 
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{maxdepth\_var}} (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in {[}\hyperlink{cite.index:id66}{Coh95}{]}).
+\sphinxcode{\sphinxupquote{maxdepth\_var}} (values: integer, default value: 2, valid for SLIPCOVER and LEMUR): maximum depth of variables in clauses (as defined in {[}\hyperlink{cite.index:id68}{Coh95}{]}).
 
 \item {} 
 \sphinxAtStartPar
@@ -2929,7 +3005,7 @@ For example, the \sphinxcode{\sphinxupquote{swish\sphinxhyphen{}ask.sh}} client 
 The call below downloads a CSV file for the coin example
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu e/coin.pl Prob \PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
+\PYG{g+gp}{\PYGZdl{} }bash\PYG{+w}{ }swish\PYGZhy{}ask.sh\PYG{+w}{ }\PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu\PYG{+w}{ }e/coin.pl\PYG{+w}{ }Prob\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2937,7 +3013,7 @@ The script can ask queries against Prolog scripts stored in \sphinxurl{http://cp
 User defined files stored in \sphinxcode{\sphinxupquote{cplint}} on SWISH (locations of type \sphinxurl{http://cplint.eu/p/coin\_user.pl}) can be directly used, for example:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu coin\PYGZus{}user.pl Prob \PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
+\PYG{g+gp}{\PYGZdl{} }bash\PYG{+w}{ }swish\PYGZhy{}ask.sh\PYG{+w}{ }\PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu\PYG{+w}{ }coin\PYGZus{}user.pl\PYG{+w}{ }Prob\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2947,9 +3023,9 @@ Example programs can be used by specifying the folder portion of the url of the 
 You can also use an url for the program as in
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu \PYG{l+s+se}{\PYGZbs{}}
+\PYG{g+gp}{\PYGZdl{} }bash\PYG{+w}{ }swish\PYGZhy{}ask.sh\PYG{+w}{ }\PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
 https://raw.githubusercontent.com/friguzzi/swish/\PYG{l+s+se}{\PYGZbs{}}
-master/e/coin.pl Prob \PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
+master/e/coin.pl\PYG{+w}{ }Prob\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2957,8 +3033,8 @@ Results can be downloaded in JSON using the option \sphinxcode{\sphinxupquote{\s
 E.g.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZdl{} }bash swish\PYGZhy{}ask.sh \PYGZhy{}\PYGZhy{}json\PYGZhy{}s \PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu \PYG{l+s+se}{\PYGZbs{}}
-        coin\PYGZus{}user.pl Prob \PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
+\PYG{g+gp}{\PYGZdl{} }bash\PYG{+w}{ }swish\PYGZhy{}ask.sh\PYG{+w}{ }\PYGZhy{}\PYGZhy{}json\PYGZhy{}s\PYG{+w}{ }\PYGZhy{}\PYGZhy{}server\PYG{o}{=}http://cplint.eu\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{        }coin\PYGZus{}user.pl\PYG{+w}{ }Prob\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}prob(heads(coin),Prob)\PYGZdq{}}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
@@ -2969,8 +3045,8 @@ See \sphinxurl{http://www.swi-prolog.org/pldoc/doc\_for?object=pengines\%3Aevent
 Prolog can exploit the Pengine API directly. For example, the above can be called as:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{p}{[}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pengines}\PYG{p}{)}\PYG{p}{]}\PYG{p}{.}
-\PYG{l+s+sAtom}{?\PYGZhy{}} \PYG{n+nf}{pengine\PYGZus{}rpc}\PYG{p}{(}\PYG{l+s+sAtom}{\PYGZsq{}http://cplint.eu\PYGZsq{}}\PYG{p}{,}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{p}{[}\PYG{n+nf}{library}\PYG{p}{(}\PYG{l+s+sAtom}{pengines}\PYG{p}{)}\PYG{p}{]}\PYG{p}{.}
+\PYG{n+nb}{?}\PYG{o}{\PYGZhy{}} \PYG{n+nf}{pengine\PYGZus{}rpc}\PYG{p}{(}\PYG{l+s+sAtom}{\PYGZsq{}http://cplint.eu\PYGZsq{}}\PYG{p}{,}
         \PYG{n+nf}{prob}\PYG{p}{(}\PYG{n+nf}{heads}\PYG{p}{(}\PYG{l+s+sAtom}{coin}\PYG{p}{)}\PYG{p}{,}\PYG{n+nv}{Prob}\PYG{p}{)}\PYG{p}{,}
         \PYG{p}{[} \PYG{n+nf}{src\PYGZus{}url}\PYG{p}{(}\PYG{l+s+sAtom}{\PYGZsq{}https://raw.githubusercontent.com/friguzzi/swish/\PYGZbs{}}
 \PYG{l+s+sAtom}{                master/e/coin.pl\PYGZsq{}}\PYG{p}{)}\PYG{p}{,}
@@ -3047,86 +3123,86 @@ POSSIBILITY OF SUCH DAMAGE.
 
 \chapter{References}
 \label{\detokenize{index:references}}
-\sphinxAtStartPar
-
-
 \begin{sphinxthebibliography}{VdBTVODR}
-\bibitem[BARZ20]{index:id47}
+\bibitem[BARZ20]{index:id49}
 \sphinxAtStartPar
 Elena Bellodi, Marco Alberti, Fabrizio Riguzzi, and Riccardo Zese. MAP inference for probabilistic logic programming. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 20(5):641â\texteuro{}“655, 2020. URL: \sphinxurl{https://arxiv.org/abs/2008.01394}, \sphinxhref{https://doi.org/10.1017/S1471068420000174}{doi:10.1017/S1471068420000174}.
-\bibitem[BR11]{index:id62}
+\bibitem[BR11]{index:id64}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. EM over binary decision diagrams for probabilistic logic programs. Technical Report CS\sphinxhyphen{}2011\sphinxhyphen{}01, Dipartimento di Ingegneria, Università di Ferrara, Italy, 2011. URL: \sphinxurl{http://ml.unife.it/wp-content/uploads/Papers/BelRig-CILC11.pdf}.
-\bibitem[BR13a]{index:id67}
+\bibitem[BR13a]{index:id69}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013.
-\bibitem[BR13b]{index:id61}
+\bibitem[BR13b]{index:id63}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Expectation Maximization over binary decision diagrams for probabilistic logic programs. \sphinxstyleemphasis{Intelligent Data Analysis}, 17(2):343\textendash{}363, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/BelRig13-IDA-IJ.pdf}.
-\bibitem[BR15]{index:id63}
+\bibitem[BR15]{index:id65}
 \sphinxAtStartPar
 Elena Bellodi and Fabrizio Riguzzi. Structure learning of probabilistic logic programs by searching the clause space. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 15(2):169\textendash{}212, 2015. URL: \sphinxurl{http://arxiv.org/abs/1309.2080}, \sphinxhref{https://doi.org/10.1017/S1471068413000689}{doi:10.1017/S1471068413000689}.
-\bibitem[Coh95]{index:id66}
+\bibitem[Coh95]{index:id68}
 \sphinxAtStartPar
 William W. Cohen. Pac\sphinxhyphen{}learning non\sphinxhyphen{}recursive prolog clauses. \sphinxstyleemphasis{Artif. Intell.}, 79(1):1\textendash{}38, 1995.
-\bibitem[DRKT07]{index:id49}
+\bibitem[DRKT07]{index:id51}
 \sphinxAtStartPar
 L. De Raedt, A. Kimmig, and H. Toivonen. ProbLog: a probabilistic Prolog and its application in link discovery. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 2462\textendash{}2467. 2007.
-\bibitem[DRVL95]{index:id65}
+\bibitem[DRVL95]{index:id67}
 \sphinxAtStartPar
 L. De Raedt and W. Van Laer. Inductive constraint logic. In \sphinxstyleemphasis{Proceedings of the 6th Conference on Algorithmic Learning Theory (ALT 1995)}, volume 997 of LNAI, 80\textendash{}94. Fukuoka, Japan, 1995. Springer.
-\bibitem[DMBR15]{index:id64}
+\bibitem[DMBR15]{index:id66}
 \sphinxAtStartPar
 Nicola Di Mauro, Elena Bellodi, and Fabrizio Riguzzi. Bandit\sphinxhyphen{}based Monte\sphinxhyphen{}Carlo structure learning of probabilistic logic programs. \sphinxstyleemphasis{Mach. Learn.}, 100(1):127\textendash{}156, July 2015. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/DiMBelRig-ML15.pdf}, \sphinxhref{https://doi.org/10.1007/s10994-015-5510-3}{doi:10.1007/s10994\sphinxhyphen{}015\sphinxhyphen{}5510\sphinxhyphen{}3}.
-\bibitem[FC90]{index:id59}
+\bibitem[FC90]{index:id61}
 \sphinxAtStartPar
 Robert M Fung and Kuo\sphinxhyphen{}Chu Chang. Weighing and integrating evidence for stochastic simulation in bayesian networks. In \sphinxstyleemphasis{Fifth Annual Conference on Uncertainty in Artificial Intelligence}, 209\textendash{}220. North\sphinxhyphen{}Holland Publishing Co., 1990.
-\bibitem[IRR12]{index:id54}
+\bibitem[IRR12]{index:id56}
 \sphinxAtStartPar
 Muhammad Asiful Islam, CR Ramakrishnan, and IV Ramakrishnan. Inference in probabilistic logic programs with continuous random variables. \sphinxstyleemphasis{Theory and Practice of Logic Programming}, 12:505\textendash{}523, 7 2012. \sphinxhref{https://doi.org/10.1017/S1471068412000154}{doi:10.1017/S1471068412000154}.
-\bibitem[NR14]{index:id58}
+\bibitem[NR14]{index:id60}
 \sphinxAtStartPar
 Arun Nampally and CR Ramakrishnan. Adaptive mcmc\sphinxhyphen{}based inference in probabilistic logic programs. \sphinxstyleemphasis{arXiv preprint arXiv:1403.6036}, 2014. URL: \sphinxurl{http://arxiv.org/pdf/1403.6036.pdf}.
-\bibitem[NDLDR16]{index:id51}
+\bibitem[NDLDR16]{index:id53}
 \sphinxAtStartPar
 Davide Nitti, Tinne De Laet, and Luc De Raedt. Probabilistic logic programming for hybrid relational domains. \sphinxstyleemphasis{Mach. Learn.}, 103(3):407\textendash{}449, 2016. URL: \sphinxurl{http://dx.doi.org/10.1007/s10994-016-5558-8}, \sphinxhref{https://doi.org/10.1007/s10994-016-5558-8}{doi:10.1007/s10994\sphinxhyphen{}016\sphinxhyphen{}5558\sphinxhyphen{}8}.
-\bibitem[Pea00]{index:id60}
+\bibitem[Pea00]{index:id62}
 \sphinxAtStartPar
 J. Pearl. \sphinxstyleemphasis{Causality}. Cambridge University Press, 2000.
-\bibitem[Poo97]{index:id52}
+\bibitem[Poo97]{index:id54}
 \sphinxAtStartPar
 David Poole. The independent choice logic for modelling multiple agents under uncertainty. \sphinxstyleemphasis{Artificial Intelligence}, 94(1\sphinxhyphen{}2):7\textendash{}56, 1997.
-\bibitem[Rig13]{index:id56}
+\bibitem[Rig13]{index:id58}
 \sphinxAtStartPar
 Fabrizio Riguzzi. MCINTYRE: a Monte Carlo system for probabilistic logic programming. \sphinxstyleemphasis{Fundamenta Informaticae}, 124(4):521\textendash{}541, 2013. URL: \sphinxurl{http://ds.ing.unife.it/~friguzzi/Papers/Rig13-FI-IJ.pdf}, \sphinxhref{https://doi.org/10.3233/FI-2013-847}{doi:10.3233/FI\sphinxhyphen{}2013\sphinxhyphen{}847}.
-\bibitem[RS10]{index:id55}
+\bibitem[RS10]{index:id57}
 \sphinxAtStartPar
 Fabrizio Riguzzi and Terrance Swift. Tabling and Answer Subsumption for Reasoning on Logic Programs with Annotated Disjunctions. In \sphinxstyleemphasis{Technical Communications of the International Conference on Logic Programming}, volume 7 of Leibniz International Proceedings in Informatics (LIPIcs), 162\textendash{}171. Schloss Dagstuhl\textendash{}Leibniz\sphinxhyphen{}Zentrum fuer Informatik, 2010. \sphinxhref{https://doi.org/10.4230/LIPIcs.ICLP.2010.162}{doi:10.4230/LIPIcs.ICLP.2010.162}.
-\bibitem[SK97]{index:id50}
+\bibitem[RS11]{index:id74}
+\sphinxAtStartPar
+Fabrizio Riguzzi and Terrance Swift. The PITA system: tabling and answer subsumption for reasoning under uncertainty. \sphinxstyleemphasis{Theory and Practice of Logic Programming, 27th International Conference on Logic Programming (ICLP\textquotesingle{}11) Special Issue, Lexington, Kentucky 6\sphinxhyphen{}10 July 2011}, 11(4\textendash{}5):433\textendash{}449, 2011. URL: \sphinxurl{http://arxiv.org/pdf/1107.4747v1}, \sphinxhref{https://doi.org/10.1017/S147106841100010X}{doi:10.1017/S147106841100010X}.
+\bibitem[SK97]{index:id52}
 \sphinxAtStartPar
 Taisuke Sato and Yoshitaka Kameya. Prism: a language for symbolic\sphinxhyphen{}statistical modeling. In \sphinxstyleemphasis{International Joint Conference on Artificial Intelligence}, 1330\textendash{}1339. 1997.
-\bibitem[SK01]{index:id53}
+\bibitem[SK01]{index:id55}
 \sphinxAtStartPar
 Taisuke Sato and Yoshitaka Kameya. Parameter learning of logic programs for symbolic\sphinxhyphen{}statistical modeling. \sphinxstyleemphasis{J. Artif. Intell. Res.}, 15:391\textendash{}454, 2001.
-\bibitem[SRV+15]{index:id46}
+\bibitem[SRV+15]{index:id48}
 \sphinxAtStartPar
 Dimitar Sht. Shterionov, Joris Renkens, Jonas Vlasselaer, Angelika Kimmig, Wannes Meert, and Gerda Janssens. The most probable explanation for probabilistic logic programs with annotated disjunctions. In Jesse Davis and Jan Ramon, editors, \sphinxstyleemphasis{International Conference on Inductive Logic Programming}, volume 9046 of LNCS, 139\textendash{}153. Berlin, Heidelberg, 2015. Springer. \sphinxhref{https://doi.org/10.1007/978-3-319-23708-4\_10}{doi:10.1007/978\sphinxhyphen{}3\sphinxhyphen{}319\sphinxhyphen{}23708\sphinxhyphen{}4\_10}.
-\bibitem[VdBTVODR10]{index:id71}
+\bibitem[VdBTVODR10]{index:id73}
 \sphinxAtStartPar
 Guy Van den Broeck, Ingo Thon, Martijn Van Otterlo, and Luc De Raedt. Dtproblog: a decision\sphinxhyphen{}theoretic probabilistic prolog. In \sphinxstyleemphasis{Twenty\sphinxhyphen{}Fourth AAAI Conference on Artificial Intelligence}. 2010.
-\bibitem[VDB06]{index:id69}
+\bibitem[VDB06]{index:id71}
 \sphinxAtStartPar
 J. Vennekens, M. Denecker, and M. Bruynooghe. Representing causal information about a probabilistic process. In \sphinxstyleemphasis{Proceedings of the 10th European Conference on Logics in Artificial Intelligence}, LNAI. Springer, September 2006.
-\bibitem[VDB09]{index:id70}
+\bibitem[VDB09]{index:id72}
 \sphinxAtStartPar
 J. Vennekens, Marc Denecker, and Maurice Bruynooghe. CP\sphinxhyphen{}logic: a language of causal probabilistic events and its relation to logic programming. \sphinxstyleemphasis{Theory Pract. Log. Program.}, 9(3):245\textendash{}308, 2009.
-\bibitem[VV03]{index:id68}
+\bibitem[VV03]{index:id70}
 \sphinxAtStartPar
 J. Vennekens and S. Verbaeten. Logic programs with annotated disjunctions. Technical Report CW386, K. U. Leuven, 2003.
-\bibitem[VVB04]{index:id48}
+\bibitem[VVB04]{index:id50}
 \sphinxAtStartPar
 J. Vennekens, S. Verbaeten, and M. Bruynooghe. Logic programs with annotated disjunctions. In \sphinxstyleemphasis{International Conference on Logic Programming}, volume 3131 of LNCS, 195\textendash{}209. Springer, 2004.
-\bibitem[VN51]{index:id57}
+\bibitem[VN51]{index:id59}
 \sphinxAtStartPar
 John Von Neumann. Various techniques used in connection with random digits. \sphinxstyleemphasis{Nat. Bureau Stand. Appl. Math. Ser.}, 12:36\textendash{}38, 1951.
 \end{sphinxthebibliography}
