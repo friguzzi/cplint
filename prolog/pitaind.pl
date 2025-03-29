@@ -185,9 +185,42 @@ parse(FileIn,FileOut):-
 	read_clauses(SI,C),
 	close(SI),
 	process_clauses(C,[],C1),
+  findall(LZ,M:zero_clauses(LZ),L0),
+  retractall(M:zero_clauses(_)),
+  retractall(M:tabled(_)),
+  append(C1,L0,Cl0),
+  divide_tab_dyn_dir(Cl0,T,Dyn,Cl),
 	open(FileOut,write,SO),
-  write_clauses(C1,SO),
+  writeln(SO,':- use_module(library(pitaind)).'),
+  writeln(SO,':- style_check(-discontiguous).'),
+	write_clauses(Dyn,SO),
+	write_tab_dir(T,SO),
+  write_clauses(Cl,SO),
+  writeln(SO,':- pitaind.'),
 	close(SO).
+
+divide_tab_dyn_dir([],[],[],[]).
+
+divide_tab_dyn_dir([(:- table A)|T],[(:- table A)|TT],Dyn,Cl):-!,
+  divide_tab_dyn_dir(T,TT,Dyn,Cl).
+
+divide_tab_dyn_dir([(:- dynamic A)|T],Tab,[(:- dynamic A)|Dyn],Cl):-!,
+  divide_tab_dyn_dir(T,Tab,Dyn,Cl).
+
+divide_tab_dyn_dir([H|T],TT,Dyn,[H|Cl]):-
+  divide_tab_dyn_dir(T,TT,Dyn,Cl).
+
+
+/* output predicates */
+write_tab_dir([],S):-
+	nl(S).
+
+write_tab_dir([H|T],S):-
+	format(S,"~w.",[H]),
+	nl(S),
+	write_tab_dir(T,S).
+
+
 
 write_clauses([],_).
 
@@ -206,7 +239,10 @@ read_clauses(S,[Cl|Out]):-
 		read_clauses(S,Out)
 	).
 /* clause processing */
-process_clauses([end_of_file],C,C).
+process_clauses([end_of_file],C,C):-!.
+
+process_clauses([:- _ |T],C0,C1):-!,
+  process_clauses(T,C0,C1).
 
 process_clauses([H|T],C0,C1):-
 	(pitaind_expansion(H,H1)->
@@ -230,7 +266,8 @@ initialize_pitaind:-
   retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
-  M:(dynamic v/3),
+  M:(dynamic v/3, av/3, query_rule/4, rule_by_num/4, dec/3,
+    zero_clauses/1, pita_on/0, tabled/1, '$cons'/2),  
   style_check(-discontiguous).
 
 /**
@@ -677,7 +714,8 @@ generate_rules_db([Head:_P|T],Body,VC,R,Probs,DB,BDDAnd,N,[Clause|Clauses],Modul
   generate_rules_db(T,Body,VC,R,Probs,DB,BDDAnd,N1,Clauses,Module).
 
 
-process_body([],BDD,BDD,Vars,Vars,[],__Module).
+
+process_body([],BDD,BDD,Vars,Vars,[],_Module).
 
 process_body([\+ H|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   builtin(H),!,
@@ -687,19 +725,12 @@ process_body([\+ db(H)|T],BDD,BDD1,Vars,Vars1,[\+ H|Rest],Module):-
   !,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list_ind(L,BDDL),notc(BDDL,BDDN);onec(BDDN)),
-  andc(BDD,BDDN,BDD2)|Rest],Module):-
-  Module:local_pitaind_setting(or,ind),!,
+process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,BDD2|Vars1],
+[H1,notc(BDDH,BDDN),
+  andc(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg(H,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
 
-process_body([\+ H|T],BDD,BDD1,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-  [(bagof(BDDH,H1,L)*->or_list_exc(L,BDDL),notc(BDDL,BDDN);onec(BDDN)),
-    andc(BDD,BDDN,BDD2)|Rest],Module):-!,
-    add_bdd_arg(H,BDDH,Module,H1),
-    process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
-  
 process_body([H|T],BDD,BDD1,Vars,Vars1,[H|Rest],Module):-
   builtin(H),!,
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
@@ -709,17 +740,13 @@ process_body([db(H)|T],BDD,BDD1,Vars,Vars1,[H|Rest],Module):-
   process_body(T,BDD,BDD1,Vars,Vars1,Rest,Module).
 
 process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-[bagof(BDDH,H1,L),or_list_ind(L,BDDL),andc(BDD,BDDL,BDD2)|Rest],Module):-
-  Module:local_pitaind_setting(or,ind),!,
+[H1,andc(BDD,BDDH,BDD2)|Rest],Module):-
   add_bdd_arg(H,BDDH,Module,H1),
   process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
 
-process_body([H|T],BDD,BDD1,Vars,[BDDH,BDD2|Vars1],
-  [bagof(BDDH,H1,L),or_list_exc(L,BDDL),andc(BDD,BDDL,BDD2)|Rest],Module):-
-    add_bdd_arg(H,BDDH,Module,H1),
-    process_body(T,BDD2,BDD1,Vars,Vars1,Rest,Module).
-  
-process_body_db([],BDD,BDD,_DB,Vars,Vars,[],__Module):-!.
+
+
+process_body_db([],BDD,BDD,_DB,Vars,Vars,[],_Module):-!.
 
 process_body_db([\+ H|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Module):-
   builtin(H),!,
@@ -729,19 +756,12 @@ process_body_db([\+ db(H)|T],BDD,BDD1,DB,Vars,Vars1,[\+ H|Rest],Module):-
   !,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-[(bagof(BDDH,H1,L)*->or_list_ind(L,BDDL),notc(BDDL,BDDN);onec(BDDN)),
-  andc(BDD,BDDN,BDD2)|Rest],Module):-
-  Module:local_pitaind_setting(or,ind),!,
+process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,BDD2|Vars1],
+[H1,notc(BDDH,BDDN),
+  andc(BDD,BDDN,BDD2)|Rest],Module):-!,
   add_bdd_arg_db(H,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
 
-process_body_db([\+ H|T],BDD,BDD1,DB,Vars,[BDDH,BDDN,L,BDDL,BDD2|Vars1],
-  [(bagof(BDDH,H1,L)*->or_list_exc(L,BDDL),notc(BDDL,BDDN);onec(BDDN)),
-    andc(BDD,BDDN,BDD2)|Rest],Module):-!,
-    add_bdd_arg_db(H,BDDH,DB,Module,H1),
-    process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
-  
 process_body_db([H|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Module):-
   builtin(H),!,
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
@@ -751,15 +771,10 @@ process_body_db([db(H)|T],BDD,BDD1,DB,Vars,Vars1,[H|Rest],Module):-
   process_body_db(T,BDD,BDD1,DB,Vars,Vars1,Rest,Module).
 
 process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-[bagof(BDDH,H1,L),or_list_ind(L,BDDL),andc(BDD,BDDL,BDD2)|Rest],Module):-
-  Module:local_pitaind_setting(or,ind),!,
+[H1,andc(BDD,BDDH,BDD2)|Rest],Module):-!, %agg. cut
   add_bdd_arg_db(H,BDDH,DB,Module,H1),
   process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
 
-process_body_db([H|T],BDD,BDD1,DB,Vars,[BDDH,BDD2|Vars1],
-  [bagof(BDDH,H1,L),or_list_exc(L,BDDL),andc(BDD,BDDL,BDD2)|Rest],Module):-!, %agg. cut
-  add_bdd_arg_db(H,BDDH,DB,Module,H1),
-  process_body_db(T,BDD2,BDD1,DB,Vars,Vars1,Rest,Module).
   
 process_head(HeadList, GroundHeadList) :-
   ground_prob(HeadList), !,
@@ -918,8 +933,59 @@ act(M,A/B):-
   B1 is B + 2,
   M:(dynamic A/B1).
 
-tab(A/B,A/B1):-
-  B1 is B + 2.
+
+zero_clause(M,A/B,(H:-maplist(nonvar,Args0),zeroc(BDD))):-
+  length(Args0,B),
+  (M:local_pitaind_setting(depth_bound,true)->
+    ExtraArgs=[_,BDD]
+  ;
+    ExtraArgs=[BDD]
+  ),
+  append(Args0,ExtraArgs,Args),
+  H=..[A|Args].
+
+
+to_table(M,Heads,ProcTabDir,Heads1):-
+  maplist(tab_dir(M),Heads,TabDirList,Heads1L),
+  append(TabDirList,TabDir),
+  %maplist(system:term_expansion,TabDir,ProcTabDirL),
+  %append(ProcTabDirL,ProcTabDir),
+  ProcTabDir=TabDir,
+  append(Heads1L,Heads1).
+
+tab_dir(_M,'':_,[],[]):-!.
+
+tab_dir(M,H:P,[],[H:P]):-
+  M:tabled(H),!.
+
+
+tab_dir(M,Head,[(:- table HT)],[H1:P]):-
+  (Head=H:P;Head=P::H),!,
+  functor(H,F,A0),
+  functor(PT,F,A0),
+  PT=..[F|Args0],
+  (M:local_pitaind_setting(or,ind)->  
+    (M:local_pitaind_setting(depth_bound,true)->
+      ExtraArgs=[_,lattice(orc_ind/3)]
+    ;
+      ExtraArgs=[lattice(orc_ind/3)]
+    )
+  ;
+    (M:local_pitaind_setting(depth_bound,true)->
+      ExtraArgs=[_,lattice(orc_exc/3)]
+    ;
+      ExtraArgs=[lattice(orc_exc/3)]
+    )
+  ),
+  append(Args0,ExtraArgs,Args),
+  HT=..[F|Args],
+  H=..[_|ArgsH],
+  H1=..[F|ArgsH],
+  assert(M:tabled(PT)),
+  zero_clause(M,F/A0,LZ),
+  assert(M:zero_clauses(LZ)).
+
+
 
 
 
@@ -974,11 +1040,13 @@ pitaind_expansion((Head :- Body), Clauses):-
   term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
+  to_table(M,HeadList,TabDir,HeadList1),
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules_db(HeadList,Body1,[],R,Probs,DB,BDDAnd,0,Clauses,M)
+    generate_rules_db(HeadList1,Body1,[],R,Probs,DB,BDDAnd,0,Clauses0,M)
   ;
-    generate_rules_db(HeadList,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
-   ).
+    generate_rules_db(HeadList1,Body1,VC,R,Probs,DB,BDDAnd,0,Clauses0,M)
+  ),
+  append(TabDir,Clauses0,Clauses).
 
 pitaind_expansion((Head :- Body), Clauses):-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -994,11 +1062,13 @@ pitaind_expansion((Head :- Body), Clauses):-
   term_variables(List,VC),
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
+  to_table(M,HeadList,TabDir,_),
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules(HeadList,Body1,[],R,Probs,BDDAnd,0,Clauses,M)
+    generate_rules(HeadList,Body1,[],R,Probs,BDDAnd,0,Clauses0,M)
   ;
-    generate_rules(HeadList,Body1,VC,R,Probs,BDDAnd,0,Clauses,M)
-  ).
+    generate_rules(HeadList,Body1,VC,R,Probs,BDDAnd,0,Clauses0,M)
+  ),
+  append(TabDir,Clauses0,Clauses).
 
 pitaind_expansion((Head :- Body), []) :-
 % disjunctive clause with a single head atom con prob. 0 senza depth_bound --> la regola non e' caricata nella teoria e non e' conteggiata in NR
@@ -1020,8 +1090,9 @@ pitaind_expansion((Head :- Body), Clauses) :-
   process_body_db(BodyList,BDD,BDDAnd,DB,[],_Vars,BodyList2,M),
   append([onec(BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH -1|BodyList3],Body1),
+  to_table(M,HeadList,TabDir,_),
   add_bdd_arg_db(H,BDDAnd,DBH,M,Head1),
-  Clauses=(Head1 :- Body1).
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 pitaind_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza depth_bound con prob =1
@@ -1034,8 +1105,9 @@ pitaind_expansion((Head :- Body), Clauses) :-
   process_body(BodyList,BDD,BDDAnd,[],_Vars,BodyList2,M),
   append([onec(BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body1),
+  to_table(M,HeadList,TabDir,_),
   add_bdd_arg(H,BDDAnd,M,Head1),
-  Clauses=(Head1 :- Body1).
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
 pitaind_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom e DB, con prob. diversa da 1
@@ -1054,10 +1126,13 @@ pitaind_expansion((Head :- Body), Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_var
   (M:local_pitaind_setting(single_var,true)->
-    generate_clause_db(H,Body2,[],R,Probs,DB,BDDAnd,0,Clauses,M)
+    generate_clause_db(H,Body2,[],R,Probs,DB,BDDAnd,0,Clauses0,M)
   ;
-    generate_clause_db(H,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses,M)
-  ).
+    generate_clause_db(H,Body2,VC,R,Probs,DB,BDDAnd,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,[Clauses0],Clauses).
+
 
 pitaind_expansion((Head :- Body), Clauses) :-
 % disjunctive clause with a single head atom senza DB, con prob. diversa da 1
@@ -1075,10 +1150,12 @@ pitaind_expansion((Head :- Body), Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),%***test single_vars
   (M:local_pitaind_setting(single_var,true)->
-    generate_clause(H,Body2,[],R,Probs,BDDAnd,0,Clauses,M)
+    generate_clause(H,Body2,[],R,Probs,BDDAnd,0,Clauses0,M)
   ;
-    generate_clause(H,Body2,VC,R,Probs,BDDAnd,0,Clauses,M)
-  ).
+    generate_clause(H,Body2,VC,R,Probs,BDDAnd,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,[Clauses0],Clauses).
 
 /*pitaind_expansion((Head :- Body),Clauses) :-
 % definite clause for db facts
@@ -1097,7 +1174,8 @@ pitaind_expansion((Head :- Body),Clauses) :-
   append([onec(BDD)],BodyList2,BodyList3),
   list2and([DBH>=1,DB is DBH-1|BodyList3],Body1),
   add_bdd_arg_db(Head,BDDAnd,DBH,M,Head1),
-  Clauses=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1 :- Body1)],Clauses).  
 
 pitaind_expansion((Head :- Body),Clauses) :-
 % definite clause senza DB
@@ -1108,7 +1186,8 @@ pitaind_expansion((Head :- Body),Clauses) :-
   append([onec(BDD)],BodyList2,BodyList3),
   list2and(BodyList3,Body2),
   add_bdd_arg(Head,BDDAnd,M,Head1),
-  Clauses=(Head1 :- Body2).
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1 :- Body2)],Clauses).
 
 pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -1121,10 +1200,13 @@ pitaind_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs),
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules_fact_db(HeadList,[],R,Probs,0,Clauses,M)
+    generate_rules_fact_db(HeadList,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact_db(HeadList,VC,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact_db(HeadList,VC,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,Clauses0,Clauses).
+
 
 pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -1136,10 +1218,12 @@ pitaind_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules_fact(HeadList,[],R,Probs,0,Clauses,M)
+    generate_rules_fact(HeadList,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact(HeadList,VC,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact(HeadList,VC,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,Clauses0,Clauses).
 
 pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -1154,10 +1238,13 @@ pitaind_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules_fact(HeadList,[],R,Probs,0,Clauses,M)
+    generate_rules_fact(HeadList,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact_vars(HeadList,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact_vars(HeadList,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,Clauses0,Clauses).
+
 
 
 pitaind_expansion(Head,Clauses) :-
@@ -1171,10 +1258,12 @@ pitaind_expansion(Head,Clauses) :-
   get_next_rule_number(M,R),
   get_probs(HeadList,Probs), %**** test single_var
   (M:local_pitaind_setting(single_var,true)->
-    generate_rules_fact(HeadList,[],R,Probs,0,Clauses,M)
+    generate_rules_fact(HeadList,[],R,Probs,0,Clauses0,M)
   ;
-    generate_rules_fact_vars(HeadList,R,Probs,0,Clauses,M)
-  ).
+    generate_rules_fact_vars(HeadList,R,Probs,0,Clauses0,M)
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,Clauses0,Clauses).
 
 pitaind_expansion(Head,[]) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -1184,7 +1273,7 @@ pitaind_expansion(Head,[]) :-
   ground(P),
   P=:=0.0, !.
 
-pitaind_expansion(Head,Clause) :-
+pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive fact with a single head atom con prob.1 e db
@@ -1194,9 +1283,10 @@ pitaind_expansion(Head,Clause) :-
   P=:=1.0, !,
   list2and([onec(BDD)],Body1),
   add_bdd_arg_db(H,BDD,_DB,M,Head1),
-  Clause=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
-pitaind_expansion(Head,Clause) :-
+pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with a single head atom con prob. 1, senza db
   (Head \= ((pitaind_expansion(_,_)) :- _ )),
@@ -1205,9 +1295,10 @@ pitaind_expansion(Head,Clause) :-
   P=:=1.0, !,
   list2and([onec(BDD)],Body1),
   add_bdd_arg(H,BDD,M,Head1),
-  Clause=(Head1 :- Body1).
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1 :- Body1)],Clauses).
 
-pitaind_expansion(Head,Clause) :-
+pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % disjunctive fact with a single head atom e prob. generiche, con db
@@ -1220,12 +1311,14 @@ pitaind_expansion(Head,Clause) :-
   get_probs(HeadList,Probs),
   add_bdd_arg_db(H,BDD,_DB,M,Head1),
   (M:local_pitaind_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
+    Clause0=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
-  ).
+    Clause0=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,[Clause0],Clauses).
 
-pitaind_expansion(Head,Clause) :-
+pitaind_expansion(Head,Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % disjunctive fact with a single head atom e prob. generiche, senza db
   (Head \= ((pitaind_expansion(_,_)) :- _ )),
@@ -1237,10 +1330,12 @@ pitaind_expansion(Head,Clause) :-
   get_probs(HeadList,Probs),
   add_bdd_arg(H,BDD,M,Head1),%***test single_var
   (M:local_pitaind_setting(single_var,true)->
-    Clause=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
+    Clause0=(Head1:-(get_var_n(M,R,[],Probs,V),equalityc(V,0,BDD)))
   ;
-    Clause=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
-  ).
+    Clause0=(Head1:-(get_var_n(M,R,VC,Probs,V),equalityc(V,0,BDD)))
+  ),
+  to_table(M,HeadList,TabDir,_),
+  append(TabDir,[Clause0],Clauses).
 
 pitaind_expansion((:- set_pitaind(P,V)), []) :-!,
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
@@ -1251,20 +1346,24 @@ pitaind_expansion((:- set_sw(A,B)), []) :-!,
   set_sw(M:A,B).
 
 
-pitaind_expansion(Head, (Head1:-onec(One))) :-
+pitaind_expansion(Head, Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
   M:local_pitaind_setting(depth_bound,true),
 % definite fact with db
   (Head \= ((pitaind_expansion(_,_) ):- _ )),
   (Head\= end_of_file),!,
-  add_bdd_arg_db(Head,One,_DB,M,Head1).
+  add_bdd_arg_db(Head,One,_DB,M,Head1),
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1:-onec(One))],Clauses).
 
-pitaind_expansion(Head, (Head1:-onec(One))) :-
+pitaind_expansion(Head, Clauses) :-
   prolog_load_context(module, M),pitaind_input_mod(M),M:pitaind_on,
 % definite fact without db
   (Head \= ((pitaind_expansion(_,_) ):- _ )),
   (Head\= end_of_file),
-  add_bdd_arg(Head,One,M,Head1).
+  add_bdd_arg(Head,One,M,Head1),
+  to_table(M,[Head:_],TabDir,_),
+  append(TabDir,[(Head1:-onec(One))],Clauses). 
 
 /**
  * begin_lpad_pred is det
@@ -1344,7 +1443,8 @@ user:term_expansion((:- pitaind), []) :-!,
   retractall(M:goal_n(_)),
   assert(M:rule_n(0)),
   assert(M:goal_n(0)),
-  M:(dynamic v/3,pitaind_on/0),
+  M:(dynamic v/3, av/3,  %M:rule_by_num/4,
+    zero_clauses/1, pitaind_on/0, if_on/0, tabled/1),
   style_check(-discontiguous).
 
 user:term_expansion(end_of_file, end_of_file) :-
