@@ -19,7 +19,7 @@ It contains modules for both inference and learning.
 cplint is available in three versions, one for Yap Prolog, one for XSB and one for SWI-Prolog. 
 They differ slightly in the features offered.
 This manual is about the SWI-Prolog version. 
-You can find the manual for the Yap version at `<http://ds.ing.unife.it/~friguzzi/software/cplint/manual.html>`_ and 
+You can find the manual for the Yap version at `<https://github.com/friguzzi/yap-6.3/blob/master/packages/cplint/doc/manual.pdf>`_ and 
 for the XSB version at `<http://xsb.sourceforge.net/manual2/manual2.pdf>`_.
 
 cplint on SWISH is a web application for using cplint available at `<http://cplint.eu>`_.
