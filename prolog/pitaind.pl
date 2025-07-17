@@ -7,7 +7,7 @@
   get_var_n/5,or_list_pitaind/3,
   or_list_ind/2,or_list_exc/2,
   equalityc/3,
-  parse_ind/2,
+  parse_ind/3,
   op(600,xfy,'::'),
   op(1150,fx,action)
     ]).
@@ -174,14 +174,22 @@ equalityc(Probs,N,P):-
 
 
 /**
- * parse_ind(++FileIn:atom,++FileOut:atom) is det
+ * parse_ind(++FileIn:atom,++FileOut:atom,+Options:list) is det
  * 
  * applies the pita transformation to FileIn and writes the result to FileOut
+ * Options is a list of options, the following are recognised:
+ * * depth_bound(+DepthBound:atom)
+ *   DepthBound is either true or false.
  */
-parse_ind(FileIn,FileOut):-
+parse_ind(FileIn,FileOut,Options):-
+  must_be(nonvar,FileIn),  
+  must_be(nonvar,FileOut),
+  must_be(nonvar,Options),
+  option(depth_bound(DB),Options,false),
   prolog_load_context(module, M),
   assert(M:pitaind_on),
   initialize_pitaind,
+  set_pitaind(M:depth_bound,DB),
   open(FileIn,read,SI),
 	read_clauses(SI,C),
 	close(SI),
