@@ -6,6 +6,7 @@
   abd_prob/3,
   bdd_dot_file/3,
   bdd_dot_string/3,
+  dt_bdd_json_file/1,
   abd_bdd_dot_string/4,
   abd_bdd_dot_string/6,
   map_bdd_dot_string/6,
@@ -51,6 +52,7 @@ Reexports [cplint_util](https://friguzzi.github.io/cplint/pldoc/cplint_util.html
 :-meta_predicate prob(:,:,-,+).
 :-meta_predicate prob_meta(:,-).
 :-meta_predicate prob_meta(:,:,+).
+:-meta_predicate dt_bdd_json_file(:).
 :-meta_predicate bdd_dot_file(:,+,-).
 :-meta_predicate bdd_dot_string(:,-,-).
 :-meta_predicate abd_bdd_dot_string(:,-,-,-).
@@ -443,6 +445,34 @@ from_assign_to_exp(M,[Var-Val|TA],[Abd|TDelta]):-
   ),
   from_assign_to_exp(M,TA,TDelta).
 
+/**
+ * dt_bdd_json_file(+FileName:text) is det
+ *
+ * Builds the decision-theoretic BDD JSON to file FileName.
+ */
+dt_bdd_json_file(M:File):-
+  must_be(string,File),
+  retractall(M:v(_,_,_)),
+  retractall(M:av(_,_,_)),
+  retractall(M:dec(_,_,_)),
+  abolish_all_tables,
+  init(Env),
+  findall([U,BDD],
+          (
+            get_node_dt(M:utility(_,U),Env,Out),
+            Out=(_,BDD),
+            number(U)
+          ),
+          UtilBdds),
+  parse_bdds_and_utils(M,Env,UtilBdds,BddList,UtilList),
+  findall([V,Heads],
+    ( M:dec(R,S,V),
+      M:rule_by_num(R,Head0,_,VC),
+      copy_term((Head0,VC), (Heads, S))
+    ),
+    DecNames),
+  create_json_util(Env,BddList,UtilList,DecNames,File),
+  end(Env).
 
 /**
  * bdd_dot_file(:Query:atom,+FileName:string,-LV:list) is det
@@ -2254,6 +2284,7 @@ sandbox:safe_meta(pita:prob_meta(_,_,_), []).
 sandbox:safe_meta(pita:abd_prob(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_file(_,_,_), []).
 sandbox:safe_meta(pita:bdd_dot_string(_,_,_), []).
+sandbox:safe_meta(pita:dt_bdd_json_file(_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_), []).
 sandbox:safe_meta(pita:abd_bdd_dot_string(_,_,_,_,_,_), []).
 sandbox:safe_meta(pita:map(_,_,_), []).
